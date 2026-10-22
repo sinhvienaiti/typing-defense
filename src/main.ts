@@ -10,6 +10,7 @@ import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { installDevHandle } from "./app/dev-handle";
 import { installKeys, installPointer } from "./app/input";
+import { learningBridge } from "./app/learning";
 import { sandboxHtml } from "./app/sandbox";
 import { Selection } from "./app/selection";
 import { Session } from "./app/session";
@@ -44,6 +45,7 @@ let painted = false;
 
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
+learningBridge().requestFocus(); // inside the portal only
 const session = new Session({ seed, sandbox, deck });
 const world = session.world;
 const selection = new Selection(world, (command) => session.send(command));
