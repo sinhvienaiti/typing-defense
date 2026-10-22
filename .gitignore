@@ -1,0 +1,56 @@
+node_modules/
+dist/
+tmp/
+.vite/
+.visual/
+.DS_Store
+*.log
+coverage/
+
+# No media in Git, ever: models, images, audio and video live on Google Drive
+# (parent repo `pnpm media:push`). Only code, JSON data and docs are tracked.
+# public/assets/typing-defense keeps its README and manifest JSON (docs/td/BUILD_NOW.md §2).
+public/assets/**
+!public/assets/typing-defense/
+!public/assets/typing-defense/**/
+!public/assets/typing-defense/README.md
+!public/assets/typing-defense/**/manifest.json
+art-src/
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.avif
+*.gif
+*.bmp
+*.ico
+*.psd
+*.blend
+*.fbx
+*.obj
+*.glb
+*.gltf
+*.bin
+*.ktx2
+*.hdr
+*.exr
+*.mp3
+*.ogg
+*.wav
+*.m4a
+*.flac
+*.aac
+*.mp4
+*.mov
+*.webm
+*.mkv
+*.ttf
+*.otf
+*.woff
+*.woff2
+
+# Local credentials never belong in a repo.
+.env
+.env.*
+rclone.conf
+*.rclone.conf
