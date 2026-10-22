@@ -1,10 +1,12 @@
 /**
- * Typing Defense (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
- * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md): a top-down 2D test field. The
- * vocabulary loads first; then the world steps at 60 Hz in a session, the
- * debug view draws it, the calls' word cards float over it, the keys, the
- * mouse and the HUD act through the selection, typing sounds follow its
- * events, and window.__td lets the browser scenarios drive it through commands.
+ * Lời Gọi (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
+ * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) in the Văn Điền theme (SPLIT_PLAN D7):
+ * the title screen first (a link with ?sandbox= skips it, ?title=1 / 0 forces
+ * it), while the vocabulary loads; then the world steps at 60 Hz in a session,
+ * the 2D view draws it, the calls' word cards float over it, the keys, the
+ * mouse and the HUD act through the selection, sound and music follow its
+ * events, Esc's pause card and the results card sit over it, and window.__td
+ * lets the browser scenarios drive it through commands.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
@@ -24,7 +26,10 @@ import { PATH_MAX } from "./sim/stores/agents";
 import { wordText } from "./typing/decks";
 import { dockHtml } from "./ui/build-menu";
 import { actionsHtml, Hud, REASON, statusHtml, stripHtml } from "./ui/hud";
+import { loadSettings, SettingsCard } from "./ui/settings";
+import { Sheet, type SheetAction } from "./ui/sheets";
 import { teamHtml } from "./ui/team-bar";
+import { TitleScreen, type TitleChoice } from "./ui/title";
 import { TypingAudio } from "./view/audio-min";
 import { DebugView } from "./view/debug-2d";
 import { WordCards } from "./view/words/cards";
@@ -42,6 +47,27 @@ const seed = Number(params.get("seed") ?? "1") >>> 0 || 1;
 const canvas = byId<HTMLCanvasElement>("tdCanvas");
 const view = new DebugView(canvas);
 let painted = false;
+const settings = loadSettings();
+const audio = new TypingAudio(settings);
+
+// The title, made on first use (a run opened by a scenario's link never loads its painting); its choice waits for the run.
+let title: TitleScreen | null = null;
+let choose: (choice: TitleChoice) => void = () => {};
+function showTitle(canContinue: boolean): void {
+  const card = (): SettingsCard => new SettingsCard(settings, (changed) => audio.apply(changed), () => title?.settingsDone());
+  title ??= new TitleScreen(document.body, { choose: (choice) => choose(choice), sound: (sound) => audio.ui(sound), wake: () => audio.resume() }, card(), sandbox);
+  title.show(canContinue);
+}
+const asked = params.get("title");
+if (asked === "1" || (asked !== "0" && !params.has("sandbox"))) showTitle(false);
+/** A fresh run of the same link, past the title (`learn`: in the learn mode). */
+const freshRun = (learn: boolean): string => {
+  const next = new URLSearchParams(params);
+  next.set("title", "0");
+  if (learn) next.set("learn", "1");
+  else next.delete("learn");
+  return "?" + next.toString();
+};
 
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
@@ -50,8 +76,18 @@ const session = new Session({ seed, sandbox, deck });
 const world = session.world;
 const selection = new Selection(world, (command) => session.send(command));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
-const audio = new TypingAudio();
 let imeWarning = false;
+const learnMode = (): void => session.send({ t: "sandbox", op: { op: "mode", value: "learn" } });
+if (params.get("learn") === "1") learnMode();
+/** A run has begun: the title was passed (or never shown); a new choice then opens a fresh page. */
+let begun = title === null;
+choose = (choice) => {
+  if (choice === "continue") selection.paused = false;
+  else if (begun) return void (window.location.search = freshRun(choice === "learn"));
+  else if (choice === "learn") learnMode();
+  begun = true;
+  title?.hide();
+};
 
 /** Buttons and keys: the camera's and the sound's own, the rest the selection's. */
 function act(action: string): void {
@@ -63,6 +99,22 @@ function act(action: string): void {
 
 const hud = new Hud(byId("tdHud"), act);
 for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio.resume());
+/** Esc's pause card and the results card; "Xem bản đồ" puts the results away. */
+let mapOnly = false;
+const sheet = new Sheet(document.body, new SettingsCard(settings, (changed) => audio.apply(changed), () => sheet.settingsDone()), (action: SheetAction) => {
+  if (action === "resume") selection.act("pause");
+  else if (action === "map") mapOnly = true;
+  else if (action === "again") window.location.search = freshRun(false);
+  else if (action === "title") showTitle(world.phase !== "defeat");
+});
+// The title takes every key while it is up; a card takes its own (arrows, Enter, Esc) and lets the rest through.
+window.addEventListener("keydown", (event) => {
+  const open = title?.open === true ? title : sheet.open ? sheet : null;
+  if (open === null) return;
+  const taken = open.key(event);
+  if (taken) event.preventDefault();
+  if (taken || open === title) event.stopImmediatePropagation();
+}, true);
 installKeys(window, {
   // Paused (Esc, or Space's tactical pause), nothing is typed: words wait.
   send: (command) => !selection.halted && (session.send(command), true),
@@ -94,6 +146,7 @@ function showHud(): void {
     actionsHtml(world, selection.tactical),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
+  sheet.show(title?.open === true ? "" : world.phase === "defeat" ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world);
 }
 
 const resize = (): void => {
@@ -122,12 +175,13 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted;
+      session.paused = selection.halted || title?.open === true;
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       const fresh = world.events.rare.splice(0);
       cards.read(fresh, world, now);
       audio.read(fresh, world, now);
+      audio.frame(title?.open === true ? null : world, now);
       recent.push(...fresh);
       if (recent.length > 400) recent.splice(0, recent.length - 400);
       showHud();
