@@ -1,5 +1,5 @@
 // Typing Defense 1A (docs/td/BUILD_NOW.md §6.2): index.html?sandbox=1 boots with
-// no media at all, draws its ground, shows its HUD in Be Vietnam Pro, and logs
+// no media at all (the title and its painting are skipped), draws its paddies, shows its HUD in Be Vietnam Pro, and logs
 // no console error or page exception. A request the server refuses (a 403 or
 // 404 font) reaches no console API, so the resource timings are read too.
 // Exits 1 when a check fails.
@@ -45,7 +45,8 @@ export default async function (page) {
     ready,
     sandbox: state?.flags?.sandbox === true,
     canvasFillsViewport: state?.canvas?.css?.[0] === page.width && state?.canvas?.css?.[1] === page.height,
-    groundDrawn: JSON.stringify(state?.ground) === JSON.stringify([0x7d, 0xba, 0x5a]),
+    // The field's middle is a paddy (Văn Điền theme, SPLIT_PLAN D7): green over red and blue, never black.
+    groundDrawn: Array.isArray(state?.ground) && state.ground[1] > 120 && state.ground[1] > state.ground[0] && state.ground[1] > state.ground[2],
     hudShown: (state?.hud?.width ?? 0) > 0 && (state?.hud?.height ?? 0) > 0,
     fontLoaded: state?.font === true,
     noMedia: (state?.media?.length ?? 1) === 0,
