@@ -1,72 +1,41 @@
+import { createHash } from "node:crypto";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
-import { blank } from "./td/source-scan";
+import { GAME_ID } from "../src/app/learning";
+import { blank, storageKeys } from "./td/source-scan";
 
 /**
- * Typing Defense's boundary (docs/td/TYPING_DEFENSE_DESIGN.md 25.3,
- * docs/td/BUILD_NOW.md §2). src/td is a new game beside Rift Defense V4: it
- * loads itself, src/platform, three, @fontsource and a short list of Space
- * Typing modules; its rules (sim/, typing/, content/) are deterministic
- * TypeScript that a replay on Node and in Chrome steps to the same hash.
+ * Lời Gọi's boundary (docs/td/TYPING_DEFENSE_DESIGN.md 25.3; the parent repo's
+ * docs/games/SPLIT_PLAN.md §3). The game's own code (src/**, src/kit aside)
+ * loads itself, the shared kit copied into src/kit, three and @fontsource;
+ * nothing reaches Space Typing or the parent repo; src/kit is byte for byte
+ * what kit-manifest.json lists. The rules (sim/, typing/, content/) are
+ * deterministic TypeScript that a replay on Node and in Chrome steps to the
+ * same hash.
  */
 const ROOT = join(__dirname, "..");
+const KIT = "src/kit/";
+const KIT_TOOLS = "src/kit/tools/";
+/** Node-only kit files (vite.config.ts, scripts, `pnpm check`): never loaded by the page. */
+const nodeOnly = (path: string) => path.startsWith(KIT_TOOLS) || path === "src/kit/verify-kit.mjs";
 
 type Source = { path: string; text: string };
 
-function sources(dir: string): Source[] {
+function sources(dir: string, pattern = /\.(ts|tsx|js|mjs|css)$/): Source[] {
   const absolute = join(ROOT, dir);
   if (!existsSync(absolute)) return [];
   return readdirSync(absolute).flatMap((name) => {
     const path = dir + "/" + name;
-    if (statSync(join(ROOT, path)).isDirectory()) return sources(path);
-    return /\.(ts|tsx|js|mjs|css)$/.test(name) ? [{ path, text: readFileSync(join(ROOT, path), "utf8") }] : [];
+    if (statSync(join(ROOT, path)).isDirectory()) return sources(path, pattern);
+    return pattern.test(name) ? [{ path, text: readFileSync(join(ROOT, path), "utf8") }] : [];
   });
 }
 
-type LegacyImport = { module: string; names: readonly string[]; from: readonly string[] };
-
-/**
- * Space Typing modules src/td may still load, by whom and which exports: the
- * list in BUILD_NOW §2. Only app/, view/ and legacy/ hold them. Fonts are no
- * entry: rule 1 allows @fontsource/* everywhere.
- */
-const LEGACY_IMPORTS: readonly LegacyImport[] = [
-  { module: "src/scene3d/keys", names: ["typedLetter", "isComposingKey", "vietnameseInputSign"], from: ["src/td/app/input.ts"] },
-  { module: "src/logic", names: ["typingText"], from: ["src/td/app/vocab.ts"] },
-  { module: "src/vocabulary", names: ["loadVocabularyIndex", "loadVocabularyLevel"], from: ["src/td/app/vocab.ts"] },
-];
-
-/**
- * The 1A list, the most LEGACY_IMPORTS may ever hold: TK 25.3 rule 1 lets it
- * only get shorter. Delete what goes away; never add here, since a new
- * exception is a design change (TK 25.3), not a fix.
- */
-const LEGACY_CEILING: readonly LegacyImport[] = [
-  { module: "src/scene3d/keys", names: ["typedLetter", "isComposingKey", "vietnameseInputSign"], from: ["src/td/app/input.ts"] },
-  { module: "src/logic", names: ["typingText"], from: ["src/td/app/vocab.ts"] },
-  { module: "src/vocabulary", names: ["loadVocabularyIndex", "loadVocabularyLevel"], from: ["src/td/app/vocab.ts"] },
-];
-
-const legacyKey = (entry: LegacyImport) => entry.module + " (" + entry.names.join(", ") + ") ← " + entry.from.join(", ");
-
-/** BUILD_NOW §2's "Ngoại lệ import cho 1A" bullets; one the pattern cannot read throws. */
-function documentedLegacy(markdown: string): LegacyImport[] {
-  const block = markdown.split("**Ngoại lệ import cho 1A**")[1]?.split(/\n\s*\n/)[0] ?? "";
-  return block
-    .split("\n")
-    .filter((line) => line.startsWith("- "))
-    .map((line) => {
-      const match = /^- `(src\/[^`]+)\.ts` \(([^)]*)\) — dùng ở `([^`]+)`/.exec(line);
-      if (match === null) throw new Error("BUILD_NOW §2: unreadable exception: " + line);
-      return { module: match[1]!, names: [...match[2]!.matchAll(/`([^`]+)`/g)].map((name) => name[1]!), from: ["src/td/" + match[3]!] };
-    });
-}
-
 const PACKAGES = /^(three|three\/examples\/jsm\/.+|@fontsource\/.+)$/;
-const PURE_ROOTS = ["src/td/sim/", "src/td/typing/", "src/td/content/"];
-const PURE_PLATFORM = ["src/platform/rng"];
+const PURE_ROOTS = ["src/sim/", "src/typing/", "src/content/"];
+const PURE_KIT = ["src/kit/platform/rng"];
 const ALLOWED_MATH = ["sqrt", "floor", "ceil", "round", "trunc", "abs", "min", "max", "sign", "imul", "clz32"];
 /**
  * Globals the rules may not name. After a dot a name is a property
@@ -113,7 +82,7 @@ function importsOf(source: Source): Import[] {
   return found;
 }
 
-/** A relative import as a repo path without its extension ("src/scene3d/keys"); a package as written. */
+/** A relative import as a repo path without its extension ("src/kit/input"); a package as written. */
 function target(file: string, spec: string): string {
   const bare = spec.split("?")[0]!;
   if (!bare.startsWith(".")) return bare;
@@ -166,74 +135,82 @@ function hostProblems(files: readonly Source[]): { path: string; problem: string
   });
 }
 
-const isPure = (path: string) => PURE_ROOTS.some((root) => path.startsWith(root)) || PURE_PLATFORM.some((module) => path.replace(/\.ts$/, "") === module);
+const isPure = (path: string) => PURE_ROOTS.some((root) => path.startsWith(root)) || PURE_KIT.some((module) => path.replace(/\.ts$/, "") === module);
 
-const td = sources("src/td");
-const platform = sources("src/platform");
-const pure = [...td, ...platform].filter((source) => isPure(source.path));
+const all = sources("src");
+/** The game's own code: src without the kit copy. */
+const game = all.filter((source) => !source.path.startsWith(KIT));
+/** What the browser loads: the game and the kit, the kit's Node-only files aside. */
+const browser = all.filter((source) => !nodeOnly(source.path));
+const tools = all.filter((source) => nodeOnly(source.path));
+const pure = all.filter((source) => isPure(source.path));
 
-describe("Typing Defense boundary (TK 25.3)", () => {
-  it("td.html boots src/td/main.ts and is a build input", () => {
-    expect(readFileSync(join(ROOT, "td.html"), "utf8")).toMatch(/<script type="module" src="\/src\/td\/main\.ts"><\/script>/);
-    expect(readFileSync(join(ROOT, "vite.config.ts"), "utf8")).toMatch(/\btd: resolve\(projectRoot, "td\.html"\)/);
-    expect(td.map((source) => source.path)).toContain("src/td/main.ts");
+describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
+  it("index.html boots src/main.ts; the package is typing-defense on port 3006", () => {
+    expect(readFileSync(join(ROOT, "index.html"), "utf8")).toMatch(/<script type="module" src="\/src\/main\.ts"><\/script>/);
+    expect(game.map((source) => source.path)).toContain("src/main.ts");
+    const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { name: string; scripts: Record<string, string>; dependencies: Record<string, string> };
+    expect(pkg.name).toBe("typing-defense");
+    expect(pkg.scripts["dev"]).toMatch(/--port 3006 --strictPort/);
+    expect(pkg.dependencies["three"]).toBe("0.170.0");
+    expect(readFileSync(join(ROOT, "vite.config.ts"), "utf8")).toMatch(/\bport: 3006\b/);
   });
 
-  it("src/td loads only itself, src/platform, three, @fontsource and LEGACY_IMPORTS", () => {
-    const crossing = td.flatMap((source) =>
+  it("src loads only src/**, three, three/examples/jsm/* and @fontsource/*", () => {
+    const crossing = browser.flatMap((source) =>
       importsOf(source)
-        .filter(({ spec, names }) => {
+        .filter(({ spec }) => {
           const path = target(source.path, spec);
-          if (path.startsWith("src/td/") || path.startsWith("src/platform/") || PACKAGES.test(path)) return false;
-          const legacy = LEGACY_IMPORTS.find((entry) => entry.module === path && entry.from.includes(source.path));
-          return legacy === undefined || names.length === 0 || names.some((name) => !legacy.names.includes(name));
+          return !(path.startsWith("src/") && !nodeOnly(path) && !nodeOnly(path + ".mjs")) && !PACKAGES.test(path);
         })
         .map(({ spec }) => source.path + " → " + spec),
     );
     expect(crossing).toEqual([]);
   });
 
-  it("holds LEGACY_IMPORTS only in app/, view/, legacy/, for exports that exist", () => {
-    for (const entry of LEGACY_IMPORTS) {
-      expect(entry.module, entry.module).toMatch(/^src\/(?!td\/|platform\/|defense\/)/);
-      for (const holder of entry.from) expect(holder).toMatch(/^src\/td\/(app|view|legacy)\//);
-      const text = readFileSync(join(ROOT, entry.module + ".ts"), "utf8");
-      for (const name of entry.names) expect(text, entry.module + " " + name).toMatch(new RegExp("export\\s+(?:async\\s+)?(?:function|const|class)\\s+" + name + "\\b"));
-    }
-  });
-
-  it("LEGACY_IMPORTS is BUILD_NOW §2's list and never outgrows the 1A ceiling", () => {
-    const documented = documentedLegacy(readFileSync(join(ROOT, "docs/td/BUILD_NOW.md"), "utf8"));
-    expect(LEGACY_IMPORTS.map(legacyKey)).toEqual(documented.map(legacyKey));
-    for (const entry of LEGACY_IMPORTS) {
-      const ceiling = LEGACY_CEILING.find((bound) => bound.module === entry.module);
-      expect(ceiling, entry.module).toBeDefined();
-      expect(entry.names.filter((name) => !ceiling!.names.includes(name)), entry.module).toEqual([]);
-      expect(entry.from.filter((path) => !ceiling!.from.includes(path)), entry.module).toEqual([]);
-    }
-    expect(LEGACY_CEILING.map(legacyKey)).toEqual([
-      "src/scene3d/keys (typedLetter, isComposingKey, vietnameseInputSign) ← src/td/app/input.ts",
-      "src/logic (typingText) ← src/td/app/vocab.ts",
-      "src/vocabulary (loadVocabularyIndex, loadVocabularyLevel) ← src/td/app/vocab.ts",
-    ]);
-  });
-
-  it("src/td never loads Rift Defense V4 (src/defense)", () => {
-    const crossing = td.flatMap((source) =>
+  it("the kit's Node-only files load only the kit's tools, node:* and vite", () => {
+    expect(tools.length).toBeGreaterThan(0);
+    const crossing = tools.flatMap((source) =>
       importsOf(source)
-        .filter(({ spec }) => target(source.path, spec).startsWith("src/defense/") || /(^|\/)defense\//.test(spec))
+        .filter(({ spec }) => !target(source.path, spec).startsWith(KIT_TOOLS) && !/^node:/.test(spec) && spec !== "vite")
         .map(({ spec }) => source.path + " → " + spec),
     );
     expect(crossing).toEqual([]);
   });
 
-  it("the rules (sim/, typing/, content/) load only the rules and src/platform/rng", () => {
-    expect(pure.map((source) => source.path)).toContain("src/platform/rng.ts");
+  it("no source, test or script reaches Space Typing or out of this repository", () => {
+    const configs = ["vite.config.ts", "vitest.config.ts"].map((path) => ({ path, text: readFileSync(join(ROOT, path), "utf8") }));
+    // This file aside: its self-checks hold sample imports.
+    const code = [...sources("src"), ...sources("tests").filter((source) => source.path !== "tests/boundary.test.ts"), ...sources("scripts"), ...configs];
+    expect(code.length).toBeGreaterThan(game.length);
+    const crossing = code.flatMap((source) =>
+      importsOf(source)
+        .filter(({ spec }) => /space-typing/.test(spec) || target(source.path, spec).startsWith("../"))
+        .map(({ spec }) => source.path + " → " + spec),
+    );
+    expect(crossing).toEqual([]);
+    const named = game.filter((source) => /space-typing|scene3d\/|src\/defense\//.test(blank(source.text, false))).map((source) => source.path);
+    expect(named).toEqual([]);
+  });
+
+  it("src/kit is what kit-manifest.json lists, byte for byte, with kit.config.json's modules", () => {
+    const manifest = JSON.parse(readFileSync(join(ROOT, KIT, "kit-manifest.json"), "utf8")) as { modules: string[]; files: Record<string, string> };
+    const config = JSON.parse(readFileSync(join(ROOT, "kit.config.json"), "utf8")) as { modules: string[] };
+    expect(manifest.modules).toEqual(config.modules);
+    const listed = Object.keys(manifest.files).sort();
+    const present = sources("src/kit", /./).map((source) => source.path.slice(KIT.length)).filter((path) => path !== "kit-manifest.json" && !/(^|\/)(\.DS_Store|Thumbs\.db)$/.test(path)).sort();
+    expect(present).toEqual(listed);
+    const changed = listed.filter((path) => createHash("sha256").update(readFileSync(join(ROOT, KIT, path))).digest("hex") !== manifest.files[path]);
+    expect(changed).toEqual([]);
+  });
+
+  it("the rules (sim/, typing/, content/) load only the rules and src/kit/platform/rng", () => {
+    expect(pure.map((source) => source.path)).toContain("src/kit/platform/rng.ts");
     const crossing = pure.flatMap((source) =>
       importsOf(source)
         .filter(({ spec }) => {
           const path = target(source.path, spec);
-          return !PURE_ROOTS.some((root) => path.startsWith(root)) && !PURE_PLATFORM.includes(path);
+          return !PURE_ROOTS.some((root) => path.startsWith(root)) && !PURE_KIT.includes(path);
         })
         .map(({ spec }) => source.path + " → " + spec),
     );
@@ -247,30 +224,26 @@ describe("Typing Defense boundary (TK 25.3)", () => {
     expect(hostProblems(typescript).map(({ path, problem }) => path + ": " + problem)).toEqual([]);
   });
 
-  it("asset URLs stay under /assets/td/ or /assets/shared/ (legacy/ aside)", () => {
-    const found = td
-      .filter((source) => !source.path.startsWith("src/td/legacy/"))
-      .flatMap((source) => [...blank(source.text, false).matchAll(/\/assets\/(?!td\/|shared\/)[^\s"'`)]*/g)].map((match) => source.path + ": " + match[0]));
+  it("asset URLs stay under /assets/typing-defense/ or /assets/shared/", () => {
+    const found = game.flatMap((source) => [...blank(source.text, false).matchAll(/\/assets\/(?!typing-defense\/|shared\/)[^\s"'`)]*/g)].map((match) => source.path + ": " + match[0]));
     expect(found).toEqual([]);
   });
 
-  it("src/platform loads nothing from Space Typing", () => {
-    expect(platform.length).toBeGreaterThan(0);
-    const crossing = platform.flatMap((source) =>
-      importsOf(source)
-        .filter(({ spec }) => spec.startsWith(".") && !target(source.path, spec).startsWith("src/platform/"))
-        .map(({ spec }) => source.path + " → " + spec),
-    );
-    expect(crossing).toEqual([]);
+  it("the game's own storage keys start with td. or typing-defense:", () => {
+    const keys = game.flatMap((source) => storageKeys(source.text).map(({ method, key }) => ({ at: source.path + " " + method, key })));
+    expect(keys.filter(({ key }) => key === null || !/^(td\.|typing-defense:)/.test(key))).toEqual([]);
   });
 
-  /**
-   * Lines of the TD code as BUILD_1A6 §0 counts them: src/td's TypeScript, as `wc -l` does (1A counted td.html,
-   * src/platform/rng.ts and td.css too: 178 lines more; docs/td/BUILD_NOTES.md §3).
-   */
-  const codeLines = (): number => td.filter((source) => source.path.endsWith(".ts")).reduce((sum, source) => sum + (source.text.match(/\n/g) ?? []).length, 0);
+  it("learning events and the portal know this game as typing-defense", () => {
+    expect(GAME_ID).toBe("typing-defense");
+    const bridges = game.filter((source) => /\bcreateLearningBridge\s*\(/.test(blank(source.text, false))).map((source) => source.path);
+    expect(bridges).toEqual(["src/app/learning.ts"]);
+  });
 
-  it("the TD code (src/td's TypeScript) stays under BUILD_1A6 §0's hard ceiling", () => {
+  /** Lines of the TD code as BUILD_1A6 §0 counts them: the game's TypeScript (src/kit aside), as `wc -l` does. */
+  const codeLines = (): number => game.filter((source) => source.path.endsWith(".ts")).reduce((sum, source) => sum + (source.text.match(/\n/g) ?? []).length, 0);
+
+  it("the TD code stays under BUILD_1A6 §0's hard ceiling", () => {
     const ceiling = /Ngân sách mã TD[^\n]*\*\*≤ (\d+)\.(\d{3}) dòng\*\*/.exec(readFileSync(join(ROOT, "docs/td/BUILD_1A6.md"), "utf8"));
     expect(ceiling, "BUILD_1A6 §0 names the hard ceiling").not.toBeNull();
     expect(codeLines()).toBeLessThanOrEqual(Number(ceiling![1]! + ceiling![2]!));
@@ -314,27 +287,18 @@ describe("the boundary checks themselves", () => {
   });
 
   it("find every host global by compiling without the DOM and Node libraries", () => {
-    const names = (text: string) => hostProblems([{ path: "src/td/sim/probe.ts", text }]).map(({ problem }) => problem);
+    const names = (text: string) => hostProblems([{ path: "src/sim/probe.ts", text }]).map(({ problem }) => problem);
     expect(names("export const t = top.length + parent.x + frames + name + status + origin;")).toEqual(["top", "parent", "frames", "name", "status", "origin"]);
     expect(names("export const t = self.Date.now() + performance.now() + structuredClone(1) + process.hrtime()[0]; console.log(t);")).toEqual([
       "self", "performance", "structuredClone", "process", "console",
     ]);
     expect(names("const parent = new Int32Array(4);\nconst top = parent[0]!;\nexport const step = (frames: number) => frames + top;")).toEqual([]);
-    expect(names('import { createRng } from "../../platform/rng";\nexport const draw = createRng(1).spawn.next();')).toEqual([]);
+    expect(names('import { createRng } from "../kit/platform/rng";\nexport const draw = createRng(1).spawn.next();')).toEqual([]);
     expect(names("export const n: number = \"x\";")).toEqual(["Type 'string' is not assignable to type 'number'."]);
   });
 
-  it("read BUILD_NOW §2's exception list", () => {
-    const markdown = "**Ngoại lệ import cho 1A** (…):\n- `src/logic.ts` (`typingText`) — dùng ở `app/vocab.ts`.\n- `src/a/b.ts` (`x`, `y`) — dùng ở `view/c.ts`.\n\nPhông theo luật `@fontsource/*`.";
-    expect(documentedLegacy(markdown)).toEqual([
-      { module: "src/logic", names: ["typingText"], from: ["src/td/app/vocab.ts"] },
-      { module: "src/a/b", names: ["x", "y"], from: ["src/td/view/c.ts"] },
-    ]);
-    expect(() => documentedLegacy("**Ngoại lệ import cho 1A**:\n- `@fontsource/be-vietnam-pro` — ở `ui/td.css`.")).toThrow(/unreadable/);
-  });
-
   it("read every kind of import", () => {
-    const source = (text: string, path = "src/td/app/a.ts") => importsOf({ path, text });
+    const source = (text: string, path = "src/app/a.ts") => importsOf({ path, text });
     expect(source('import { a, type B as C } from "../x";')).toEqual([{ spec: "../x", names: ["a", "B"] }]);
     expect(source('import D, * as E from "y";\nexport * from "./z";\nimport F from "w";')).toEqual([
       { spec: "y", names: ["*", "default"] },
@@ -342,12 +306,20 @@ describe("the boundary checks themselves", () => {
       { spec: "w", names: ["default"] },
     ]);
     expect(source('export function f() { return a }\nexport const g = { b: 1 }\nimport { h } from "../v";')).toEqual([{ spec: "../v", names: ["h"] }]);
-    expect(source('import "./td.css";\nconst m = await import("../../defense/main");\n// import { x } from "../../scene3d/hero";')).toEqual([
+    expect(source('import "./td.css";\nconst m = await import("../../space-typing/src/main");\n// import { x } from "../../scene3d/hero";')).toEqual([
       { spec: "./td.css", names: [] },
-      { spec: "../../defense/main", names: ["*"] },
+      { spec: "../../space-typing/src/main", names: ["*"] },
     ]);
-    expect(source('@import "@fontsource/be-vietnam-pro/700.css";\n/* @import "x.css"; */', "src/td/ui/td.css")).toEqual([{ spec: "@fontsource/be-vietnam-pro/700.css", names: [] }]);
-    expect(target("src/td/app/input.ts", "../../scene3d/keys")).toBe("src/scene3d/keys");
-    expect(target("src/td/sim/world.ts", "../../platform/rng.ts")).toBe("src/platform/rng");
+    expect(source('@import "@fontsource/be-vietnam-pro/700.css";\n/* @import "x.css"; */', "src/ui/td.css")).toEqual([{ spec: "@fontsource/be-vietnam-pro/700.css", names: [] }]);
+    expect(target("src/app/input.ts", "../kit/input")).toBe("src/kit/input");
+    expect(target("src/sim/world.ts", "../kit/platform/rng.ts")).toBe("src/kit/platform/rng");
+    expect(target("src/app/vocab.ts", "../../../space-typing/src/logic")).toBe("../space-typing/src/logic");
+  });
+
+  it("read storage keys", () => {
+    expect(storageKeys('safeLocalStorage.writeJson("typing-defense:x", 1); s.getItem(key);')).toEqual([
+      { method: "writeJson", key: "typing-defense:x" },
+      { method: "getItem", key: null },
+    ]);
   });
 });

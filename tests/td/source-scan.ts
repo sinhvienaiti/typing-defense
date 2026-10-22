@@ -1,6 +1,6 @@
 /**
  * Reading source text for Typing Defense's boundary checks
- * (tests/td-boundary.test.ts, tests/mode-isolation.test.ts) without a parser:
+ * (tests/boundary.test.ts) without a parser:
  * comments and string contents are blanked in place, so a pattern never
  * matches inside them and every offset still points into the original text.
  */
@@ -59,7 +59,7 @@ export function blank(text: string, strings: boolean): string {
 }
 
 /**
- * SafeStorage's methods (src/platform/safe-storage.ts). Each names its key in
+ * SafeStorage's methods (src/kit/platform/safe-storage.ts). Each names its key in
  * its first argument; setItems names its keys in an object literal.
  */
 export const STORAGE_METHODS = ["getItem", "readItem", "readJson", "setItem", "setItems", "writeJson", "commitItem", "removeItem"] as const;

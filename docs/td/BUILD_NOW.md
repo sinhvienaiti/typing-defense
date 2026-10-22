@@ -82,6 +82,8 @@ Mục tiêu ≤ 5.000 dòng mã (không tính test). Trần cứng 5.500; chạm
 
 Phông `@fontsource/be-vietnam-pro` ở `ui/td.css` không phải ngoại lệ: TK 25.3 luật 1 đã cho mọi `@fontsource/*`. Test đọc danh sách trên, đòi `LEGACY_IMPORTS` khớp đúng, và giữ một trần cố định để danh sách chỉ ngắn đi.
 
+> **Sau khi tách (23/10/2026):** Lời Gọi là repo riêng `games/typing-defense`. `src/td/` thành `src/`, `td.html` thành `index.html`. Ba ngoại lệ trên và `src/platform/{rng,frame-loop}` nay lấy từ `src/kit/` (chép từ `shared/game-kit` của repo cha). Không còn ngoại lệ nào. Luật ranh giới mới ở `tests/boundary.test.ts`; media ở `/assets/typing-defense/` thay cho `/assets/td/`.
+
 **Sửa file có sẵn:**
 - `tests/mode-isolation.test.ts`: thêm `"td/"` vào danh sách được import `scene3d/`; thêm ca "không file nào ngoài `td/` import `td/`" và "`td/` chỉ ghi khóa lưu bắt đầu bằng `td.`".
 - `vite.config.ts`: thêm đầu vào `td`.
