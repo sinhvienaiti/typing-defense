@@ -38,7 +38,7 @@ export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: b
   const enemies = w.enemies.count + w.spawnQueue.length;
   const phase = w.phase === "day" ? `Ngày ${w.day} · ${clock}` : w.phase === "night" ? `Đêm ${w.day} · còn ${enemies} quái` : w.phase === "dawn" ? `Bình minh ${w.day}` : "Thua";
   return (
-    `<div class="td-row"><span class="td-title"><b>Typing Defense</b>${sandbox ? "<small>Hộp cát · bản thử 1A.6</small>" : ""}</span>` +
+    `<div class="td-row"><span class="td-title"><b>Lời Gọi</b>${sandbox ? "<small>Hộp cát · bản thử 1A.6</small>" : ""}</span>` +
     button("pause", paused ? "▶" : "Ⅱ", "", ' class="td-x" title="Tạm dừng (Pause)"') + button("mute", muted ? "<s>Âm</s>" : "Âm", "", ' class="td-x"') + (sandbox ? button("sandbox", "F9", "", ' class="td-x" title="Hộp cát"') : "") + "</div>" +
     `<div class="td-row">${stat("Vàng", String(Math.floor(w.gold / 1000)))}${stat("Gỗ", String(w.wood))}${stat("Lúa", String(w.food))}${stat("Hạt", String(w.seeds))}${stat("Mạng", String(w.lives))}</div>` +
     `<p class="td-phase"><b>${phase}</b></p>` +
