@@ -4,21 +4,23 @@
  * made bright with a chosen word, and keys sent the way the input sends them.
  */
 import { readFileSync } from "node:fs";
-import { deckFromLevels, VOCAB_LEVELS } from "../../src/td/app/vocab";
-import { WORD_D } from "../../src/td/content/rules";
-import type { CommandBody } from "../../src/td/sim/commands";
-import type { RareEvent } from "../../src/td/sim/events";
-import { CALL_KIND, CALL_STATE } from "../../src/td/sim/stores/calls";
-import { expectedE, makeCall } from "../../src/td/sim/systems/calls";
-import { step, type World } from "../../src/td/sim/world";
-import { compileDeck, wordText, type Deck } from "../../src/td/typing/decks";
-import { KIND } from "../../src/td/typing/letters";
-import { lifeTicks } from "../../src/td/typing/scorer";
+import { deckFromLevels, VOCAB_LEVELS } from "../../src/app/vocab";
+import { filterVocabularyEntries } from "../../src/kit/vocab";
+import { WORD_D } from "../../src/content/rules";
+import type { CommandBody } from "../../src/sim/commands";
+import type { RareEvent } from "../../src/sim/events";
+import { CALL_KIND, CALL_STATE } from "../../src/sim/stores/calls";
+import { expectedE, makeCall } from "../../src/sim/systems/calls";
+import { step, type World } from "../../src/sim/world";
+import { compileDeck, wordText, type Deck } from "../../src/typing/decks";
+import { KIND } from "../../src/typing/letters";
+import { lifeTicks } from "../../src/typing/scorer";
 import { send } from "./fixtures";
 
 const levels = new Map<number, { id: string; en: string }[]>();
 const level = (n: number) => {
-  if (!levels.has(n)) levels.set(n, JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries);
+  // Flagged words dropped, as the page's loader (src/kit/vocab) drops them.
+  if (!levels.has(n)) levels.set(n, filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries));
   return levels.get(n)!;
 };
 

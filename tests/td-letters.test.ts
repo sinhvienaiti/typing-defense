@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { createRng } from "../src/platform/rng";
-import { LETTERS } from "../src/td/content/rules";
-import { compileDeck, wordText } from "../src/td/typing/decks";
-import { withinOneEdit } from "../src/td/typing/distance";
-import { KIND, Letters, type LiveWords } from "../src/td/typing/letters";
-import { createBag, pickWord } from "../src/td/typing/picker";
+import { createRng } from "../src/kit/platform/rng";
+import { LETTERS } from "../src/content/rules";
+import { compileDeck, wordText } from "../src/typing/decks";
+import { withinOneEdit } from "../src/typing/distance";
+import { KIND, Letters, type LiveWords } from "../src/typing/letters";
+import { createBag, pickWord } from "../src/typing/picker";
 import { letter, smallDeck } from "./td/typing";
 
 /**

@@ -5,7 +5,7 @@
  * clock, no DOM, randomness only from the named seeded streams. The same
  * seed, content and command log give the same world on Node and in every browser.
  */
-import { createRng, type Rng } from "../../platform/rng";
+import { createRng, type Rng } from "../kit/platform/rng";
 import { compile, ticks, type Compiled } from "../content/compile";
 import { CALL, ECONOMY, EXPECTED, MODES, STORE, VILLAGERS } from "../content/rules";
 import { SLICE_1A } from "../content/slice-1a";

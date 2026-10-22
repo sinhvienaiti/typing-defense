@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import type { MapDef } from "../src/td/content/types";
-import { clearLine, findPath, nearestOpen, pullPath } from "../src/td/sim/nav/astar";
-import { STEPS, WalkGrid } from "../src/td/sim/nav/grid";
-import { canPlace } from "../src/td/sim/placement";
-import { MODE, PATH_MAX } from "../src/td/sim/stores/agents";
-import { stand } from "../src/td/sim/systems/agents";
-import { createRng } from "../src/platform/rng";
+import { SLICE_1A } from "../src/content/slice-1a";
+import type { MapDef } from "../src/content/types";
+import { clearLine, findPath, nearestOpen, pullPath } from "../src/sim/nav/astar";
+import { STEPS, WalkGrid } from "../src/sim/nav/grid";
+import { canPlace } from "../src/sim/placement";
+import { MODE, PATH_MAX } from "../src/sim/stores/agents";
+import { stand } from "../src/sim/systems/agents";
+import { createRng } from "../src/kit/platform/rng";
 import { arrive, build, ready, run, send, world } from "./td/fixtures";
 
 /** Walking: A*, the pulled path, re-routing (docs/td/TYPING_DEFENSE_DESIGN.md 25.9; BUILD_NOW §6.1 td-nav). */

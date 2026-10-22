@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { AGENT } from "../src/td/content/rules";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import type { RareEvent } from "../src/td/sim/events";
-import { hashHex } from "../src/td/sim/hash";
-import { STAT } from "../src/td/sim/stats";
-import { MODE } from "../src/td/sim/stores/agents";
-import { inRing, passive, slotsOpen, stand } from "../src/td/sim/systems/agents";
-import { step, type World } from "../src/td/sim/world";
+import { AGENT } from "../src/content/rules";
+import { SLICE_1A } from "../src/content/slice-1a";
+import type { RareEvent } from "../src/sim/events";
+import { hashHex } from "../src/sim/hash";
+import { STAT } from "../src/sim/stats";
+import { MODE } from "../src/sim/stores/agents";
+import { inRing, passive, slotsOpen, stand } from "../src/sim/systems/agents";
+import { step, type World } from "../src/sim/world";
 import { arrive, build, enemyAt, goTo, ready, run, send, world } from "./td/fixtures";
 
 /** The hero and the helpers on the map (docs/td/TYPING_DEFENSE_DESIGN.md 5, 8.2–8.4, 25.9; BUILD_1A6 §6). */

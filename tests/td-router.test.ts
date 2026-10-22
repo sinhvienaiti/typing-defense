@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { STAT } from "../src/td/sim/stats";
-import type { World } from "../src/td/sim/world";
-import { KEY } from "../src/td/typing/router";
+import { STAT } from "../src/sim/stats";
+import type { World } from "../src/sim/world";
+import { KEY } from "../src/typing/router";
 import { send, world } from "./td/fixtures";
 import { callWord, live, smallDeck, type, wordOf } from "./td/typing";
 

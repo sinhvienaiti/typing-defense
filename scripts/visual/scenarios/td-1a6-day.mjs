@@ -9,7 +9,7 @@
 // not the worker alone). The page's command log is replayed on Node to the page's hash. The cards are
 // measured and gated (cardsClean). Pictures
 // td-1a6-day-{harvest,chop,build}. Exits 1 when a check fails.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
 import { KIND, Seen, boot, cardStats, cardSummary, cardsClean, click, consoleChecks, finish, look, out, replayOnNode, sandbox, send, sizeOf, state, td, typeFor } from "./td-1a6-common.mjs";
 
 const q = (m) => Math.round(m * 4);

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { STAT } from "../src/td/sim/stats";
-import { lifeSeconds, lifeTicks, rawWpm, scoreWord, typeSeconds } from "../src/td/typing/scorer";
+import { STAT } from "../src/sim/stats";
+import { lifeSeconds, lifeTicks, rawWpm, scoreWord, typeSeconds } from "../src/typing/scorer";
 import { run, send, world } from "./td/fixtures";
 import { callWord, smallDeck, type } from "./td/typing";
-import { expectedE, lengthBand } from "../src/td/sim/systems/calls";
+import { expectedE, lengthBand } from "../src/sim/systems/calls";
 
 /** Scoring a word (docs/td/TYPING_DEFENSE_DESIGN.md 6.4, 6.6; BUILD_NOW §6.1 td-scorer; BUILD_1A6 §2, §5.4). */
 const E = 35;

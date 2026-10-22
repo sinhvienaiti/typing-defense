@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { compile, contentHash, waveSchedule } from "../src/td/content/compile";
-import { CALL, CAP, EXPECTED, LENGTH_BY_E, MODES, TIERS, TREE } from "../src/td/content/rules";
-import { validateContent } from "../src/td/content/schema";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import type { Content, Mode } from "../src/td/content/types";
-import { groundLanes } from "../src/td/sim/lanes";
-import { canPlace } from "../src/td/sim/placement";
-import { lengthBand } from "../src/td/sim/systems/calls";
-import { availableLetters, bandWords, streamCap } from "../src/td/typing/decks";
-import { lifeSeconds, typeSeconds } from "../src/td/typing/scorer";
+import { compile, contentHash, waveSchedule } from "../src/content/compile";
+import { CALL, CAP, EXPECTED, LENGTH_BY_E, MODES, TIERS, TREE } from "../src/content/rules";
+import { validateContent } from "../src/content/schema";
+import { SLICE_1A } from "../src/content/slice-1a";
+import type { Content, Mode } from "../src/content/types";
+import { groundLanes } from "../src/sim/lanes";
+import { canPlace } from "../src/sim/placement";
+import { lengthBand } from "../src/sim/systems/calls";
+import { availableLetters, bandWords, streamCap } from "../src/typing/decks";
+import { lifeSeconds, typeSeconds } from "../src/typing/scorer";
 import { def, q, world } from "./td/fixtures";
 import { realDeck } from "./td/typing";
 
@@ -167,12 +167,13 @@ describe("1A content", () => {
       return [words.length, a, streamCap(a)];
     }));
     // TK 6.5's 4–8 column was measured on 5–8 letters (58 / 237 / 453 words); the real 4–8 band is wider.
+    // Since the split the deck drops flagged words as src/kit/vocab does: 5 of them sat in level 4–5's bands (A unchanged).
     expect(measured).toEqual([
       [[122, 16, 10], [140, 16, 10], [123, 15, 9], [124, 15, 9]],
       [[291, 19, 12], [362, 20, 12], [355, 21, 12], [375, 21, 12]],
-      [[499, 22, 12], [626, 22, 12], [635, 23, 12], [676, 23, 12]],
+      [[494, 22, 12], [621, 22, 12], [630, 23, 12], [671, 23, 12]],
     ]);
-    expect([1, 3, 5].map((level) => bandWords(deck, level, 5, 8).length)).toEqual([58, 237, 453]);
+    expect([1, 3, 5].map((level) => bandWords(deck, level, 5, 8).length)).toEqual([58, 237, 451]);
   });
 
   it("every word can be typed in its scoring clock (TK 25.4): L_w ≥ 1.2 + 12·(len + 1)/(E·d) at every E, mode and band", () => {

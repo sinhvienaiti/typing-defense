@@ -9,7 +9,7 @@
  * change of behaviour. `pnpm td:golden:update` remakes it after a change that was meant.
  */
 import { readFileSync } from "node:fs";
-import { compileDeck, wordText, type Deck } from "../../src/td/typing/decks";
+import { compileDeck, wordText, type Deck } from "../../src/typing/decks";
 import { runBot, type BotRun, type BotSpec } from "./bot";
 import { heroDay, heroNight } from "./policies/hero";
 import { ARCHER_WEST, STANDARD } from "./policies/layouts";

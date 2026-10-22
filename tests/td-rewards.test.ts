@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { COMBAT, MODES, POWER } from "../src/td/content/rules";
-import { STAT } from "../src/td/sim/stats";
-import { CALL_KIND, CALL_STATE } from "../src/td/sim/stores/calls";
-import { PROJECTILE } from "../src/td/sim/stores/projectiles";
-import { towersAttack } from "../src/td/sim/systems/combat";
-import { shotPower } from "../src/td/sim/systems/rewards";
-import type { World } from "../src/td/sim/world";
-import { wordText } from "../src/td/typing/decks";
-import { scoreWord } from "../src/td/typing/scorer";
+import { COMBAT, MODES, POWER } from "../src/content/rules";
+import { STAT } from "../src/sim/stats";
+import { CALL_KIND, CALL_STATE } from "../src/sim/stores/calls";
+import { PROJECTILE } from "../src/sim/stores/projectiles";
+import { towersAttack } from "../src/sim/systems/combat";
+import { shotPower } from "../src/sim/systems/rewards";
+import type { World } from "../src/sim/world";
+import { wordText } from "../src/typing/decks";
+import { scoreWord } from "../src/typing/scorer";
 import { built, enemyAt, goTo, run, send, world } from "./td/fixtures";
 import { callWord, smallDeck, type, wordOf } from "./td/typing";
 

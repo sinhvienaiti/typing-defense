@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { BUILD } from "../src/td/content/rules";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import type { Content } from "../src/td/content/types";
-import { canPlace, PLACE_CHECKS } from "../src/td/sim/placement";
-import type { World } from "../src/td/sim/world";
+import { BUILD } from "../src/content/rules";
+import { SLICE_1A } from "../src/content/slice-1a";
+import type { Content } from "../src/content/types";
+import { canPlace, PLACE_CHECKS } from "../src/sim/placement";
+import type { World } from "../src/sim/world";
 import { build, def, q, send, world } from "./td/fixtures";
 
 /** Spots that fill the caps: 6 attack towers, 3 barracks. */

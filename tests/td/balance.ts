@@ -7,8 +7,8 @@
  * fullest, what became of the calls, what was earned day by day, the modes side by side, and the step's cost.
  * `gates` is what tests/td-balance-gates.test.ts holds; the report itself never fails a build.
  */
-import { MODES } from "../../src/td/content/rules";
-import type { Mode } from "../../src/td/content/types";
+import { MODES } from "../../src/content/rules";
+import type { Mode } from "../../src/content/types";
 import { earned, runBot, type BotRun, type CallTally, type Earned } from "./bot";
 import type { HandsSpec } from "./keystrokes";
 import { heroDay, heroNight } from "./policies/hero";

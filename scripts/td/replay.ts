@@ -9,10 +9,11 @@
  * Prints one JSON line; exits 1 when the content or the hash differs.
  */
 import { readFileSync } from "node:fs";
-import { deckFromLevels, fallbackDeck, VOCAB_LEVELS } from "../../src/td/app/vocab";
-import type { Command } from "../../src/td/sim/commands";
-import { hashHex } from "../../src/td/sim/hash";
-import { createWorld, replayTo } from "../../src/td/sim/world";
+import { filterVocabularyEntries } from "../../src/kit/vocab";
+import { deckFromLevels, fallbackDeck, VOCAB_LEVELS } from "../../src/app/vocab";
+import type { Command } from "../../src/sim/commands";
+import { hashHex } from "../../src/sim/hash";
+import { createWorld, replayTo } from "../../src/sim/world";
 
 type BrowserRun = { seed: number; sandbox: boolean; content: string; deck: string; vocabulary: string; tick: number; hash: string; log: Command[] };
 
@@ -22,7 +23,8 @@ if (file === undefined) {
   process.exit(2);
 }
 const run = JSON.parse(readFileSync(file, "utf8")) as BrowserRun;
-const level = (n: number) => JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries;
+// Flagged words dropped, as the page's loader (src/kit/vocab) drops them.
+const level = (n: number) => filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries);
 const deck = run.vocabulary === "fallback" ? fallbackDeck() : deckFromLevels(Array.from({ length: VOCAB_LEVELS }, (_, index) => level(index + 1)));
 const world = createWorld({ seed: run.seed, sandbox: run.sandbox, deck });
 replayTo(world, run.log, run.tick); // with what a tactical pause ordered at that tick

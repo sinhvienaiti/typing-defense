@@ -1,17 +1,17 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { TICK_HZ } from "../src/td/content/rules";
-import { PLACE_CHECKS } from "../src/td/sim/placement";
-import { CALL_KIND } from "../src/td/sim/stores/calls";
-import { makeCall } from "../src/td/sim/systems/calls";
-import { Selection } from "../src/td/app/selection";
-import { review } from "../src/td/sim/systems/calls";
-import { compileDeck } from "../src/td/typing/decks";
-import { dockHtml } from "../src/td/ui/build-menu";
-import { actionsHtml, REASON, statusHtml, stripHtml } from "../src/td/ui/hud";
-import { teamHtml } from "../src/td/ui/team-bar";
-import { pips } from "../src/td/view/words/cards";
+import { TICK_HZ } from "../src/content/rules";
+import { PLACE_CHECKS } from "../src/sim/placement";
+import { CALL_KIND } from "../src/sim/stores/calls";
+import { makeCall } from "../src/sim/systems/calls";
+import { Selection } from "../src/app/selection";
+import { review } from "../src/sim/systems/calls";
+import { compileDeck } from "../src/typing/decks";
+import { dockHtml } from "../src/ui/build-menu";
+import { actionsHtml, REASON, statusHtml, stripHtml } from "../src/ui/hud";
+import { teamHtml } from "../src/ui/team-bar";
+import { pips } from "../src/view/words/cards";
 import { built, run, send, world } from "./td/fixtures";
 import { callWord, type } from "./td/typing";
 
@@ -49,7 +49,7 @@ describe("the status panel", () => {
 
   it("names every reason the sim may refuse a command for, in Vietnamese", () => {
     // applyCommand's reasons: the string literals commands.ts returns, typeKey's (calls.ts), and canPlace's checks.
-    const files = ["../src/td/sim/commands.ts", "../src/td/sim/systems/calls.ts"].map((path) => readFileSync(join(__dirname, path), "utf8"));
+    const files = ["../src/sim/commands.ts", "../src/sim/systems/calls.ts"].map((path) => readFileSync(join(__dirname, path), "utf8"));
     const returned = files.flatMap((text) => [...text.matchAll(/return ([^;]*);/g)].flatMap((match) => [...match[1]!.matchAll(/"([a-z][A-Za-z]*)"/g)].map((literal) => literal[1]!)));
     const reasons = [...new Set([...returned, ...PLACE_CHECKS])];
     expect(reasons).toEqual(expect.arrayContaining(["noBuilding", "noBarracks", "badValue", "noSandbox", "badKey", "blocked", "notDay", "path", "tree", "wood", "food", "villagerCap", "notRipe", "noTree"]));

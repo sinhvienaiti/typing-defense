@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { besidePanels, COLUMN, columnHeights, lanesTouch, spreadLanes, type LaneBox } from "../src/td/view/words/lanes";
+import { besidePanels, COLUMN, columnHeights, lanesTouch, spreadLanes, type LaneBox } from "../src/view/words/lanes";
 
 /** Word card layout (docs/td/TYPING_DEFENSE_DESIGN.md 23.4; BUILD_NOW §6.1 td-lanes). */
 const CARD = 32;

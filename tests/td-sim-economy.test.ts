@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { createRng } from "../src/platform/rng";
-import { BUILD, CALL, ECONOMY, FARM, MINE, MODES, PHASE, TREE, VILLAGERS } from "../src/td/content/rules";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import type { Mode } from "../src/td/content/types";
-import { STAT } from "../src/td/sim/stats";
-import { PLOT } from "../src/td/sim/stores/buildings";
-import { CALL_KIND } from "../src/td/sim/stores/calls";
-import { NPC_KIND, TASK } from "../src/td/sim/stores/npcs";
-import { CELL } from "../src/td/sim/nav/grid";
-import { MODE } from "../src/td/sim/stores/walkers";
-import { damageEnemy } from "../src/td/sim/systems/combat";
-import { countNpcs } from "../src/td/sim/systems/economy";
-import { step, type World } from "../src/td/sim/world";
+import { createRng } from "../src/kit/platform/rng";
+import { BUILD, CALL, ECONOMY, FARM, MINE, MODES, PHASE, TREE, VILLAGERS } from "../src/content/rules";
+import { SLICE_1A } from "../src/content/slice-1a";
+import type { Mode } from "../src/content/types";
+import { STAT } from "../src/sim/stats";
+import { PLOT } from "../src/sim/stores/buildings";
+import { CALL_KIND } from "../src/sim/stores/calls";
+import { NPC_KIND, TASK } from "../src/sim/stores/npcs";
+import { CELL } from "../src/sim/nav/grid";
+import { MODE } from "../src/sim/stores/walkers";
+import { damageEnemy } from "../src/sim/systems/combat";
+import { countNpcs } from "../src/sim/systems/economy";
+import { step, type World } from "../src/sim/world";
 import { build, built, def, goTo, q, ready, run, send, world } from "./td/fixtures";
 
 /** Day and night, farms, trees, villagers, sites, mines and the money they make (docs/td/BUILD_1A6.md §2–§4). */

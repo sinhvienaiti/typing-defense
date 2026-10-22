@@ -10,7 +10,7 @@
 // Every sample: bright ≤ the cap of the mode then, no two live word cards overlap (> 1 px²), none touches a
 // HUD panel (zoom 1), text ≥ 18 px, all on screen. Pictures td-1a6-attention-cap, td-1a6-attention-typing.
 // Exits 1 when a check fails.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a6-attention.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-attention.mjs --width=1280 --height=720
 import { CAP, boot, cardStats, cardSummary, cardsClean, consoleChecks, finish, look, out, sandbox, send, sizeOf, state, td, typeFor } from "./td-1a6-common.mjs";
 
 const q = (m) => Math.round(m * 4);

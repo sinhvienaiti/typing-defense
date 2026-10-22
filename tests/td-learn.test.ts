@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { CALL } from "../src/td/content/rules";
-import { hashHex } from "../src/td/sim/hash";
-import { CALL_KIND, CALL_STATE } from "../src/td/sim/stores/calls";
-import { makeCall, review } from "../src/td/sim/systems/calls";
-import { createWorld, type World } from "../src/td/sim/world";
-import { compileDeck, gloss, wordText } from "../src/td/typing/decks";
+import { CALL } from "../src/content/rules";
+import { hashHex } from "../src/sim/hash";
+import { CALL_KIND, CALL_STATE } from "../src/sim/stores/calls";
+import { makeCall, review } from "../src/sim/systems/calls";
+import { createWorld, type World } from "../src/sim/world";
+import { compileDeck, gloss, wordText } from "../src/typing/decks";
 import { run, send, world } from "./td/fixtures";
 import { callWord, realDeck, smallDeck, type, wordOf } from "./td/typing";
 

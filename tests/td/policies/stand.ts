@@ -6,13 +6,13 @@
  * allows, and (if the layout says so) call the night early. Rules (where the hero stands by day and by night) run
  * after, every tick. A plan only reads the world and sends commands.
  */
-import { ECONOMY, MODES, VILLAGERS } from "../../../src/td/content/rules";
-import type { CommandBody } from "../../../src/td/sim/commands";
-import { canPlace } from "../../../src/td/sim/placement";
-import { NPC_KIND } from "../../../src/td/sim/stores/npcs";
-import { slotsOpen } from "../../../src/td/sim/systems/agents";
-import { countNpcs, villagerCap } from "../../../src/td/sim/systems/economy";
-import type { World } from "../../../src/td/sim/world";
+import { ECONOMY, MODES, VILLAGERS } from "../../../src/content/rules";
+import type { CommandBody } from "../../../src/sim/commands";
+import { canPlace } from "../../../src/sim/placement";
+import { NPC_KIND } from "../../../src/sim/stores/npcs";
+import { slotsOpen } from "../../../src/sim/systems/agents";
+import { countNpcs, villagerCap } from "../../../src/sim/systems/economy";
+import type { World } from "../../../src/sim/world";
 
 /** What a policy may do: read the world, queue commands for this tick. */
 export interface Bot {

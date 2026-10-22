@@ -2,12 +2,12 @@
  * Small builders for Typing Defense simulation tests: a world, commands that
  * act this tick, buildings built at once, and enemies dropped straight onto a route.
  */
-import { placeBuilding, type CommandBody } from "../../src/td/sim/commands";
-import { TASK } from "../../src/td/sim/stores/npcs";
-import { MODE } from "../../src/td/sim/stores/walkers";
-import { closeCall } from "../../src/td/sim/systems/calls";
-import { finishSite } from "../../src/td/sim/systems/economy";
-import { createWorld, step, type World, type WorldOptions } from "../../src/td/sim/world";
+import { placeBuilding, type CommandBody } from "../../src/sim/commands";
+import { TASK } from "../../src/sim/stores/npcs";
+import { MODE } from "../../src/sim/stores/walkers";
+import { closeCall } from "../../src/sim/systems/calls";
+import { finishSite } from "../../src/sim/systems/economy";
+import { createWorld, step, type World, type WorldOptions } from "../../src/sim/world";
 
 /** A world on seed 1; asking for `gold` brings as much wood (a test's building budget), unless `wood` is given. */
 export function world(options: Partial<WorldOptions> = {}): World {

@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { createRng } from "../src/platform/rng";
-import { compileAttack } from "../src/td/content/compile";
-import { SLICE_1A } from "../src/td/content/slice-1a";
-import { hashHex } from "../src/td/sim/hash";
-import { SOURCE, STAT } from "../src/td/sim/stats";
-import { PROJECTILE } from "../src/td/sim/stores/projectiles";
-import { damageEnemy, fireAt, selectTargets, towersAttack } from "../src/td/sim/systems/combat";
-import { deathsStep } from "../src/td/sim/systems/deaths";
-import { projectilesStep } from "../src/td/sim/systems/projectile";
-import { createWorld, runLog, step, type World } from "../src/td/sim/world";
-import { Session } from "../src/td/app/session";
-import type { Command, CommandBody } from "../src/td/sim/commands";
+import { createRng } from "../src/kit/platform/rng";
+import { compileAttack } from "../src/content/compile";
+import { SLICE_1A } from "../src/content/slice-1a";
+import { hashHex } from "../src/sim/hash";
+import { SOURCE, STAT } from "../src/sim/stats";
+import { PROJECTILE } from "../src/sim/stores/projectiles";
+import { damageEnemy, fireAt, selectTargets, towersAttack } from "../src/sim/systems/combat";
+import { deathsStep } from "../src/sim/systems/deaths";
+import { projectilesStep } from "../src/sim/systems/projectile";
+import { createWorld, runLog, step, type World } from "../src/sim/world";
+import { Session } from "../src/app/session";
+import type { Command, CommandBody } from "../src/sim/commands";
 import { build, def, enemyAt, enemyPoint, q, ready, run, send, world } from "./td/fixtures";
 
 /** Damage, armour, crits, blasts and targeting (docs/td/TYPING_DEFENSE_DESIGN.md 10, 11.3). */

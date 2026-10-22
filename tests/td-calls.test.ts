@@ -1,15 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { createRng } from "../src/platform/rng";
-import { CHAIN, FARM, MODES, TREE } from "../src/td/content/rules";
-import type { Command, CommandBody } from "../src/td/sim/commands";
-import { hashHex } from "../src/td/sim/hash";
-import { STAT } from "../src/td/sim/stats";
-import { PLOT } from "../src/td/sim/stores/buildings";
-import { CALL_KIND, CALL_STATE } from "../src/td/sim/stores/calls";
-import { closeCall, makeCall } from "../src/td/sim/systems/calls";
-import { createWorld, runLog, step, type World } from "../src/td/sim/world";
-import { wordText } from "../src/td/typing/decks";
-import { KEY } from "../src/td/typing/router";
+import { createRng } from "../src/kit/platform/rng";
+import { CHAIN, FARM, MODES, TREE } from "../src/content/rules";
+import type { Command, CommandBody } from "../src/sim/commands";
+import { hashHex } from "../src/sim/hash";
+import { STAT } from "../src/sim/stats";
+import { PLOT } from "../src/sim/stores/buildings";
+import { CALL_KIND, CALL_STATE } from "../src/sim/stores/calls";
+import { closeCall, makeCall } from "../src/sim/systems/calls";
+import { createWorld, runLog, step, type World } from "../src/sim/world";
+import { wordText } from "../src/typing/decks";
+import { KEY } from "../src/typing/router";
 import { built, goTo, q, run, send, world } from "./td/fixtures";
 import { live, realDeck, smallDeck, type } from "./td/typing";
 

@@ -8,16 +8,16 @@
  * earned (gold from every source, wood, food, knowledge) at each nightfall and dawn, what became of the calls, and
  * the cost of a step; it may check the call invariants every tick (§12 gate 6).
  */
-import { createRng } from "../../src/platform/rng";
-import { MODES, TICK_HZ } from "../../src/td/content/rules";
-import type { Mode } from "../../src/td/content/types";
-import type { Command, CommandBody } from "../../src/td/sim/commands";
-import { hashHex } from "../../src/td/sim/hash";
-import { STAT, statsObject, type StatName } from "../../src/td/sim/stats";
-import { CALL_STATE } from "../../src/td/sim/stores/calls";
-import { createWorld, step, type World } from "../../src/td/sim/world";
-import { wordText, type Deck } from "../../src/td/typing/decks";
-import { withinOneEdit } from "../../src/td/typing/distance";
+import { createRng } from "../../src/kit/platform/rng";
+import { MODES, TICK_HZ } from "../../src/content/rules";
+import type { Mode } from "../../src/content/types";
+import type { Command, CommandBody } from "../../src/sim/commands";
+import { hashHex } from "../../src/sim/hash";
+import { STAT, statsObject, type StatName } from "../../src/sim/stats";
+import { CALL_STATE } from "../../src/sim/stores/calls";
+import { createWorld, step, type World } from "../../src/sim/world";
+import { wordText, type Deck } from "../../src/typing/decks";
+import { withinOneEdit } from "../../src/typing/distance";
 import { Keystrokes, type HandsSpec } from "./keystrokes";
 import { Plan } from "./policies/stand";
 import { Reader } from "./reader";

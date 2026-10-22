@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { SOLDIER } from "../src/td/content/rules";
-import { STAT } from "../src/td/sim/stats";
-import { soldiersStep } from "../src/td/sim/systems/block";
-import { meleeStep } from "../src/td/sim/systems/combat";
-import { moveEnemies } from "../src/td/sim/systems/move";
-import type { Lane } from "../src/td/sim/lanes";
-import { step, type World } from "../src/td/sim/world";
+import { SOLDIER } from "../src/content/rules";
+import { STAT } from "../src/sim/stats";
+import { soldiersStep } from "../src/sim/systems/block";
+import { meleeStep } from "../src/sim/systems/combat";
+import { moveEnemies } from "../src/sim/systems/move";
+import type { Lane } from "../src/sim/lanes";
+import { step, type World } from "../src/sim/world";
 import { build, enemyAt, enemyPoint, ready, run, world } from "./td/fixtures";
 
 /** Soldiers block (docs/td/TYPING_DEFENSE_DESIGN.md 13, BUILD_NOW §3.2). */

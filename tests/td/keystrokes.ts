@@ -6,7 +6,7 @@
  * Backspace takes a right letter back and costs a retype, as it costs a real
  * player. The hands draw on a stream of their own: the world's never move.
  */
-import type { RngStream } from "../../src/platform/rng";
+import type { RngStream } from "../../src/kit/platform/rng";
 
 /** wpm: keys a minute / 5; accuracy: the share of keys that land right; backspace: the chance of a Backspace after a slip. */
 export type HandsSpec = { wpm: number; accuracy: number; backspace: number };

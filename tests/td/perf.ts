@@ -6,12 +6,12 @@
  * points no shot ends, `shots` already in flight, at night (power calls). The full world is TK 25.12's: ten
  * buildings more past the 1A caps and 64 soldiers. td-sim-perf gates them.
  */
-import { CAP, STORE } from "../../src/td/content/rules";
-import { placeBuilding } from "../../src/td/sim/commands";
-import { STAT } from "../../src/td/sim/stats";
-import { NPC_KIND } from "../../src/td/sim/stores/npcs";
-import { addVillager, countNpcs } from "../../src/td/sim/systems/economy";
-import { step, type World } from "../../src/td/sim/world";
+import { CAP, STORE } from "../../src/content/rules";
+import { placeBuilding } from "../../src/sim/commands";
+import { STAT } from "../../src/sim/stats";
+import { NPC_KIND } from "../../src/sim/stores/npcs";
+import { addVillager, countNpcs } from "../../src/sim/systems/economy";
+import { step, type World } from "../../src/sim/world";
 import { built, enemyAt, send, world } from "./fixtures";
 import { realDeck } from "./typing";
 

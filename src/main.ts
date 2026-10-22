@@ -1,5 +1,5 @@
 /**
- * Typing Defense (td.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
+ * Typing Defense (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
  * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md): a top-down 2D test field. The
  * vocabulary loads first; then the world steps at 60 Hz in a session, the
  * debug view draws it, the calls' word cards float over it, the keys, the
@@ -7,7 +7,7 @@
  * events, and window.__td lets the browser scenarios drive it through commands.
  */
 import "./ui/td.css";
-import { runFrameLoop } from "../platform/frame-loop";
+import { runFrameLoop } from "./kit/platform";
 import { installDevHandle } from "./app/dev-handle";
 import { installKeys, installPointer } from "./app/input";
 import { sandboxHtml } from "./app/sandbox";

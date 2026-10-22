@@ -1,5 +1,5 @@
 // Shared helpers for the Typing Defense 1A.6 browser scenarios (scripts/visual/scenarios/td-1a6-*.mjs,
-// docs/td/BUILD_1A6.md §12 gate 8): boot td.html?sandbox=1, real CDP keys and clicks, the zoom-1 screen
+// docs/td/BUILD_1A6.md §12 gate 8): boot index.html?sandbox=1, real CDP keys and clicks, the zoom-1 screen
 // mapping of main.ts and DebugView.resize, a typist that reads the live words, the card checks (no two
 // live cards overlap, none over a HUD panel, text ≥ 18 px), a collector for the page's rare events, and
 // the Node replay of the page's command log (scripts/td/replay.ts: Node and Chrome reach the same hash).
@@ -12,14 +12,14 @@ import { DEV_URL, gesture, out } from "./common.mjs";
 export { out };
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 export const td = (code) => "(() => { const t = window.__td; if (!t) return null; " + code + " })()";
-/** CALL_KIND of src/td/sim/stores/calls.ts, and the bright cap of each mode (MODES[mode].open in rules.ts). */
+/** CALL_KIND of src/sim/stores/calls.ts, and the bright cap of each mode (MODES[mode].open in rules.ts). */
 export const KIND = { power: 0, build: 1, harvest: 2, chop: 3, mine: 4, quiz: 5 };
 export const CAP = { relax: 2, balanced: 3, challenge: 4, learn: 2 };
 export const sizeOf = (page) => page.width + "x" + page.height;
 
-/** td.html?sandbox=1 until the first frame is painted and the fonts are in; `mouse: false` sends no first click (keyboard-only runs). */
+/** index.html?sandbox=1 until the first frame is painted and the fonts are in; `mouse: false` sends no first click (keyboard-only runs). */
 export async function boot(page, { mouse = true } = {}) {
-  await page.goto(DEV_URL.replace(/\/$/, "") + "/td.html?sandbox=1", { settle: 300 });
+  await page.goto(DEV_URL.replace(/\/$/, "") + "/?sandbox=1", { settle: 300 });
   if (mouse) await gesture(page);
   let ready = false;
   for (let wait = 0; wait < 80 && !ready; wait += 1) {

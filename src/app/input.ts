@@ -6,7 +6,7 @@
  * presses (unless the dev flag allows them) do nothing. A Space right after a
  * letter the game took is the space typed between words, not the pause.
  */
-import { isComposingKey, typedLetter, vietnameseInputSign } from "../../scene3d/keys";
+import { isComposingKey, typedLetter, vietnameseInputSign } from "../kit/input";
 import type { CommandBody } from "../sim/commands";
 
 /** Command keys by event.code, "Shift" + code with Shift held (BUILD_1A6 §8: no tempo keys; Space pauses only in relax and learn, else it is swallowed). */

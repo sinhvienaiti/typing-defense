@@ -1,9 +1,9 @@
-// Typing Defense 1A (docs/td/BUILD_NOW.md §6.2): td.html?sandbox=1 boots with
+// Typing Defense 1A (docs/td/BUILD_NOW.md §6.2): index.html?sandbox=1 boots with
 // no media at all, draws its ground, shows its HUD in Be Vietnam Pro, and logs
 // no console error or page exception. A request the server refuses (a 403 or
 // 404 font) reaches no console API, so the resource timings are read too.
 // Exits 1 when a check fails.
-//   URL=http://127.0.0.1:3110/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a-boot.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a-boot.mjs --width=1280 --height=720
 import { DEV_URL, gesture, out } from "./common.mjs";
 
 const td = (code) => "(() => { const t = window.__td; if (!t) return null; " + code + " })()";
@@ -13,7 +13,7 @@ export default async function (page) {
   const size = page.width + "x" + page.height;
   // The dev server's module requests would fill the default 250-entry buffer and hide later failures.
   await page.send("Page.addScriptToEvaluateOnNewDocument", { source: "performance.setResourceTimingBufferSize(100000);" });
-  await page.goto(base + "/td.html?sandbox=1", { settle: 300 });
+  await page.goto(base + "/?sandbox=1", { settle: 300 });
   await gesture(page);
   let ready = false;
   for (let wait = 0; wait < 80 && !ready; wait += 1) {

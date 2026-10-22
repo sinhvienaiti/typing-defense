@@ -6,12 +6,12 @@
  * for nothing), less for the way there, and goes when a place is clearly better than where he stands. By night the
  * places are the towers and the Bastion: the power calls they make and the enemies in their reach.
  */
-import { AGENT } from "../../../src/td/content/rules";
-import type { CommandBody } from "../../../src/td/sim/commands";
-import { CALL_KIND, CALL_STATE } from "../../../src/td/sim/stores/calls";
-import { MODE } from "../../../src/td/sim/stores/walkers";
-import { slotsOpen, stand } from "../../../src/td/sim/systems/agents";
-import type { World } from "../../../src/td/sim/world";
+import { AGENT } from "../../../src/content/rules";
+import type { CommandBody } from "../../../src/sim/commands";
+import { CALL_KIND, CALL_STATE } from "../../../src/sim/stores/calls";
+import { MODE } from "../../../src/sim/stores/walkers";
+import { slotsOpen, stand } from "../../../src/sim/systems/agents";
+import type { World } from "../../../src/sim/world";
 import type { Rule } from "./stand";
 
 const EVERY = 30;

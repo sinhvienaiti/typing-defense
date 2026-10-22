@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { CAP, STORE } from "../src/td/content/rules";
-import { hashHex } from "../src/td/sim/hash";
-import { STAT } from "../src/td/sim/stats";
-import { NPC_KIND } from "../src/td/sim/stores/npcs";
-import { createWorld, runLog } from "../src/td/sim/world";
+import { CAP, STORE } from "../src/content/rules";
+import { hashHex } from "../src/sim/hash";
+import { STAT } from "../src/sim/stats";
+import { NPC_KIND } from "../src/sim/stores/npcs";
+import { createWorld, runLog } from "../src/sim/world";
 import { send, world } from "./td/fixtures";
 import { fullWorld, loadedWorld, stepCost } from "./td/perf";
 

@@ -10,7 +10,7 @@
 // composing presses made only key and backspace commands and moved no
 // selection; the HUD asked to switch the input method off; digits pick, and
 // Backquote is safe right after them. Picture td-1a-ime with the notice up.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a-ime.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a-ime.mjs --width=1280 --height=720
 import { DEV_URL, out } from "./common.mjs";
 
 const td = (code) => "(() => { const t = window.__td; if (!t) return null; " + code + " })()";
@@ -47,7 +47,7 @@ const ui = (page) => page.eval(td("const u = t.ui(); return { agent: u.agent, fo
 export default async function (page) {
   const base = DEV_URL.replace(/\/$/, "");
   const size = page.width + "x" + page.height;
-  await page.goto(base + "/td.html?sandbox=1", { settle: 300 });
+  await page.goto(base + "/?sandbox=1", { settle: 300 });
   let ready = false;
   for (let wait = 0; wait < 80 && !ready; wait += 1) {
     ready = (await page.eval(td("return t.ready();"))) === true;

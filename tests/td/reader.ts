@@ -5,10 +5,10 @@
  * the next is a power word first (they run out; one that cannot be finished in time is let go), else the oldest word
  * seen. The reader only reads the world; its reaction times come from its own stream.
  */
-import type { RngStream } from "../../src/platform/rng";
-import { TICK_HZ } from "../../src/td/content/rules";
-import { CALL_KIND } from "../../src/td/sim/stores/calls";
-import type { World } from "../../src/td/sim/world";
+import type { RngStream } from "../../src/kit/platform/rng";
+import { TICK_HZ } from "../../src/content/rules";
+import { CALL_KIND } from "../../src/sim/stores/calls";
+import type { World } from "../../src/sim/world";
 
 const STEP_MS = 1000 / TICK_HZ;
 const span = (lo: number, hi: number) => [Math.round((lo * 1000) / STEP_MS), Math.round((hi * 1000) / STEP_MS)] as const;

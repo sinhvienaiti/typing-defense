@@ -9,11 +9,11 @@
 // Checks: every logged command is one a key makes, both buildings stand, words typed on chop, build and
 // power calls, Esc unlocked, the night ended, the hire went through, and the log replays on Node to the
 // page's hash. Picture td-1a6-keyboard (the night). Exits 1 when a check fails.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a6-keyboard.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-keyboard.mjs --width=1280 --height=720
 import { KIND, Seen, WORDS, consoleChecks, finish, key, letter, out, replayOnNode, sizeOf, state, td, typeFor, until } from "./td-1a6-common.mjs";
 import { DEV_URL } from "./common.mjs";
 
-/** Commands a key makes (src/td/app/input.ts, selection.ts): nothing else may be in the log. */
+/** Commands a key makes (src/app/input.ts, selection.ts): nothing else may be in the log. */
 const KEY_COMMANDS = new Set(["build", "assignUnit", "move", "recall", "hire", "callNight", "key", "backspace", "unlock", "sell", "upgrade"]);
 
 const ui = (page) => page.eval(td("return t.ui();"));
@@ -52,7 +52,7 @@ export default async function (page) {
   await page.send("Page.addScriptToEvaluateOnNewDocument", {
     source: "window.__mouseEvents = 0; for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'click', 'wheel', 'contextmenu']) window.addEventListener(type, () => (window.__mouseEvents += 1), true);",
   });
-  await page.goto(DEV_URL.replace(/\/$/, "") + "/td.html?sandbox=1", { settle: 300 });
+  await page.goto(DEV_URL.replace(/\/$/, "") + "/?sandbox=1", { settle: 300 });
   let ready = false;
   for (let wait = 0; wait < 80 && !ready; wait += 1) {
     ready = (await page.eval(td("return t.ready();"))) === true;

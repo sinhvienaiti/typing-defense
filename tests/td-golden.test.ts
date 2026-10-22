@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createWorld } from "../src/td/sim/world";
+import { createWorld } from "../src/sim/world";
 import { replayHashes, runBot } from "./td/bot";
 import { GOLDEN_EVERY, goldenSpec, readGolden, runGolden } from "./td/golden";
 

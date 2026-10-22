@@ -5,8 +5,8 @@
  * mid-run needs no load. Meanings and IPA come along for the view (BUILD_1A6 §7). Without the shared files (a dev server that does
  * not serve /vocabulary/) a short built-in list keeps the stream playable.
  */
-import { typingText } from "../../logic";
-import { loadVocabularyIndex, loadVocabularyLevel } from "../../vocabulary";
+import { typingText } from "../kit/input";
+import { loadVocabularyIndex, loadVocabularyLevel } from "../kit/vocab";
 import { compileDeck, type Deck } from "../typing/decks";
 
 export const VOCAB_LEVELS = 5;

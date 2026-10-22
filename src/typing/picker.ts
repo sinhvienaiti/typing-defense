@@ -6,7 +6,7 @@
  * counting. A round's rest that fits nowhere now is never dropped: it opens
  * the next round, ahead of the words just dealt. Shuffles draw on the `words` stream.
  */
-import type { RngStream } from "../../platform/rng";
+import type { RngStream } from "../kit/platform/rng";
 import type { Deck } from "./decks";
 import type { Letters, LiveWords } from "./letters";
 

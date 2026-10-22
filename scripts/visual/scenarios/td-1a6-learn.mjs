@@ -8,7 +8,7 @@
 // the learn mode tactically (the tick stands still, the HUD says so) and Space runs it again. Cards are
 // checked at zoom 1 (no overlap, none over the HUD, ≥ 18 px); the log replays on Node to the page's
 // hash. Pictures td-1a6-learn-meaning, td-1a6-learn-quiz, td-1a6-learn-pause. Exits 1 on a failed check.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a6-learn.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-learn.mjs --width=1280 --height=720
 import { KIND, Seen, boot, cardStats, cardSummary, cardsClean, consoleChecks, finish, key, letter, look, out, replayOnNode, sandbox, send, sizeOf, state, td, typeFor, until } from "./td-1a6-common.mjs";
 
 const q = (m) => Math.round(m * 4);

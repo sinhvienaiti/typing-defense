@@ -14,7 +14,7 @@
 // Determinism (gate 2): Node runs the golden bot (scripts/td/golden.ts --check --log) and Chrome steps its
 // log with the page's modules: every 60-tick hash must be Node's, and the golden file must be current;
 // the page's own log (flood included) replays on Node to the page's hash. Picture td-1a6-perf.
-//   URL=http://127.0.0.1:3140/ OUT_DIR=… node scripts/visual/cdp-run.mjs scripts/visual/scenarios/td-1a6-perf.mjs --width=1280 --height=720
+//   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-perf.mjs --width=1280 --height=720
 import { execFileSync } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
@@ -38,11 +38,11 @@ const stats = (list) => {
 
 /** tests/td/perf.ts loadedWorld(300, 0) in the page, from its own modules; then 600 timed steps after 60. */
 const STEP_COST = `(async () => {
-  const { createWorld, step } = await import("/src/td/sim/world.ts");
-  const { placeBuilding } = await import("/src/td/sim/commands.ts");
-  const { addVillager, countNpcs } = await import("/src/td/sim/systems/economy.ts");
-  const { NPC_KIND } = await import("/src/td/sim/stores/npcs.ts");
-  const { loadDeck } = await import("/src/td/app/vocab.ts");
+  const { createWorld, step } = await import("/src/sim/world.ts");
+  const { placeBuilding } = await import("/src/sim/commands.ts");
+  const { addVillager, countNpcs } = await import("/src/sim/systems/economy.ts");
+  const { NPC_KIND } = await import("/src/sim/stores/npcs.ts");
+  const { loadDeck } = await import("/src/app/vocab.ts");
   const { deck } = await loadDeck();
   const w = createWorld({ seed: 1, deck, gold: 5000, wood: 5000 });
   const at = (body) => step(w, [{ ...body, tick: w.tick }]);
@@ -192,9 +192,9 @@ export default async function (page) {
     golden = JSON.parse(readFileSync(goldenFile, "utf8"));
   } catch {}
   const chrome = golden === null ? null : await page.eval(`(async () => {
-    const { createWorld, step } = await import("/src/td/sim/world.ts");
-    const { hashHex } = await import("/src/td/sim/hash.ts");
-    const { compileDeck } = await import("/src/td/typing/decks.ts");
+    const { createWorld, step } = await import("/src/sim/world.ts");
+    const { hashHex } = await import("/src/sim/hash.ts");
+    const { compileDeck } = await import("/src/typing/decks.ts");
     const run = ${JSON.stringify(golden)};
     const deck = compileDeck(run.words.flatMap((texts, index) => texts.map((text, k) => ({ id: "golden-" + (index + 1) + "-" + k, text, level: index + 1 }))));
     const world = createWorld({ seed: run.seed, deck, expected: run.expected, vocab: run.vocab, mode: run.mode });
