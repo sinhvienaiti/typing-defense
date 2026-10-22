@@ -3,7 +3,7 @@
 Lời Gọi (EN "Wordwoven", id `typing-defense`) is a village defense helped by
 typing: villagers and towers call for help, the player types the words on
 their cards, and the village holds the night. Step 1A is a top-down 2D
-sandbox (Canvas 2D, WebAudio, no media). It was split out of Space Typing
+sandbox (Canvas 2D, WebAudio; no media in Git, one optional title painting). It was split out of Space Typing
 (`src/td`) on 23/10/2026 at tag `td-1a6-final`; history before the split is
 kept.
 
@@ -29,6 +29,16 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
 - `src/sim`, `src/typing`, `src/content`: deterministic rules (no clock, no
   host globals, seeded RNG from `src/kit/platform/rng`).
 - `src/app`, `src/view`, `src/ui`: page, input, 2D view, HUD.
+- Theme Miền Văn Điền (SPLIT_PLAN D7): every UI colour, font and paper
+  texture is a token in `src/ui/theme.css`; the 2D map's palette mirrors it
+  (`src/view/debug-2d.ts` COLOR). Title screen `src/ui/title.ts` (painted in
+  SVG; the optional backdrop `/assets/typing-defense/ui/title-dusk.webp` is
+  not in Git), settings `src/ui/settings.ts` (`td.settings`), pause and
+  results cards `src/ui/sheets.ts`. Sound and music are synthesized:
+  `src/view/folk.ts`, `audio-min.ts`, `music.ts`; the list of real files to
+  make is `docs/audio/THEME_SOUND_LIST.md`.
+- The title shows at `/`; a link with `?sandbox=` (the scenarios) skips it,
+  `?title=1` / `?title=0` force it.
 - `src/kit/`: shared kit copied from the parent repo's `shared/game-kit`.
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`.
 - `scripts/td/`: balance report, golden update, Node replay.
@@ -46,6 +56,7 @@ pnpm td:balance          # bot balance report (Markdown)
 pnpm td:golden:check     # golden run must match tests/golden/td-1a.json
 pnpm td:golden:update    # remake the golden after an intended change
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
+OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-theme.mjs --width=1280 --height=720  # title, settings, pause, results
 ```
 
 The dev server serves `/vocabulary/` and `/typing-texts/` read-only from the

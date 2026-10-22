@@ -30,6 +30,7 @@ Instructions for ChatGPT
 | [`03-2d-scenery-ui-vfx-vs.md`](03-2d-scenery-ui-vfx-vs.md) | Cảnh và phông bản đồ 2, 3; chân dung đủ; ảnh trượt Tối Thượng; tranh truyện; atlas Neon; thú nền | VS |
 | [`04-audio.md`](04-audio.md) | Tiếng ngắn, giọng, nhạc bản đồ 1 và câu nhạc ngắn | P, danh sách Sau |
 | [`04-audio-vs.md`](04-audio-vs.md) | Thoại đủ, tiếng quái, vũ khí, nhà, sự kiện, boss, âm nền, nhạc VS | VS |
+| [`05-title-dusk.md`](05-title-dusk.md) | Ảnh nền màn đầu (làng tre lúc hoàng hôn), prompt đã dùng; danh sách âm chủ đề ở `docs/audio/THEME_SOUND_LIST.md` | Chủ đề (D7) |
 
 ## 2. Thứ tự làm
 
