@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createRng } from "../src/kit/platform/rng";
 import { compileAttack } from "../src/content/compile";
+import { COMBAT } from "../src/content/rules";
 import { SLICE_1A } from "../src/content/slice-1a";
 import { hashHex } from "../src/sim/hash";
 import { SOURCE, STAT } from "../src/sim/stats";
@@ -27,11 +28,11 @@ describe("damage (TK 10.1–10.2)", () => {
     expect(damageEnemy(w, wisp, 21.3, 0, SOURCE.tower)).toBe(21);
     expect(damageEnemy(w, serpent, 20, 2, SOURCE.tower)).toBe(20);
     expect(damageEnemy(w, serpent, 0.4, 0, SOURCE.tower)).toBe(1);
-    expect(w.enemies.hp[serpent]).toBe(320 - 8 - 20 - 20 - 1);
+    expect(w.enemies.hp[serpent]).toBe(w.c.enemies[w.enemies.def[serpent]!]!.hp - 8 - 20 - 20 - 1);
     expect(w.stats[STAT.damageTower]).toBe(8 + 20 + 8 + 21 + 20 + 1);
   });
 
-  it("rolls the base on the combat stream and the crit on the crit stream (×1.75)", () => {
+  it("rolls the base on the combat stream and the crit on the crit stream (×COMBAT.critMul)", () => {
     const w = world({ seed: 99 });
     const archer = attackOf(w, "archer");
     const level = archer.levels[0]!;
@@ -45,7 +46,7 @@ describe("damage (TK 10.1–10.2)", () => {
       const base = level.min + twin.combat.float() * (level.max - level.min);
       const crit = twin.crit.chance(0.1);
       const slot = w.projectiles.top - 1;
-      expect(w.projectiles.power[slot]).toBe(base * (crit ? 1.75 : 1));
+      expect(w.projectiles.power[slot]).toBe(base * (crit ? COMBAT.critMul : 1));
       expect(w.projectiles.crit[slot]).toBe(crit ? 1 : 0);
       crits += crit ? 1 : 0;
       w.projectiles.release(slot);
@@ -166,7 +167,7 @@ describe("leaks and determinism", () => {
     enemyAt(w, "thuong-luong", 0, w.lanes[0]!.length - 0.01);
     enemyAt(w, "ma-troi", w.lanes.length - 1, w.lanes[w.lanes.length - 1]!.length - 0.01);
     step(w);
-    expect(w.lives).toBe(20 - 3 - 2);
+    expect(w.lives).toBe(20 - 3 - 1); // Ma Trơi leaks 1 since balance step 4
     expect(w.stats[STAT.leaks]).toBe(2);
     w.lives = 1;
     enemyAt(w, "cuong-thi", 1, w.lanes[1]!.length - 0.01);

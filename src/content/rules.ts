@@ -16,10 +16,10 @@ export const CAP = { soldiers: 64, agents: 4, streamLiveMax: 12, streamLiveMin: 
 
 /** BUILD_1A6 §2: what a mode sets. lifeK scales the clock a word is scored against (TK 6.4's k_L); powerCdS is §4.5's cooldown. */
 export const MODES = {
-  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.75, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
-  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 8, pause: false },
+  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.6, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
+  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false },
   challenge: { dayS: 50, open: 4, typeS: 11, hpMul: 1.15, floorE: 35, lifeK: 0.9, powerCdS: 6, pause: false },
-  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.75, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
+  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.6, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
 } as const;
 /** §2: dawn's length; building at night takes ×1.5 as long. */
 export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
@@ -59,19 +59,19 @@ export const CHAIN = {
  */
 export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
-  sloppy: 0.6, powerLifeS: 6, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.1,
+  sloppy: 1, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.1,
 } as const;
 /** A power word's Word Shot (TK 6.11): D̄ × (0.8 + 1.2·Q) × lenF, lenF = clamp((len + 1)/6; 0.8; 1.2). */
-export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [0.8, 1.2] } as const;
+export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [1.6, 0.4] } as const;
 /** §4.5: power charges of a tower; a power word adds 2, a whole Perfect call 1 more. */
 export const POWER = { max: 5, perWord: 2, perfect: 1 } as const;
 export const RICHNESS = [0.8, 1.0, 1.25] as const;
 
 /** §6: help rings (hero 10 m, helpers 6 m) and the helpers' passive on economy work; idle helpers stand in a row west of the Bastion (TK 23.7). */
-export const AGENT = { heroRingM: 10, helperRingM: 6, passive: 1.5, socketGapM: 1.0, homeSideM: 5.5, homeGapM: 2.4 } as const;
+export const AGENT = { heroRingM: 14, helperRingM: 6, passive: 1.5, socketGapM: 1.0, homeSideM: 5.5, homeGapM: 2.4 } as const;
 
 /** TK 10. Crits multiply by 1.75; armour and resist tiers are 0 / 30 / 60 / 80 %. */
-export const COMBAT = { critMul: 1.75, armorTiers: [0, 30, 60, 80], minDamage: 1, splashHits: ["ground", "low"] } as const;
+export const COMBAT = { critMul: 1.15, armorTiers: [0, 30, 60, 80], minDamage: 1, splashHits: ["ground", "low"] } as const;
 
 /** §3: the run's start; a building's old price G becomes round(0.3 G) wood and the rest gold; a food sale. */
 export const ECONOMY = {

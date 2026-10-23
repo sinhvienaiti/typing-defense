@@ -58,7 +58,8 @@ describe("1A content", () => {
 
   it("holds §2's mode table and §5.1's words a call", () => {
     expect(Object.entries(MODES).map(([mode, m]) => [mode, m.dayS, m.open, m.typeS, m.hpMul, m.floorE, m.pause, m.powerCdS])).toEqual([
-      ["relax", 120, 2, 6, 0.75, 12, true, 12], ["balanced", 75, 3, 8, 1, 20, false, 8], ["challenge", 50, 4, 11, 1.15, 35, false, 6], ["learn", 120, 2, 6, 0.75, 12, true, 12],
+      // Balance step 4: Thư giãn and Học take ×0.6 hit points (a child must hold them, B3), Cân bằng's power cooldown is 9 s.
+      ["relax", 120, 2, 6, 0.6, 12, true, 12], ["balanced", 75, 3, 8, 1, 20, false, 9], ["challenge", 50, 4, 11, 1.15, 35, false, 6], ["learn", 120, 2, 6, 0.6, 12, true, 12],
     ]);
     expect(CALL.words).toEqual({ harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } });
     const c = compile(SLICE_1A);

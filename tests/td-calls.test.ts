@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createRng } from "../src/kit/platform/rng";
-import { CHAIN, FARM, MODES, TREE } from "../src/content/rules";
+import { CALL, CHAIN, FARM, MODES, TREE } from "../src/content/rules";
 import type { Command, CommandBody } from "../src/sim/commands";
 import { hashHex } from "../src/sim/hash";
 import { STAT } from "../src/sim/stats";
@@ -43,7 +43,7 @@ describe("a call's life (§5.2)", () => {
     const first = w.typing.deck.letters[w.typing.deck.start[w.words.word[s]!]!]!;
     expect(w.typing.letters.owner[first]).toBe(s);
     const [chain, gold] = [w.typing.chain, w.gold];
-    goTo(w, 0, 0, 30);
+    goTo(w, 0, -40, 10); // west of the stream, far from every call
     expect([w.calls.bright[c], w.calls.word[c], w.typing.letters.owner[first], w.words.count]).toEqual([0, -1, -1, 0]);
     expect(w.typing.chain).toBe(chain);
     expect(w.gold).toBeGreaterThanOrEqual(gold);
@@ -104,12 +104,12 @@ describe("a call's life (§5.2)", () => {
     w.typing.chain = 8;
     const [gold, pile] = [w.gold, w.buildings.pile[mine]!];
     const word = wordOfCall(w, c);
-    type(w, word[0] + "zzzz" + word.slice(1), 60, true); // sloppy: the chain halves, the word's gold ×0.6
+    type(w, word[0] + "zzzz" + word.slice(1), 60, true); // sloppy: the chain halves, the word's gold ×CALL.sloppy
     expect(w.typing.chain).toBe(4);
     type(w, wordOfCall(w, c), 60, true);
     expect(w.typing.chain).toBe(5);
     expect(w.events.rare.find((event) => event.t === "callEnd")).toMatchObject({ perfect: false });
-    expect((w.gold - gold - pile) / 1000).toBeCloseTo(0.6 + 1, 9);
+    expect((w.gold - gold - pile) / 1000).toBeCloseTo(CALL.sloppy + 1, 9);
   });
 });
 
@@ -216,7 +216,7 @@ describe("the AttentionDirector (§5.3)", () => {
       // A mine call never ends by itself: three ignored far away, dim.
       const mines = [[26, -30], [-12, 32], [-34, 8]].map(([x, z]) => built(w, "gold-mine", x!, z!));
       for (const m of mines) [w.buildings.haulAt[m], w.buildings.pile[m]] = [1e9, 50000];
-      goTo(w, 0, 0, 34); // by the Bastion, 12 m and more from every mine
+      goTo(w, 0, 6, 44); // by the Bastion, more than the hero's ring from every mine
       const far = mines.map((m) => w.buildings.call[m]!);
       expect(far.map((c) => w.calls.bright[c])).toEqual([0, 0, 0]);
       const near = makeCall(w, CALL_KIND.build, 2, -1, 0, -1, -1); // the Bastion's, in the hero's ring
@@ -315,12 +315,12 @@ describe("work by hand and by typing (§5.1)", () => {
     expect(w.events.rare.find((event) => event.t === "callEnd")).toMatchObject({ perfect: true, finished: true });
   });
 
-  it("a sloppy word pushes the work ×0.6", () => {
+  it("a sloppy word pushes the work ×CALL.sloppy (×1 since balance step 4: the pace k already prices accuracy)", () => {
     const { w, c, tree } = chopping();
     const before = w.trees.progress[tree]!;
     const word = wordOfCall(w, c);
     type(w, word[0] + "zzzz" + word.slice(1), 60, true);
-    expect(w.trees.progress[tree]! - before).toBeCloseTo(0.6 / 4 + 1 / T(TREE.chopS), 9);
+    expect(w.trees.progress[tree]! - before).toBeCloseTo(CALL.sloppy / 4 + 1 / T(TREE.chopS), 9);
   });
 
   it("a harvest typed whole and Perfect brings 5 food and 3 more", () => {

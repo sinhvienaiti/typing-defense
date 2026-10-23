@@ -88,12 +88,13 @@ describe("orders (TK 5.1, 8.3; BUILD_1A6 §6)", () => {
 });
 
 describe("help rings (BUILD_1A6 §6)", () => {
-  it("light what lies within 10 m of the hero or 6 m of a helper whose slot is open", () => {
+  it("light what lies within AGENT.heroRingM (14 m since balance step 4) of the hero or 6 m of a helper whose slot is open", () => {
     const w = field(2);
     goTo(w, 0, 0, 0);
-    goTo(w, 1, 20, 20);
-    expect([inRing(w, 9.9, 0), inRing(w, 0, -10), inRing(w, 10.1, 0)]).toEqual([true, true, false]);
-    expect([inRing(w, 25.9, 20), inRing(w, 26.1, 20)]).toEqual([true, false]);
+    goTo(w, 1, 30, 20);
+    const r = AGENT.heroRingM;
+    expect([inRing(w, r - 0.1, 0), inRing(w, 0, -r), inRing(w, r + 0.1, 0)]).toEqual([true, true, false]);
+    expect([inRing(w, 35.9, 20), inRing(w, 36.1, 20)]).toEqual([true, false]);
     // A helper whose slot is closed is inside the Bastion: its ring lights nothing.
     w.agents.x[2] = -30;
     w.agents.z[2] = 30;

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { COMBAT, MODES, POWER } from "../src/content/rules";
+import { CALL, COMBAT, MODES, POWER, REWARD } from "../src/content/rules";
+import { SLICE_1A } from "../src/content/slice-1a";
 import { STAT } from "../src/sim/stats";
 import { CALL_KIND, CALL_STATE } from "../src/sim/stores/calls";
 import { PROJECTILE } from "../src/sim/stores/projectiles";
@@ -40,7 +41,7 @@ function power(w: World, b: number, text: string, errors = 0) {
 }
 
 describe("power words (§4.5)", () => {
-  it("fire a Word Shot at once, D̄ × (0.8 + 1.2·Q) × lenF; Perfect and Flash always crit, with no draw; +2 charges, +1 for a whole Perfect call", () => {
+  it("fire a Word Shot at once, D̄ × (q0 + q1·Q) × lenF; Perfect and Flash always crit, with no draw; +2 charges, +1 for a whole Perfect call", () => {
     const w = world({ deck, gold: 1000 });
     const archer = built(w, "archer", -16, -4);
     const target = enemyNear(w, "thuong-luong", -16, -4);
@@ -51,8 +52,9 @@ describe("power words (§4.5)", () => {
     const fired = shots(w);
     expect(fired.length).toBe(1); // one target in reach (it could pierce to a second)
     const p = fired[0]!;
-    expect(w.projectiles.power[p]).toBeCloseTo(shotPower(7.5, 5, score.quality) * COMBAT.critMul, 9);
-    expect(shotPower(7.5, 5, score.quality)).toBeCloseTo(7.5 * (0.8 + 1.2 * score.quality) * lenF(5), 12);
+    const dBar = SLICE_1A.buildings.find((b) => b.id === "archer")!.shot!.dBar[0];
+    expect(w.projectiles.power[p]).toBeCloseTo(shotPower(dBar, 5, score.quality) * COMBAT.critMul, 9);
+    expect(shotPower(dBar, 5, score.quality)).toBeCloseTo(dBar * (REWARD.shotQ[0] + REWARD.shotQ[1] * score.quality) * lenF(5), 12);
     expect([w.projectiles.crit[p], w.rng.crit.state, w.projectiles.target[p]]).toEqual([1, crits, w.enemies.id(target)]);
     expect(w.stats[STAT.wordShots]).toBe(1);
     expect(w.buildings.charges[archer]).toBe(POWER.perWord + POWER.perfect);
@@ -85,8 +87,10 @@ describe("power words (§4.5)", () => {
     while (w.enemies.burnUntil[target] === 0) run(w, 1);
     const hp = w.enemies.hp[target]!;
     run(w, 130);
-    expect(hp - w.enemies.hp[target]!).toBeGreaterThanOrEqual(5);
-    expect(hp - w.enemies.hp[target]!).toBeLessThanOrEqual(6);
+    // Burning is true damage at the hero's dps (50 since balance step 4), so ~2.17 s of it.
+    const dps = SLICE_1A.hero.burn.dps;
+    expect(hp - w.enemies.hp[target]!).toBeGreaterThanOrEqual(Math.floor((dps * 130) / 60) - 1);
+    expect(hp - w.enemies.hp[target]!).toBeLessThanOrEqual(Math.ceil((dps * 130) / 60));
   });
 
   it("the Bastion's power word is a crossbow volley at one target more", () => {
@@ -139,7 +143,7 @@ describe("power calls (§4.5)", () => {
     return { w, archer };
   };
 
-  it("come only at night, with an enemy in reach, under 5 charges, past the mode's cooldown: 1 word that lives 6 s", () => {
+  it("come only at night, with an enemy in reach, under 5 charges, past the mode's cooldown: 1 word that lives CALL.powerLifeS", () => {
     const day = world({ deck, gold: 1000 });
     const tower = built(day, "archer", -16, -4);
     enemyNear(day, "thuong-luong", -16, -4);
@@ -161,24 +165,25 @@ describe("power calls (§4.5)", () => {
     hold(1);
     const c = w.buildings.call[archer]!;
     const born = w.calls.born[c]!;
-    expect([w.calls.kind[c], w.calls.words[c], w.calls.expire[c]! - born, w.calls.state[c]]).toEqual([CALL_KIND.power, 1, T(6), CALL_STATE.open]);
-    // Not typed: it ends at 6 s, costing nothing; the next comes once the cooldown (8 s from the last) is over.
+    expect([w.calls.kind[c], w.calls.words[c], w.calls.expire[c]! - born, w.calls.state[c]]).toEqual([CALL_KIND.power, 1, T(CALL.powerLifeS), CALL_STATE.open]);
+    // Not typed: it ends at CALL.powerLifeS (9 s), costing nothing; the next comes once the cooldown (9 s from the last) is over.
     const chain = w.typing.chain;
-    hold(T(6));
+    hold(T(CALL.powerLifeS));
     expect([w.calls.used[c], w.buildings.call[archer], w.typing.chain]).toEqual([0, -1, chain]);
     let again = -1;
     for (let k = 0; k < T(10) && again < 0; k += 1) {
       hold(1);
       if (w.buildings.call[archer]! >= 0) again = w.calls.born[w.buildings.call[archer]!]!;
     }
-    expect(again - born).toBe(T(MODES.balanced.powerCdS));
+    // The call closes on the tick it runs out, after the towers' step: with a 9 s life and a 9 s cooldown the next comes a tick later.
+    expect(again - born).toBe(Math.max(T(MODES.balanced.powerCdS), T(CALL.powerLifeS) + 1));
     w.buildings.charges[archer] = POWER.max;
     closeAll(w);
     hold(T(10));
     expect(w.buildings.call[archer]).toBe(-1); // full
   });
 
-  it("a locked power word outlives the 6 s until it is typed", () => {
+  it("a locked power word outlives its life (CALL.powerLifeS) until it is typed", () => {
     const { w, archer } = night();
     goTo(w, 0, -16, 0);
     const e = enemyNear(w, "thuong-luong", -16, -4);

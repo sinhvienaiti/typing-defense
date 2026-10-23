@@ -3,7 +3,7 @@
  * (every standard bot × Thư giãn, Cân bằng, Thử thách × --stage-seeds seeds, worker threads; the §3 metrics, B1–B9
  * and the profiles the game measures), then the R3 report (tests/td/balance.ts) with the §12 gate table, as Markdown.
  * Never fails a build (tests/td-balance-gates.test.ts and tests/td-flow.test.ts do).
- *   node --import tsx scripts/td/balance.ts [--seeds=5] [--nights=4] [--stage-seeds=40]
+ *   node --import tsx scripts/td/balance.ts [--seeds=5] [--nights=4] [--stage-seeds=120]
  */
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
@@ -13,7 +13,7 @@ import { realDeck } from "../../tests/td/typing";
 
 const arg = (name: string, fallback: number): number => Number(process.argv.find((a) => a.startsWith("--" + name + "="))?.split("=")[1] ?? fallback);
 const started = performance.now();
-const seeds = arg("stage-seeds", 40);
+const seeds = arg("stage-seeds", 120);
 const specs = matrixCells();
 const threads = Math.max(1, Math.min(specs.length, availableParallelism() - 1));
 const shares = Array.from({ length: threads }, (_, t) => specs.filter((_, k) => k % threads === t));
