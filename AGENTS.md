@@ -16,6 +16,9 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/TYPING_DEFENSE_DESIGN.md` (TK): the full design.
 - `docs/td/BUILD_NOW.md` (1A), `docs/td/BUILD_1A6.md` (1A.6), `docs/td/BUILD_NOTES.md`
   (milestone, line budget), `docs/td/CALLS_V3_1_PLAN.md`.
+- `docs/td/BUILD_1B.md` (1B, written after the split, so its paths are current):
+  map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
+  ceiling 10,500, balance targets and gates.
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
