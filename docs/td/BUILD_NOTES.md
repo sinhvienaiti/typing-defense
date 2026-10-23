@@ -43,7 +43,7 @@ Mốc đang làm: **1B.R1**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.5 Bot, báo cáo (xong) | 41 thật (mục 1.11): op hộp cát `flood` (TK 25.12) ở `spawn.ts` +19 và `commands.ts` +6, đo khung ở `main.ts` +16; bot, chính sách, báo cáo nằm ở `tests/` và `scripts/` | 40 | 5.500 |
 | 1A.6 Lời Gọi (R1, R2, R3 xong; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4); R3 6.012 (mục 5); tách repo và chủ đề Văn Điền: 7.064 | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
-| 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → (ghi ở mục 7.1) | 1.351 | 8.850 |
+| 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1) | 1.351 | 8.850 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -766,3 +766,73 @@ Muốn thắng 83 % mà Biên S 50 % thì 15 % ván phải sập hẳn trong khi
 - Thử thách: thắng 57–82 % (Chậm chắc 82 % ở bộ 2); Biên S 10–15 % ở Mới, Chuẩn, Ẩu (dải 15–45 %).
 - Thư giãn: bot Mới tới Nhanh thắng 99–100 %, Biên S 85–100 %, Nhàn I 5–8 %: trong dải. Bot Trẻ em thắng 92–98 % nhưng Biên S 50–53 %.
 - Muốn tách hẳn thắng và Biên S cần một quyết định thiết kế (ví dụ một đỉnh trùm cuối Đêm 5 có báo trước, hay Lũy có hồi mạng giữa các đêm), không chỉ đổi số.
+
+## 7. 1B "Mộc Tinh tới làng" (`BUILD_1B.md`)
+
+### 7.1 R1 "Mộc Tinh tới" (24/10/2026)
+
+Changelog: `docs/changelog/2026-10-24-td-1b-r1.md`.
+
+**Đã làm (theo §17 R1):**
+
+1. **Ải truyện** `w1-silverfall`: 5 Ngày, 5 Đêm, pha `victory` (sim dừng), sao (18–20 mạng: 3; 6–17: 2; 1–5: 1), lịch mở (`stage.unlock`: Trại Lính Ngày 2; Mỏ, Tháp Pháo, Lũy cấp 2 Ngày 3; nâng cấp Ngày 4; Lũy cấp 3 Ngày 5; lý do từ chối `locked`). Màn đầu "Bắt đầu" vào truyện; hộp cát bằng `?sandbox=1`.
+2. **Mộc Tinh** (`src/sim/systems/boss.ts`, kho `src/sim/stores/boss.ts`, vào mã băm): báo đầu Ngày 5 kèm nhánh (luồng `spawn`); lặng 12 s (chỉ Bắn mạnh được sáng; bộ điều nhịp đứng yên; không tinh anh); 2 toán × 4 Cương Thi ra ở Khe Nứt, 6 s sau boss trồi trên nhánh đã báo; không bị chặn, dừng cách Lũy 1,5 m; Vỏ dày; Cháy ×1,25; Rễ Trồi (tê 3 s, không trừ máu; nhà tê không tự bắn, không tạo lời gọi mới, không sản xuất; Phát Chữ của lời gọi đang có vẫn bắn); Quật cành (cung 120°, 40–60, đẩy lùi 1,5 m); choáng ở 70 % (5 s đứng yên, Dễ Tổn Thương ×1,25, xóa mọi tê, lời gọi Dồn lửa 1 từ ≤ trần SÁNG, nhà đánh trong vòng giúp gần boss trước; Phát Chữ của Dồn lửa nhắm boss); Mầm Gỗ ở pha 2; Quật Lũy −3 mạng; rút ở 50 % (rương 150 Vàng ghi một lần), 2 s sau mọi quái còn lại tan, `victory`. Lệnh hộp cát `boss`, `skipTo`.
+3. **Nâng Lũy bằng tiền** qua thợ xây (13,5 s, lời gọi Xây 3 từ; mở thêm một người và một thợ), `keepMax` 3 ở truyện; **bán 60 %** tổng đã chi (`spentGold`, `spentWood`), hoàn tác 5 s giữ nguyên; HUD bán bấm hai lần trong 3 s (nút, hoặc Shift + Delete).
+4. **Bản vẽ và tiếng** (`src/view/boss-2d.ts`, `audio-min.ts`, `folk.ts`, `music.ts`): mạch rễ trên nhánh boss, vết nứt bò 12 s, đất phồng rồi boss nhô lên (vượt 6 %), thân nhún và tán trễ nửa nhịp, ngả ra sau trước Quật cành và vượt đà sau, vòng son có sọc quét đúng thời gian báo dưới nhà bị nhắm, gai rễ, dấu "Tê N s", sao và vòng "Dễ Tổn Thương", trời ngả hổ phách, mầm nhú, chìm khi rút, số Phát Chữ lớn xanh ngọc, số cầu lửa nhỏ xám, chip "Cháy ×1,25". Thanh boss ở đỉnh giữa (máu, vạch 70 % và 50 %, "còn N m tới Lũy", đếm ngược lúc lặng), một dải chữ dưới nó; bản đồ dời xuống dưới thanh boss từ lúc báo. Hai hàng boss của bảng dạy (`src/ui/tips.ts`). Màn kết: sao đóng dấu, gợi ý thua theo số của ván, "Từ cần ôn", **Chơi lại Ngày n**, **Chép số chơi thử**.
+5. **Bot:** chơi ải truyện, nâng Lũy bằng lệnh, Tướng ở đỉnh boss (`heroBoss`), Tháp Cung thêm bên nhánh boss ở Ngày 5 cho Tốt (`bossArcher`), `no-type@kite` cho B5; báo cáo thêm bảng boss, bảng tách hai số, bảng gộp hai bộ seed và B1–B9 trên bộ gộp.
+6. **Cân bằng vòng 1** theo §6.5 (số ở dưới).
+7. **File vàng:** `td-1a.json` làm lại; thêm `td-1b-boss.json`.
+8. **Kịch bản** `td-1b-boss`, `td-1b-night5`, `td-1b-build`, `td-1b-perf`.
+
+**Lệch so với spec (có lý do):**
+
+- `BossDef` không có `hp`: máu gốc là `hp` của quái `moc-tinh`, một nguồn số.
+- Lũy nâng bằng `upgrade` với id thật của Lũy (ô 0, thế hệ 1: id 1024), không phải số 0.
+- **Hộp cát cũng có "Chơi lại Ngày n"** (§4.3 ghi một nút; kịch bản `td-1b-night5` của §19 cần nút này sau `skipTo`).
+- Thân boss vẽ 1,3 lần bán kính thân (≈ 6,5 m bề ngang, spec ~5 m): ở 1280 × 720 thân 5 m chỉ ~30 px và hay nằm dưới thẻ chữ của tháp bên cạnh.
+- Dồn lửa: Phát Chữ của lời gọi này nhắm boss nếu boss trong tầm (không thì quái đi xa nhất như thường), để lời gọi đúng là "dồn lửa".
+- Chế độ của ván đặt lúc tick 0 (`setMode`), không qua lệnh hộp cát; `?learn=1` chạy được ở truyện, `flags().mode` và file chạy lại mang chế độ.
+- `flood` (thử tải) có Mầm Gỗ, không bao giờ có boss. Thêm thống kê `burstTyped` (từ gõ trên lời gọi Dồn lửa, cho gợi ý thua).
+- Bot: Tướng đánh nốt quái phần đầu Đêm 5 rồi mới tới nhà boss sắp vào tầm (spec: từ lúc lặng). Đo: bỏ đi lúc toán Thuồng Luồng còn ở khúc nhập thì 3–5 con lọt (9–15 mạng), ván thua vì phần đầu chứ không vì boss.
+- Bot ở truyện: bước chưa mở mà mai mở thì để dành tiền; mở xa hơn thì các bước sau đi tiếp (giữ thứ tự, không bỏ bước). Bố cục chuẩn dời Lũy cấp 3 ra sau nâng Tháp Cung khúc nhập, Tháp Cung tây, nâng Tháp Pháo (Lũy cấp 3 chỉ mở Ngày 5). Đo trước khi sửa: chờ cứng thì cả Ngày 4 bỏ không; đi tiếp tham lam thì không nâng Lũy nổi trước Đêm 4 (cổng §12 hỏng).
+- Số dòng: cộng dồn 8.829 (trần R1 8.850). Từng file vượt cột §16: `sim/systems/boss.ts` 331 (≤ 300), `view/boss-2d.ts` 417 (≤ 320; giữ cả hạt có pool mà §16 để `fx-2d.ts` ở R2).
+
+**Cân bằng vòng 1 (§6.5; số trong `slice-1a.ts`):**
+
+| Núm | Trước | Sau | Lý do (đo) |
+|---|---|---|---|
+| Máu Mộc Tinh | 3.200 | 3.400 | Theo bot Chuẩn ~85 % (§6.5 bước 1). 80 seed: 3.300 → Chuẩn 87,5 %, 3.500 → 82,5 % |
+| Tốc Mộc Tinh | 0,9 m/s | 0,8 m/s | G3: giao chiến p50 của bot Chuẩn 40 s ở 0,9; 50 s ở 0,8 |
+| `emergeM` | 20 m | 25 m | G8: trồi → trúng đầu p50 38 s ở 0,8 m/s; 24–32 s ở 25 m |
+| `heroMul` (Vỏ dày) | 0,5 | 0,35 | B5: `no-type@kite` gây ~1.050–1.260 ở 0,8 m/s, gần mức phải gỡ; §23: hạ `heroMul` trước núm khác |
+| Thuồng Luồng phần đầu Đêm 5 | 5 (một toán) | 4 (một toán) | §6.5 bước 2: toán 5 con lọt 3–5 con khi boss tới khúc nhập, Biên S 25–35 % |
+| `kHp` | 0,4 / ×1,12 | 0,4 / ×1,12 | Thử 0,6 / ×1,18: Khá, Nhanh tụt dưới Chuẩn; trả về |
+
+Đầu dò ngoài báo cáo (`scripts/td/boss-tune.ts`, 30–40 seed mỗi lần, Cân bằng): boss "bất tử" cho phân bố sát thương; bot Chuẩn kế hoạch cũ (chờ cứng) chỉ gây p50 ~1.000–1.300; lịch mở là núm lớn nhất (mở hết từ Ngày 1: Chuẩn 83 %, mạng trước đỉnh 19; theo lịch: 53 %, 14).
+
+**Báo cáo `pnpm td:balance --stage-seeds=40 --stage-sets=2 --threads=6` (149 s)**, Cân bằng, gộp 80 ván mỗi ô:
+
+| Bot | Thắng bộ 1 / bộ 2 / gộp | Biên S gộp | Đích chặt 78–88 %, 40–60 % |
+|---|---|---|---|
+| Mới | 68 / 90 / 79 % | 48 % | đạt |
+| Chậm chắc | 93 / 90 / 91 % | 50 % | trượt (thắng cao) |
+| Chuẩn | 83 / 80 / 81 % | 40 % | đạt (sát mép S) |
+| Khá | 73 / 75 / 74 % | 35 % | trượt |
+| Ẩu | 70 / 68 / 69 % | 30 % | trượt |
+| Nhanh | 93 / 88 / 90 % | 40 % | trượt (thắng cao) |
+| Chuẩn Tốt / Kém | 89 % / 38 % | 55 % / 0 % | B6 Cân bằng đạt |
+| Không gõ, `no-type@kite` | 0 % / 0 % (boss rút 0/80) | 0 % | B5 đạt |
+
+Bảng boss (Chuẩn, Cân bằng, bộ 1): tới boss 40/40, rút 83 %, trồi → trúng đầu p50 32 s (G8 đạt), giao chiến p50 50 s (G3 đạt), rút ở 73 % đường, mạng mất ở đỉnh p50 6,5, phần gõ 51 %, phần Draconis 16 %, Nhàn I đỉnh boss 3 %. Cổng gộp: B1 trượt (Chậm chắc, Khá, Ẩu), B2 đạt, B3 trượt (Trẻ em Thư giãn 74 %), B4 nửa trượt (S Chậm chắc 50 % > Ẩu 30 %; hạ quái 21,60 s vs 21,41 s), B5 đạt, B6 trượt ở Thử thách (23 % vs 15 %), B7 đạt, B8 đạt, B9 thiếu số. Thử thách: mọi bot 25–41 % (dải 50–75 %). Thư giãn: Mới tới Nhanh 100 %, Trẻ em 74 %. Cổng §12 trên ải truyện: 4, 5a (7,95 s), 5b (30,6 %), 5c (20,8 %), 6, 7 (+41,1 %) đạt.
+
+**File vàng:** `td-1a.json` nội dung `ef790fee`, 19.098 tick, 318 mã băm, 336 lệnh (trước `bf0c4da8`, 18.136, 302, 334): trạng thái mới vào mã băm (kho boss, cột nhà, quái, lời gọi, thống kê), và bot hộp cát nâng Lũy qua thợ xây thay vì đặt cấp ngay. `td-1b-boss.json` mới: hộp cát, Đặt sẵn (tháp cấp 3, Lũy cấp 4), gọi boss ở tick 2, tay 35 WPM; 4.811 tick, 80 mã băm, boss rút với 1.946 sát thương, 20 mạng.
+
+**Kiểm:** `tsc`, 267 test (24 file), `vite build` (JS gzip 80,6 kB), `verify-kit` đạt. Kịch bản ở 1280 × 720 (máy chủ dev cổng 3046): `td-1b-boss`, `td-1b-night5` (Chơi lại Ngày 5: mã băm khớp `9fd0a328`), `td-1b-build`, `td-1b-perf` (vẽ p95 0,5 ms, luồng chính 0,59 ms mỗi khung, 306 quái) đạt, 0 lỗi console; nhật ký trang chạy lại trên Node ra cùng mã băm. Cỡ 1920 × 1080 và kịch bản cũ chưa chạy lại ở đợt này.
+
+**Còn mở cho đợt sau:**
+
+- Khoảng cách giữa các bot ở Cân bằng ~22 điểm (Ẩu 69 %, Khá 74 % so với Chậm chắc 91 %, Nhanh 90 %): một số máu boss không đưa cả sáu bot vào 78–88 %. Hướng: §6.5 bước 5 (máu Thuồng Luồng, Cháy) cho Ẩu; xem vì sao Khá (k 1,2) thua Chuẩn.
+- Thử thách quá khó (25–41 %), Trẻ em ở Thư giãn 74 % (B3 ≥ 85 %). Cần quyết định có cho boss hệ số máu riêng theo chế độ hay không (hiện chỉ nhân `hpMul` của chế độ).
+- Phần đầu Đêm 5: 4 Thuồng Luồng một toán vẫn là chỗ mất mạng chính ở đỉnh boss (con nào còn ở khúc nhập lúc boss tới thì lọt khi Quật cành hất lính).
+- Hình R1: thân boss hay bị thẻ chữ của tháp bên cạnh che (thẻ luôn trên cùng là luật); dải chữ hai dòng lúc báo Ngày 5 che một phần Khe Nứt ở 1280 × 720.
+
