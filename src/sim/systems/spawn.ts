@@ -3,7 +3,7 @@
  * gate, spread across the road by the spawn stream, with the mode's hit
  * points (BUILD_1A6 §2).
  */
-import { MODES } from "../../content/rules";
+import { MODES, PACE } from "../../content/rules";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
 import type { World } from "../world";
@@ -21,9 +21,13 @@ export function spawnEnemies(w: World): void {
     const flying = def.altitude > 0;
     const spread = flying ? 1 : Math.max(0, w.map.roadHalfM - def.radius);
     const lateral = (w.rng.spawn.float() * 2 - 1) * spread;
-    const slot = E.add(next.enemy, maxHp(w, next.enemy), def.altitude, next.route, next.wave, lateral);
+    const elite = w.pace.elite > 0 ? 1 : 0;
+    const slot = E.add(next.enemy, Math.round(maxHp(w, next.enemy) * (elite === 1 ? PACE.eliteHp : 1)), def.altitude, next.route, next.wave, lateral);
     w.waveLeft[next.wave]! -= 1;
     if (slot >= 0) {
+      w.pace.elite -= elite;
+      E.elite[slot] = elite;
+      E.born[slot] = w.tick;
       w.waveAlive[next.wave]! += 1;
       w.lanes[next.route]!.point(0, lateral, spot);
       E.x[slot] = spot.x;
@@ -45,6 +49,7 @@ export function flood(w: World, n: number): void {
     const slot = E.add(def.index, maxHp(w, def.index), def.altitude, route, w.wave, (((k * 0.618034) % 1) * 2 - 1) * spread);
     if (slot < 0) return;
     E.dist[slot] = (w.lanes[route]!.length * (k + 0.5)) / (2 * n);
+    E.born[slot] = w.tick;
     w.lanes[route]!.point(E.dist[slot]!, E.lateral[slot]!, spot);
     E.x[slot] = spot.x;
     E.z[slot] = spot.z;

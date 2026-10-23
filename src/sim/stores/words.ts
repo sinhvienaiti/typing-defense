@@ -20,6 +20,8 @@ export class WordStore extends Slots {
   /** Key times (ms) of its first and last letter, for the raw typing speed. */
   readonly firstMs = new Float64Array(this.cap);
   readonly lastMs = new Float64Array(this.cap);
+  /** The tick of its first letter: the time it took to see it (BALANCE.md §2 factor 5). */
+  readonly firstTick = new Int32Array(this.cap);
 
   add(word: number, call: number, kind: number, tier: number, tick: number, life: number): number {
     const slot = this.take();

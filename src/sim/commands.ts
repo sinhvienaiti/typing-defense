@@ -11,13 +11,15 @@ import type { Mode } from "../content/types";
 import { routeBackspace } from "../typing/router";
 import { CELL } from "./nav/grid";
 import { canPlace } from "./placement";
+import { STAT, bump } from "./stats";
 import { PLOT } from "./stores/buildings";
 import { NPC_KIND, TASK } from "./stores/npcs";
 import { moveAgent, orderAgent, recallAgent, releaseBuilding, reroute, slotsOpen } from "./systems/agents";
 import { closeCall, closeCallsOf, configureDeck, typeKey } from "./systems/calls";
 import { addVillager, countNpcs, finishSite, releaseNpc, staffBuilders, villagerCap } from "./systems/economy";
+import { setPaceMode } from "./systems/pace";
 import { flood } from "./systems/spawn";
-import { callNight, startNight } from "./systems/waves";
+import { callNight, dayTicks, startNight } from "./systems/waves";
 import type { World } from "./world";
 
 export type SandboxOp =
@@ -192,11 +194,15 @@ function run(w: World, command: Command): string | null {
     case "key":
       return typeKey(w, command.letter, command.atMs);
     case "backspace":
+      bump(w.stats, STAT.backspaces);
       routeBackspace(w.typing.router, w.words);
       return null;
     case "unlock":
-      // Esc drops the half-typed word, its errors uncounted (plan §8 Q6): typed again, it starts clean.
-      if (w.typing.router.lock >= 0) w.words.typed[w.typing.router.lock] = w.words.errors[w.typing.router.lock] = 0;
+      // Esc drops the half-typed word, its errors uncounted (plan §8 Q6): typed again, it starts clean. A dropped lock (BALANCE.md §3 O).
+      if (w.typing.router.lock >= 0) {
+        w.words.typed[w.typing.router.lock] = w.words.errors[w.typing.router.lock] = 0;
+        bump(w.stats, STAT.abandons);
+      }
       w.typing.router.lock = -1;
       w.typing.router.group = -1;
       return null;
@@ -222,8 +228,9 @@ function sandbox(w: World, op: SandboxOp): string | null {
     case "mode":
       if (!MODE_IDS.includes(op.value)) return "badValue";
       // The running day takes the new mode's length, the time gone kept (review R1).
-      if (w.phase === "day") w.phaseEnd = Math.max(w.tick + 1, w.phaseEnd + ticks(MODES[op.value].dayS) - ticks(MODES[w.mode].dayS));
+      if (w.phase === "day") w.phaseEnd = Math.max(w.tick + 1, w.phaseEnd + dayTicks(op.value, w.pace.k) - dayTicks(w.mode, w.pace.k));
       w.mode = op.value;
+      setPaceMode(w);
       configureDeck(w); // E's floor follows the mode
       return null;
     case "expected":

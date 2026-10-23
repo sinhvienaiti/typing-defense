@@ -112,6 +112,21 @@ export const RALLY = { radiusM: 12, roadMaxM: 3 } as const;
 /** §10 "Đặt sẵn": Bastion level, villagers, how many trees nearest the Bastion are marked; the farm's plots (stage, work) so it shows every stage at once. */
 export const PRESET = { keepLevel: 3, villagers: 5, marks: 8, plots: [[2, 0], [1, 0.7], [1, 0.3], [0, 0]] } as const;
 
+/**
+ * Balance step 4 (docs/games/BALANCE.md §4, §9.2). Pace k (the run header, 0.75–1.30) divides the night's pack gaps,
+ * the day (the wave clock) and the day's call clocks (a quiz, a mine's half-full call), and enemies walk at
+ * 1 + speedK·(k − 1) (spawn gaps alone barely moved a night, the other way at that: docs/changelog/2026-10-23-balance.md).
+ * An enemy within dangerM of the Bastion is danger (buildings and villagers cannot be hurt in 1A.6); the director
+ * judges a night once a foe is within engageM. Step tables: at night spawn ±7 %, one elite affix (hit points
+ * ×eliteHp at spawn), the peak and the lull ±3 s, a support drop near defeat (+supportLives lives, once a night);
+ * by day only the call clocks ±7 %, against a band without pressure (no enemy comes by day).
+ */
+export const PACE = {
+  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 3, mineCallMin: 0.25, speedK: 0.25,
+  night: { up: ["spawn", "elite", "peak", "lull"], down: ["support", "spawn", "lull", "peak", "elite"], spawnStep: 70, eliteCost: 30, peakTicks: 180, lullTicks: 180 },
+  day: { up: ["spawn"], down: ["spawn"], spawnStep: 70, eliteCost: 0, peakTicks: 0, lullTicks: 0 },
+} as const;
+
 /** TK 14.2: what each tier's gold and leak may be. */
 export const TIERS = {
   swarm: { gold: [1, 4], leak: [1, 1], weight: [1, 1] },

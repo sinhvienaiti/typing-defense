@@ -245,7 +245,9 @@ function finishWord(w: World, s: number): void {
   if (top) bump(w.stats, STAT.wordsPerfect);
   if (score.grade === "sloppy") bump(w.stats, STAT.wordsSloppy);
   bump(w.stats, STAT.rawWpmSum, rawWpm(len, W.firstMs[s]!, W.lastMs[s]!));
-  w.events.rare.push({ t: "wordHit", tick: w.tick, word: W.id(s), call: C.id(c), grade: score.grade, errors: W.errors[s]!, quality: score.quality });
+  // What the skill profile reads (BALANCE.md §2): letters, first to last key, ticks to the first; familiarity 0 known, 1 learning (a quiz), 2 new (the top level).
+  const fam = C.kind[c] === CALL_KIND.quiz ? 1 : w.vocab > 1 && w.typing.deck.level[word] === w.vocab ? 2 : 0;
+  w.events.rare.push({ t: "wordHit", tick: w.tick, word: W.id(s), call: C.id(c), grade: score.grade, errors: W.errors[s]!, quality: score.quality, len, ms: W.lastMs[s]! - W.firstMs[s]!, wait: W.firstTick[s]! - W.born[s]!, fam });
   dropWord(w, s);
   // A job this word finished ends at its worker's step this tick (economy.ts), with its yield and the bonus.
   if (work(w, c, score.grade === "sloppy" ? CALL.sloppy : 1, word, len, score.quality, top)) {
@@ -273,7 +275,7 @@ export function typeKey(w: World, letter: number, atMs: number): string | null {
   const result = routeKey(T.router, T.deck, T.letters, W, letter);
   const s = result === KEY.done ? before : T.router.lock;
   if (result === KEY.stray || result === KEY.wrong || result === KEY.switch) bump(w.stats, result === KEY.stray ? STAT.strays : STAT.keyErrors);
-  if (s >= 0 && (s !== before || (result === KEY.advance && W.typed[s] === 1))) W.firstMs[s] = atMs; // its first letter: the lock came with this key, or it came locked
+  if (s >= 0 && (s !== before || (result === KEY.advance && W.typed[s] === 1))) [W.firstMs[s], W.firstTick[s]] = [atMs, w.tick]; // its first letter: the lock came with this key, or it came locked
   if (result === KEY.lock || result === KEY.switch || result === KEY.advance || result === KEY.done) W.lastMs[s] = atMs;
   w.events.rare.push({ t: "wordKey", tick: w.tick, word: s >= 0 ? W.id(s) : -1, result });
   if (result === KEY.done) finishWord(w, s);

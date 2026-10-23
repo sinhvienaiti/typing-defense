@@ -8,7 +8,7 @@
  * there first, and a worker within 6 m of a helper works ×1.5.
  */
 import { ticks } from "../../content/compile";
-import { BUILD, CALL, FARM, MINE, MODES, NPC, PHASE, POWER, RICHNESS, TICK_HZ, TREE, VILLAGERS } from "../../content/rules";
+import { BUILD, CALL, FARM, MINE, MODES, NPC, PACE, PHASE, POWER, RICHNESS, TICK_HZ, TREE, VILLAGERS } from "../../content/rules";
 import { socketCell } from "../placement";
 import { STAT, bump } from "../stats";
 import { CALL_KIND } from "../stores/calls";
@@ -20,6 +20,7 @@ import type { World } from "../world";
 import { passive, slotsOpen, stand, toward, walk, walkTo } from "./agents";
 import { closeCall, endWork, makeCall } from "./calls";
 import { selectTargets } from "./combat";
+import { callScale } from "./pace";
 
 const SOW = ticks(FARM.sowS);
 const GROW = ticks(FARM.growS);
@@ -255,10 +256,10 @@ function mine(w: World, b: number): void {
     w.gold += take;
     bump(w.stats, STAT.goldProduce, take);
   }
-  if (B.call[b]! < 0 && B.pile[b]! >= MINE.callAt * cap) B.call[b] = makeCall(w, CALL_KIND.mine, CALL.words.mine, -1, b, -1, -1);
+  if (B.call[b]! < 0 && B.pile[b]! >= Math.max(PACE.mineCallMin, Math.min(1, MINE.callAt * callScale(w))) * cap) B.call[b] = makeCall(w, CALL_KIND.mine, CALL.words.mine, -1, b, -1, -1);
 }
 
-/** §4.5: at night a tower (or the Bastion) under 5 charges, past its cooldown, with an enemy in reach, calls for power: 1 word, 6 s. */
+/** §4.5: at night a tower (or the Bastion) under 5 charges, past its cooldown, with an enemy in reach, calls for power: 1 word, CALL.powerLifeS. */
 function power(w: World, b: number): void {
   const B = w.buildings;
   const attack = w.c.buildings[B.def[b]!]!.attack!;
@@ -276,7 +277,7 @@ function quizzes(w: World): void {
   for (let a = 1; a < slotsOpen(w); a += 1) {
     const asked = C.live().filter((c) => C.kind[c] === CALL_KIND.quiz);
     if (w.tick < A.quizAt[a]! || asked.length >= w.typing.reviewN || asked.some((c) => C.agent[c] === a)) continue;
-    A.quizAt[a] = w.tick + ticks(CALL.quizEveryS);
+    A.quizAt[a] = w.tick + Math.round(ticks(CALL.quizEveryS) * callScale(w));
     makeCall(w, CALL_KIND.quiz, CALL.words.quiz, -1, -1, -1, -1, -1, a);
   }
 }

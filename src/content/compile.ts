@@ -95,13 +95,13 @@ export function compile(content: Content): Compiled {
   return { content, hash: contentHash(content), buildings, enemies, hero: compileAttack(content.hero.attack), buildingIndex: find(buildings, "building"), enemyIndex: find(enemies, "enemy") };
 }
 
-/** Wave n (from 1). Past the list, the last wave grows by `endlessGrowth` per wave. */
-export function waveSchedule(c: Compiled, wave: number): ScheduledSpawn[] {
+/** Wave n (from 1), its gaps × `gap` (the run's pace, BALANCE.md §4). Past the list, the last wave grows by `endlessGrowth` per wave. */
+export function waveSchedule(c: Compiled, wave: number, gap = 1): ScheduledSpawn[] {
   const { list, endlessGrowth, packGapS, memberGapS } = c.content.waves;
   const base = list[Math.min(wave, list.length) - 1]!;
   const scale = wave > list.length ? 1 + endlessGrowth * (wave - list.length) : 1;
   const member = ticks(memberGapS);
-  const packGap = ticks(packGapS);
+  const packGap = Math.max(1, Math.round(ticks(packGapS) * gap));
   const out: ScheduledSpawn[] = [];
   let at = 0;
   let lane = 0;

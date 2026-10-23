@@ -24,6 +24,9 @@ export class EnemyStore extends Slots {
   /** Burning until this tick (TK 10.3); damage not yet whole. */
   readonly burnUntil = new Int32Array(this.cap);
   readonly burnAcc = new Float64Array(this.cap);
+  /** The tick it came in; an elite affix of the pace director (BALANCE.md §4.2: hit points ×PACE.eliteHp). */
+  readonly born = new Int32Array(this.cap);
+  readonly elite = new Uint8Array(this.cap);
 
   add(def: number, hp: number, altitude: number, route: number, wave: number, lateral: number): number {
     const slot = this.take();

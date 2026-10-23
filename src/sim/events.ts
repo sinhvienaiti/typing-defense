@@ -50,7 +50,8 @@ export type RareEvent = { tick: number } & (
   | { t: "callEnd"; call: number; kind: number; perfect: boolean; finished: boolean }
   | { t: "wordSpawn"; word: number; call: number }
   | { t: "wordKey"; word: number; result: number }
-  | { t: "wordHit"; word: number; call: number; grade: Grade; errors: number; quality: number }
+  | { t: "wordHit"; word: number; call: number; grade: Grade; errors: number; quality: number; len: number; ms: number; wait: number; fam: number }
+  | { t: "pace"; night: boolean; lever: string; dir: number; amount: number; level: number }
   | { t: "chain"; chain: number; tier: number; callout: boolean }
 );
 

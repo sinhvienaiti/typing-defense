@@ -8,6 +8,8 @@
 import { ticks, waveSchedule } from "../../content/compile";
 import { ECONOMY, MODES, PHASE, TICK_HZ } from "../../content/rules";
 import { STAT, bump } from "../stats";
+import { gapScale } from "./pace";
+import type { Mode } from "../../content/types";
 import type { Phase, World } from "../world";
 
 function enter(w: World, phase: Exclude<Phase, "defeat">, length: number): void {
@@ -16,15 +18,21 @@ function enter(w: World, phase: Exclude<Phase, "defeat">, length: number): void 
   w.events.rare.push({ t: "phase", tick: w.tick, phase, day: w.day });
 }
 
+/** A day's ticks at pace k: the wave clock (BALANCE.md §4.1 "giờ đợt"), ÷ k. */
+export const dayTicks = (mode: Mode, k: number): number => Math.round(ticks(MODES[mode].dayS) / k);
+
 export function startWave(w: World): void {
   const wave = (w.wave += 1);
-  const schedule = waveSchedule(w.c, wave);
+  const schedule = waveSchedule(w.c, wave, gapScale(w));
   const grounds = w.lanes.length - 1;
-  // Packs take the ground routes in turn, from a side the spawn stream picks.
+  // Packs take the ground routes in turn, from a side the spawn stream picks; a pace step taken when no spawn was left moves all but the first.
   const first = w.rng.spawn.int(0, grounds - 1);
-  for (const spawn of schedule) {
-    w.spawnQueue.push({ tick: w.tick + spawn.at, enemy: spawn.enemy, route: spawn.lane < 0 ? grounds : (first + spawn.lane) % grounds, wave });
-  }
+  schedule.forEach((spawn, k) => {
+    const at = k === 0 ? spawn.at : Math.max(1, spawn.at + w.pace.carry);
+    w.spawnQueue.push({ tick: w.tick + at, enemy: spawn.enemy, route: spawn.lane < 0 ? grounds : (first + spawn.lane) % grounds, wave });
+  });
+  w.pace.carry = 0;
+  w.pace.waveSize = Math.max(1, schedule.length);
   w.spawnQueue.sort((a, b) => a.tick - b.tick);
   w.waveLeft[wave] = schedule.length;
   w.waveAlive[wave] = 0;
@@ -58,7 +66,7 @@ export function phaseStep(w: World): void {
   if (w.phase === "day" && w.tick >= w.phaseEnd) startNight(w);
   else if (w.phase === "dawn" && w.tick >= w.phaseEnd) {
     w.day += 1;
-    enter(w, "day", ticks(MODES[w.mode].dayS));
+    enter(w, "day", dayTicks(w.mode, w.pace.k));
   }
   let open = 0;
   for (let wave = 1; wave <= w.wave; wave += 1) {

@@ -109,7 +109,8 @@ describe("scoring by errors, with slack for long words (TK 6.6)", () => {
         for (const key of keys) send(w, key);
       }
       expect(w.stats[STAT.callWords]).toBe(1);
-      return w.events.rare.find((event) => event.t === "wordHit");
+      const hit = w.events.rare.find((event) => event.t === "wordHit");
+      return hit?.t === "wordHit" ? { grade: hit.grade, errors: hit.errors, quality: hit.quality, len: hit.len, ms: hit.ms } : null;
     });
     expect(scores[0]).toEqual(scores[1]);
   });

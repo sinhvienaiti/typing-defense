@@ -35,7 +35,8 @@ function sources(dir: string, pattern = /\.(ts|tsx|js|mjs|css)$/): Source[] {
 
 const PACKAGES = /^(three|three\/examples\/jsm\/.+|@fontsource\/.+)$/;
 const PURE_ROOTS = ["src/sim/", "src/typing/", "src/content/"];
-const PURE_KIT = ["src/kit/platform/rng"];
+/** Kit files the rules load: the seeded streams, and the balance module's flow meter and pace director (BALANCE.md §8: pure, deterministic TS). */
+const PURE_KIT = ["src/kit/platform/rng", ...["bands", "director", "flow", "math", "profile"].map((file) => "src/kit/balance/" + file)];
 const ALLOWED_MATH = ["sqrt", "floor", "ceil", "round", "trunc", "abs", "min", "max", "sign", "imul", "clz32"];
 /**
  * Globals the rules may not name. After a dot a name is a property
@@ -204,7 +205,7 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
     expect(changed).toEqual([]);
   });
 
-  it("the rules (sim/, typing/, content/) load only the rules and src/kit/platform/rng", () => {
+  it("the rules (sim/, typing/, content/) load only the rules, src/kit/platform/rng and the balance module's pure files", () => {
     expect(pure.map((source) => source.path)).toContain("src/kit/platform/rng.ts");
     const crossing = pure.flatMap((source) =>
       importsOf(source)
@@ -218,7 +219,9 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
   });
 
   it("the rules use no clock, host global, storage, locale, Math.random, trigonometry, powers or logarithms", () => {
-    const found = pure.flatMap((source) => purityProblems(source.text).map((problem) => source.path + ": " + problem));
+    // The balance kit names its 20 s FlowWindow `window`: a local there, which the hostless compile below tells from the global.
+    const local = (source: Source, problem: string) => problem === "window" && source.path.startsWith("src/kit/balance/");
+    const found = pure.flatMap((source) => purityProblems(source.text).filter((problem) => !local(source, problem)).map((problem) => source.path + ": " + problem));
     expect(found).toEqual([]);
     const typescript = pure.filter((source) => source.path.endsWith(".ts"));
     expect(hostProblems(typescript).map(({ path, problem }) => path + ": " + problem)).toEqual([]);
@@ -229,9 +232,9 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
     expect(found).toEqual([]);
   });
 
-  it("the game's own storage keys start with td. or typing-defense:", () => {
+  it("the game's own storage keys start with td. or typing-defense:, or are the kit's skill profile key typing-defense.skill (BALANCE.md §2)", () => {
     const keys = game.flatMap((source) => storageKeys(source.text).map(({ method, key }) => ({ at: source.path + " " + method, key })));
-    expect(keys.filter(({ key }) => key === null || !/^(td\.|typing-defense:)/.test(key))).toEqual([]);
+    expect(keys.filter(({ key }) => key === null || !/^(td\.|typing-defense:|typing-defense\.skill$)/.test(key))).toEqual([]);
   });
 
   it("learning events and the portal know this game as typing-defense", () => {

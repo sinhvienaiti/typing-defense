@@ -6,6 +6,7 @@
  */
 import { rngState } from "../kit/platform/rng";
 import { MODE_IDS } from "./commands";
+import { paceState } from "./systems/pace";
 import type { World } from "./world";
 
 type Column = Uint8Array | Int8Array | Uint16Array | Int16Array | Int32Array | Float64Array;
@@ -58,6 +59,7 @@ export function hashWorld(w: World): number {
   T.bags.forEach((bag, hi) => (h = mixColumn(mixNumber(mixNumber(h, hi), bag!.next), bag!.order, bag!.order.length)));
   h = mixColumn(h, w.grid.cells, w.grid.cells.length);
   h = mixColumn(h, w.stats, w.stats.length);
+  for (const value of paceState(w.pace)) h = mixNumber(h, value);
   return h >>> 0;
 }
 

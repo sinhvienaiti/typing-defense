@@ -17,7 +17,7 @@ export function moveEnemies(w: World): void {
     const block = E.block[e]!;
     const pace = block === 0 ? 1 : block >= def.weight ? 0 : 0.5;
     const lane = w.lanes[E.route[e]!]!;
-    const dist = E.dist[e]! + def.speed * pace;
+    const dist = E.dist[e]! + def.speed * pace * w.pace.foeSpeed;
     E.dist[e] = dist;
     if (dist >= lane.length) E.dying[e] = LEAKED;
     lane.point(dist, E.lateral[e]!, spot);

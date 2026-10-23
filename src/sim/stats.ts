@@ -8,7 +8,7 @@ export const STATS = [
   "goldKill", "goldProduce", "goldWave", "goldEarly", "goldWord",
   "damageTower", "damageCrossbow", "damageSoldier", "damageWordShot", "damageHero",
   "calls", "callWords", "callsPerfect", "wordsPerfect", "wordsSloppy", "jams", "food", "foodEaten", "wood", "seedsBought",
-  "keys", "keyErrors", "strays", "wordShots", "fizzles", "rawWpmSum",
+  "keys", "keyErrors", "strays", "wordShots", "fizzles", "rawWpmSum", "backspaces", "abandons", "killTicks",
 ] as const;
 
 export type StatName = (typeof STATS)[number];

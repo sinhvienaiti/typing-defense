@@ -38,7 +38,8 @@ import { moveEnemies } from "./systems/move";
 import { projectilesStep } from "./systems/projectile";
 import { fireWordShots } from "./systems/rewards";
 import { spawnEnemies } from "./systems/spawn";
-import { phaseStep } from "./systems/waves";
+import { createPace, PACE_OFF, paceStep, type Pace, type PaceHeader } from "./systems/pace";
+import { dayTicks, phaseStep } from "./systems/waves";
 
 export type Phase = "day" | "night" | "dawn" | "defeat";
 
@@ -112,10 +113,12 @@ export type World = {
   readonly typing: Typing;
   readonly stats: Float64Array;
   readonly events: Events;
+  /** The run's pace k, flow meter and pace directors (systems/pace.ts). */
+  readonly pace: Pace;
 };
 
-/** `deck`: the compiled vocabulary (levels 1–5); none deals no word. */
-export type WorldOptions = { seed: number; sandbox?: boolean; content?: Content; deck?: Deck; gold?: number; wood?: number; mode?: Mode; expected?: number; vocab?: number };
+/** `deck`: the compiled vocabulary (levels 1–5); none deals no word. `pace`: the run header (none: k 1, director off). */
+export type WorldOptions = { seed: number; sandbox?: boolean; content?: Content; deck?: Deck; gold?: number; wood?: number; mode?: Mode; expected?: number; vocab?: number; pace?: PaceHeader };
 
 export function createWorld(options: WorldOptions): World {
   const c = compile(options.content ?? SLICE_1A);
@@ -130,7 +133,7 @@ export function createWorld(options: WorldOptions): World {
     tick: 0,
     phase: "day",
     day: 1,
-    phaseEnd: ticks(MODES[mode].dayS),
+    phaseEnd: dayTicks(mode, (options.pace ?? PACE_OFF).k),
     rng: createRng(options.seed),
     gold: (options.gold ?? ECONOMY.start.gold) * 1000,
     wood: options.wood ?? ECONOMY.start.wood,
@@ -163,6 +166,7 @@ export function createWorld(options: WorldOptions): World {
     typing: createTyping(options.deck ?? compileDeck([])),
     stats: createStats(),
     events: new Events(),
+    pace: createPace(mode, options.pace ?? PACE_OFF),
   };
   placeBuilding(w, 0, map.keep[0], map.keep[1], -1, true);
   for (let agent = 0; agent <= c.content.helpers.length; agent += 1) w.agents.add(home(w, agent));
@@ -192,6 +196,7 @@ export function step(w: World, commands: readonly Command[] = []): void {
   attentionStep(w); // 11: calls open, light, get words
   deathsStep(w); // 15
   phaseStep(w); // 17
+  paceStep(w); // BALANCE.md §4.2: the flow meter and the pace director
   w.tick += 1;
 }
 
