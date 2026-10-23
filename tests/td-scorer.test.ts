@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { MODES } from "../src/content/rules";
 import { STAT } from "../src/sim/stats";
 import { lifeSeconds, lifeTicks, rawWpm, scoreWord, typeSeconds } from "../src/typing/scorer";
 import { run, send, world } from "./td/fixtures";
@@ -20,7 +21,7 @@ describe("word life, the clock a call's word is scored against", () => {
   });
 });
 
-describe("E = max(B, the mode's floor): relax and learn 12, balanced 20, challenge 35 (TK 6.6, BUILD_1A6 §2)", () => {
+describe("E = max(B, the mode's floor): relax and learn 12, balanced 20, challenge 30 (TK 6.6, BUILD_1A6 §2; 35 before balance step 4)", () => {
   const deck = smallDeck(["apple", "bread", "cider", "garden"]);
   const field = (mode: "relax" | "balanced" | "challenge" | "learn", expected: number) => {
     const w = world({ deck, mode, expected });
@@ -35,11 +36,11 @@ describe("E = max(B, the mode's floor): relax and learn 12, balanced 20, challen
     expect(expectedE(balanced.w)).toBe(20);
     expect(balanced.life).toBe(Math.round(4.8 * 60)); // a 5-letter word at E = 20, not 6.0 s at 12
     const challenge = field("challenge", 20);
-    expect(expectedE(challenge.w)).toBe(35);
-    expect(challenge.life).toBe(lifeTicks(5, 35, 1, "challenge")); // 2.93 s, not 4.32 s at 20
+    expect(expectedE(challenge.w)).toBe(MODES.challenge.floorE);
+    expect(challenge.life).toBe(lifeTicks(5, MODES.challenge.floorE, 1, "challenge")); // shorter than at 20
     run(challenge.w, 100);
     const hit = type(challenge.w, "apple", 50, true).find((event) => event.t === "wordHit");
-    expect(hit).toMatchObject({ quality: scoreWord(5, 0, challenge.life, 100, 35, 1).quality });
+    expect(hit).toMatchObject({ quality: scoreWord(5, 0, challenge.life, 100, MODES.challenge.floorE, 1).quality });
   });
 
   it("word length follows E (TK 6.3); a power word takes the band's lower half; a sandbox mode change moves the floor and the band", () => {

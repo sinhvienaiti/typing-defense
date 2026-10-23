@@ -75,7 +75,7 @@ describe("damage (TK 10.1–10.2)", () => {
     expect(1000 - w.enemies.hp[half]!).toBe(30);
     expect(1000 - w.enemies.hp[rim]!).toBe(20);
     expect(1000 - w.enemies.hp[outside]!).toBe(0);
-    expect(90 - w.enemies.hp[wisp]!).toBe(60);
+    expect(w.c.enemies[w.enemies.def[wisp]!]!.hp - w.enemies.hp[wisp]!).toBe(60);
   });
 
   it("a blast always hurts its target at any height it may aim at; around it, only ground and low (Draconis on a high flyer)", () => {
@@ -91,9 +91,9 @@ describe("damage (TK 10.1–10.2)", () => {
     expect(w.projectiles.splash[w.projectiles.top - 1]).toBe(1.8);
     for (let tick = 0; tick < 60 && w.projectiles.count > 0; tick += 1) projectilesStep(w);
     expect(w.projectiles.count).toBe(0);
-    expect(w.enemies.hp[target]).toBeLessThan(90);
-    expect(w.enemies.hp[highNear]).toBe(90);
-    expect(w.enemies.hp[lowNear]).toBeLessThan(90);
+    expect(w.enemies.hp[target]).toBeLessThan(wisp.hp);
+    expect(w.enemies.hp[highNear]).toBe(wisp.hp);
+    expect(w.enemies.hp[lowNear]).toBeLessThan(wisp.hp);
     expect(w.stats[STAT.damageHero]).toBeGreaterThan(0);
   });
 

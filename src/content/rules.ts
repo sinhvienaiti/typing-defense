@@ -16,10 +16,10 @@ export const CAP = { soldiers: 64, agents: 4, streamLiveMax: 12, streamLiveMin: 
 
 /** BUILD_1A6 §2: what a mode sets. lifeK scales the clock a word is scored against (TK 6.4's k_L); powerCdS is §4.5's cooldown. */
 export const MODES = {
-  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.6, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
+  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
   balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false },
-  challenge: { dayS: 50, open: 4, typeS: 11, hpMul: 1.15, floorE: 35, lifeK: 0.9, powerCdS: 6, pause: false },
-  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.6, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
+  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false },
+  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
 } as const;
 /** §2: dawn's length; building at night takes ×1.5 as long. */
 export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
@@ -59,7 +59,7 @@ export const CHAIN = {
  */
 export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
-  sloppy: 1, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.1,
+  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.1,
 } as const;
 /** A power word's Word Shot (TK 6.11): D̄ × (0.8 + 1.2·Q) × lenF, lenF = clamp((len + 1)/6; 0.8; 1.2). */
 export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [1.6, 0.4] } as const;
@@ -122,7 +122,7 @@ export const PRESET = { keepLevel: 3, villagers: 5, marks: 8, plots: [[2, 0], [1
  * by day only the call clocks ±7 %, against a band without pressure (no enemy comes by day).
  */
 export const PACE = {
-  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 3, mineCallMin: 0.25, speedK: 0.25,
+  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 2, mineCallMin: 0.25, speedK: 0.2,
   night: { up: ["spawn", "elite", "peak", "lull"], down: ["support", "spawn", "lull", "peak", "elite"], spawnStep: 70, eliteCost: 30, peakTicks: 180, lullTicks: 180 },
   day: { up: ["spawn"], down: ["spawn"], spawnStep: 70, eliteCost: 0, peakTicks: 0, lullTicks: 0 },
 } as const;
