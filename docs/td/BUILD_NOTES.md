@@ -687,7 +687,7 @@ Quái đến dồn thì tháp Pháo và Phát Chữ trúng nhiều hơn, nên d�
 - Ngày: chỉ đồng hồ lời gọi ±7 %.
 - Trần của kit: ≤ 2 bậc một đợt, khoảng sinh ±15 %. Không đổi máu quái đang sống, không đổi luật gõ hay điểm từ.
 
-### 6.5 Đổi số (chỉ dữ liệu)
+### 6.5 Đổi số vòng 1 (chỉ dữ liệu; vòng 2 sửa lại ở 6.10)
 
 | Chỗ | Trước | Sau | Lý do (đo) |
 |---|---|---|---|
@@ -709,7 +709,7 @@ Quái đến dồn thì tháp Pháo và Phát Chữ trúng nhiều hơn, nên d�
 - Kế hoạch R3 theo chiến thuật: Tốt (bố cục chuẩn, 3 dân), Vừa (bố cục chuẩn, 3 dân, 1 cây dư), Kém (Ruộng cạnh Lũy, Mỏ N2, Lũy cấp 2 trước tháp thứ hai, Trại Lính muộn, Tướng Đêm nhìn mỗi 2 s), Không mua. Hồ sơ của bot là E, a, CV của nó (tin hoàn toàn); bot Không gõ chưa đo nên dùng mặc định của chế độ.
 - Cổng học riêng (B8): cả ván, phần thời gian khóa từ không vượt ngân sách chú ý của chế độ (6/8/11 s mỗi 20 s), không bất biến lời gọi nào vỡ, không lệnh nào bị từ chối. Một từ chậm có thể làm một cửa sổ 20 s vượt (bot Trẻ em ở Thử thách tới 2,4 lần, vì sàn E 35 của chế độ).
 
-### 6.7 Cổng (120 seed mỗi ô, `pnpm td:balance --stage-seeds=120`, 122 s, 9 luồng)
+### 6.7 Cổng vòng 1 (120 seed mỗi ô; số hiện tại ở 6.10)
 
 | Cổng | Kết quả |
 |---|---|
@@ -736,3 +736,32 @@ Cổng §12 (R3, 5 seed, 4 đêm, đầu ván mặc định k = 1, bộ điều 
 - Game đo bot Chuẩn ở 30 WPM, 90 %, CV 0,34 (lỗi, gõ hụt khi lời gọi mờ đi, nhịp mỗi từ); với C_ref theo thông số danh nghĩa, người chơi như vậy được k ≈ 0,8. Hiệu chỉnh ở B9.
 - Thử thách (không là cổng B1): bot Nhanh 88 %, Khá 85 % trên dải 50–75 %; Ẩu 52 % / S 10 %. Thư giãn: S trung vị 65 % dưới dải ≥ 70 %.
 - Bộ điều nhịp Ngày phần lớn chỉ nới đồng hồ Hỏi bài và Đào (ban Ngày lời gọi thường đủ trần mà vẫn có lời gọi chờ).
+
+### 6.10 Vòng 2 (review của điều phối viên, 23/10/2026)
+
+**Đổi luật thiết kế (báo trước):**
+
+- Phạt từ Ẩu **khôi phục** ×0,6 (BUILD_1A6 §5.1); vòng 1 đã bỏ (×1), làm B4 hòa.
+- Bảng chế độ (BUILD_1A6 §2, §4.5) đổi theo dải §3 của từng chế độ: Thư giãn, Học máu ×0,5 (trước 0,75, vòng 1 0,6); Thử thách gõ ≤ 10 s mỗi 20 s (trước 11), máu ×1,19 (trước 1,15), sàn E 30 (trước 35), hồi Bắn mạnh 10 s (trước 6); Cân bằng hồi 9 s (trước 8). Bắn mạnh sống 9 s (trước 6, từ vòng 1).
+- Đêm 4: 1 Thuồng Luồng (trước 2). Đêm 5: 7 Thuồng Luồng **đi một toán 6 con** (`packSize` 6, trước 1) rồi 7 Cương Thi, 3 Ma Trơi. Ma Trơi 60 máu (trước 90). Thuồng Luồng 365 máu. Cháy của Draconis 55/s.
+- Bộ điều nhịp: rơi hỗ trợ +2 mạng (vòng 1: +3); tốc quái ×(1 + 0,2·(k − 1)) (vòng 1: 0,25). Vòng tinh anh giữ hiện trên bản đồ: tinh anh là quái thường, phải đọc được.
+
+**Q đo đúng chưa.** Đúng: mỗi quái bị hạ đưa phần đường thật của nó (`dist / chiều dài làn`) vào FlowMeter. Q gần như luôn 67 % vì trên bản đồ hộp cát, mọi bố cục đều có lính và tháp chặn ở khúc nhập (≈ 2/3 đường): 10 seed, bot Mới: p10 43 %, p25 65 %, p50 67 %, p75 68 %, p90 93 %; 55 % số quái chết trong khoảng 65–70 %. Bố cục khác thì Q khác (Kém 68–70 %, Chỉ gõ 97 %). Có một lỗi nhỏ đã sửa: tick Đêm kết thúc (quái cuối chết, hoặc thua) không vào meter Đêm, nên mất ~4 % số quái hạ (trước: meter 263, thống kê 275; sau: bằng nhau).
+
+**Vì sao chưa giữa dải (thắng và Biên S đi cùng nhau).** Ở game này, số mạng còn của các ván thắng và tỉ lệ thua do cùng một chỗ quyết: Thuồng Luồng ở Đêm 5 (3 mạng mỗi con lọt). Đo trên cùng bot Chuẩn, đổi độ khó:
+
+| Đêm 5 | Thắng | Biên S |
+|---|---|---|
+| Thuồng Luồng đi lẻ (vòng 1, Ẩu ×0,6) | 100 / 95 / 90 / 85 % | 50 / 40 / 30 / 25 % |
+| Thuồng Luồng một toán 6 con (vòng 2) | 87–88 % | 35–40 % |
+
+Muốn thắng 83 % mà Biên S 50 % thì 15 % ván phải sập hẳn trong khi ván giữa vẫn còn 10 mạng: phân bố mạng cuối phải có hai đỉnh. Giảm mạng mỗi lần lọt làm phân bố hẹp lại: thắng lên mà Biên S gần như đứng yên (đo: Thuồng Luồng mất 2, Đêm 5 có 8 con đi lẻ: thắng 94–98 %, Biên S 25–30 %). Toán lớn (6 con) làm kết quả rõ hơn: hoặc giữ khúc nhập, hoặc vỡ. Đây là lý do đổi cỡ toán, không phải giảm mạng mỗi lần lọt. Giảm rơi hỗ trợ (+2, +1) gần như không đổi gì. Ít mạng hơn (15, 12) khó hơn hẳn mà không tách được hai số.
+
+**Kết quả (`pnpm td:balance`, mặc định 2 bộ seed × 120, 6 luồng, 334 s):** bảng ở changelog `2026-10-23-balance.md`. B1–B8 đạt ở cả hai bộ seed; B9 thiếu số. Cổng §12: 4 đạt (mạng 17 / 17 / 16 / 14 / 16), 5a 7,93 s, 5b 30,9 %, 5c 22,6 %, 6 không lỗi, 7 +43,8 %. File vàng làm lại: nội dung `bf0c4da8`, 18.136 tick, 302 mã băm. Số dòng 7.499 (trần 7.500).
+
+**Còn lệch so với đích chặt của review** (thắng 78–88 %, Biên S 40–60 % ở Cân bằng; dải riêng của Thử thách):
+
+- Cân bằng: thắng 83–89 % ở cả hai bộ; Biên S 35–40 % ở Mới, Chuẩn, Khá, Ẩu, Nhanh (Chậm chắc 50–58 %). Bộ 1: Khá 89 %; bộ 2: Mới 89 %.
+- Thử thách: thắng 57–82 % (Chậm chắc 82 % ở bộ 2); Biên S 10–15 % ở Mới, Chuẩn, Ẩu (dải 15–45 %).
+- Thư giãn: bot Mới tới Nhanh thắng 99–100 %, Biên S 85–100 %, Nhàn I 5–8 %: trong dải. Bot Trẻ em thắng 92–98 % nhưng Biên S 50–53 %.
+- Muốn tách hẳn thắng và Biên S cần một quyết định thiết kế (ví dụ một đỉnh trùm cuối Đêm 5 có báo trước, hay Lũy có hồi mạng giữa các đêm), không chỉ đổi số.
