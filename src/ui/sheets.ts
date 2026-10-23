@@ -1,18 +1,42 @@
 /**
  * The pause and results cards (SPLIT_PLAN D7): dó paper in the middle of the map, never a HUD panel (the
  * word cards do not part around them). Pause (Esc, the HUD's Ⅱ): Chơi tiếp, Cài đặt, Về màn đầu. Results
- * (the Bastion lost): the run's numbers, Chơi lại, Xem bản đồ, Về màn đầu. Keyboard first: ↑ ↓ pick,
- * Enter chooses, Esc goes back to the game (or closes the settings).
+ * (BUILD_1B §4.3, §13.1): "Giữ được làng" with its stars stamped one by one, or "Lũy đã vỡ" with a hint read off
+ * the run; the numbers, "Từ cần ôn" (the review book's newest five with their meaning); Chơi lại Ngày n (after a
+ * night past the first was lost), Chơi lại (từ đầu), Chép số chơi thử, Xem bản đồ, Về màn đầu.
+ * Keyboard first: ↑ ↓ pick, Enter chooses, Esc goes back to the game (or closes the settings).
  */
+import { STARS } from "../content/rules";
 import { STAT } from "../sim/stats";
+import { BOSS } from "../sim/stores/boss";
 import type { World } from "../sim/world";
+import { gloss, wordText } from "../typing/decks";
 import type { SettingsCard } from "./settings";
 
-export type SheetAction = "resume" | "settings" | "title" | "again" | "map";
+export type SheetAction = "resume" | "settings" | "title" | "again" | "retry" | "copy" | "map";
 type Button = readonly [action: SheetAction, label: string, key: string];
+/** The results card's run: a story or the sandbox, and a "Chơi lại Ngày n" this run came from (0: none). */
+export type ResultsOf = { story: boolean; retried: number };
 
 const PAUSE: readonly Button[] = [["resume", "Chơi tiếp", "Esc"], ["settings", "Cài đặt", ""], ["title", "Về màn đầu", ""]];
-const RESULTS: readonly Button[] = [["again", "Chơi lại", "Enter"], ["map", "Xem bản đồ", "Esc"], ["title", "Về màn đầu", ""]];
+
+/** Stars for the lives left (TK 20.2): 18–20 three, 6–17 two, 1–5 one. */
+export const starsFor = (lives: number): number => STARS.filter((least) => lives >= least).length;
+
+/**
+ * The loss card's hint, read off the run (BALANCE §4.3): lost before the boss; it passed the merge with less than half
+ * of what had to come off; the stagger let pass; buildings rooted again and again.
+ */
+export function lossHint(w: World): string {
+  const S = w.boss;
+  const s = w.stats;
+  const need = (S.hpMax * w.c.content.boss!.retreatPct) / 100;
+  if (S.stage < BOSS.fight) return "Gõ Bắn mạnh khi quái tới gần tháp; Phát Chữ của Tháp Pháo cạnh Draconis làm quái cháy.";
+  if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Thêm tháp trên nhánh rễ sáng.";
+  if (S.phase === 2 && s[STAT.burstTyped]! < 2) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
+  if (s[STAT.rootsHits]! >= 6) return "Đặt Tháp Cung xa đường hơn: rễ không với tới.";
+  return "Dồn tháp và Draconis lên nhánh rễ sáng, gõ Bắn mạnh khi nó tới gần.";
+}
 
 export class Sheet {
   readonly el: HTMLElement;
@@ -35,22 +59,32 @@ export class Sheet {
   }
 
   /** The card for this frame: "pause", "results" or "" (none); written only when it changes. */
-  show(kind: "pause" | "results" | "", w: World): void {
+  show(kind: "pause" | "results" | "", w: World, run: ResultsOf = { story: false, retried: 0 }): void {
     if (kind === this.kind) return;
     this.kind = kind;
     this.el.hidden = kind === "";
     this.settings.close();
     if (kind === "") return;
-    this.buttons = kind === "pause" ? PAUSE : RESULTS;
+    const won = w.phase === "victory";
+    const retry = !won && w.day >= 2; // the sandbox too: its skipTo runs replay alike (BUILD_1B §19 td-1b-night5)
+    this.buttons = kind === "pause" ? PAUSE : [
+      ...(retry ? [["retry", "Chơi lại Ngày " + w.day, "Enter"] as const] : []),
+      ["again", retry ? "Chơi lại từ đầu" : "Chơi lại", retry ? "" : "Enter"], ["copy", "Chép số chơi thử", ""], ["map", "Xem bản đồ", "Esc"], ["title", "Về màn đầu", ""],
+    ];
     this.focus = 0;
-    this.el.className = "td-sheet vd-sheet is-" + kind;
+    this.el.className = "td-sheet vd-sheet is-" + kind + (won ? " is-won" : "");
     const stats = w.stats;
-    const row = (label: string, value: number): string => `<dt>${label}</dt><dd>${value}</dd>`;
+    const row = (label: string, value: number | string): string => `<dt>${label}</dt><dd>${value}</dd>`;
+    const { review, reviewN, deck } = w.typing;
+    const words = Array.from(review.subarray(Math.max(0, reviewN - 5), reviewN)).reverse().map((word) => `<li><b>${wordText(deck, word)}</b> ${gloss(deck, word)}</li>`).join("");
+    const stars = won ? starsFor(w.lives) : 0;
     this.el.innerHTML =
       (kind === "pause"
         ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ anh. Chữ trên thẻ vẫn ở đó.</p>`
-        : `<h2>Lũy đã thất thủ</h2><p>Mực Câm tràn qua cổng làng. Đêm sau giữ chặt hơn nhé.</p><dl>` +
-          row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Từ Hoàn hảo", stats[STAT.wordsPerfect]!) + row("Tri thức", w.knowledge) + row("Sổ ôn", w.typing.reviewN) + `</dl>`) +
+        : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div><p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
+          : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w)}</p>`) +
+          `<dl>` + row("Mạng còn", w.lives) + row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
+          (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);
     this.paint();
@@ -63,7 +97,7 @@ export class Sheet {
   private choose(at: number): void {
     const action = this.buttons[at]?.[0];
     if (action === "settings") {
-      this.el.querySelectorAll<HTMLElement>("button[data-sheet], p, dl").forEach((el) => (el.hidden = true));
+      this.el.querySelectorAll<HTMLElement>("button[data-sheet], p, dl, .td-stars, .td-review").forEach((el) => (el.hidden = true));
       this.settings.open();
     } else if (action !== undefined) this.act(action);
   }
@@ -71,7 +105,7 @@ export class Sheet {
   /** Settings closed: the card's own buttons come back. */
   settingsDone(): void {
     this.settings.close();
-    this.el.querySelectorAll<HTMLElement>("button[data-sheet], p, dl").forEach((el) => (el.hidden = false));
+    this.el.querySelectorAll<HTMLElement>("button[data-sheet], p, dl, .td-stars, .td-review").forEach((el) => (el.hidden = false));
   }
 
   /** A key while the card is up; true when it was the card's (the rest go on to the game). */

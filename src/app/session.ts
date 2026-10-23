@@ -8,6 +8,7 @@
  */
 import { MAX_STEPS_PER_FRAME, TICK_HZ } from "../content/rules";
 import { applyCommand, type Command, type CommandBody } from "../sim/commands";
+import { hashHex } from "../sim/hash";
 import { createWorld, step, type World, type WorldOptions } from "../sim/world";
 
 const STEP_MS = 1000 / TICK_HZ;
@@ -17,6 +18,8 @@ const MAX_FRAME_MS = 250;
 export class Session {
   readonly world: World;
   readonly log: Command[] = [];
+  /** The hash of the world as each day began (index n: day n), for "Chơi lại Ngày n" (BUILD_1B §4.3). */
+  readonly dayHashes: string[] = [];
   paused = false;
   /** While paused, orders act at once (the tactical pause); typing still waits for the game. */
   orders = false;
@@ -27,6 +30,7 @@ export class Session {
   constructor(options: WorldOptions) {
     this.world = createWorld(options);
   }
+
 
   /** Queues a command for the next step. */
   send(body: CommandBody): void {
@@ -72,7 +76,9 @@ export class Session {
   /** One step now, with every queued command stamped with this tick. */
   tick(): void {
     const commands = this.pending.splice(0).map((body) => ({ ...body, tick: this.world.tick }) as Command);
+    if (this.world.tick === 0) this.dayHashes[1] = hashHex(this.world);
     this.log.push(...commands);
     step(this.world, commands);
+    if (this.world.dayStarts[this.world.day] === this.world.tick) this.dayHashes[this.world.day] = hashHex(this.world);
   }
 }

@@ -27,6 +27,7 @@ import { slotsOpen } from "../sim/systems/agents";
 import { plotAt } from "../sim/systems/economy";
 import type { World } from "../sim/world";
 import { wordText } from "../typing/decks";
+import { BossView, type Pen } from "./boss-2d";
 import { CALL_COLOR, CALL_ICON, pips, ROOF_M } from "./words/cards";
 
 /** The Văn Điền palette (theme.css --vd-*): paddies, bamboo, silver water, earth paths; the meaning colours as TK 23.3. */
@@ -79,6 +80,9 @@ export class DebugView {
   private readonly marks: Mark[] = [];
   /** The dim bubbles drawn last frame, CSS px: what a click hits. */
   private readonly bubbles: Bubble[] = [];
+  /** Mộc Tinh's layers (BUILD_1B §13.1); main.ts hands it each frame's events. */
+  readonly boss = new BossView();
+  private readonly pen: Pen = { ctx: null as unknown as CanvasRenderingContext2D, px: (pixels) => this.px(pixels), text: (label, x, z, size, color, weight, edge) => this.text(label, x, z, size, color, weight, edge) };
 
   constructor(private readonly canvas: HTMLCanvasElement) {
     const ctx = canvas.getContext("2d", { alpha: false });
@@ -86,14 +90,14 @@ export class DebugView {
     this.ctx = this.screen = ctx;
   }
 
-  /** Fits the field (with a margin) into the canvas above the `bottom` px the word strip keeps. */
-  resize(cssWidth: number, cssHeight: number, ratio: number, halfM: number, bottom: number): void {
+  /** Fits the field (with a margin) into the canvas between the `top` px the boss bar keeps and the `bottom` px the word strip keeps. */
+  resize(cssWidth: number, cssHeight: number, ratio: number, halfM: number, bottom: number, top = 0): void {
     this.ratio = ratio;
     this.canvas.width = Math.round(cssWidth * ratio);
     this.canvas.height = Math.round(cssHeight * ratio);
-    this.fit.scale = this.scale = (Math.min(cssWidth, cssHeight - bottom) / (halfM * 2 + 4)) * ratio;
+    this.fit.scale = this.scale = (Math.min(cssWidth, cssHeight - bottom - top) / (halfM * 2 + 4)) * ratio;
     this.fit.x = this.ox = this.canvas.width / 2;
-    this.fit.y = this.oy = ((cssHeight - bottom) / 2) * ratio;
+    this.fit.y = this.oy = (top + (cssHeight - bottom - top) / 2) * ratio;
   }
 
   /** Moves the field `dx`, `dy` CSS px; its centre stays within half its size of the middle. */
@@ -129,22 +133,33 @@ export class DebugView {
   draw(w: World, hand: Hand): void {
     this.paintBase(w);
     const { ctx } = this;
+    const now = performance.now();
+    // The ground shakes ≤ 2 px in the lull and as the boss breaks out (none with reduced motion).
+    const [qx, qy] = this.boss.quake(w, now);
+    [this.ox, this.oy] = [this.ox + qx, this.oy + qy];
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.drawImage(this.base, 0, 0);
+    ctx.drawImage(this.base, qx, qy);
     ctx.setTransform(this.scale, 0, 0, this.scale, this.ox, this.oy);
+    this.pen.ctx = ctx;
     this.night(w);
     this.nodes(w);
     this.trees(w);
-    this.buildings(w, hand);
+    this.boss.under(this.pen, w, now);
+    this.buildings(w, hand, now);
     this.ghost(w, hand);
     this.soldiers(w);
     this.enemies(w);
+    this.boss.over(this.pen, w, now);
     this.npcs(w);
     this.agents(w, hand);
     this.shots(w);
     this.readMarks(w);
     this.drawMarks(w);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.boss.sky(ctx, w, this.canvas.width, this.canvas.height);
+    ctx.setTransform(this.scale, 0, 0, this.scale, this.ox, this.oy);
     this.calls(w, hand);
+    [this.ox, this.oy] = [this.ox - qx, this.oy - qy];
   }
 
   private px(pixels: number): number {
@@ -446,19 +461,20 @@ export class DebugView {
     ctx.globalCompositeOperation = "source-over";
   }
 
-  private buildings(w: World, hand: Hand): void {
+  private buildings(w: World, hand: Hand, now: number): void {
     const B = w.buildings;
     const { ctx } = this;
     for (let b = 0; b < B.top; b += 1) {
       if (B.used[b] === 0) continue;
       const spec = w.c.buildings[B.def[b]!]!;
-      const x = B.x[b]!;
+      const x = B.x[b]! + this.boss.offset(B.id(b), now);
       const z = B.z[b]!;
+      const stunned = B.stunUntil[b]! > w.tick;
       const r = spec.radius;
       const level = B.level[b]!;
       const site = B.ready[b] === 0;
       if (B.id(b) === hand.focus) this.disc(x, z, r + 0.7, "rgba(127, 245, 224, 0.35)", COLOR.jade, 3);
-      if (spec.attack !== null && !site) this.disc(x, z, spec.attack.levels[level - 1]!.range, null, "rgba(43, 33, 24, 0.22)", 1);
+      if (spec.attack !== null && !site) this.disc(x, z, spec.attack.levels[level - 1]!.range, null, stunned ? "rgba(120, 120, 120, 0.55)" : "rgba(43, 33, 24, 0.22)", stunned ? 2 : 1);
       if (site) ctx.setLineDash([this.px(4), this.px(3)]);
       this.disc(x, z, r, site ? "rgba(255, 244, 214, 0.6)" : spec.def.view.color, COLOR.ink, 2);
       ctx.setLineDash([]);
@@ -495,6 +511,7 @@ export class DebugView {
       if (spec.hp[0] > 0 && B.hp[b]! < spec.hp[level - 1]!) this.bar(x, z + r + 0.5, r * 2, B.hp[b]! / spec.hp[level - 1]!, COLOR.buildingHp);
       if (spec.barracks !== null) this.shape(FLAG, B.rallyX[b]!, B.rallyZ[b]!, COLOR.soldier);
       if (spec.mine !== null && B.pile[b]! > 0) this.text("+" + Math.floor(B.pile[b]! / 1000), x + r + 1.2, z, 11, "#7a4f12");
+      if (stunned) this.boss.stunMark(this.pen, w, b);
     }
   }
 
@@ -608,7 +625,7 @@ export class DebugView {
       const { ctx } = this;
       ctx.beginPath();
       for (let e = 0; e < E.top; e += 1) {
-        if (E.used[e] === 0) continue;
+        if (E.used[e] === 0 || w.c.enemies[E.def[e]!]!.boss) continue;
         const r = w.c.enemies[E.def[e]!]!.radius + this.px(2.5);
         ctx.moveTo(E.x[e]! + r, E.z[e]!);
         ctx.arc(E.x[e]!, E.z[e]!, r, 0, Math.PI * 2);
@@ -621,6 +638,7 @@ export class DebugView {
       const def = w.c.enemies[E.def[e]!]!;
       const x = E.x[e]!;
       const z = E.z[e]!;
+      if (def.boss || def.id === w.c.content.boss?.summon.enemy) continue; // boss-2d.ts draws Mộc Tinh and its sprouts
       if (def.altitude > 0) {
         // Flyers: a ground shadow, the body lifted, a soft glow ring.
         this.disc(x + 0.5, z + 0.9, def.radius * 0.8, "rgba(43, 33, 24, 0.25)", null);

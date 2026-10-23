@@ -1,8 +1,12 @@
 /**
  * Lời Gọi (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
- * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) in the Văn Điền theme (SPLIT_PLAN D7):
- * the title screen first (a link with ?sandbox= skips it, ?title=1 / 0 forces
- * it), while the vocabulary loads; then the world steps at 60 Hz in a session,
+ * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) and 1B's map 1 with Mộc Tinh
+ * (docs/td/BUILD_1B.md) in the Văn Điền theme (SPLIT_PLAN D7): the title screen
+ * first (a link with ?sandbox= skips it, ?title=1 / 0 forces it), while the
+ * vocabulary loads; the story stage, or the sandbox with ?sandbox=1. A lost run
+ * may be played again from the day of the night it was lost ("Chơi lại Ngày n":
+ * the page reloads, replays the log to that day's start and checks its hash).
+ * Then the world steps at 60 Hz in a session,
  * the 2D view draws it, the calls' word cards float over it, the keys, the
  * mouse and the HUD act through the selection, sound and music follow its
  * events, Esc's pause card and the results card sit over it, and window.__td
@@ -21,16 +25,19 @@ import { sandboxHtml } from "./app/sandbox";
 import { Selection } from "./app/selection";
 import { Session } from "./app/session";
 import { loadDeck } from "./app/vocab";
-import type { CommandBody } from "./sim/commands";
+import type { Command, CommandBody } from "./sim/commands";
+import type { Mode } from "./content/types";
+import type { PaceHeader } from "./sim/systems/pace";
 import type { RareEvent } from "./sim/events";
 import { hashHex } from "./sim/hash";
 import { canPlace } from "./sim/placement";
-import { setPace } from "./sim/systems/pace";
+import { setMode, setPace } from "./sim/systems/pace";
+import { runLog } from "./sim/world";
 import { statsObject } from "./sim/stats";
 import { PATH_MAX } from "./sim/stores/agents";
 import { wordText } from "./typing/decks";
 import { dockHtml } from "./ui/build-menu";
-import { actionsHtml, Hud, REASON, statusHtml, stripHtml } from "./ui/hud";
+import { actionsHtml, BossBanner, Hud, REASON, statusHtml, stripHtml } from "./ui/hud";
 import { ProfileCard } from "./ui/profile";
 import { loadSettings, SettingsCard } from "./ui/settings";
 import { Sheet, type SheetAction } from "./ui/sheets";
@@ -47,8 +54,8 @@ function byId<T extends HTMLElement = HTMLElement>(id: string): T {
 }
 
 const params = new URLSearchParams(window.location.search);
-// 1A is the sandbox build: on unless ?sandbox=0.
-const sandbox = params.get("sandbox") !== "0";
+// The story stage of map 1 (BUILD_1B §4.1); the sandbox with ?sandbox=1.
+const sandbox = params.get("sandbox") === "1";
 const seed = Number(params.get("seed") ?? "1") >>> 0 || 1;
 const canvas = byId<HTMLCanvasElement>("tdCanvas");
 const view = new DebugView(canvas);
@@ -65,11 +72,24 @@ let choose: (choice: TitleChoice) => void = () => {};
 function showTitle(canContinue: boolean): void {
   const card = (): SettingsCard => new SettingsCard(settings, (changed) => audio.apply(changed), () => title?.settingsDone());
   const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: audio.ui.bind(audio), wake: () => audio.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
-  title ??= new TitleScreen(document.body, hooks, card(), new ProfileCard(() => title?.settingsDone()), sandbox);
+  title ??= new TitleScreen(document.body, hooks, card(), new ProfileCard(() => title?.settingsDone()), true);
   title.show(canContinue);
 }
+/** "Chơi lại Ngày n" (BUILD_1B §4.3): the run's header, its log up to day n's start, the hash there; one page load reads it. */
+type Retry = { seed: number; sandbox: boolean; deck: string; content: string; mode: Mode; header: PaceHeader & { expected: number }; day: number; tick: number; hashes: string[]; log: Command[] };
+function takeRetry(): Retry | null {
+  try {
+    const raw = sessionStorage.getItem("td.retry");
+    sessionStorage.removeItem("td.retry");
+    const retry = raw === null ? null : (JSON.parse(raw) as Retry);
+    return retry !== null && retry.seed === seed && retry.sandbox === sandbox ? retry : null;
+  } catch {
+    return null;
+  }
+}
+const retry = takeRetry();
 const asked = params.get("title");
-if (asked === "1" || (asked !== "0" && !params.has("sandbox"))) showTitle(false);
+if (retry === null && (asked === "1" || (asked !== "0" && !params.has("sandbox")))) showTitle(false);
 /** A fresh run of the same link, past the title (`learn`: in the learn mode). */
 const freshRun = (learn: boolean): string => {
   const next = new URLSearchParams(params);
@@ -82,17 +102,27 @@ const freshRun = (learn: boolean): string => {
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
 learningBridge().requestFocus(); // inside the portal only
-let runHeader = header();
-const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader });
+let runHeader = retry?.header ?? header();
+/** The run's mode at its start (the replay's header): Học with ?learn=1 or the title's choice. */
+let startMode: Mode = retry?.mode ?? (params.get("learn") === "1" ? "learn" : "balanced");
+const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader, mode: startMode });
 const world = session.world;
+if (retry !== null) {
+  runLog(world, retry.log, retry.tick);
+  const same = world.c.hash === retry.content && deck.hash === retry.deck && hashHex(world) === retry.hashes[retry.day];
+  // Another rule or vocabulary since: the run starts over (the replay would not be the run that was lost).
+  if (!same) window.location.search = "?" + new URLSearchParams({ ...Object.fromEntries(params), title: "0" }).toString();
+  session.log.push(...retry.log);
+  session.dayHashes.push(...retry.hashes);
+  world.events.rare.length = 0;
+}
 const tally = new SkillTally(world);
 // A run left mid-cycle counts as a quit (the trend keeps it; the measures do not); the title alone is no run.
 window.addEventListener("pagehide", () => world.tick > 0 && saveSkill(updateSkill(profile, tally.sample(world, "quit")).profile));
 const selection = new Selection(world, (command) => session.send(command));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
 let imeWarning = false;
-const learnMode = (): void => session.send({ t: "sandbox", op: { op: "mode", value: "learn" } });
-if (params.get("learn") === "1") learnMode();
+const learnMode = (): void => setMode(world, (startMode = "learn"));
 /** A run has begun: the title was passed (or never shown); a new choice then opens a fresh page. */
 let begun = title === null;
 choose = (choice) => {
@@ -114,6 +144,7 @@ function act(action: string): void {
 }
 
 const hud = new Hud(byId("tdHud"), act);
+const banner = new BossBanner();
 for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio.resume());
 /** Esc's pause card and the results card; "Xem bản đồ" puts the results away. */
 let mapOnly = false;
@@ -121,6 +152,8 @@ const sheet = new Sheet(document.body, new SettingsCard(settings, (changed) => a
   if (action === "resume") selection.act("pause");
   else if (action === "map") mapOnly = true;
   else if (action === "again") window.location.search = freshRun(false);
+  else if (action === "retry") retryDay();
+  else if (action === "copy") copyNumbers();
   else if (action === "title") showTitle(world.phase !== "defeat");
 });
 // The title takes every key while it is up; a card takes its own (arrows, Enter, Esc) and lets the rest through.
@@ -153,23 +186,29 @@ function showHud(): void {
   const notices = [
     selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", imeWarning ? "Tắt bộ gõ tiếng Việt để gõ" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
   ];
+  const now = performance.now();
   hud.update([
-    statusHtml(world, sandbox, selection.halted, audio.muted, notices.filter((notice) => notice !== "")),
+    statusHtml(world, sandbox, selection.halted, audio.muted, notices.filter((notice) => notice !== ""), banner.hit(now)),
     sandbox && selection.panel ? sandboxHtml(world) : "",
     teamHtml(world, selection.agent),
     stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical),
     dockHtml(world, selection),
     actionsHtml(world, selection.tactical),
+    banner.html(world, now),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
-  sheet.show(title?.open === true ? "" : world.phase === "defeat" ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world);
+  const over = world.phase === "defeat" || world.phase === "victory";
+  sheet.show(title?.open === true ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world, { story: !sandbox, retried: retry?.day ?? 0 });
 }
 
+/** The boss bar takes the top of the screen from its warning on: the field moves down under it (BUILD_1B §13.1). */
+let bossTop = 0;
 const resize = (): void => {
   const ui = Math.max(0.8, Math.min(1.2, Math.min(window.innerWidth / 1600, window.innerHeight / 900)));
   document.documentElement.style.setProperty("--ui", ui.toFixed(3));
   document.documentElement.style.setProperty("--hud", Math.max(1, ui).toFixed(3));
-  view.resize(window.innerWidth, window.innerHeight, Math.min(2, window.devicePixelRatio || 1), world.map.halfM, 60 * Math.max(1, ui));
+  bossTop = world.boss.stage > 0 ? 64 * Math.max(1, ui) : 0;
+  view.resize(window.innerWidth, window.innerHeight, Math.min(2, window.devicePixelRatio || 1), world.map.halfM, 60 * Math.max(1, ui), bossTop);
   view.draw(world, selection);
   painted = true;
 };
@@ -198,6 +237,9 @@ runFrameLoop({
       const sample = tally.read(fresh, world);
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));
       cards.read(fresh, world, now);
+      if ((world.boss.stage > 0) !== bossTop > 0) resize();
+      view.boss.read(fresh, world, now);
+      banner.read(fresh, world, now);
       audio.read(fresh, world, now);
       audio.frame(title?.open === true ? null : world, now);
       recent.push(...fresh);
@@ -217,17 +259,50 @@ runFrameLoop({
   },
 });
 
+/** A play-test's numbers for BALANCE.md §7 B9: the run's flow (night meter) and the profile the game keeps. */
+function balanceOf() {
+  const outcome = world.phase === "defeat" ? "lost" : world.phase === "victory" ? "won" : "quit";
+  return { flow: world.pace.meter.summary(outcome), night: world.pace.night.summary(), day: world.pace.day.summary(), profile, stats: statsObject(world.stats), lives: world.lives, dayNumber: world.day };
+}
+
+/** "Chép số chơi thử" (BUILD_1B §14): the numbers to the clipboard, else a .json file to save. */
+function copyNumbers(): void {
+  const text = JSON.stringify(balanceOf());
+  const save = (): void => {
+    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: "loi-goi-choi-thu.json" });
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+  if (navigator.clipboard === undefined) save();
+  else navigator.clipboard.writeText(text).catch(save);
+}
+
+/** "Chơi lại Ngày n": the log up to the start of the lost night's day, and the hashes kept, for the next page load. */
+function retryDay(): void {
+  const day = world.day;
+  const at = world.dayStarts[day];
+  if (at === undefined || session.dayHashes[day] === undefined) return void (window.location.search = freshRun(false));
+  const kept: Retry = { seed, sandbox, deck: deck.hash, content: world.c.hash, mode: startMode, header: runHeader, day, tick: at, hashes: session.dayHashes.slice(0, day + 1), log: session.log.filter((command) => command.tick < at) };
+  try {
+    sessionStorage.setItem("td.retry", JSON.stringify(kept));
+  } catch {
+    return void (window.location.search = freshRun(false));
+  }
+  window.location.search = freshRun(startMode === "learn");
+}
+
 installDevHandle({
   ready: () => painted,
   // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
-  flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director } }),
+  flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director }, mode: startMode }),
   send: (command: CommandBody) => session.send(command),
   // TK 25.12's load test: n enemies on the routes, through the sandbox's logged command.
   flood: (n: number) => session.send({ t: "sandbox", op: { op: "flood", value: n } }),
   costs: () => ({ update: costs.update.slice(), draw: costs.draw.slice() }),
   stats: () => statsObject(world.stats),
   // A play-test's numbers for BALANCE.md §7 B9: the run's flow (night meter) and the profile the game keeps.
-  balance: () => ({ flow: world.pace.meter.summary(world.phase === "defeat" ? "lost" : "quit"), night: world.pace.night.summary(), day: world.pace.day.summary(), profile }),
+  balance: () => balanceOf(),
+  dayHashes: () => session.dayHashes.slice(),
   hash: () => hashHex(world),
   defs: () => world.c.buildings.map((building) => building.id),
   canPlace: (id: string, x: number, z: number) => canPlace(world, world.c.buildingIndex(id), Math.round(x * 4), Math.round(z * 4)),
@@ -252,15 +327,20 @@ installDevHandle({
       enemies: world.enemies.count, projectiles: world.projectiles.count,
       buildings: B.live().map((b) => ({
         id: B.id(b), def: world.c.buildings[B.def[b]!]!.id, level: B.level[b]!, x: B.x[b]!, z: B.z[b]!, ready: B.ready[b] === 1, upTo: B.upTo[b]!, progress: B.progress[b]!,
-        charges: B.charges[b]!, pile: B.pile[b]! / 1000,
+        charges: B.charges[b]!, pile: B.pile[b]! / 1000, stunned: B.stunUntil[b]! > world.tick,
       })),
+      boss: (() => {
+        const S = world.boss;
+        const e = world.enemies.slotOf(S.e);
+        return { ...S, targets: Array.from(S.targets.subarray(0, S.targetN)), hp: e < 0 ? 0 : world.enemies.hp[e]!, dist: e < 0 ? -1 : world.enemies.dist[e]!, x: e < 0 ? 0 : world.enemies.x[e]!, z: e < 0 ? 0 : world.enemies.z[e]! };
+      })(),
       soldiers: U.live().map((s) => ({ alive: U.hp[s]! > 0, contact: U.contact[s] === 1, x: U.x[s]!, z: U.z[s]! })),
       agents: A.live().map((a) => ({
         x: A.x[a]!, z: A.z[a]!, mode: A.mode[a]!, goal: A.goal[a]! < 0 ? -1 : B.id(A.goal[a]!),
         path: Array.from(A.path.subarray((a * PATH_MAX + A.next[a]!) * 2, (a * PATH_MAX + A.pathN[a]!) * 2)),
       })),
       npcs: N.live().map((n) => ({ kind: N.kind[n]!, task: N.task[n]!, job: N.job[n]!, x: N.x[n]!, z: N.z[n]! })),
-      calls: C.live().map((c) => ({ id: C.id(c), kind: C.kind[c]!, open: C.state[c] === 1, bright: C.bright[c] === 1, words: C.words[c]!, done: C.done[c]!, x: C.x[c]!, z: C.z[c]!, agent: C.agent[c]! })),
+      calls: C.live().map((c) => ({ id: C.id(c), kind: C.kind[c]!, open: C.state[c] === 1, bright: C.bright[c] === 1, words: C.words[c]!, done: C.done[c]!, x: C.x[c]!, z: C.z[c]!, agent: C.agent[c]!, burst: C.burst[c] === 1 })),
       review: Array.from(world.typing.review.subarray(0, world.typing.reviewN), (word) => wordText(deck, word)),
       trees: world.map.trees.map(([x, z], t) => ({ x, z, standing: world.trees.standing[t] === 1, marked: world.trees.marked[t] === 1 })),
     };

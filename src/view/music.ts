@@ -3,8 +3,9 @@
  * scale (ngũ cung, shared with the typing notes), two layers that start together and cross-fade over 2 s.
  * Calm (day, the title): đàn tranh figures over a low string, a sáo trúc phrase every four bars. Tension
  * (night): trống cơm, a low tranh ostinato, bamboo clicks on the off-beats, a bronze gong every four bars.
- * At night both play, the calm one 6 dB down. Eighths are scheduled a quarter second ahead from the frame
- * loop; a layer faded out schedules nothing.
+ * At night both play, the calm one 6 dB down. Before Mộc Tinh rises the music steps back; while it fights a
+ * steady low drum joins (BUILD_1B §13.2). Eighths are scheduled a quarter second ahead from the frame loop; a
+ * layer faded out schedules nothing.
  */
 import { chuong, go, note, sao, tranh, trong } from "./folk";
 
@@ -32,6 +33,8 @@ export class FolkMusic {
   private eighth = 0;
   private figure = 0;
   private night: boolean | null = null;
+  /** The boss peak: 0 none, 1 the lull (the music steps back), 2 the fight (a drum on every beat). */
+  private peak = 0;
   /** The sáo phrase being played: [eighth it starts on, scale step, eighths held]. */
   private phrase: [number, number, number][] = [];
 
@@ -42,12 +45,13 @@ export class FolkMusic {
     this.tense.connect(out);
   }
 
-  /** The night's layer on or off: a 2 s cross-fade (the first call fades the music in). */
-  set(night: boolean): void {
-    if (night === this.night) return;
-    this.night = night;
+  /** The night's layer on or off: a 2 s cross-fade (the first call fades the music in); the boss peak's step back. */
+  set(night: boolean, peak = 0): void {
+    if (night === this.night && peak === this.peak) return;
+    [this.night, this.peak] = [night, peak];
     const t = this.ctx.currentTime;
-    for (const [layer, to] of [[this.calm, night ? 0.5 : 1], [this.tense, night ? 1 : 0]] as const) {
+    const back = peak === 1 ? 0.35 : 1;
+    for (const [layer, to] of [[this.calm, (night ? 0.5 : 1) * back], [this.tense, (night ? 1 : 0) * back]] as const) {
       layer.gain.cancelScheduledValues(t);
       layer.gain.setValueAtTime(layer.gain.value, t);
       layer.gain.linearRampToValueAtTime(to, t + 2);
@@ -85,6 +89,7 @@ export class FolkMusic {
     for (const [at, s, hold] of this.phrase) if (at === k) sao(calm, t, note(s), hold * EIGHTH * 0.95, 0.045);
     if (this.night !== true && this.tense.gain.value < 0.01) return;
     if (DRUM[pos]! > 0) trong(tense, t, DRUM[pos] === 2 ? 0.32 : 0.16, DRUM[pos] === 2 ? 120 : 165);
+    if (this.peak === 2 && pos % 2 === 0) trong(tense, t, 0.28, 62);
     if (OSTINATO[pos] !== R) tranh(tense, t, note(OSTINATO[pos]!), 0.06);
     if (pos % 2 === 1) go(tense, t, 1250, 0.03, 0.03);
     if (bar % 4 === 0 && pos === 0) chuong(tense, t, 98, 0.12, 2.6);

@@ -115,7 +115,7 @@ export class WordCards {
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     card.el.style.setProperty("--agent", "transparent");
     card.el.dataset.icon = CALL_ICON[kind];
-    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "");
+    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (w.calls.burst[c] === 1 ? " is-burst" : ""); // a "Dồn lửa" call: amber (BUILD_1B §13.1)
     card.sub.textContent = card.learn && !card.quiz ? card.mean : "";
     this.byId.set(id, card);
   }

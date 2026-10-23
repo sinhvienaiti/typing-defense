@@ -8,7 +8,8 @@
  * is the tactical pause of the relax and learn modes: the world stops, the
  * hand keeps working, typing waits.
  */
-import { FARM, MODES, TREE } from "../content/rules";
+import { ticks } from "../content/compile";
+import { ECONOMY, FARM, MODES, SELL, TREE } from "../content/rules";
 import type { CommandBody } from "../sim/commands";
 import { canPlace, nextSpot, spotCandidates, type Point } from "../sim/placement";
 import { PLOT } from "../sim/stores/buildings";
@@ -37,6 +38,8 @@ export class Selection {
   /** Space in relax and learn (§8). */
   tactical = false;
   panel = true;
+  /** A sale asks twice within 3 s (BUILD_1B §7): the building's id and when the first press lapses. */
+  sellArm = { id: -1, until: 0 };
 
   constructor(private readonly w: World, private readonly send: (command: CommandBody) => void) {}
 
@@ -55,7 +58,8 @@ export class Selection {
     sellFood: () => this.send({ t: "sellFood" }),
     upgrade: () => this.focus >= 0 && this.send({ t: "upgrade", building: this.focus }),
     build: () => this.choose(this.kind, null),
-    undo: () => this.w.buildings.slotOf(this.focus) > 0 && this.send({ t: "sell", building: this.focus }), // the card's button; Delete
+    undo: () => this.undoable() && this.send({ t: "sell", building: this.focus }), // the card's button; Delete
+    sell: () => this.sell(),
     close: () => this.close(),
     escape: () => this.escape(),
     pause: () => (this.tactical ? (this.tactical = false) : (this.paused = !this.paused)), // the HUD's ▶ ends either pause
@@ -69,6 +73,28 @@ export class Selection {
     if (name === "sb") this.send({ t: "sandbox", op: sandboxOp(arg, value, this.w, this.focus) });
     else this.actions[name]?.(Number(arg));
     this.update();
+  }
+
+  /** The building in focus has a site or an upgrade within its 5 s undo (BUILD_1A6 §4.3). */
+  undoable(): boolean {
+    const B = this.w.buildings;
+    const b = B.slotOf(this.focus);
+    return b > 0 && (B.ready[b] === 0 || B.upTo[b]! > 0) && this.w.tick - B.builtTick[b]! <= ticks(ECONOMY.undoWindowS);
+  }
+
+  /** The first press arms the sale, a second within 3 s sends it. */
+  private sell(): void {
+    const now = performance.now();
+    if (this.w.buildings.slotOf(this.focus) <= 0) return;
+    if (this.sellArm.id === this.focus && now < this.sellArm.until) {
+      this.send({ t: "sell", building: this.focus });
+      this.sellArm.id = -1;
+    } else this.sellArm = { id: this.focus, until: now + SELL.confirmS * 1000 };
+  }
+
+  /** A sale armed for building `id`. */
+  armed(id: number): boolean {
+    return this.sellArm.id === id && performance.now() < this.sellArm.until;
   }
 
   /** Paused either way: the session does not step and typing keys are not taken. */

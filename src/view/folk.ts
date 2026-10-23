@@ -114,6 +114,23 @@ export function giay(o: Out, t: number, gain: number, length = 0.16, from = 3000
   hiss(o, t, t + length + 0.03, "bandpass", from, 0.9, envelope(o, t, gain, 0.012, length)).frequency.exponentialRampToValueAtTime(to, t + length);
 }
 
+/** The ground: a low noise swelling over `length` s (the lull), or a short break (`length` ≤ 0.4). */
+export function rumble(o: Out, t: number, length: number, gain: number): void {
+  const g = new GainNode(o.ctx, { gain: 0.0001 });
+  g.gain.exponentialRampToValueAtTime(gain, t + length * 0.9);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + length + 0.3);
+  g.connect(o.to);
+  hiss(o, t, t + length + 0.35, "lowpass", 140, 0.8, g);
+}
+
+/** Mộc Tinh's roar: low noise and a falling saw through a lowpass. */
+export function roar(o: Out, t: number, gain: number): void {
+  const lp = new BiquadFilterNode(o.ctx, { type: "lowpass", frequency: 700, Q: 2 });
+  lp.connect(envelope(o, t, gain, 0.05, 1.1));
+  tone(o, "sawtooth", 160, t, t + 1.2, lp).frequency.exponentialRampToValueAtTime(55, t + 1.1);
+  hiss(o, t, t + 1.2, "bandpass", 320, 1.2, lp);
+}
+
 /** A villager calling across the fields, far off: "Ơ… ơi!" (a voice through two vowel formants, rising, then falling). */
 export function goi(o: Out, t: number, f0: number, gain: number): void {
   const end = t + 1.3;

@@ -16,7 +16,7 @@ type EntryId = TitleChoice | "settings" | "profile";
 
 const ART = "/assets/typing-defense/ui/title-dusk.webp";
 const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
-  ["start", "Bắt đầu", "Một ngày, một đêm giữ làng"],
+  ["start", "Bắt đầu", "Bản đồ 1 · Đồng Cỏ Thác Bạc"],
   ["continue", "Chơi tiếp", "Về lại ván đang dở · Esc"],
   ["settings", "Cài đặt", "Âm lượng nhạc và tiếng"],
   ["learn", "Học", "Chế độ Học: hiện nghĩa, Space để dừng"],

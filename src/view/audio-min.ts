@@ -8,7 +8,10 @@
  * bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB lower; a finished word a
  * đàn tranh note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots whoosh, blasts thud,
  * the ink folk puff like paper, a leak rings a gong; night and dawn have their own calls. The title adds far
- * villagers calling across the fields.
+ * villagers calling across the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's swelling
+ * rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers; Rễ
+ * Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
+ * gong; the retreat's falling chord and leaves; the chest's coins up the scale.
  */
 import { FX, type RareEvent } from "../sim/events";
 import { PROJECTILE } from "../sim/stores/projectiles";
@@ -16,7 +19,7 @@ import { chainTier } from "../sim/systems/chain";
 import type { World } from "../sim/world";
 import { KEY } from "../typing/router";
 import type { Settings } from "../ui/settings";
-import { chuong, giay, go, goi, note, reverbTail, sao, tranh, trong, type Out } from "./folk";
+import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, trong, type Out } from "./folk";
 import { FolkMusic } from "./music";
 
 const ALERTS_PER_S = 3;
@@ -102,7 +105,7 @@ export class TypingAudio {
    */
   frame(w: World | null, now: number): void {
     if (this.ctx === null || this.music === null) return;
-    this.music.set(w !== null && w.phase === "night");
+    this.music.set(w !== null && w.phase === "night", w === null ? 0 : w.boss.stage === 2 || w.boss.stage === 3 ? 1 : w.boss.stage === 4 ? 2 : 0);
     this.music.update();
     const speaking = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
     this.duck.gain.setTargetAtTime(speaking ? 0.35 : 1, this.ctx.currentTime, speaking ? 0.04 : 0.17);
@@ -150,6 +153,27 @@ export class TypingAudio {
     else [0, 0.13].forEach((at, k) => sao(o, t + at, note(k === 0 ? 12 : 14), 0.1, 0.05));
   }
 
+  /** Mộc Tinh's sounds (BUILD_1B §13.2); a warning's sound is never capped. */
+  private boss(event: RareEvent, t: number): void {
+    const world = this.out.world;
+    if (event.t === "bossWarn") [0, 0.42].forEach((at) => go(world, t + at, 110, 0.35, 0.22));
+    else if (event.t === "bossLull") {
+      rumble(world, t, 12, 0.3);
+      [0, 3, 6, 9, 10.5, 11.2, 11.7].forEach((at) => trong(world, t + at, 0.35, 70));
+    } else if (event.t === "bossEmerge" || event.t === "bossPhase") {
+      rumble(world, t, 0.35, 0.5);
+      roar(world, t + 0.2, 0.35);
+      if (event.t === "bossPhase") [chuong(world, t + 0.1, 1318.5, 0.08, 1.6), chuong(world, t + 0.3, 98, 0.18, 2.4)];
+    } else if (event.t === "bossStrike" && !event.hit && event.move === "roots") giay(world, t, 0.12, (event.end - event.tick) / 60, 500, 180);
+    else if (event.t === "bossStrike" && event.hit && event.move === "roots") [go(world, t, 160, 0.4, 0.09), giay(world, t + 0.03, 0.08, 0.3, 900, 300)];
+    else if (event.t === "bossStrike" && event.hit && (event.move === "slam" || event.move === "keep")) [giay(world, t, 0.14, 0.18, 2600, 500), trong(world, t + 0.12, 0.45, 60)];
+    else if (event.t === "bossRetreat") {
+      [0, 0.25, 0.5, 0.75].forEach((at, k) => tranh(world, t + at, note(7 - 2 * k), 0.12));
+      giay(world, t + 0.3, 0.06, 1.2, 1800, 700);
+      for (let k = 0; k < 8; k += 1) chuong(world, t + 1.2 + k * 0.08, note(5 + k) * 4, 0.02, 0.3);
+    }
+  }
+
   /** This frame's rare events and the combat ring since the last call. */
   read(events: readonly RareEvent[], w: World, now: number): void {
     const ring = w.events.ring;
@@ -177,7 +201,8 @@ export class TypingAudio {
           [0, 0.32, 0.5].forEach((at) => trong(world, t + at, 0.4, 110));
           chuong(world, t + 0.05, 98, 0.16, 3);
         } else if (event.phase === "dawn") [0, 0.2, 0.4].forEach((at, k) => sao(world, t + at, note(7 + 2 * k), 0.25, 0.05));
-      } else if (event.t === "defeat") {
+      } else if (event.t.startsWith("boss")) this.boss(event, t);
+      else if (event.t === "defeat") {
         chuong(world, t, 82.4, 0.2, 3.5);
         [0, 0.35, 0.7].forEach((at, k) => sao(world, t + 0.2 + at, note(7 - 2 * k), 0.4, 0.05));
       }

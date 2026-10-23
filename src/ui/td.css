@@ -87,6 +87,21 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-kind kbd { margin: 0 8px 0 0; }
 .td-kind span { margin-left: auto; opacity: 0.75; }
 .td-panel .td-hint { padding: 3px 8px; border-radius: 6px; background: var(--vd-jade-wash); font-weight: 700; }
+/* The boss bar (BUILD_1B §13.1): top middle; its one line of words under it, never in the middle of the screen. */
+.td-boss { left: 50%; top: 10px; width: min(calc(420px * var(--hud, 1)), calc(100vw - 620px * var(--hud, 1))); min-width: 300px; transform: translateX(-50%); text-align: center; }
+.td-boss-main > b { font-family: var(--vd-title); font-size: 1.15em; }
+.td-boss-main.is-dim { opacity: 0.6; }
+.td-boss .td-row { justify-content: space-between; margin: 0; }
+.td-bar { position: relative; height: 12px; margin: 4px 0 2px; border: 1.5px solid var(--vd-ink); border-radius: 4px; background: #e6d4ab; overflow: visible; }
+.td-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
+.td-bar .td-ghost { background: #fff4d6; }
+.td-bar .td-hp { background: linear-gradient(#8a5a2b, #6b4a2a); }
+.td-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--vd-ink); }
+.td-bar .td-retreat { background: var(--vd-seal); }
+.td-bar .td-retreat small { position: absolute; top: calc(100% + 1px); left: -1.4em; color: var(--vd-seal); font-size: 0.8em; line-height: 1; white-space: nowrap; }
+.td-say { margin: 6px 0 0 !important; padding: 2px 10px; border-radius: 6px; background: var(--vd-ink); color: var(--vd-paper-light); font-weight: 700; font-size: max(16px, 1.05em); line-height: 1.3; }
+.td-hit { margin-left: 4px; color: var(--vd-seal); font-style: normal; animation: td-hit 0.9s ease-out; }
+@keyframes td-hit { from { opacity: 1; } to { opacity: 0.2; } }
 
 /*
  * Word cards (TK 23.4): flat paper lanterns lettered in ink, bamboo caps top and bottom, one rule a line.
@@ -112,6 +127,7 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-card.is-late { border-left-color: var(--vd-amber-bright); border-right-color: var(--vd-amber-bright); }
 .td-card.is-late .td-card-bar { background: var(--vd-amber-bright); }
 .td-card.is-ash { background: #d8d2c4; color: #8a8172; }
+.td-card.is-burst { border-left-color: var(--vd-amber-bright); border-right-color: var(--vd-amber-bright); box-shadow: 0 2px 0 var(--vd-amber), 0 0 14px rgba(255, 176, 32, 0.8); }
 /* A grade is a round seal pressed over the card: jade for typing at its best, vermilion for good, amber for sloppy. */
 .td-stamp { padding: 1px 9px; border: 2px solid currentColor; border-radius: 999px; background: rgba(255, 244, 214, 0.94); box-shadow: inset 0 0 0 1.5px rgba(255, 244, 214, 0.94), inset 0 0 0 3px currentColor; color: var(--vd-seal); font: 800 14px/1.35 var(--vd-title); letter-spacing: 0.02em; }
 .td-stamp.is-flash, .td-stamp.is-perfect { color: var(--vd-jade); }
@@ -132,3 +148,13 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-sheet button kbd { margin-left: auto; padding: 0 5px; border: 1px solid currentColor; border-radius: 4px; font: 700 12px/1.5 var(--vd-font); opacity: 0.7; }
 .td-sheet button.is-focus { border: 0; background: radial-gradient(circle at 30% 25%, #d24a2e, var(--vd-seal) 55%, var(--vd-seal-dark)); color: var(--vd-paper-light); box-shadow: inset 0 0 0 2px var(--vd-seal-dark), inset 0 0 0 3.5px rgba(255, 236, 200, 0.7), 1px 2px 0 rgba(43, 33, 24, 0.7); }
 .td-sheet .td-settings { margin-top: 4px; }
+/* Results (BUILD_1B §4.3): the stars stamp in one by one; the hint of a loss; the words to review. */
+.td-stars { display: flex; gap: 10px; justify-content: center; margin: 4px 0; }
+.td-stars i { color: #cbbd9b; font: 900 34px/1 var(--vd-title); font-style: normal; }
+.td-stars i.on { color: var(--vd-seal); animation: td-stamp 0.35s ease-out both; }
+.td-stars i.on:nth-child(2) { animation-delay: 0.35s; }
+.td-stars i.on:nth-child(3) { animation-delay: 0.7s; }
+@keyframes td-stamp { from { opacity: 0; transform: scale(2.2) rotate(-12deg); } to { opacity: 1; transform: none; } }
+.td-sheet .td-hint-line { padding: 6px 10px; border-left: 4px solid var(--vd-seal); background: rgba(255, 250, 235, 0.7); color: var(--vd-ink); font-weight: 700; }
+.td-review ul { margin: 2px 0 6px; padding-left: 18px; }
+.td-review b { color: var(--vd-jade-ink); }

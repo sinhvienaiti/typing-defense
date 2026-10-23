@@ -13,7 +13,7 @@ import type { CommandBody } from "../sim/commands";
 export const KEY_ACTIONS: Readonly<Record<string, string>> = {
   Digit1: "pick:1", Digit2: "pick:2", Digit3: "pick:3", Digit4: "pick:4", Digit5: "pick:5", Digit0: "recall", Backquote: "cycle",
   Tab: "next", ShiftTab: "prev", Enter: "send", NumpadEnter: "send", ShiftEnter: "night",
-  Insert: "build", Backslash: "build", ShiftInsert: "hire", ShiftBackslash: "hire", Delete: "undo", Escape: "escape", Pause: "pause", F9: "sandbox", Space: "space",
+  Insert: "build", Backslash: "build", ShiftInsert: "hire", ShiftBackslash: "hire", Delete: "undo", ShiftDelete: "sell", Escape: "escape", Pause: "pause", F9: "sandbox", Space: "space",
   ArrowLeft: "pan:1:0", ArrowRight: "pan:-1:0", ArrowUp: "pan:0:1", ArrowDown: "pan:0:-1",
 };
 
