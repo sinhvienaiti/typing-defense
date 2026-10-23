@@ -140,9 +140,16 @@ export function flowSnapshot(w: World): FlowSnapshot {
   return { danger, hp: w.lives / ECONOMY.lives, live: w.words.count, capped, backlog: capped ? waiting : 0, busy, kills: w.pace.kills, abandons, damage };
 }
 
-/** After step 17: the phase's meter reads the tick (dawn is no one's), its director judges, a step acts at once. */
+/**
+ * After step 17: the phase's meter reads the tick (dawn is no one's), its director judges, a step acts at once. The
+ * tick a night ends (its last kills, or the defeat) still belongs to the night's meter.
+ */
 export function paceStep(w: World): void {
   const P = w.pace;
+  if (P.phase === "night" && w.phase !== "night") {
+    P.meter.feed(flowSnapshot(w));
+    P.kills.length = 0;
+  }
   const night = w.phase === "night";
   if (P.phase !== w.phase) {
     P.phase = w.phase;
