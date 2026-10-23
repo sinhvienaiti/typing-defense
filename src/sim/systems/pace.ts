@@ -17,10 +17,12 @@ import { ticks } from "../../content/compile";
 import { BUILD, ECONOMY, MODES, PACE } from "../../content/rules";
 import type { Mode } from "../../content/types";
 import { STAT } from "../stats";
+import { BOSS } from "../stores/boss";
 import { CALL_KIND } from "../stores/calls";
 import { MODE } from "../stores/walkers";
 import type { World } from "../world";
 import { slotsOpen } from "./agents";
+import { bossWarning } from "./boss";
 import { lit } from "./calls";
 import { dayTicks } from "./waves";
 
@@ -114,6 +116,7 @@ export function flowSnapshot(w: World): FlowSnapshot {
       w.pace.meter.resetWindow();
     }
   }
+  danger ||= bossWarning(w); // a boss move being warned (BUILD_1B §5.5)
   const lock = w.typing.router.lock;
   const locked = lock >= 0 ? w.words.call[lock]! : -1;
   let bright = 0;
@@ -163,6 +166,7 @@ export function paceStep(w: World): void {
   const director = night ? P.night : P.day;
   meter.feed(flowSnapshot(w));
   P.kills.length = 0;
+  if (w.boss.stage >= BOSS.lull) return; // the boss peak is scripted: the director stands still (BUILD_1B §5.5)
   const d = director.step(meter);
   if (d !== null) apply(w, director, d, night);
 }

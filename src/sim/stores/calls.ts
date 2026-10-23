@@ -33,6 +33,8 @@ export class CallStore extends Slots {
   readonly expire = new Int32Array(this.cap);
   readonly perfect = new Uint8Array(this.cap);
   readonly finished = new Uint8Array(this.cap);
+  /** A "Dồn lửa" power call of the boss's stagger (BUILD_1B §5.2). */
+  readonly burst = new Uint8Array(this.cap);
 
   add(kind: number, words: number, npc: number, b: number, tree: number, plot: number, tick: number, expire: number, agent = -1): number {
     const slot = this.take();

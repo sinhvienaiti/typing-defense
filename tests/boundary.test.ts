@@ -246,15 +246,15 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
   /** Lines of the TD code as BUILD_1A6 §0 counts them: the game's TypeScript (src/kit aside), as `wc -l` does. */
   const codeLines = (): number => game.filter((source) => source.path.endsWith(".ts")).reduce((sum, source) => sum + (source.text.match(/\n/g) ?? []).length, 0);
 
-  it("the TD code stays under BUILD_1A6 §0's hard ceiling", () => {
-    const ceiling = /Ngân sách mã TD[^\n]*\*\*≤ (\d+)\.(\d{3}) dòng\*\*/.exec(readFileSync(join(ROOT, "docs/td/BUILD_1A6.md"), "utf8"));
-    expect(ceiling, "BUILD_1A6 §0 names the hard ceiling").not.toBeNull();
+  it("the TD code stays under the hard ceiling of step 1B (BUILD_1B §16)", () => {
+    const ceiling = /Trần cứng 1B: \*\*(\d+)\.(\d{3})\*\*/.exec(readFileSync(join(ROOT, "docs/td/BUILD_1B.md"), "utf8"));
+    expect(ceiling, "BUILD_1B §16 names the hard ceiling").not.toBeNull();
     expect(codeLines()).toBeLessThanOrEqual(Number(ceiling![1]! + ceiling![2]!));
   });
 
   it("the TD code stays inside the running total its milestone may reach (docs/td/BUILD_NOTES.md §1.2)", () => {
     const notes = readFileSync(join(ROOT, "docs/td/BUILD_NOTES.md"), "utf8");
-    const milestone = /Mốc đang làm: \*\*(1A\.\d)\*\*/.exec(notes)?.[1];
+    const milestone = /Mốc đang làm: \*\*(1[AB]\.\w+)\*\*/.exec(notes)?.[1];
     expect(milestone, "BUILD_NOTES §1.2 names the milestone being built").toBeDefined();
     // Its row: | 1A.n … | new lines | share | running total |
     const row = new RegExp("^\\| " + milestone!.replace(".", "\\.") + " [^|]*\\|[^|]*\\|[^|]*\\| (\\d+)\\.(\\d{3}) \\|", "m").exec(notes);

@@ -15,11 +15,12 @@ export const STORE = { enemies: 640, soldiers: 96, projectiles: 512, buildings: 
 export const CAP = { soldiers: 64, agents: 4, streamLiveMax: 12, streamLiveMin: 4 } as const;
 
 /** BUILD_1A6 §2: what a mode sets. lifeK scales the clock a word is scored against (TK 6.4's k_L); powerCdS is §4.5's cooldown. */
+/** BUILD_1B §5.2: warnK scales a boss move's warning (relax, learn 1.33; challenge 0.8). */
 export const MODES = {
-  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
-  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false },
-  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false },
-  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true },
+  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33 },
+  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false, warnK: 1 },
+  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false, warnK: 0.8 },
+  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33 },
 } as const;
 /** §2: dawn's length; building at night takes ×1.5 as long. */
 export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
@@ -79,6 +80,10 @@ export const ECONOMY = {
   earlyCall: { goldPerS: 1, goldCap: 30 }, waveBonus: { base: 10, perWave: 2 },
   undoWindowS: 5, woodShare: 0.3, sale: { food: 10, gold: 10 },
 } as const;
+/** BUILD_1B §7: a finished building sells for 60 % of what it cost (rounded down); the HUD asks twice within 3 s. */
+export const SELL = { refund: 0.6, confirmS: 3 } as const;
+/** BUILD_1B §4.3 (TK 20.2): lives left for 3, 2, 1 stars. */
+export const STARS = [18, 6, 1] as const;
 
 /** §4.1: 4 plots a farm, 1.1 m off its centre; sow 2 s, grow 40 s, harvest 12 s for 5 food; seeds 4 for 30 gold, or 1 for 8 bought on the spot. */
 export const FARM = { plots: 4, plotM: 1.1, sowS: 2, growS: 40, harvestS: 12, food: 5, pack: { seeds: 4, gold: 30 }, seedGold: 8, perfectFood: 3 } as const;
@@ -133,4 +138,5 @@ export const TIERS = {
   small: { gold: [4, 12], leak: [1, 2], weight: [1, 1] },
   medium: { gold: [12, 25], leak: [2, 3], weight: [1, 2] },
   heavy: { gold: [25, 35], leak: [3, 4], weight: [2, 2] },
+  boss: { gold: [0, 0], leak: [0, 0], weight: [1, 4] },
 } as const;

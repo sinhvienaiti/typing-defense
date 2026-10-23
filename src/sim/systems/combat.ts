@@ -9,6 +9,9 @@
  * the "crit" stream, and rounding happens once, on impact. A tower aims at
  * the enemy furthest along its route (least distance left); ties go to the
  * lower id. A tower with a power charge fires a powered volley and spends it.
+ * The boss (BUILD_1B §5.1) takes Draconis' own fireballs ×0.5 ("Vỏ dày"), every
+ * hit ×1.25 while it staggers, and never dies of it (it retreats at 50 %); a
+ * building Rễ Trồi stunned does not fire.
  */
 import { ticks, type CompiledAttack, type CompiledAttackLevel } from "../../content/compile";
 import { COMBAT, TICK_HZ } from "../../content/rules";
@@ -22,7 +25,16 @@ export function damageEnemy(w: World, e: number, power: number, damageType: numb
   if (E.dying[e] !== 0) return 0;
   const def = w.c.enemies[E.def[e]!]!;
   const armour = damageType === 0 ? def.armor : damageType === 1 ? def.resist : 0;
-  const dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour)));
+  const boss = def.boss ? w.c.content.boss! : null;
+  const mul = boss === null ? 1 : (source === SOURCE.hero ? boss.heroMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
+  let dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour) * mul));
+  if (boss !== null) {
+    dmg = Math.min(dmg, E.hp[e]! - 1);
+    bump(w.stats, STAT.bossDamage, dmg);
+    if (source === SOURCE.wordShot) bump(w.stats, STAT.bossTyped, dmg);
+    if (source === SOURCE.hero) bump(w.stats, STAT.bossHero, dmg);
+    w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 8 + source, w.tick);
+  }
   E.hp[e] = E.hp[e]! - dmg;
   bump(w.stats, STAT.damageTower + source, dmg);
   bump(w.stats, STAT.hits);
@@ -90,7 +102,8 @@ export function statusStep(w: World): void {
   const perTick = w.c.content.hero.burn.dps / TICK_HZ;
   for (let e = 0; e < E.top; e += 1) {
     if (E.used[e] === 0 || E.dying[e] !== 0 || E.burnUntil[e]! <= w.tick) continue;
-    const owed = E.burnAcc[e]! + perTick * (1 - w.c.enemies[E.def[e]!]!.resist);
+    const def = w.c.enemies[E.def[e]!]!;
+    const owed = E.burnAcc[e]! + perTick * (1 - def.resist) * def.burnTaken;
     const whole = Math.floor(owed);
     E.burnAcc[e] = owed - whole;
     if (whole > 0) damageEnemy(w, e, whole, 2, SOURCE.wordShot);
@@ -103,7 +116,7 @@ export const burnTicks = (w: World): number => ticks(w.c.content.hero.burn.durat
 export function towersAttack(w: World): void {
   const B = w.buildings;
   for (let b = 0; b < B.top; b += 1) {
-    if (B.used[b] === 0 || B.ready[b] === 0) continue;
+    if (B.used[b] === 0 || B.ready[b] === 0 || B.stunUntil[b]! > w.tick) continue;
     const def = w.c.buildings[B.def[b]!]!;
     const attack = def.attack;
     if (attack === null) continue;
@@ -160,17 +173,22 @@ export function meleeStep(w: World): void {
     E.meleeCd[e] = E.meleeCd[e]! - 1;
     if (E.meleeCd[e]! > 0) continue;
     E.meleeCd[e] = E.meleeCd[e]! + melee.period;
-    const b = U.barracks[s]!;
-    const armour = w.c.buildings[B.def[b]!]!.barracks!.levels[B.level[b]! - 1]!.armor;
-    const dmg = Math.max(COMBAT.minDamage, Math.round((melee.min + w.rng.combat.float() * (melee.max - melee.min)) * (1 - armour)));
-    U.hp[s] = U.hp[s]! - dmg;
-    U.lastFight[s] = w.tick;
-    if (U.hp[s]! > 0) continue;
-    U.hp[s] = 0;
-    U.target[s] = -1;
-    U.contact[s] = 0;
-    U.respawnAt[s] = w.tick + w.c.buildings[B.def[b]!]!.barracks!.respawn;
-    bump(w.stats, STAT.soldierDeaths);
-    w.events.ring.push(FX.soldierDown, U.x[s]!, U.z[s]!, s, w.tick);
+    hurtSoldier(w, s, melee.min + w.rng.combat.float() * (melee.max - melee.min));
   }
+}
+
+/** Soldier s takes `raw` damage through its armour; at 0 it falls and waits for its respawn. */
+export function hurtSoldier(w: World, s: number, raw: number): void {
+  const U = w.units;
+  const b = U.barracks[s]!;
+  const barracks = w.c.buildings[w.buildings.def[b]!]!.barracks!;
+  U.hp[s] = U.hp[s]! - Math.max(COMBAT.minDamage, Math.round(raw * (1 - barracks.levels[w.buildings.level[b]! - 1]!.armor)));
+  U.lastFight[s] = w.tick;
+  if (U.hp[s]! > 0) return;
+  U.hp[s] = 0;
+  U.target[s] = -1;
+  U.contact[s] = 0;
+  U.respawnAt[s] = w.tick + barracks.respawn;
+  bump(w.stats, STAT.soldierDeaths);
+  w.events.ring.push(FX.soldierDown, U.x[s]!, U.z[s]!, s, w.tick);
 }

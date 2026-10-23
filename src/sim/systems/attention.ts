@@ -29,6 +29,7 @@
 import { ticks } from "../../content/compile";
 import { CALL, MODES, WORD_D } from "../../content/rules";
 import { typeSeconds } from "../../typing/scorer";
+import { BOSS } from "../stores/boss";
 import { CALL_KIND, CALL_RANK, CALL_STATE } from "../stores/calls";
 import type { World } from "../world";
 import { closeCall, dropWord, expectedE, giveWord, lengthBand, lit, placeCall } from "./calls";
@@ -82,6 +83,7 @@ export function attentionStep(w: World): void {
     return (T.typedSum === 0 && flying === 0) || (k <= T.typed.length ? peak[k]! : peak[T.typed.length]! + k - T.typed.length) <= room;
   };
   const longest = lengthBand(expectedE(w))[1];
+  const calm = w.boss.stage === BOSS.lull; // the lull before the boss: only power calls light (BUILD_1B §4.4)
   let locked = lock >= 0 ? W.call[lock]! : -1;
   let bright = 0;
   let economy = 0;
@@ -114,7 +116,7 @@ export function attentionStep(w: World): void {
     for (let c = 0; c < C.top; c += 1) {
       if (C.used[c] === 0 || C.bright[c] === 1 || ((full || C.state[c] === CALL_STATE.open) && !lit(w, c, locked))) continue;
       const rank = CALL_RANK[C.kind[c]!]!;
-      if ((full && rank === QUIZ_RANK) || (night && (rank === QUIZ_RANK || (rank === ECONOMY_RANK && economy >= CALL.nightEconomy)))) continue;
+      if ((full && rank === QUIZ_RANK) || (calm && rank > 0) || (night && (rank === QUIZ_RANK || (rank === ECONOMY_RANK && economy >= CALL.nightEconomy)))) continue;
       const bestRank = best < 0 ? 99 : CALL_RANK[C.kind[best]!]!;
       if (rank < bestRank || (rank === bestRank && C.born[c]! < C.born[best]!)) best = c;
     }

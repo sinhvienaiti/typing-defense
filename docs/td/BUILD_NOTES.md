@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1A.7**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của `BUILD_1A6.md` §0). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1B.R1**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16, 10.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -43,6 +43,7 @@ Mốc đang làm: **1A.7**. Test `td-boundary` đọc dòng này và cột "Cộ
 | 1A.5 Bot, báo cáo (xong) | 41 thật (mục 1.11): op hộp cát `flood` (TK 25.12) ở `spawn.ts` +19 và `commands.ts` +6, đo khung ở `main.ts` +16; bot, chính sách, báo cáo nằm ở `tests/` và `scripts/` | 40 | 5.500 |
 | 1A.6 Lời Gọi (R1, R2, R3 xong; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4); R3 6.012 (mục 5); tách repo và chủ đề Văn Điền: 7.064 | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
+| 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → (ghi ở mục 7.1) | 1.351 | 8.850 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 

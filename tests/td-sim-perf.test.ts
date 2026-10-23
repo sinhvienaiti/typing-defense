@@ -52,7 +52,7 @@ describe("simulation step cost", () => {
     expect(w.enemies.count).toBe(300);
     expect(w.waveAlive[0]).toBe(300);
     const E = w.enemies;
-    const kinds = [0, 0, 0];
+    const kinds = [0, 0, 0, 0, 0];
     for (const e of E.live()) {
       kinds[E.def[e]!] = kinds[E.def[e]!]! + 1;
       const lane = w.lanes[E.route[e]!]!;
@@ -60,7 +60,7 @@ describe("simulation step cost", () => {
       expect(E.dist[e]).toBeGreaterThan(0);
       expect(E.dist[e]).toBeLessThanOrEqual(lane.length / 2 + 0.1);
     }
-    expect(kinds).toEqual([100, 100, 100]);
+    expect(kinds, "every kind but the boss (BUILD_1B §19 td-1b-perf)").toEqual([75, 75, 75, 0, 75]);
     const again = createWorld({ seed: 1 });
     runLog(again, [{ t: "sandbox", op: { op: "flood", value: 0 }, tick: 0 }, { t: "sandbox", op: { op: "flood", value: STORE.enemies + 1 }, tick: 0 }, { t: "sandbox", op: { op: "flood", value: 2.5 }, tick: 0 }, { ...log[0], tick: 3 }], w.tick + 120);
     for (let k = 0; k < 120; k += 1) send(w);

@@ -11,6 +11,7 @@ import { FX } from "../events";
 import { SOURCE, STAT, bump } from "../stats";
 import { PROJECTILE } from "../stores/projectiles";
 import type { World } from "../world";
+import { bossSlot, dist2 } from "./boss";
 import { fireAt, launch, selectTargets } from "./combat";
 
 export function shotPower(dBar: number, len: number, quality: number): number {
@@ -32,7 +33,14 @@ export function fireWordShots(w: World): void {
     const x = B.x[b]!;
     const z = B.z[b]!;
     const spec = def.def.shot;
-    const found = selectTargets(w, x, z, attack, level, Math.min(targets.length, spec ? 1 + spec.pierce : level.targets + def.power.targets), targets);
+    let found = selectTargets(w, x, z, attack, level, Math.min(targets.length, spec ? 1 + spec.pierce : level.targets + def.power.targets), targets);
+    // A "Dồn lửa" call's shot goes at the boss while it is in reach (BUILD_1B §5.2).
+    const e = shot.boss ? bossSlot(w) : -1;
+    if (e >= 0 && w.enemies.dying[e] === 0 && dist2(w.enemies.x[e]!, w.enemies.z[e]!, x, z) <= level.range2) {
+      const at = targets.subarray(0, found).indexOf(e);
+      if (at > 0) targets[at] = targets[0]!;
+      [targets[0], found] = [e, Math.max(1, found)];
+    }
     if (found === 0) {
       bump(w.stats, STAT.fizzles);
       w.events.ring.push(FX.fizzle, x, z, b, w.tick);

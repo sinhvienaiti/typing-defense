@@ -6,7 +6,7 @@
  * Positions are quarter metres.
  */
 import { ticks } from "../content/compile";
-import { BUILD, ECONOMY, EXPECTED, FARM, MODES, PRESET, RALLY, STORE, VILLAGERS } from "../content/rules";
+import { BUILD, ECONOMY, EXPECTED, FARM, MODES, PRESET, RALLY, SELL, STORE, VILLAGERS } from "../content/rules";
 import type { Mode } from "../content/types";
 import { routeBackspace } from "../typing/router";
 import { CELL } from "./nav/grid";
@@ -15,11 +15,12 @@ import { STAT, bump } from "./stats";
 import { PLOT } from "./stores/buildings";
 import { NPC_KIND, TASK } from "./stores/npcs";
 import { moveAgent, orderAgent, recallAgent, releaseBuilding, reroute, slotsOpen } from "./systems/agents";
+import { callBoss } from "./systems/boss";
 import { closeCall, closeCallsOf, configureDeck, typeKey } from "./systems/calls";
 import { addVillager, countNpcs, finishSite, releaseNpc, staffBuilders, villagerCap } from "./systems/economy";
 import { setPaceMode } from "./systems/pace";
 import { flood } from "./systems/spawn";
-import { callNight, dayTicks, startNight } from "./systems/waves";
+import { callNight, dayTicks, locked, skipTo, startNight } from "./systems/waves";
 import type { World } from "./world";
 
 export type SandboxOp =
@@ -33,7 +34,9 @@ export type SandboxOp =
   | { op: "speed"; value: number }
   | { op: "night" }
   | { op: "preset" }
-  | { op: "flood"; value: number };
+  | { op: "flood"; value: number }
+  | { op: "boss" }
+  | { op: "skipTo"; value: number };
 
 export type CommandBody =
   | { t: "build"; def: number; qx: number; qz: number }
@@ -73,6 +76,13 @@ function pay(w: World, gold: number, wood: number): string | null {
   return null;
 }
 
+/** Building slot b's new site or upgrade cost `gold` and `wood`: the last price (an undo's) and the total (a sale's). */
+function spend(w: World, b: number, gold: number, wood: number): void {
+  const B = w.buildings;
+  [B.paidGold[b], B.paidWood[b]] = [gold, wood];
+  [B.spentGold[b], B.spentWood[b]] = [B.spentGold[b]! + gold, B.spentWood[b]! + wood];
+}
+
 export function applyCommand(w: World, command: Command): void {
   const reason = run(w, command);
   if (reason !== null) w.events.rare.push({ t: "rejected", tick: w.tick, command: command.t, reason });
@@ -82,45 +92,53 @@ function run(w: World, command: Command): string | null {
   const B = w.buildings;
   switch (command.t) {
     case "build": {
+      if (Number.isInteger(command.def) && locked(w, w.c.buildings[command.def]?.id ?? "")) return "locked";
       const placed = canPlace(w, command.def, command.qx, command.qz);
       if (!placed.ok) return placed.reason;
       const spec = w.c.buildings[command.def]!;
       const [gold, wood] = [spec.gold[0]!, spec.wood[0]!];
       pay(w, gold, wood);
-      const slot = placeBuilding(w, command.def, placed.x, placed.z, placed.node, false);
-      B.paidGold[slot] = gold;
-      B.paidWood[slot] = wood;
+      spend(w, placeBuilding(w, command.def, placed.x, placed.z, placed.node, false), gold, wood);
       return null;
     }
     case "upgrade": {
+      // A building, or the Bastion (BUILD_1B §7: its builders and its next helper; the story stops at keepMax).
       const slot = B.slotOf(command.building);
-      if (slot <= 0) return "noBuilding";
+      if (slot < 0) return "noBuilding";
       const spec = w.c.buildings[B.def[slot]!]!;
       const level = B.level[slot]!;
-      if (B.ready[slot] === 0 || B.upTo[slot]! > 0 || level >= spec.gold.length) return "noUpgrade";
-      const gold = spec.gold[level]! - spec.gold[level - 1]!;
-      const wood = spec.wood[level]! - spec.wood[level - 1]!;
+      const keep = spec.def.keep?.levels;
+      const top = keep === undefined ? spec.gold.length : w.sandbox ? keep.length : Math.min(keep.length, w.c.content.stage?.keepMax ?? keep.length);
+      if (B.ready[slot] === 0 || B.upTo[slot]! > 0 || level >= (keep?.length ?? top)) return "noUpgrade";
+      if (level >= top) return "keepMax";
+      if (locked(w, keep === undefined ? "upgrade" : "keep" + (level + 1))) return "locked";
+      const gold = keep === undefined ? spec.gold[level]! - spec.gold[level - 1]! : keep[level]!.gold;
+      const wood = keep === undefined ? spec.wood[level]! - spec.wood[level - 1]! : keep[level]!.wood;
       const short = pay(w, gold, wood);
       if (short !== null) return short;
       B.upTo[slot] = level + 1;
       B.progress[slot] = 0;
       B.builtTick[slot] = w.tick;
-      B.paidGold[slot] = gold;
-      B.paidWood[slot] = wood;
+      spend(w, slot, gold, wood);
       w.events.rare.push({ t: "built", tick: w.tick, building: B.id(slot), def: B.def[slot]! });
       return null;
     }
     case "sell": {
-      // An undo (§4.3): a site or an upgrade still being built, within 5 s of its start, goes, refunded in full; finished work stays.
+      // An undo (§4.3): a site or an upgrade within 5 s of its start goes, refunded in full. Past that a finished building
+      // sells for 60 % of all it cost, an upgrade under way included (BUILD_1B §7); a site still building may not.
       const slot = B.slotOf(command.building);
       if (slot <= 0) return "noBuilding";
-      if (B.ready[slot] === 1 && B.upTo[slot] === 0) return "finished";
-      if (w.tick - B.builtTick[slot]! > ticks(ECONOMY.undoWindowS)) return "undoWindow";
-      w.gold += B.paidGold[slot]! * 1000;
-      w.wood += B.paidWood[slot]!;
-      w.events.rare.push({ t: "sold", tick: w.tick, building: command.building, gold: B.paidGold[slot]!, wood: B.paidWood[slot]! });
-      if (B.ready[slot] === 1 && B.upTo[slot]! > 0) stopSite(w, slot);
-      else removeBuilding(w, slot);
+      const undo = (B.ready[slot] === 0 || B.upTo[slot]! > 0) && w.tick - B.builtTick[slot]! <= ticks(ECONOMY.undoWindowS);
+      if (!undo && B.ready[slot] === 0) return "undoWindow";
+      const gold = undo ? B.paidGold[slot]! : Math.floor(B.spentGold[slot]! * SELL.refund);
+      const wood = undo ? B.paidWood[slot]! : Math.floor(B.spentWood[slot]! * SELL.refund);
+      w.gold += gold * 1000;
+      w.wood += wood;
+      w.events.rare.push({ t: "sold", tick: w.tick, building: command.building, gold, wood, undo });
+      if (undo && B.ready[slot] === 1) {
+        [B.spentGold[slot], B.spentWood[slot]] = [B.spentGold[slot]! - gold, B.spentWood[slot]! - wood];
+        stopSite(w, slot);
+      } else removeBuilding(w, slot);
       return null;
     }
     case "rally": {
@@ -257,6 +275,10 @@ function sandbox(w: World, op: SandboxOp): string | null {
       if (!(Number.isInteger(op.value) && op.value >= 1 && op.value <= STORE.enemies)) return "badValue";
       flood(w, op.value);
       return null;
+    case "boss":
+      return callBoss(w) ? null : "bossBusy";
+    case "skipTo":
+      return skipTo(w, op.value) ? null : "badValue";
   }
 }
 

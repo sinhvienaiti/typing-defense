@@ -119,6 +119,16 @@ export class Lane {
     return best;
   }
 
+  /** Metres along the lane to the sample of the centre line nearest (x, z). */
+  distAt(x: number, z: number): number {
+    let [best, bestD] = [0, Infinity];
+    for (let index = 0; index < this.xs.length; index += 1) {
+      const [dx, dz] = [this.xs[index]! - x, this.zs[index]! - z];
+      if (dx * dx + dz * dz < bestD) [best, bestD] = [index, dx * dx + dz * dz];
+    }
+    return best * this.step;
+  }
+
   private index(distance: number): number {
     return Math.min(this.xs.length - 2, Math.max(0, Math.floor(Math.min(this.length, Math.max(0, distance)) / this.step)));
   }

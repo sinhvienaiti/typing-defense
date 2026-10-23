@@ -6,7 +6,8 @@
  */
 import type { Grade } from "../content/types";
 
-export const FX = { spawn: 1, fire: 2, hit: 3, burst: 4, death: 5, leak: 6, coin: 7, block: 8, soldierDown: 9, fizzle: 10 } as const;
+/** bossHit: damage on the boss, value = damage × 8 + its SOURCE. */
+export const FX = { spawn: 1, fire: 2, hit: 3, burst: 4, death: 5, leak: 6, coin: 7, block: 8, soldierDown: 9, fizzle: 10, bossHit: 11 } as const;
 
 const RING = 8192;
 
@@ -34,10 +35,18 @@ export class CombatRing {
 export type RareEvent = { tick: number } & (
   | { t: "built"; building: number; def: number } // a site or an upgrade begins
   | { t: "finished"; building: number; level: number }
-  | { t: "sold"; building: number; gold: number; wood: number }
+  | { t: "sold"; building: number; gold: number; wood: number; undo: boolean }
   | { t: "levelSet"; building: number; level: number }
   | { t: "rejected"; command: string; reason: string }
   | { t: "phase"; phase: "day" | "night" | "dawn"; day: number }
+  | { t: "bossWarn"; day: number; route: number }
+  | { t: "bossLull"; end: number }
+  | { t: "bossEmerge"; route: number; hp: number }
+  | { t: "bossPhase"; phase: number }
+  | { t: "bossStrike"; move: "roots" | "slam" | "summon" | "keep"; hit: boolean; end: number; count: number }
+  | { t: "bossRetreat"; gold: number }
+  | { t: "victory" }
+  | { t: "stun"; building: number; until: number }
   | { t: "waveStart"; wave: number }
   | { t: "waveEnd"; wave: number; bonus: number }
   | { t: "nightCalled"; day: number; bonus: number }

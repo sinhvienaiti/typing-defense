@@ -194,7 +194,10 @@ function villager(w: World, n: number): void {
 /** Ticks of work site b needs: its footprint's time, an upgrade 0.75 of it (§4.3). */
 const siteTicks = (w: World, b: number): number => w.c.buildings[w.buildings.def[b]!]!.buildTicks * (w.buildings.ready[b] === 1 ? BUILD.upgradeK : 1);
 
-/** Site b is done: the level it was built to runs, at its full hit points (+10 % on a sturdy one); a new barracks' squad and a new farm's farmer come out. */
+/**
+ * Site b is done: the level it was built to runs, at its full hit points (+10 % on a sturdy one); a new barracks'
+ * squad and a new farm's farmer come out; a raised Bastion lets out its next helper and builder (BUILD_1B §7).
+ */
 export function finishSite(w: World, b: number): void {
   const B = w.buildings;
   const def = w.c.buildings[B.def[b]!]!;
@@ -204,7 +207,8 @@ export function finishSite(w: World, b: number): void {
   B.upTo[b] = 0;
   B.progress[b] = 0;
   B.builder[b] = -1;
-  B.hp[b] = Math.round(def.hp[B.level[b]! - 1]! * (B.sturdy[b] === 1 ? BUILD.sturdy : 1));
+  if (def.hp[0] > 0) B.hp[b] = Math.round(def.hp[B.level[b]! - 1]! * (B.sturdy[b] === 1 ? BUILD.sturdy : 1));
+  if (!first && b === 0) staffBuilders(w);
   if (first && def.barracks !== null) for (let post = 0; post < def.barracks.soldiers; post += 1) w.units.add(b, post, def.barracks.levels[0]!.hp, B.x[b]!, B.z[b]!);
   if (first && def.farm) B.farmer[b] = w.npcs.add(NPC_KIND.farmer, B.x[b]!, B.z[b]!, b);
   w.events.rare.push({ t: "finished", tick: w.tick, building: B.id(b), level: B.level[b]! });
@@ -216,7 +220,7 @@ function builder(w: World, n: number): void {
   const B = w.buildings;
   if (N.task[n] === TASK.idle) {
     let site = -1;
-    for (let b = 1; b < B.top; b += 1) if (B.used[b] === 1 && B.upTo[b]! > 0 && B.builder[b]! < 0 && (site < 0 || B.builtTick[b]! < B.builtTick[site]!)) site = b;
+    for (let b = 0; b < B.top; b += 1) if (B.used[b] === 1 && B.upTo[b]! > 0 && B.builder[b]! < 0 && (site < 0 || B.builtTick[b]! < B.builtTick[site]!)) site = b;
     if (site < 0) return;
     const spot = stand(w, site);
     B.builder[site] = n;
@@ -285,7 +289,7 @@ function quizzes(w: World): void {
 export function economyStep(w: World): void {
   const B = w.buildings;
   for (let b = 0; b < B.top; b += 1) {
-    if (B.used[b] === 0 || B.ready[b] === 0) continue;
+    if (B.used[b] === 0 || B.ready[b] === 0 || B.stunUntil[b]! > w.tick) continue; // stunned (BUILD_1B §5.5): no output, no new call
     const def = w.c.buildings[B.def[b]!]!;
     if (def.farm) farm(w, b);
     else if (def.mine !== null) mine(w, b);

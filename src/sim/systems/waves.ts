@@ -8,14 +8,31 @@
 import { ticks, waveSchedule } from "../../content/compile";
 import { ECONOMY, MODES, PHASE, TICK_HZ } from "../../content/rules";
 import { STAT, bump } from "../stats";
+import { BOSS } from "../stores/boss";
 import { gapScale } from "./pace";
 import type { Mode } from "../../content/types";
-import type { Phase, World } from "../world";
+import type { World } from "../world";
 
-function enter(w: World, phase: Exclude<Phase, "defeat">, length: number): void {
+export function enter(w: World, phase: "day" | "night" | "dawn", length: number): void {
   w.phase = phase;
   w.phaseEnd = length < 0 ? -1 : w.tick + length;
+  if (phase === "day") w.dayStarts[w.day] = w.tick + 1;
   w.events.rare.push({ t: "phase", tick: w.tick, phase, day: w.day });
+}
+
+/** The day `key` (a building id, "keep2", "keep3", "upgrade") opens in the story (BUILD_1B §12); the sandbox opens all. */
+export const opensOn = (w: World, key: string): number => (w.sandbox ? 1 : (w.c.content.stage?.unlock[key] ?? 1));
+export const locked = (w: World, key: string): boolean => w.day < opensOn(w, key);
+
+/** The sandbox's skipTo: day n of the stage, the nights before it counted as held (their enemies gone, no pay). */
+export function skipTo(w: World, day: number): boolean {
+  if (!(Number.isInteger(day) && day > w.wave && day <= (w.c.content.stage?.nights ?? w.c.content.waves.list.length)) || w.boss.stage >= BOSS.lull) return false;
+  for (const e of w.enemies.live()) w.enemies.release(e);
+  w.spawnQueue.length = 0;
+  for (let wave = 1; wave < day; wave += 1) [w.waveLeft[wave], w.waveAlive[wave], w.waveEnded[wave]] = [0, 0, 1];
+  [w.wave, w.day] = [day - 1, day];
+  enter(w, "day", dayTicks(w.mode, w.pace.k));
+  return true;
 }
 
 /** A day's ticks at pace k: the wave clock (BALANCE.md §4.1 "giờ đợt"), ÷ k. */
@@ -62,7 +79,7 @@ export function callNight(w: World): boolean {
 }
 
 export function phaseStep(w: World): void {
-  if (w.phase === "defeat") return;
+  if (w.phase === "defeat" || w.phase === "victory") return;
   if (w.phase === "day" && w.tick >= w.phaseEnd) startNight(w);
   else if (w.phase === "dawn" && w.tick >= w.phaseEnd) {
     w.day += 1;
@@ -82,5 +99,6 @@ export function phaseStep(w: World): void {
     bump(w.stats, STAT.wavesCleared);
     w.events.rare.push({ t: "waveEnd", tick: w.tick, wave, bonus });
   }
-  if (w.phase === "night" && open === 0) enter(w, "dawn", ticks(PHASE.dawnS));
+  // The boss night holds from its warning to the retreat (BUILD_1B §4.4).
+  if (w.phase === "night" && open === 0 && !(w.boss.stage >= BOSS.warned && w.boss.stage < BOSS.done)) enter(w, "dawn", ticks(PHASE.dawnS));
 }

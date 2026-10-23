@@ -21,6 +21,7 @@ export const REASON: Readonly<Record<string, string>> = {
   undoWindow: "Hết 5 s hoàn tác", finished: "Xây xong rồi, không hoàn tác", blocked: "Không đứng được ở đó", rallyFar: "Xa trại quá", rallyOffRoad: "Điểm tập kết phải ở đường",
   noBuilding: "Không có nhà đó", noBarracks: "Không phải Trại Lính", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
   noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ dân rồi", notRipe: "Ô này chưa chín",
+  locked: "Chưa mở", keepMax: "Lũy đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",
 };
 
 export const button = (act: string, label: string, key = "", attrs = ""): string => `<button data-act="${act}"${attrs}>${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`;

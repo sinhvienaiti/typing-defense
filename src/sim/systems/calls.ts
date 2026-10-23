@@ -204,7 +204,7 @@ function work(w: World, c: number, share: number, word: number, len: number, qua
       const dz = w.agents.z[0]! - B.z[b]!;
       // Draconis within his ring of a cannon (his affinity) sets what its Word Shot hits burning (TK 10.3).
       const burn = w.c.content.hero.affinity.includes(def.id) && dx * dx + dz * dz <= AGENT.heroRingM * AGENT.heroRingM;
-      w.typing.shots.push({ b, power: spec ? shotPower(spec.dBar[B.level[b]! - 1]!, len, quality) : 0, crit, word, burn, bolt: spec === undefined });
+      w.typing.shots.push({ b, power: spec ? shotPower(spec.dBar[B.level[b]! - 1]!, len, quality) : 0, crit, word, burn, bolt: spec === undefined, boss: C.burst[c] === 1 });
       B.charges[b] = Math.min(POWER.max, B.charges[b]! + Math.round(POWER.perWord * share));
       return false;
     }

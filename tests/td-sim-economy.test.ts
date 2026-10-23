@@ -327,9 +327,10 @@ describe("sites and builders (§4.3)", () => {
     send(w, { t: "upgrade", building: w.buildings.id(late) });
     send(w, { t: "sell", building: w.buildings.id(late) });
     expect([w.gold, w.wood, w.buildings.level[late], w.buildings.upTo[late], w.buildings.used[late]]).toEqual([g, wd, 1, 0, 1]);
-    // A second undo in the same 5 s finds nothing under way: no second refund, the building stays (review R1).
-    expect(send(w, { t: "sell", building: w.buildings.id(late) }).find((event) => event.t === "rejected")).toMatchObject({ reason: "finished" });
-    expect([w.gold, w.wood, w.buildings.used[late]]).toEqual([g, wd, 1]);
+    // A second press in the same 5 s finds nothing under way: no second refund; it sells the building for 60 % of what
+    // it cost (BUILD_1B §7: the undone upgrade no longer counts), rounded down.
+    expect(send(w, { t: "sell", building: w.buildings.id(late) }).find((event) => event.t === "sold")).toMatchObject({ gold: 29, wood: 12, undo: false });
+    expect([w.gold, w.wood, w.buildings.used[late]]).toEqual([g + 29_000, wd + 12, 0]);
   });
 
   it("finished work is never undone, even within 5 s: an upgrade typed through in 1 s keeps its building (review R1)", () => {
@@ -343,12 +344,14 @@ describe("sites and builders (§4.3)", () => {
     until(w, () => w.npcs.task[n] === TASK.working, T(1));
     w.buildings.progress[archer] = 1;
     until(w, () => w.buildings.level[archer] === 2, 2);
-    const [gold, wood] = [w.gold, w.wood];
-    expect(send(w, { t: "sell", building: w.buildings.id(archer) }).find((event) => event.t === "rejected")).toMatchObject({ reason: "finished" });
-    expect([w.gold, w.wood, w.buildings.used[archer], w.buildings.level[archer]]).toEqual([gold, wood, 1, 2]);
     // The sandbox's free level waits for an upgrade under way, which would set its own level when done.
     send(w, { t: "upgrade", building: w.buildings.id(archer) });
     expect(send(w, { t: "sandbox", op: { op: "level", building: w.buildings.id(archer), value: 1 } }).find((event) => event.t === "rejected")).toMatchObject({ reason: "notReady" });
+    // Pressed now it undoes only the upgrade just begun; the finished level 2 is sold, never undone: 60 % of 112 gold, 48 wood (BUILD_1B §7).
+    expect(send(w, { t: "sell", building: w.buildings.id(archer) }).find((event) => event.t === "sold")).toMatchObject({ gold: 203 - 112, wood: 87 - 48, undo: true });
+    const [gold, wood] = [w.gold, w.wood];
+    expect(send(w, { t: "sell", building: w.buildings.id(archer) }).find((event) => event.t === "sold")).toMatchObject({ gold: 67, wood: 28, undo: false });
+    expect([w.gold - gold, w.wood - wood, w.buildings.used[archer]]).toEqual([67_000, 28, 0]);
   });
 
   it("undoing an upgrade ends only its build call: the mine's own call goes on (review R1)", () => {
@@ -372,7 +375,7 @@ describe("sites and builders (§4.3)", () => {
     expect(w.buildings.hp[archer]).toBe(Math.round(w.c.buildings[def(w, "archer")]!.hp[1]! * BUILD.sturdy));
   });
 
-  it("no sequence of builds, upgrades, undos and free sandbox levels makes gold or wood (property)", () => {
+  it("no sequence of builds, upgrades (the Bastion's too), sales at 60 %, undos and free sandbox levels makes gold or wood (property; BUILD_1B §7, G7)", () => {
     const seen = { built: 0, sold: 0, levelSet: 0 };
     const spots = [[-18, -14], [-18, -8], [-8, -16], [-8, -8], [7, -25], [10, -8], [20, -22], [2, 18], [8, 12], [-10, 16]];
     for (let seed = 1; seed <= 30; seed += 1) {
@@ -387,7 +390,7 @@ describe("sites and builders (§4.3)", () => {
         if (roll < 4) {
           const [x, z] = spots[pick.int(0, spots.length - 1)]!;
           seen.built += send(w, { t: "build", def: pick.int(1, 3), qx: q(x!), qz: q(z!) }).filter((event) => event.t === "built").length;
-        } else if (roll < 5 && alive.length > 0) send(w, { t: "upgrade", building: any() });
+        } else if (roll < 5) send(w, { t: "upgrade", building: alive.length === 0 || pick.int(0, 3) === 0 ? w.buildings.id(0) : any() });
         else if (roll < 8 && alive.length > 0) seen.sold += send(w, { t: "sell", building: any() }).filter((event) => event.t === "sold").length;
         else if (alive.length > 0) seen.levelSet += send(w, { t: "sandbox", op: { op: "level", building: any(), value: pick.int(1, 3) } }).filter((event) => event.t === "levelSet").length;
         run(w, pick.int(0, 400));

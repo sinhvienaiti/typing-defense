@@ -11,7 +11,7 @@ export type WordKind = "call" | "finisher" | "rare" | "review" | "direct" | "sea
 export type Grade = "flash" | "perfect" | "good" | "ok" | "sloppy";
 export type DamageType = "physical" | "magic" | "true";
 export type Footprint = "S" | "M" | "L" | "XL";
-export type EnemyTier = "swarm" | "small" | "medium" | "heavy";
+export type EnemyTier = "swarm" | "small" | "medium" | "heavy" | "boss";
 export type Altitude = "ground" | "low" | "high";
 
 export type Range = readonly [number, number];
@@ -33,8 +33,8 @@ export type PowerSpec = { dmgMul?: number; targets?: number; areaMul?: number };
 export type BarracksLevel = { hp: number; damage: Range; periodS: number; armorPct: number };
 export type MineLevel = { amount: number; everyS: number; pile: number };
 
-/** The Bastion's levels (TK 12.4); its crossbow is the definition's attack. */
-export type KeepLevel = { slots: number };
+/** The Bastion's levels (TK 12.4); its crossbow is the definition's attack. `gold`, `wood`: the step's price (level 1: 0). */
+export type KeepLevel = { slots: number; gold: number; wood: number };
 
 export type BuildingDef = {
   id: string;
@@ -77,6 +77,9 @@ export type EnemyDef = {
   /** Blast damage multiplier (Ma Trơi takes ×1.5). */
   splashTakenMul?: number;
   melee?: { damage: Range; periodS: number };
+  /** Soldiers fight it but never stop it (the boss); burning hurts it ×burnTakenMul. */
+  unblockable?: true;
+  burnTakenMul?: number;
   view: ViewBlock;
 };
 
@@ -99,7 +102,8 @@ export type MapDef = {
   preset?: readonly (readonly [string, number, number])[];
 };
 
-export type WaveEntry = { enemy: string; count: number };
+/** `pack`: this entry's pack size (the enemy's own by default). */
+export type WaveEntry = { enemy: string; count: number; pack?: number };
 
 export type WavesDef = {
   list: readonly (readonly WaveEntry[])[];
@@ -107,6 +111,27 @@ export type WavesDef = {
   endlessGrowth: number;
   packGapS: number;
   memberGapS: number;
+};
+
+/**
+ * The boss of a stage (BUILD_1B §5): its enemy (whose hit points are the base), retreat at retreatPct of them, hit
+ * points ×(1 + kHp·max(0, k − 1)) up to kHpMax, Draconis' own fireballs ×heroMul ("Vỏ dày"), and its moves.
+ */
+export type BossDef = {
+  enemy: string; retreatPct: number; kHp: number; kHpMax: number; retreatS: number; chestGold: number; heroMul: number;
+  roots: { everyS: number; firstS: number; warnS: number; radiusM: number; stunS: number };
+  slam: { damage: Range; reachM: number; everyS: number; warnS: number; knockM: number };
+  stagger: { atPct: number; stunS: number; vulnerable: number; burstLifeS: number; burstReachM: number };
+  summon: { enemy: string; count: number; everyS: number; firstS: number; warnS: number };
+  keep: { lives: number; everyS: number; warnS: number; stopM: number };
+};
+
+/** The story stage (BUILD_1B §4): its nights, the Bastion's top level, the boss peak, the day each thing opens. */
+export type StageDef = {
+  nights: number; keepMax: number;
+  boss: { night: number; lullS: number; lullAlive: number; lullWaitS: number; escort: readonly WaveEntry[]; emergeM: number; emergeAfterS: number };
+  /** Building id, "keep2", "keep3" or "upgrade" → the day it opens. */
+  unlock: Readonly<Record<string, number>>;
 };
 
 export type Content = {
@@ -118,4 +143,6 @@ export type Content = {
   helpers: readonly HelperDef[];
   map: MapDef;
   waves: WavesDef;
+  boss?: BossDef;
+  stage?: StageDef;
 };

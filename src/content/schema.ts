@@ -76,6 +76,22 @@ export function validateContent(content: Content): string[] {
     }
   });
 
+  const boss = content.boss;
+  if (boss !== undefined) {
+    if (content.enemies.find((enemy) => enemy.id === boss.enemy)?.tier !== "boss") fail("boss", boss.enemy + " is not an enemy of the boss tier");
+    if (!enemyIds.has(boss.summon.enemy)) fail("boss", "summons unknown enemy " + boss.summon.enemy);
+    if (!(boss.retreatPct > 0 && boss.retreatPct < boss.stagger.atPct && boss.stagger.atPct < 100)) fail("boss", "needs 0 < retreat < stagger < 100 %");
+    range("boss slam", boss.slam.damage);
+  }
+  const stage = content.stage;
+  if (stage !== undefined) {
+    const keys = new Set([...buildingIds, "keep2", "keep3", "upgrade"]);
+    for (const key of Object.keys(stage.unlock)) if (!keys.has(key)) fail("stage", "unlocks unknown " + key);
+    for (const entry of stage.boss.escort) if (!enemyIds.has(entry.enemy)) fail("stage", "escort of unknown enemy " + entry.enemy);
+    if (stage.nights > content.waves.list.length || stage.boss.night > stage.nights) fail("stage", "nights beyond the wave list, or the boss after the last night");
+    if (keep?.keep !== undefined && stage.keepMax > keep.keep.levels.length) fail("stage", "keepMax beyond the Bastion's levels");
+  }
+
   const { map } = content;
   const same = (a: readonly number[] | undefined, b: readonly number[]) => a !== undefined && a[0] === b[0] && a[1] === b[1];
   for (const route of [...map.routes, map.flyRoute]) {

@@ -6,6 +6,7 @@
 import { MODES, PACE } from "../../content/rules";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
+import { BOSS } from "../stores/boss";
 import type { World } from "../world";
 
 const spot = { x: 0, z: 0 };
@@ -21,7 +22,7 @@ export function spawnEnemies(w: World): void {
     const flying = def.altitude > 0;
     const spread = flying ? 1 : Math.max(0, w.map.roadHalfM - def.radius);
     const lateral = (w.rng.spawn.float() * 2 - 1) * spread;
-    const elite = w.pace.elite > 0 ? 1 : 0;
+    const elite = w.pace.elite > 0 && w.boss.stage < BOSS.lull ? 1 : 0; // never in the boss peak (BUILD_1B §5.5)
     const slot = E.add(next.enemy, Math.round(maxHp(w, next.enemy) * (elite === 1 ? PACE.eliteHp : 1)), def.altitude, next.route, next.wave, lateral);
     w.waveLeft[next.wave]! -= 1;
     if (slot >= 0) {
@@ -38,12 +39,13 @@ export function spawnEnemies(w: World): void {
   }
 }
 
-/** The sandbox's load test (TK 25.12, __td.flood): n enemies of each kind in turn on the first half of the routes, evenly spaced, in the current wave. */
+/** The sandbox's load test (TK 25.12, __td.flood): n enemies of each kind but the boss in turn on the first half of the routes, evenly spaced, in the current wave. */
 export function flood(w: World, n: number): void {
   const E = w.enemies;
   const grounds = w.lanes.length - 1;
+  const kinds = w.c.enemies.filter((def) => !def.boss);
   for (let k = 0; k < n; k += 1) {
-    const def = w.c.enemies[k % w.c.enemies.length]!;
+    const def = kinds[k % kinds.length]!;
     const route = def.altitude > 0 ? grounds : k % grounds;
     const spread = def.altitude > 0 ? 1 : Math.max(0, w.map.roadHalfM - def.radius);
     const slot = E.add(def.index, maxHp(w, def.index), def.altitude, route, w.wave, (((k * 0.618034) % 1) * 2 - 1) * spread);

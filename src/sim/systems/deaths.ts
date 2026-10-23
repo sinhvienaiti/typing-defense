@@ -5,18 +5,20 @@
  */
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
+import { BOSS } from "../stores/boss";
 import type { World } from "../world";
-import { LEAKED } from "./move";
+import { LEAKED, SINKING } from "./move";
 
 export function deathsStep(w: World): void {
   const E = w.enemies;
   for (let e = 0; e < E.top; e += 1) {
-    if (E.used[e] === 0 || E.dying[e] === 0) continue;
+    if (E.used[e] === 0 || E.dying[e] === 0 || E.dying[e] === SINKING) continue;
     const def = w.c.enemies[E.def[e]!]!;
     if (E.dying[e] === LEAKED) {
       w.lives = Math.max(0, w.lives - def.leak);
       bump(w.stats, STAT.leaks);
       bump(w.stats, STAT.livesLost, def.leak);
+      if (w.boss.stage >= BOSS.lull) bump(w.stats, STAT.livesBoss, def.leak);
       w.events.ring.push(FX.leak, E.x[e]!, E.z[e]!, def.leak, w.tick);
       w.events.rare.push({ t: "leak", tick: w.tick, enemy: def.index, lives: w.lives });
     } else {

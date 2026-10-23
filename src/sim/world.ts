@@ -20,6 +20,7 @@ import { groundLanes, Lane } from "./lanes";
 import { WalkGrid } from "./nav/grid";
 import { createStats } from "./stats";
 import { AgentStore } from "./stores/agents";
+import { BossStore } from "./stores/boss";
 import { BuildingStore } from "./stores/buildings";
 import { CallStore } from "./stores/calls";
 import { EnemyStore } from "./stores/enemies";
@@ -30,6 +31,7 @@ import { UnitStore } from "./stores/units";
 import { WordStore } from "./stores/words";
 import { agentsStep, heroAttack, home } from "./systems/agents";
 import { attentionStep } from "./systems/attention";
+import { bossStep } from "./systems/boss";
 import { soldiersStep } from "./systems/block";
 import { meleeStep, statusStep, towersAttack } from "./systems/combat";
 import { deathsStep } from "./systems/deaths";
@@ -41,12 +43,12 @@ import { spawnEnemies } from "./systems/spawn";
 import { createPace, PACE_OFF, paceStep, type Pace, type PaceHeader } from "./systems/pace";
 import { dayTicks, phaseStep } from "./systems/waves";
 
-export type Phase = "day" | "night" | "dawn" | "defeat";
+export type Phase = "day" | "night" | "dawn" | "defeat" | "victory";
 
 export type QueuedSpawn = { tick: number; enemy: number; route: number; wave: number };
 
 /** A Word Shot (or a Bastion volley) a power word finished in step 1 asks for; fired in step 7 of the same tick. */
-export type PendingShot = { b: number; power: number; crit: boolean; word: number; burn: boolean; bolt: boolean };
+export type PendingShot = { b: number; power: number; crit: boolean; word: number; burn: boolean; bolt: boolean; boss: boolean };
 
 /**
  * The typing state of a run (TK 25.8): bags by the band's top length (a power
@@ -67,12 +69,15 @@ export type World = {
   readonly c: Compiled;
   readonly map: MapDef;
   readonly seed: number;
+  /** The sandbox (BUILD_1B §4.1); else the story stage: its unlock days, the Bastion bought up to level 3, no sandbox commands. */
   readonly sandbox: boolean;
   tick: number;
   phase: Phase;
   /** The day number (from 1; the night after day n is night n) and the tick the day or the dawn ends (−1 at night). */
   day: number;
   phaseEnd: number;
+  /** Index n: the tick at which day n's world stands (after the step that began it): "Chơi lại Ngày n" replays to it. */
+  readonly dayStarts: number[];
   readonly rng: Rng;
   /** Treasury, thousandths of gold (TK 25.4); wood, food, seeds and knowledge are whole (BUILD_1A6 §3). */
   gold: number;
@@ -115,6 +120,7 @@ export type World = {
   readonly events: Events;
   /** The run's pace k, flow meter and pace directors (systems/pace.ts). */
   readonly pace: Pace;
+  readonly boss: BossStore;
 };
 
 /** `deck`: the compiled vocabulary (levels 1–5); none deals no word. `pace`: the run header (none: k 1, director off). */
@@ -134,6 +140,7 @@ export function createWorld(options: WorldOptions): World {
     phase: "day",
     day: 1,
     phaseEnd: dayTicks(mode, (options.pace ?? PACE_OFF).k),
+    dayStarts: [0, 0],
     rng: createRng(options.seed),
     gold: (options.gold ?? ECONOMY.start.gold) * 1000,
     wood: options.wood ?? ECONOMY.start.wood,
@@ -167,6 +174,7 @@ export function createWorld(options: WorldOptions): World {
     stats: createStats(),
     events: new Events(),
     pace: createPace(mode, options.pace ?? PACE_OFF),
+    boss: new BossStore(),
   };
   placeBuilding(w, 0, map.keep[0], map.keep[1], -1, true);
   for (let agent = 0; agent <= c.content.helpers.length; agent += 1) w.agents.add(home(w, agent));
@@ -177,7 +185,7 @@ export function createWorld(options: WorldOptions): World {
 
 /** One tick. `commands` are this tick's, in the order they were sent. */
 export function step(w: World, commands: readonly Command[] = []): void {
-  if (w.phase === "defeat") {
+  if (w.phase === "defeat" || w.phase === "victory") {
     w.tick += 1;
     return;
   }
@@ -192,6 +200,7 @@ export function step(w: World, commands: readonly Command[] = []): void {
   meleeStep(w); // 7: melee
   projectilesStep(w); // 8
   statusStep(w); // 9
+  bossStep(w); // BUILD_1B §5: the boss peak
   economyStep(w); // 10: farms, trees, sites, mines, power calls, quizzes
   attentionStep(w); // 11: calls open, light, get words
   deathsStep(w); // 15

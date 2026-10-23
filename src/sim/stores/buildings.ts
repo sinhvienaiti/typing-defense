@@ -10,7 +10,9 @@ const NEVER = -0x40000000;
  * §4.3): `upTo` is the level being built (0: none), `progress` 0–1 of that
  * work, and nothing runs before `ready`; an upgrade keeps the building
  * running at its level meanwhile. `builtTick` and `paidGold`/`paidWood` are
- * the last site or upgrade and its price: what an undo within 5 s refunds.
+ * the last site or upgrade and its price: what an undo within 5 s refunds;
+ * `spentGold`/`spentWood` everything it cost, what a sale refunds 60 % of
+ * (BUILD_1B §7). Rễ Trồi stuns it until `stunUntil` (§5.5).
  */
 export class BuildingStore extends Slots {
   readonly def = new Uint8Array(this.cap);
@@ -24,6 +26,9 @@ export class BuildingStore extends Slots {
   readonly builtTick = new Int32Array(this.cap);
   readonly paidGold = new Int32Array(this.cap);
   readonly paidWood = new Int32Array(this.cap);
+  readonly spentGold = new Int32Array(this.cap);
+  readonly spentWood = new Int32Array(this.cap);
+  readonly stunUntil = new Int32Array(this.cap);
   /** Builder NPC on the site, −1 none; a whole Perfect build call left it sturdy (+10 % hit points). */
   readonly builder = new Int16Array(this.cap);
   readonly sturdy = new Uint8Array(this.cap);

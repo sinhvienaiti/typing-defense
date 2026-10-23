@@ -79,6 +79,7 @@ function compileEnemy(def: EnemyDef, index: number) {
     index, id: def.id, tier: def.tier, hp: def.hp, armor: def.armorPct / 100, resist: def.resistPct / 100,
     speed: def.speed / RULES.TICK_HZ, altitude: ALTITUDES.indexOf(def.altitude), leak: def.leak, gold: def.gold,
     weight: def.blockWeight, radius: def.radiusM, packSize: def.packSize, splashMul: def.splashTakenMul ?? 1,
+    boss: def.tier === "boss", unblockable: def.unblockable === true, burnTaken: def.burnTakenMul ?? 1,
     melee: def.melee ? { min: def.melee.damage[0], max: def.melee.damage[1], period: ticks(def.melee.periodS) } : null,
     def,
   };
@@ -107,7 +108,8 @@ export function waveSchedule(c: Compiled, wave: number, gap = 1): ScheduledSpawn
   let lane = 0;
   for (const entry of base) {
     const enemy = c.enemyIndex(entry.enemy);
-    const { packSize, altitude } = c.enemies[enemy]!;
+    const { altitude } = c.enemies[enemy]!;
+    const packSize = entry.pack ?? c.enemies[enemy]!.packSize;
     let left = Math.round(entry.count * scale);
     while (left > 0) {
       const size = Math.min(packSize, left);
