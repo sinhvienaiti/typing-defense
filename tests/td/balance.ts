@@ -30,8 +30,9 @@ export type Runs = { mode: Mode; typing: boolean; runs: BotRun[] };
 export function play(mode: Mode, typing: boolean, seeds: number, nights: number): Runs {
   const deck = realDeck();
   // The game's default header for the standard player: k = 1, the pace director on (BALANCE.md §4).
+  // BUILD_1B §18.2: the §12 gates run on the story stage (its unlock days, the Bastion raised through its builders).
   const runs = Array.from({ length: seeds }, (_, k) => runBot({
-    seed: k + 1, deck, hands: typing ? HANDS : null, expected: 35, mode, nights, check: true, timeSteps: true, pace: { k: 1, director: true },
+    seed: k + 1, deck, hands: typing ? HANDS : null, expected: 35, mode, nights, check: true, timeSteps: true, pace: { k: 1, director: true }, sandbox: false,
     plan: () => new Plan(STANDARD, [heroDay(), heroNight()]),
   }));
   return { mode, typing, runs };
@@ -90,7 +91,7 @@ export function balanceReport(options: ReportOptions, print: (text: string) => v
   const all = new Map<Mode, [Runs, Runs]>(modes.map((mode) => [mode, [play(mode, true, seeds, nights), play(mode, false, seeds, nights)]]));
   const [typing, idle] = all.get("balanced") ?? [play("balanced", true, seeds, nights), play("balanced", false, seeds, nights)];
   const result = gates(typing, idle, nights);
-  print(`## Typing Defense 1A.6 R3: báo cáo bot (${seeds} seed, ${nights} đêm, sandbox, từ vựng thật)\n`);
+  print(`## Cổng BUILD_1A6 §12 trên ải truyện (${seeds} seed, ${nights} đêm, theo lịch mở, từ vựng thật)\n`);
   print("Bot gõ: 35 WPM, 95 % mỗi phím, 30 % lần trượt có Backspace; mắt thấy từ mới sau 0,35–0,6 s, từ kế của lời gọi đang khóa sau 0,15–0,3 s, nhớ từ Hỏi bài sau 0,8–1,6 s. Bot không gõ: cùng kế hoạch, không phím chữ nào. Kế hoạch chuẩn (`tests/td/policies`): Ruộng cạnh rừng đông nam, Tháp Cung và Trại Lính ở khúc nhập, Mỏ ★★★ N1, Lũy cấp 2 rồi 3 trả bằng Vàng và Gỗ, Tháp Cung đường đông, Tháp Pháo, nâng cấp; đánh dấu cây theo cụm, tối đa 4 dân, bán Lúa quá 20; Tướng ban Ngày tới chỗ lời gọi tụ nhiều nhất (lệnh như Tab + Enter), ban Đêm tới tháp có quái và lời gọi Bắn mạnh; không gọi Đêm sớm.\n");
   print("### Cổng `BUILD_1A6.md` §12 (Cân bằng)\n");
   print("| Cổng | Nội dung | Mục tiêu | Đo được | Kết quả |");

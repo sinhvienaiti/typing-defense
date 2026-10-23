@@ -28,17 +28,17 @@ export const WOOD = [[17, 38], [-18.5, -26], [-29, -29], [-18, -41], [6, -43], [
 /**
  * The standard build (BUILD_1A6 §12 gate 4: a farm, trees chopped, towers, barracks, a mine, the Bastion raised with
  * gold): the farm by the south-east trees, the merge's archer and barracks, the rich mine on N1, the Bastion to
- * level 2 (Chấm out, by the farm), the east road's archer and the cannon, a second farm, the Bastion to level 3
- * (Phẩy out, by the mine), then level 2 for the merge's archer, the west archer, level 2 for the cannon, the mine
- * and the barracks. Marked
+ * level 2 (Chấm out, by the farm), the east road's archer and the cannon, then level 2 for the merge's archer, the
+ * west archer, level 2 for the cannon, the Bastion to level 3 (Phẩy out, by the mine; the story opens it last, on
+ * day 5: BUILD_1B §12), level 2 for the mine and the barracks. Marked
  * trees: the villagers' count and 2 more, cluster by cluster from the south-east trees; up to 4 villagers, 20 gold
  * kept back; food past 20 sold; the days run out (no early night).
  */
 export const STANDARD: Layout = {
   name: "Chuẩn",
   builds: [
-    FARM_EAST, ARCHER_MERGE, BARRACKS, MINE_N1, { keep: 2 }, ARCHER_EAST, CANNON, { keep: 3 },
-    { upgrade: 1, level: 2 }, ARCHER_WEST, { upgrade: 6, level: 2 }, { upgrade: 3, level: 2 }, { upgrade: 2, level: 2 },
+    FARM_EAST, ARCHER_MERGE, BARRACKS, MINE_N1, { keep: 2 }, ARCHER_EAST, CANNON,
+    { upgrade: 1, level: 2 }, ARCHER_WEST, { upgrade: 6, level: 2 }, { keep: 3 }, { upgrade: 3, level: 2 }, { upgrade: 2, level: 2 },
   ],
   helpers: [0, 3],
   marks: { spare: 2, woodAt: WOOD },

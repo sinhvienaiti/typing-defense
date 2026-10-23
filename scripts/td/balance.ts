@@ -9,7 +9,8 @@
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
 import { balanceReport } from "../../tests/td/balance";
-import { botById, matrixCells, measuredProfile, stageReport, type Cell } from "../../tests/td/flow";
+import { botById, matrixCells, measuredProfile, poolCells, stageGates, stageReport, tightTable, type Cell } from "../../tests/td/flow";
+import { formatGates } from "../../src/kit/balance";
 import { realDeck } from "../../tests/td/typing";
 
 const arg = (name: string, fallback: number): number => Number(process.argv.find((a) => a.startsWith("--" + name + "="))?.split("=")[1] ?? fallback);
@@ -31,8 +32,19 @@ async function playSet(from: number): Promise<Cell[]> {
 const deck = realDeck();
 const measured = ["child", "novice", "steady", "standard", "skilled", "sloppy", "fast"].map((bot) => ({ bot, profile: measuredProfile(botById(bot), deck) }));
 // A second, independent set of seeds checks that the first set's numbers are not luck.
+const played: Cell[][] = [];
 for (let set = 0; set < sets; set += 1) {
-  stageReport(await playSet(set * seeds), set === sets - 1 ? measured : [], seeds, (text) => console.log(text), set * seeds);
+  played.push(await playSet(set * seeds));
+  stageReport(played[set]!, set === sets - 1 ? measured : [], seeds, (text) => console.log(text), set * seeds);
+  console.log("");
+}
+// BUILD_1B §6.4: the tight targets in Cân bằng read the sets pooled; each set alone keeps BALANCE §3's bands (B1 above).
+if (sets > 1) {
+  const pooled = poolCells(played);
+  console.log(`## Gộp ${sets} bộ seed (${sets * seeds} ván mỗi ô): đích chặt 1B (BUILD_1B §6.4)\n`);
+  console.log(tightTable(played, pooled).join("\n"));
+  console.log("\n### Cổng B1–B9 trên các bộ gộp\n");
+  console.log(formatGates(stageGates(pooled)));
   console.log("");
 }
 

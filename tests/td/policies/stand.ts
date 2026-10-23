@@ -1,17 +1,19 @@
 /**
  * "Build what the layout says" (docs/td/BUILD_NOW.md §6.3, BUILD_1A6 §2–§6, §12 gate 4), the frame every bot policy
- * builds on: buy the layout's steps in order as gold and wood allow (a building on its spot, or the Bastion's next
- * level paid in gold and wood), send each helper to its building once it stands and the helper's slot is open, keep
+ * builds on: buy the layout's steps in order as gold and wood allow and the story's unlock days open them (a step not
+ * open yet is waited for, never skipped: BUILD_1B §18.1), a building on its spot, or the Bastion's next level through
+ * the `upgrade` command (its builders raise it), send each helper to its building once it stands and the helper's slot is open, keep
  * enough marked trees standing for the villagers (nearest the layout's wood anchor first), hire villagers when food
  * allows, and (if the layout says so) call the night early. Rules (where the hero stands by day and by night) run
  * after, every tick. A plan only reads the world and sends commands.
  */
-import { ECONOMY, MODES, VILLAGERS } from "../../../src/content/rules";
+import { MODES, VILLAGERS, ECONOMY } from "../../../src/content/rules";
 import type { CommandBody } from "../../../src/sim/commands";
 import { canPlace } from "../../../src/sim/placement";
 import { NPC_KIND } from "../../../src/sim/stores/npcs";
 import { slotsOpen } from "../../../src/sim/systems/agents";
 import { countNpcs, villagerCap } from "../../../src/sim/systems/economy";
+import { locked, opensOn } from "../../../src/sim/systems/waves";
 import type { World } from "../../../src/sim/world";
 
 /** What a policy may do: read the world, queue commands for this tick. */
@@ -23,17 +25,6 @@ export interface Bot {
 export type Spot = { readonly id: string; readonly x: number; readonly z: number };
 /** A step of the build order: a building on its spot, the Bastion to a level, or build k (an index into builds) upgraded to a level. */
 export type Step = Spot | { readonly keep: number } | { readonly upgrade: number; readonly level: number };
-
-/**
- * The Bastion's level 2–4 at TK 2's price (150 / 260 / 400; its own wood dropped) cut as BUILD_1A6 §3 cuts every
- * price: wood round(woodShare × G), the rest gold. 1A.6 raises the Bastion only in the sandbox, free and at once
- * (§4.3), so the bots pay this through the sandbox's gold and wood, then set the level.
- */
-export function keepPrice(level: number): { gold: number; wood: number } {
-  const total = [0, 0, 150, 260, 400][level]!;
-  const wood = Math.round(total * ECONOMY.woodShare);
-  return { gold: total - wood, wood };
-}
 
 export type Layout = {
   readonly name: string;
@@ -63,7 +54,8 @@ const isUpgrade = (step: Step): step is { readonly upgrade: number; readonly lev
 export class Plan {
   /** Building slot of builds[k] (−1: not down yet); a Bastion step: 0 once it is at that level. */
   readonly slots: number[];
-  private asked = -1;
+  /** The tick something was last bought: a rule buying too waits for the next (one price at a time). */
+  asked = -1;
 
   constructor(readonly layout: Layout, readonly rules: readonly Rule[] = []) {
     this.slots = layout.builds.map(() => -1);
@@ -80,8 +72,15 @@ export class Plan {
     const { layout } = this;
     this.find(w);
     if (w.tick === 0 && layout.gold !== undefined) bot.send({ t: "sandbox", op: { op: "gold", value: layout.gold } });
-    // The next step in order, when the treasury has its price (and a building fits: the price first, canPlace walks the field); one at a time.
-    const next = this.slots.findIndex((s) => s < 0);
+    // The next step in order that is open, when the treasury has its price (and a building fits: the price first,
+    // canPlace walks the field); one at a time. A step the story opens tomorrow is saved for; one further off waits its
+    // day, kept, while the steps after it go on (BUILD_1B §18.1).
+    let next = -1;
+    for (let k = 0; k < this.slots.length && next < 0; k += 1) {
+      if (this.slots[k]! >= 0) continue;
+      if (this.open(w, k)) next = k;
+      else if (this.opensOn(w, k) <= w.day + 1) break;
+    }
     if (next >= 0 && this.asked !== w.tick - 1) this.buy(bot, next);
     const A = w.agents;
     layout.helpers.forEach((k, index) => {
@@ -104,14 +103,17 @@ export class Plan {
     const { w } = bot;
     const step = this.layout.builds[k]!;
     if (isKeep(step)) {
-      const price = keepPrice(step.keep);
+      // The Bastion's next level (BUILD_1B §7: 105 + 45, 182 + 78), once open; the story stops at its top level.
+      const B = w.buildings;
+      const next = B.level[0]! + 1;
+      const price = w.c.content.buildings[0]!.keep!.levels[next - 1];
+      const top = w.sandbox ? 4 : (w.c.content.stage?.keepMax ?? 4);
+      if (price === undefined || B.upTo[0]! > 0 || next > Math.min(step.keep, top) || locked(w, "keep" + next)) return;
       if (w.gold < price.gold * 1000 || w.wood < price.wood) return;
-      bot.send({ t: "sandbox", op: { op: "gold", value: Math.floor(w.gold / 1000) - price.gold } });
-      bot.send({ t: "sandbox", op: { op: "wood", value: w.wood - price.wood } });
-      bot.send({ t: "sandbox", op: { op: "keepLevel", value: step.keep } });
+      bot.send({ t: "upgrade", building: B.id(0) });
     } else if (isUpgrade(step)) {
       const b = this.slot(w, step.upgrade);
-      if (b < 0 || w.buildings.ready[b] === 0 || w.buildings.upTo[b]! > 0) return;
+      if (b < 0 || w.buildings.ready[b] === 0 || w.buildings.upTo[b]! > 0 || locked(w, "upgrade")) return;
       const spec = w.c.buildings[w.buildings.def[b]!]!;
       const level = w.buildings.level[b]!;
       if (w.gold < (spec.gold[level]! - spec.gold[level - 1]!) * 1000 || w.wood < spec.wood[level]! - spec.wood[level - 1]!) return;
@@ -119,10 +121,23 @@ export class Plan {
     } else {
       const def = w.c.buildingIndex(step.id);
       const spec = w.c.buildings[def]!;
-      if (w.gold < spec.gold[0]! * 1000 || w.wood < spec.wood[0]! || !canPlace(w, def, q(step.x), q(step.z)).ok) return;
+      if (locked(w, step.id) || w.gold < spec.gold[0]! * 1000 || w.wood < spec.wood[0]! || !canPlace(w, def, q(step.x), q(step.z)).ok) return;
       bot.send({ t: "build", def, qx: q(step.x), qz: q(step.z) });
     }
     this.asked = w.tick;
+  }
+
+  /** Step k is open in the story (its building, the Bastion's level, upgrades; a step upgrading a building not yet down is not). */
+  private open(w: World, k: number): boolean {
+    return w.day >= this.opensOn(w, k) && (!isUpgrade(this.layout.builds[k]!) || this.slot(w, (this.layout.builds[k] as { upgrade: number }).upgrade) >= 0);
+  }
+
+  /** The day step k opens (an upgrade of a building not down yet: never, till it is). */
+  private opensOn(w: World, k: number): number {
+    const step = this.layout.builds[k]!;
+    if (isKeep(step)) return opensOn(w, "keep" + (w.buildings.level[0]! + 1));
+    if (isUpgrade(step)) return this.slot(w, step.upgrade) >= 0 ? opensOn(w, "upgrade") : Infinity;
+    return opensOn(w, step.id);
   }
 
   /** Marks the standing trees nearest the first wood anchor that still has some within 12 m, until `want` marked ones stand. */

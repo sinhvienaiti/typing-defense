@@ -11,8 +11,8 @@
     "test": "vitest run",
     "check": "node src/kit/verify-kit.mjs && pnpm test && pnpm build",
     "td:balance": "node --import tsx scripts/td/balance.ts",
-    "td:golden:update": "node --import tsx scripts/td/golden.ts",
-    "td:golden:check": "node --import tsx scripts/td/golden.ts --check",
+    "td:golden:update": "node --import tsx scripts/td/golden.ts && node --import tsx scripts/td/golden.ts --boss",
+    "td:golden:check": "node --import tsx scripts/td/golden.ts --check && node --import tsx scripts/td/golden.ts --boss --check",
     "td:replay": "node --import tsx scripts/td/replay.ts",
     "visual": "node src/kit/tools/cdp-run.mjs"
   },

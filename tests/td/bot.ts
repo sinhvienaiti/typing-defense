@@ -22,6 +22,7 @@ import type { PaceHeader } from "../../src/sim/systems/pace";
 import { createWorld, step, type World } from "../../src/sim/world";
 import { wordText, type Deck } from "../../src/typing/decks";
 import { withinOneEdit } from "../../src/typing/distance";
+import { BossProbe, type BossRun } from "./boss-probe";
 import { HumanHands } from "./human";
 import { Keystrokes, type HandsSpec } from "./keystrokes";
 import { Plan } from "./policies/stand";
@@ -40,8 +41,10 @@ export type BotSpec = {
   pace?: PaceHeader;
   /** Made fresh for each run: a plan keeps state. */
   plan: () => Plan;
-  /** Stop when this night has ended (or the Bastion falls). */
+  /** Stop when this night has ended (or the Bastion falls); the boss night ends with its retreat (victory). */
   nights: number;
+  /** The sandbox (default, as 1A.6's bots played); false: the story stage (BUILD_1B §18.1). */
+  sandbox?: boolean;
   /** E, the sandbox's expected speed: the hands' WPM by default (35 without hands). */
   expected?: number;
   vocab?: number;
@@ -92,10 +95,12 @@ export type BotRun = {
   rejected: string[];
   problems: string[];
   defeat: boolean;
-  /** BALANCE.md §3 for the whole run (won: every night held), the directors' steps (night and day together), mean seconds from spawn to kill. */
+  /** BALANCE.md §3 for the whole run (won: every night held, the boss's retreat), the directors' steps (night and day together), mean seconds from spawn to kill. */
   flow: FlowSummary;
   pace: PaceSummary;
   killSeconds: number | null;
+  /** The boss peak (BUILD_1B §18.2). */
+  boss: BossRun;
 };
 
 /** Eyes and hands: one key a tick at most, when the hands are free and there is something seen to type. */
@@ -163,8 +168,11 @@ export function callProblems(w: World): string[] {
   return out;
 }
 
-const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "human" | "pace">): World =>
-  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? (spec.human?.wpm || 35), vocab: spec.vocab, mode: spec.mode, pace: spec.pace });
+const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "human" | "pace" | "sandbox">): World =>
+  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? (spec.human?.wpm || 35), vocab: spec.vocab, mode: spec.mode, pace: spec.pace, sandbox: spec.sandbox });
+
+/** The run is over: the Bastion fell, the boss retreated, or the last night asked for ended (a boss night holds until its retreat). */
+const over = (w: World, nights: number): boolean => w.phase === "defeat" || w.phase === "victory" || (w.wave >= nights && w.waveEnded[nights] === 1 && w.phase !== "night");
 
 /** The night and day directors' steps as one stage's (BALANCE.md §7 B7): steps a wave over both, the spawn and call scales' range. */
 export function paceSummary(w: World): PaceSummary {
@@ -231,8 +239,9 @@ export function runBot(spec: BotSpec): BotRun {
   const run: BotRun = {
     world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
     atNightfall: [], atDawn: [], calls: tally(), callsByKind: [], stepMs: null, livesAtWaveEnd: [], rejected: [], problems: [], defeat: false,
-    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null,
+    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run,
   };
+  const probe = new BossProbe();
   run.atDawn[1] = earned(world);
   const meter = new Meter(run);
   const times: number[] = [];
@@ -261,15 +270,17 @@ export function runBot(spec: BotSpec): BotRun {
     }
     if (world.typing.typedSum > run.windowMax) [run.windowMax, run.windowAt] = [world.typing.typedSum, world.tick];
     spec.onTick?.(world);
+    probe.tick(world);
     meter.read(world);
     if (spec.check === true && run.problems.length < 20) run.problems.push(...callProblems(world).map((p) => "tick " + world.tick + ": " + p));
     if (spec.hashEvery !== undefined && world.tick % spec.hashEvery === 0) run.hashes.push(hashHex(world));
-    if (world.phase === "defeat" || (world.wave >= spec.nights && world.waveEnded[spec.nights] === 1)) break;
+    if (over(world, spec.nights)) break;
   }
   run.ticks = world.tick;
   run.stats = statsObject(world.stats);
   run.defeat = world.phase === "defeat";
-  run.flow = world.pace.meter.summary(run.defeat ? "lost" : world.wave >= spec.nights && world.waveEnded[spec.nights] === 1 ? "won" : "quit");
+  run.flow = world.pace.meter.summary(run.defeat ? "lost" : over(world, spec.nights) ? "won" : "quit");
+  run.boss = probe.finish(world);
   run.pace = paceSummary(world);
   run.killSeconds = run.stats.kills > 0 ? run.stats.killTicks / run.stats.kills / 60 : null;
   if (times.length > 0) {
@@ -281,7 +292,7 @@ export function runBot(spec: BotSpec): BotRun {
 }
 
 /** Steps a fresh world through a run's log, hashing every `every` ticks: a replay must give the run's hashes. */
-export function replayHashes(spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands">, log: readonly Command[], ticks: number, every: number): string[] {
+export function replayHashes(spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "sandbox">, log: readonly Command[], ticks: number, every: number): string[] {
   const world = worldOf(spec);
   const hashes: string[] = [];
   let next = 0;

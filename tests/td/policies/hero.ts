@@ -8,6 +8,7 @@
  */
 import { AGENT } from "../../../src/content/rules";
 import type { CommandBody } from "../../../src/sim/commands";
+import { BOSS } from "../../../src/sim/stores/boss";
 import { CALL_KIND, CALL_STATE } from "../../../src/sim/stores/calls";
 import { MODE } from "../../../src/sim/stores/walkers";
 import { slotsOpen, stand } from "../../../src/sim/systems/agents";
@@ -76,13 +77,13 @@ export function heroDay(): Rule {
   };
 }
 
-/** By night: to the tower (or the Bastion) with the most enemies in reach and a dim power call; there he fights too. A slower player looks every `every` ticks. */
+/** By night: to the tower (or the Bastion) with the most enemies in reach and a dim power call; there he fights too. A slower player looks every `every` ticks. The boss peak has its own rules (policies/boss.ts). */
 export function heroNight(every = EVERY): Rule {
   return (bot) => {
     const { w } = bot;
     const A = w.agents;
     const B = w.buildings;
-    if (w.phase !== "night" || w.tick % every !== 0 || w.typing.router.lock >= 0 || A.mode[0] === MODE.takeoff || A.mode[0] === MODE.fly) return;
+    if (w.phase !== "night" || w.boss.stage >= BOSS.fight || (w.boss.stage >= BOSS.lull && w.enemies.count === 0) || w.tick % every !== 0 || w.typing.router.lock >= 0 || A.mode[0] === MODE.takeoff || A.mode[0] === MODE.fly) return;
     let best = -1;
     let bestValue = 0;
     let here = 0;

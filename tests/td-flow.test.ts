@@ -14,9 +14,11 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
   const deck = realDeck();
 
   it("has every standard bot, the tactics pair for B6, every mode, and the director off once for B7", () => {
-    expect(MATRIX_BOTS.map((bot) => bot.id)).toEqual([...STANDARD_BOTS.map((bot) => bot.id), "standard@good", "standard@poor"]);
+    expect(MATRIX_BOTS.map((bot) => bot.id)).toEqual([...STANDARD_BOTS.map((bot) => bot.id), "standard@good", "standard@poor", "no-type@kite"]);
     const cells = matrixCells();
-    expect(cells.length).toBe(3 * MATRIX_BOTS.length + 1);
+    // The kite (B5, BUILD_1B §18.1) plays Cân bằng and Thử thách only.
+    expect(cells.length).toBe(3 * MATRIX_BOTS.length + 1 - 1);
+    expect(cells.filter((cell) => cell.bot === "no-type@kite").map((cell) => cell.mode)).toEqual(["balanced", "challenge"]);
     expect(cells.filter((cell) => !cell.director)).toEqual([{ bot: "standard", mode: "balanced", director: false }]);
   });
 

@@ -19,8 +19,12 @@ import { built, enemyAt, run, send, world } from "./td/fixtures";
  */
 const BOSS_DEF = SLICE_1A.boss!;
 const STAGE = SLICE_1A.stage!;
+const HP = SLICE_1A.enemies.find((enemy) => enemy.id === BOSS_DEF.enemy)!.hp;
 const T = (seconds: number) => ticks(seconds);
 const sb = (op: string, value?: number) => ({ t: "sandbox" as const, op: (value === undefined ? { op } : { op, value }) as never });
+
+type Strike = Extract<RareEvent, { t: "bossStrike" }>;
+const strikes = (events: readonly RareEvent[], move: Strike["move"]): Strike[] => events.filter((e): e is Strike => e.t === "bossStrike" && e.move === move);
 
 /** Steps until `done` holds (at most `limit` ticks); returns the rare events seen meanwhile. */
 function until(w: World, done: () => boolean, limit = T(120)): RareEvent[] {
@@ -104,20 +108,22 @@ describe("Mộc Tinh's peak (BUILD_1B §4.4)", () => {
     expect([0, 1].map((route) => escort.filter((s) => s.route === route).length)).toEqual([4, 4]);
     const events = until(w, () => w.boss.stage === BOSS.fight, T(7));
     const e = bossSlot(w);
-    expect(events.find((ev) => ev.t === "bossEmerge")).toMatchObject({ route: w.boss.route, hp: 3200 });
+    expect(events.find((ev) => ev.t === "bossEmerge")).toMatchObject({ route: w.boss.route, hp: HP });
     expect(w.enemies.dist[e]).toBeCloseTo(STAGE.boss.emergeM, 0);
     expect(w.enemies.route[e]).toBe(w.boss.route);
     expect(w.enemies.elite[e]).toBe(0);
   });
 
-  it("its hit points: 3,200 × the mode's × (1 + 0.4·max(0, k − 1)), at most ×1.12 (§5.6)", () => {
+  it("its hit points: the enemy's × the mode's × (1 + kHp·max(0, k − 1)), at most ×kHpMax (§5.6)", () => {
     const at = (mode: "relax" | "balanced" | "challenge", k: number) => bossHp(world({ mode, pace: { k, director: false } }));
-    expect(at("balanced", 1)).toBe(3200);
-    expect(at("balanced", 0.75)).toBe(3200);
-    expect(at("balanced", 1.2)).toBe(Math.round(3200 * 1.08));
-    expect(at("balanced", 1.3)).toBe(Math.round(3200 * 1.12));
-    expect(at("relax", 1)).toBe(1600);
-    expect(at("challenge", 1)).toBe(Math.round(3200 * 1.19));
+    const kMul = (k: number) => Math.min(BOSS_DEF.kHpMax, 1 + BOSS_DEF.kHp * Math.max(0, k - 1));
+    expect(at("balanced", 1)).toBe(HP);
+    expect(at("balanced", 0.75)).toBe(HP);
+    expect(at("balanced", 1.2)).toBe(Math.round(HP * kMul(1.2)));
+    expect(at("balanced", 1.3)).toBe(Math.round(HP * kMul(1.3)));
+    expect(kMul(1.3)).toBeLessThanOrEqual(BOSS_DEF.kHpMax);
+    expect(at("relax", 1)).toBe(HP / 2);
+    expect(at("challenge", 1)).toBe(Math.round(HP * 1.19));
   });
 });
 
@@ -135,12 +141,14 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     expect(w.stats[STAT.leaks]).toBe(0);
   });
 
-  it("takes Draconis' own fireballs ×0.5, burning ×1.25, every hit ×1.25 while staggered; its damage is counted by source", () => {
+  it("takes Draconis' own fireballs ×heroMul (\"Vỏ dày\"), burning ×1.25, every hit ×1.25 while staggered; its damage is counted by source", () => {
     const { w, e } = risen();
     const hp = () => w.enemies.hp[e]!;
     let before = hp();
     damageEnemy(w, e, 100, 1, SOURCE.hero); // magic: no resist
-    expect(before - hp()).toBe(50);
+    const hero = Math.round(100 * BOSS_DEF.heroMul);
+    expect(BOSS_DEF.heroMul).toBeLessThanOrEqual(0.5);
+    expect(before - hp()).toBe(hero);
     before = hp();
     damageEnemy(w, e, 100, 0, SOURCE.tower); // physical: 30 % armour
     expect(before - hp()).toBe(70);
@@ -158,7 +166,7 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     for (let k = 0; k < 60; k += 1) step(w);
     w.boss.staggerUntil = kept;
     expect(before - hp()).toBeGreaterThanOrEqual(Math.floor(55 * 1.25) - 1);
-    expect(w.stats[STAT.bossHero]).toBe(50);
+    expect(w.stats[STAT.bossHero]).toBe(hero);
     expect(w.stats[STAT.bossTyped]).toBeGreaterThanOrEqual(125);
     expect(w.stats[STAT.bossDamage]).toBe(w.boss.hpMax - hp());
   });
@@ -171,7 +179,7 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     moveBoss(w, e, w.boss.mergeM);
     w.enemies.stunUntil[e] = 1e9; // it stays here
     const warned = until(w, () => w.boss.rootsEnd >= 0, T(7));
-    const warn = warned.find((ev) => ev.t === "bossStrike" && ev.move === "roots")!;
+    const warn = strikes(warned, "roots")[0]!;
     expect(warn).toMatchObject({ hit: false, end: w.boss.rootsEnd });
     expect(w.boss.rootsEnd - (w.tick - 1)).toBe(T(BOSS_DEF.roots.warnS));
     const ids = Array.from(w.boss.targets.subarray(0, w.boss.targetN));
@@ -223,7 +231,7 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     };
     place();
     w.boss.slamAt = w.tick;
-    const warn = until(w, () => w.boss.slamEnd >= 0, 3).find((ev) => ev.t === "bossStrike" && ev.move === "slam")!;
+    const warn = strikes(until(w, () => w.boss.slamEnd >= 0, 3), "slam")[0]!;
     expect(warn.end - (w.tick - 1)).toBe(T(BOSS_DEF.slam.warnS));
     expect(w.boss.slamX).toBeGreaterThan(0.9);
     while (w.tick < w.boss.slamEnd) {
@@ -287,7 +295,7 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     const warned = until(w, () => w.boss.summonEnd >= 0, T(10));
     const warnedAt = w.tick - 1;
     expect(warnedAt).toBe(staggerEnd + T(BOSS_DEF.summon.firstS));
-    expect(warned.find((ev) => ev.t === "bossStrike" && ev.move === "summon")).toMatchObject({ hit: false, count: 4 });
+    expect(strikes(warned, "summon")[0]).toMatchObject({ hit: false, count: 4 });
     const sprout = w.c.enemyIndex("mam-go");
     until(w, () => w.boss.summonEnd < 0, T(1));
     const sprouts = w.enemies.live().filter((s) => w.enemies.def[s] === sprout);
@@ -304,9 +312,9 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     w.lives = 7;
     moveBoss(w, e, w.lanes[w.enemies.route[e]!]!.length - BOSS_DEF.keep.stopM);
     const events = until(w, () => w.phase === "defeat", T(20));
-    const strikes = events.filter((ev) => ev.t === "bossStrike" && ev.move === "keep");
-    const warns = strikes.filter((ev) => !ev.hit);
-    const blows = strikes.filter((ev) => ev.hit);
+    const keep = strikes(events, "keep");
+    const warns = keep.filter((ev) => !ev.hit);
+    const blows = keep.filter((ev) => ev.hit);
     expect(blows.length).toBe(3);
     for (const [k, blow] of blows.entries()) expect(blow.tick - warns[k]!.tick).toBe(T(BOSS_DEF.keep.warnS));
     expect(w.lives).toBe(0);

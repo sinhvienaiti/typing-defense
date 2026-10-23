@@ -1,5 +1,5 @@
 /**
- * Remakes tests/golden/td-1a.json (`pnpm td:golden:update`) after a change
+ * Remakes tests/golden/td-1a.json and tests/golden/td-1b-boss.json (`pnpm td:golden:update`; --boss: only the boss one) after a change
  * that was meant: runs the golden bot (tests/td/golden.ts) on the file's own
  * words, or on a fresh snapshot of vocabulary levels 1–3 with --fresh-words,
  * and prints the fields that changed (any field: hashes, ticks, commands,
@@ -13,14 +13,16 @@
  */
 import { existsSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { GOLDEN_URL, goldenOf, goldenSpec, readGolden, runGolden, snapshotWords, type Golden } from "../../tests/td/golden";
+import { BOSS_GOLDEN_URL, GOLDEN_URL, bossGoldenSpec, goldenOf, goldenSpec, readGolden, runBossGolden, runGolden, snapshotWords, type Golden } from "../../tests/td/golden";
 
 const args = process.argv.slice(2);
 const flag = (name: string) => args.includes(name);
 const logAt = args.indexOf("--log");
-const before = existsSync(GOLDEN_URL) ? readGolden() : null;
-const words = flag("--fresh-words") || before === null ? snapshotWords() : before.words;
-const { run, deck } = runGolden(words);
+const boss = flag("--boss");
+const URL_ = boss ? BOSS_GOLDEN_URL : GOLDEN_URL;
+const before = existsSync(URL_) ? readGolden(URL_) : null;
+const words = flag("--fresh-words") || before === null ? (existsSync(GOLDEN_URL) && boss ? readGolden().words : snapshotWords()) : before.words;
+const { run, deck } = boss ? runBossGolden(words) : runGolden(words);
 const golden = goldenOf(run, deck, words);
 const keys = [...new Set([...Object.keys(before ?? {}), ...Object.keys(golden)])] as (keyof Golden)[];
 const changed = before === null ? [] : keys.filter((key) => JSON.stringify(golden[key]) !== JSON.stringify(before[key]));
@@ -43,12 +45,12 @@ console.log(JSON.stringify({
   summary: golden.summary,
 }));
 if (logAt >= 0) {
-  const spec = goldenSpec(deck);
+  const spec = boss ? bossGoldenSpec(deck) : goldenSpec(deck);
   writeFileSync(args[logAt + 1]!, JSON.stringify({ seed: spec.seed, expected: spec.hands!.wpm, pace: spec.pace, words, deck: deck.hash, content: golden.content, every: golden.every, ticks: golden.ticks, hashes: golden.hashes, log: run.log }));
 }
 if (flag("--check")) {
   if (!same) process.exitCode = 1;
 } else if (!same) {
-  writeFileSync(GOLDEN_URL, JSON.stringify(golden, null, 1) + "\n");
-  console.log("wrote " + fileURLToPath(GOLDEN_URL));
+  writeFileSync(URL_, JSON.stringify(golden, null, 1) + "\n");
+  console.log("wrote " + fileURLToPath(URL_));
 }

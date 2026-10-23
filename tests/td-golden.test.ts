@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createWorld } from "../src/sim/world";
 import { replayHashes, runBot } from "./td/bot";
-import { GOLDEN_EVERY, goldenSpec, readGolden, runGolden } from "./td/golden";
+import { BOSS_GOLDEN_URL, GOLDEN_EVERY, bossGoldenSpec, goldenSpec, readGolden, runBossGolden, runGolden } from "./td/golden";
 
 /**
  * The golden run (docs/td/BUILD_NOW.md §6.1, §7 gate 4; BUILD_1A6 §12 gate 2): the balanced bot plays
@@ -45,5 +45,29 @@ describe("golden run", () => {
     expect(again.hashes).toEqual(run.hashes);
     expect(again.log).toEqual(run.log);
     expect(replayHashes(goldenSpec(deck), run.log, run.ticks, GOLDEN_EVERY)).toEqual(run.hashes);
+  });
+});
+
+/**
+ * The boss golden (docs/td/BUILD_1B.md §17 item 7): the sandbox preset, its towers raised, Mộc Tinh called on day 1,
+ * the standard hands at 35 WPM until the stage ends; tests/golden/td-1b-boss.json keeps its hashes. It must make the
+ * boss retreat (the whole peak runs: lull, rise, moves, stagger, sprouts, retreat, victory).
+ */
+describe("boss golden run", () => {
+  const golden = readGolden(BOSS_GOLDEN_URL);
+  const { run, deck } = runBossGolden(golden.words);
+
+  it("plays the boss peak to its retreat and the stage won, every call invariant holding, nothing refused", () => {
+    expect(createWorld({ seed: golden.seed }).c.hash).toBe(golden.content);
+    expect(run.world.phase).toBe("victory");
+    expect(run.stats.bossRetreats).toBe(1);
+    expect(run.rejected).toEqual([]);
+    expect(run.problems).toEqual([]);
+  });
+
+  it("hashes the world every 60 ticks as td-1b-boss.json says; again and from its log alike", () => {
+    expect(run.ticks).toBe(golden.ticks);
+    expect(run.hashes).toEqual(golden.hashes);
+    expect(replayHashes(bossGoldenSpec(deck), run.log, run.ticks, GOLDEN_EVERY)).toEqual(run.hashes);
   });
 });

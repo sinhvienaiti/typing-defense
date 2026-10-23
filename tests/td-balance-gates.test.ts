@@ -19,11 +19,13 @@ describe("the bots' gates (BUILD_1A6 §12)", () => {
     });
   }
 
-  it("both bots build, raise the Bastion with gold and hire; only the typing bot types, and it gets every kind of call done", () => {
+  it("both bots build on the story stage, raise the Bastion with gold through its builders and hire; only the typing bot types, and it gets every kind of call done", () => {
     for (const r of [typing, idle]) {
       for (const run of r.runs) {
+        expect(run.world.sandbox).toBe(false);
         const kinds = new Set(run.log.map((command) => command.t));
-        for (const kind of ["build", "markTree", "hire", "assignUnit", "sandbox", "sellFood"]) expect(kinds, kind).toContain(kind);
+        for (const kind of ["build", "markTree", "hire", "assignUnit", "upgrade", "sellFood"]) expect(kinds, kind).toContain(kind);
+        expect(kinds.has("sandbox")).toBe(false);
         expect(run.world.buildings.level[0]).toBeGreaterThanOrEqual(2);
         expect(kinds.has("key")).toBe(r.typing);
       }
