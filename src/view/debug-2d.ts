@@ -626,6 +626,7 @@ export class DebugView {
         this.disc(x + 0.5, z + 0.9, def.radius * 0.8, "rgba(43, 33, 24, 0.25)", null);
         this.disc(x, z, def.radius + 0.45, "rgba(186, 160, 255, 0.35)", null);
       }
+      if (E.elite[e] === 1) this.disc(x, z, def.radius + 0.35, null, COLOR.buildingHp, 2.5); // an elite (the pace director, BALANCE.md §4.2)
       this.disc(x, z, def.radius, def.def.view.color, COLOR.ink, def.armor > 0 ? 3 : 1.2);
       if (E.hp[e]! < def.hp) this.bar(x, z - def.radius - 0.7, Math.max(1.4, def.radius * 2), E.hp[e]! / def.hp, COLOR.enemyHp);
     }

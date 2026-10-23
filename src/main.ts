@@ -6,13 +6,17 @@
  * the 2D view draws it, the calls' word cards float over it, the keys, the
  * mouse and the HUD act through the selection, sound and music follow its
  * events, Esc's pause card and the results card sit over it, and window.__td
- * lets the browser scenarios drive it through commands.
+ * lets the browser scenarios drive it through commands. The typing profile
+ * (app/skill.ts, BALANCE.md §2) gives the run its header (E, pace k, the pace
+ * director by the settings) and takes each day and night's typing after it.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { installDevHandle } from "./app/dev-handle";
 import { installKeys, installPointer } from "./app/input";
 import { learningBridge } from "./app/learning";
+import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
+import { updateSkill } from "./kit/balance";
 import { sandboxHtml } from "./app/sandbox";
 import { Selection } from "./app/selection";
 import { Session } from "./app/session";
@@ -21,11 +25,13 @@ import type { CommandBody } from "./sim/commands";
 import type { RareEvent } from "./sim/events";
 import { hashHex } from "./sim/hash";
 import { canPlace } from "./sim/placement";
+import { setPace } from "./sim/systems/pace";
 import { statsObject } from "./sim/stats";
 import { PATH_MAX } from "./sim/stores/agents";
 import { wordText } from "./typing/decks";
 import { dockHtml } from "./ui/build-menu";
 import { actionsHtml, Hud, REASON, statusHtml, stripHtml } from "./ui/hud";
+import { ProfileCard } from "./ui/profile";
 import { loadSettings, SettingsCard } from "./ui/settings";
 import { Sheet, type SheetAction } from "./ui/sheets";
 import { teamHtml } from "./ui/team-bar";
@@ -49,13 +55,17 @@ const view = new DebugView(canvas);
 let painted = false;
 const settings = loadSettings();
 const audio = new TypingAudio(settings);
+let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
+/** The run header from the profile and the "Nhịp tự điều" setting. */
+const header = () => paceHeader(profile, settings.pace);
 
 // The title, made on first use (a run opened by a scenario's link never loads its painting); its choice waits for the run.
 let title: TitleScreen | null = null;
 let choose: (choice: TitleChoice) => void = () => {};
 function showTitle(canContinue: boolean): void {
   const card = (): SettingsCard => new SettingsCard(settings, (changed) => audio.apply(changed), () => title?.settingsDone());
-  title ??= new TitleScreen(document.body, { choose: (choice) => choose(choice), sound: (sound) => audio.ui(sound), wake: () => audio.resume() }, card(), sandbox);
+  const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: audio.ui.bind(audio), wake: () => audio.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
+  title ??= new TitleScreen(document.body, hooks, card(), new ProfileCard(() => title?.settingsDone()), sandbox);
   title.show(canContinue);
 }
 const asked = params.get("title");
@@ -72,8 +82,12 @@ const freshRun = (learn: boolean): string => {
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
 learningBridge().requestFocus(); // inside the portal only
-const session = new Session({ seed, sandbox, deck });
+let runHeader = header();
+const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader });
 const world = session.world;
+const tally = new SkillTally(world);
+// A run left mid-cycle counts as a quit (the trend keeps it; the measures do not); the title alone is no run.
+window.addEventListener("pagehide", () => world.tick > 0 && saveSkill(updateSkill(profile, tally.sample(world, "quit")).profile));
 const selection = new Selection(world, (command) => session.send(command));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
 let imeWarning = false;
@@ -85,6 +99,8 @@ choose = (choice) => {
   if (choice === "continue") selection.paused = false;
   else if (begun) return void (window.location.search = freshRun(choice === "learn"));
   else if (choice === "learn") learnMode();
+  // Settings changed on the title apply to this run while it has not stepped (BALANCE.md §4.1: set before the run).
+  if (world.tick === 0) setPace(world, (runHeader = header()));
   begun = true;
   title?.hide();
 };
@@ -179,6 +195,8 @@ runFrameLoop({
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       const fresh = world.events.rare.splice(0);
+      const sample = tally.read(fresh, world);
+      if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));
       cards.read(fresh, world, now);
       audio.read(fresh, world, now);
       audio.frame(title?.open === true ? null : world, now);
@@ -202,12 +220,14 @@ runFrameLoop({
 installDevHandle({
   ready: () => painted,
   // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
-  flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source }),
+  flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director } }),
   send: (command: CommandBody) => session.send(command),
   // TK 25.12's load test: n enemies on the routes, through the sandbox's logged command.
   flood: (n: number) => session.send({ t: "sandbox", op: { op: "flood", value: n } }),
   costs: () => ({ update: costs.update.slice(), draw: costs.draw.slice() }),
   stats: () => statsObject(world.stats),
+  // A play-test's numbers for BALANCE.md §7 B9: the run's flow (night meter) and the profile the game keeps.
+  balance: () => ({ flow: world.pace.meter.summary(world.phase === "defeat" ? "lost" : "quit"), night: world.pace.night.summary(), day: world.pace.day.summary(), profile }),
   hash: () => hashHex(world),
   defs: () => world.c.buildings.map((building) => building.id),
   canPlace: (id: string, x: number, z: number) => canPlace(world, world.c.buildingIndex(id), Math.round(x * 4), Math.round(z * 4)),

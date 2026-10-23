@@ -24,6 +24,7 @@ export function sandboxHtml(w: World): string {
     seg("Chế độ", "sb:mode", MODE_IDS, ["Thư giãn", "Cân bằng", "Thử thách", "Học"], w.mode, true) +
     seg("Từ vựng", "sb:vocab", ["1", "3", "5"], ["Cấp 1", "1–3", "1–5"], String(w.vocab)) +
     seg("Tốc game", "sb:speed", ["0.75", "1", "2"], ["0,75×", "1×", "2×"], String(w.speed)) +
-    `<div class="td-row">${button("sb:preset", "Đặt sẵn")}${button("sb:night", "Sinh đêm")}</div>`
+    `<div class="td-row">${button("sb:preset", "Đặt sẵn")}${button("sb:night", "Sinh đêm")}</div>` +
+    `<div class="td-row"><small>Nhịp</small><span>k ×${w.pace.k.toFixed(2).replace(".", ",")} · tự điều ${w.pace.director ? "Bật" : "Tắt"}</span></div>`
   );
 }

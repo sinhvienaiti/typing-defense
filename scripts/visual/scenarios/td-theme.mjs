@@ -1,6 +1,6 @@
 // Lời Gọi theme (SPLIT_PLAN step D7; TK 22.1, 23, 24): the title screen, its keys and settings, the build menu,
 // the pause card and the results card, pictured (td-theme-<name>-<size>.png):
-//   title     the village at dusk, lanterns lit one by one, the name in Baloo 2 and the four entries
+//   title     the village at dusk, lanterns lit one by one, the name in Baloo 2 and the five entries
 //   glyphs    every Vietnamese vowel with every tone, and đ / Đ, in the title face (a sample the run adds)
 //   settings  the settings card (a volume changed by the keys and kept in storage)
 //   continue  the title again from the pause card: "Chơi tiếp" is open and takes the run back
@@ -72,7 +72,7 @@ export default async function (page) {
   const title = await page.eval(TITLE);
   const tick0 = await page.eval(td("return t.state().tick;"));
   await shot("title");
-  shown.title = title !== null && title.name === "Lời Gọi" && title.entries.length === 4 && title.lit >= 5;
+  shown.title = title !== null && title.name === "Lời Gọi" && title.entries.length === 5 && title.lit >= 5;
   shown.titleFace = title?.nameFont?.startsWith('"Baloo 2"') === true;
   shown.noStepBehind = tick0 === 0 || tick0 === null ? (await page.eval(td("return t.state().tick;"))) === tick0 : false;
   const face = await page.eval(FACE);

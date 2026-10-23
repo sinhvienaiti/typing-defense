@@ -50,8 +50,22 @@
 .td-set-bar > i { position: absolute; inset: 0 auto 0 0; border-radius: 5px; background: linear-gradient(#a8d06a, var(--vd-seedling-deep)); }
 .td-set-row b { text-align: right; font-variant-numeric: tabular-nums; }
 .td-set-hint { margin: 8px 10px 0; color: #6b5638; font-size: 13px; }
-.td-settings .vd-seal { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; padding: 9px; font: 800 16px/1.2 var(--vd-font); cursor: pointer; }
-.td-settings kbd { padding: 0 5px; border: 1px solid currentColor; border-radius: 4px; font: 700 12px/1.5 var(--vd-font); opacity: 0.8; }
+/* "Nhịp tự điều theo cách bạn gõ": a switch, jade when on (jade is typing, TK 23.3). */
+.td-set-row.td-set-pace { grid-template-columns: 1fr auto; cursor: pointer; }
+.td-set-pace small, .td-profile dd small { display: block; color: #6b5638; font-size: 12px; font-weight: 600; }
+.td-set-switch { min-width: 3.6em; padding: 2px 10px; border: 1.5px solid var(--vd-ink); border-radius: 999px; background: var(--vd-paper-shade); color: var(--vd-ink-soft); text-align: center !important; }
+.td-set-switch.is-on { border-color: var(--vd-jade-ink); background: var(--vd-jade); color: var(--vd-paper-light); }
+.td-settings .vd-seal, .td-profile .vd-seal { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; padding: 9px; font: 800 16px/1.2 var(--vd-font); cursor: pointer; }
+.td-settings kbd, .td-profile kbd { padding: 0 5px; border: 1px solid currentColor; border-radius: 4px; font: 700 12px/1.5 var(--vd-font); opacity: 0.8; }
+
+/* "Hồ sơ gõ" (BALANCE.md §2): the typing profile on dó paper, one jade line of advice. */
+.td-profile[hidden] { display: none; }
+.td-profile h3 { margin: 2px 4px 8px; font: 800 clamp(20px, 3.2vh, 28px)/1.1 var(--vd-title); }
+.td-profile dl { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 6px 14px; margin: 0; padding: 10px 12px; border: 1.5px dashed var(--vd-ink-soft); border-radius: 8px; background: rgba(255, 250, 235, 0.6); }
+.td-profile dt { font-weight: 700; }
+.td-profile dd { margin: 0; text-align: right; font-weight: 800; font-size: 1.1em; font-variant-numeric: tabular-nums; }
+.td-profile-advice { margin: 10px 2px 4px; padding: 8px 10px; border-left: 4px solid var(--vd-jade); border-radius: 4px; background: var(--vd-jade-wash); color: var(--vd-jade-ink); font-weight: 700; }
+.td-profile-note { margin: 6px 4px 0; color: #6b5638; font-size: 13px; }
 
 @keyframes tt-flicker { from { opacity: 0.92; } to { opacity: 1; } }
 @keyframes tt-twinkle { from { opacity: 0.25; } to { opacity: 0.95; } }

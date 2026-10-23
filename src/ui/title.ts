@@ -3,14 +3,16 @@
  * flat SVG shapes (sky, limestone towers, terraced paddies, a bamboo village on stilts, bamboo clumps); one
  * painted backdrop (/assets/typing-defense/ui/title-dusk.webp, not in Git) replaces it when the file is there.
  * A string of paper lanterns lights up one by one, villagers call across the fields (audio-min.ts), the name
- * "Lời Gọi" is brushed in Baloo 2 by a vermilion seal. Keyboard first: ↑ ↓ pick, Enter or 1–4 choose, Esc
+ * "Lời Gọi" is brushed in Baloo 2 by a vermilion seal. Keyboard first: ↑ ↓ pick, Enter or 1–5 choose, Esc
  * goes back to the run left open; while the title is up it takes every key and the world does not step.
+ * "Hồ sơ gõ" opens the typing profile (BALANCE.md §2) in the menu's place, as "Cài đặt" opens the settings.
  */
 import type { UiSound } from "../view/audio-min";
+import type { ProfileCard } from "./profile";
 import type { SettingsCard } from "./settings";
 
 export type TitleChoice = "start" | "continue" | "learn";
-type EntryId = TitleChoice | "settings";
+type EntryId = TitleChoice | "settings" | "profile";
 
 const ART = "/assets/typing-defense/ui/title-dusk.webp";
 const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
@@ -18,6 +20,7 @@ const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
   ["continue", "Chơi tiếp", "Về lại ván đang dở · Esc"],
   ["settings", "Cài đặt", "Âm lượng nhạc và tiếng"],
   ["learn", "Học", "Chế độ Học: hiện nghĩa, Space để dừng"],
+  ["profile", "Hồ sơ gõ", "Tốc độ, độ chính xác, một lời khuyên"],
 ];
 const LAMP_MS = 380;
 
@@ -139,8 +142,9 @@ export class TitleScreen {
 
   constructor(
     root: HTMLElement,
-    private readonly hooks: { choose(choice: TitleChoice): void; sound(sound: UiSound): void; wake(): void },
+    private readonly hooks: { choose(choice: TitleChoice): void; sound(sound: UiSound): void; wake(): void; profile(card: ProfileCard): void },
     private readonly settings: SettingsCard,
+    private readonly profile: ProfileCard,
     learn: boolean,
   ) {
     this.el = Object.assign(document.createElement("div"), { className: "tt-screen", hidden: true });
@@ -150,16 +154,16 @@ export class TitleScreen {
       `<header class="tt-head"><h1 class="tt-name">Lời Gọi</h1><span class="tt-seal" aria-hidden="true">Văn<br>Điền</span>` +
       `<p class="tt-sub">Giữ làng tre bằng những lời gọi · <i>Wordwoven</i></p></header>` +
       `<nav class="tt-menu vd-sheet" aria-label="Màn đầu">${ENTRIES.map(([id, label, sub], k) => `<div class="tt-entry" role="button" data-entry="${id}"><kbd>${k + 1}</kbd><b>${label}</b><small>${sub}</small></div>`).join("")}</nav>` +
-      `<p class="tt-keys">↑ ↓ chọn · Enter vào · 1–4 chọn nhanh</p>`;
+      `<p class="tt-keys">↑ ↓ chọn · Enter vào · 1–5 chọn nhanh</p>`;
     this.menu = this.el.querySelector(".tt-menu")!;
-    this.menu.appendChild(settings.el);
+    this.menu.append(settings.el, profile.el);
     this.entries = [...this.el.querySelectorAll<HTMLElement>(".tt-entry")];
     if (!learn) this.off.add("learn");
     root.appendChild(this.el);
     this.el.addEventListener("pointerdown", (event) => {
       this.hooks.wake();
       const entry = (event.target as Element).closest<HTMLElement>(".tt-entry");
-      if (entry === null || this.settings.shown) return;
+      if (entry === null || this.settings.shown || this.profile.shown) return;
       event.preventDefault();
       this.pick(this.entries.indexOf(entry));
     });
@@ -185,6 +189,8 @@ export class TitleScreen {
     if (canContinue) this.off.delete("continue");
     else this.off.add("continue");
     this.settings.close();
+    this.profile.close();
+    this.entries.forEach((entry) => (entry.hidden = false));
     this.entries.forEach((entry, k) => entry.classList.toggle("is-off", this.off.has(ENTRIES[k]![0])));
     this.move(canContinue ? 1 : 0, false);
     this.timers.forEach(clearTimeout);
@@ -201,6 +207,7 @@ export class TitleScreen {
   hide(): void {
     this.el.hidden = true;
     this.settings.close();
+    this.profile.close();
     this.timers.forEach(clearTimeout);
   }
 
@@ -215,16 +222,19 @@ export class TitleScreen {
     if (id === undefined) return;
     if (this.off.has(id)) return this.hooks.sound("off");
     this.hooks.sound("pick");
-    if (id !== "settings") return this.hooks.choose(id);
+    if (id !== "settings" && id !== "profile") return this.hooks.choose(id);
     this.entries.forEach((entry) => (entry.hidden = true));
-    this.settings.open();
+    if (id === "settings") this.settings.open();
+    else this.hooks.profile(this.profile);
   }
 
-  /** Settings closed: the entries come back, the focus on Cài đặt. */
+  /** Settings or the profile closed: the entries come back, the focus on the entry that opened it. */
   settingsDone(): void {
+    const at = this.profile.shown ? ENTRIES.findIndex(([id]) => id === "profile") : 2;
     this.settings.close();
+    this.profile.close();
     this.entries.forEach((entry) => (entry.hidden = false));
-    this.move(2, false);
+    this.move(at, false);
   }
 
   /** Every key while the title is up; true when the page should not act on it (its default). */
@@ -232,6 +242,7 @@ export class TitleScreen {
     this.hooks.wake();
     if (event.repeat && !event.code.startsWith("Arrow")) return true;
     if (this.settings.shown) return this.settings.key(event);
+    if (this.profile.shown) return this.profile.key(event);
     const step = event.code === "ArrowDown" || (event.code === "Tab" && !event.shiftKey) ? 1 : event.code === "ArrowUp" || event.code === "Tab" ? -1 : 0;
     if (step !== 0) {
       let to = this.focus;
@@ -239,7 +250,7 @@ export class TitleScreen {
       while (this.off.has(ENTRIES[to]![0]));
       this.move(to);
     } else if (event.code === "Enter" || event.code === "NumpadEnter" || event.code === "Space") this.pick(this.focus);
-    else if (/^Digit[1-4]$/.test(event.code)) this.pick(Number(event.code.slice(5)) - 1);
+    else if (/^Digit[1-5]$/.test(event.code)) this.pick(Number(event.code.slice(5)) - 1);
     else if (event.code === "Escape" && !this.off.has("continue")) this.pick(1);
     else return false;
     return true;
