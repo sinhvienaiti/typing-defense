@@ -44,9 +44,15 @@ export function bossHp(w: World): number {
 }
 
 function warnDay(w: World): void {
-  w.boss.stage = BOSS.warned;
-  w.boss.route = w.rng.spawn.int(0, w.lanes.length - 2);
-  w.events.rare.push({ t: "bossWarn", tick: w.tick, day: w.day, route: w.boss.route });
+  const S = w.boss;
+  S.stage = BOSS.warned;
+  S.route = w.rng.spawn.int(0, w.lanes.length - 2);
+  // The merge: where the branches meet again (the first point of the routes' common end).
+  const [a, b] = [w.map.routes[0]!, w.map.routes[w.map.routes.length - 1]!];
+  let k = 1;
+  while (k < a.length && k < b.length && a[a.length - k - 1]!.join() === b[b.length - k - 1]!.join()) k += 1;
+  S.mergeM = w.lanes[S.route]!.distAt(a[a.length - k]![0], a[a.length - k]![1]);
+  w.events.rare.push({ t: "bossWarn", tick: w.tick, day: w.day, route: S.route });
 }
 
 function lull(w: World): void {
@@ -110,11 +116,6 @@ function rise(w: World): void {
   const slot = put(w, w.c.enemyIndex(w.c.content.boss!.enemy), hp, S.route, w.c.content.stage!.boss.emergeM, 0);
   if (slot < 0) return;
   Object.assign(S, { e: w.enemies.id(slot), hpMax: hp, stage: BOSS.fight, phase: 1, rootsAt: -1, slamAt: w.tick, keepAt: w.tick });
-  // The merge: where the branches meet again (the first point of the routes' common end).
-  const [a, b] = [w.map.routes[0]!, w.map.routes[w.map.routes.length - 1]!];
-  let k = 1;
-  while (k < a.length && k < b.length && a[a.length - k - 1]!.join() === b[b.length - k - 1]!.join()) k += 1;
-  S.mergeM = w.lanes[S.route]!.distAt(a[a.length - k]![0], a[a.length - k]![1]);
   w.events.rare.push({ t: "bossEmerge", tick: w.tick, route: S.route, hp });
 }
 

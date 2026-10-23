@@ -99,7 +99,8 @@ export const SLICE_1A: Content = {
       view: { name: "Thuồng Luồng", short: "TL", color: "#3e2766" },
     },
     {
-      id: "moc-tinh", tier: "boss", hp: 3200, armorPct: 30, resistPct: 0, speed: 0.9, altitude: "ground", leak: 0, gold: 0,
+      // BUILD_1B §6.5 round 1 (docs/td/BUILD_NOTES.md §7.1): 3,200 → 3,400 hit points, 0.9 → 0.8 m/s (G3).
+      id: "moc-tinh", tier: "boss", hp: 3400, armorPct: 30, resistPct: 0, speed: 0.8, altitude: "ground", leak: 0, gold: 0,
       blockWeight: 3, radiusM: 2.5, packSize: 1, unblockable: true, burnTakenMul: 1.25,
       view: { name: "Mộc Tinh", short: "MT", color: "#6b4a2a" },
     },
@@ -151,8 +152,8 @@ export const SLICE_1A: Content = {
       [{ enemy: "cuong-thi", count: 10 }, { enemy: "ma-troi", count: 1 }],
       [{ enemy: "cuong-thi", count: 12 }, { enemy: "ma-troi", count: 2 }],
       [{ enemy: "thuong-luong", count: 1 }, { enemy: "cuong-thi", count: 10 }],
-      // BUILD_1B §4.2: the first part of night 5, one pack of 5 Thuồng Luồng; the boss peak follows it.
-      [{ enemy: "thuong-luong", count: 5 }, { enemy: "cuong-thi", count: 7 }, { enemy: "ma-troi", count: 3 }],
+      // BUILD_1B §4.2: the first part of night 5, one pack of Thuồng Luồng (§6.5 round 1: 5 → 4); the boss peak follows it.
+      [{ enemy: "thuong-luong", count: 4 }, { enemy: "cuong-thi", count: 7 }, { enemy: "ma-troi", count: 3 }],
       [{ enemy: "thuong-luong", count: 4 }, { enemy: "cuong-thi", count: 20 }, { enemy: "ma-troi", count: 4 }],
     ],
     endlessGrowth: 0.15,
@@ -161,7 +162,7 @@ export const SLICE_1A: Content = {
   },
   // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.5 on its bark.
   boss: {
-    enemy: "moc-tinh", retreatPct: 50, kHp: 0.4, kHpMax: 1.12, retreatS: 2, chestGold: 150, heroMul: 0.5,
+    enemy: "moc-tinh", retreatPct: 50, kHp: 0.4, kHpMax: 1.12, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },
     slam: { damage: [40, 60], reachM: 3, everyS: 2.5, warnS: 1.2, knockM: 1.5 },
     stagger: { atPct: 70, stunS: 5, vulnerable: 1.25, burstLifeS: 5, burstReachM: 2 },
@@ -171,7 +172,7 @@ export const SLICE_1A: Content = {
   // BUILD_1B §4, §12: five nights, the boss at the end of the fifth; what opens on which day.
   stage: {
     nights: 5, keepMax: 3,
-    boss: { night: 5, lullS: 12, lullAlive: 2, lullWaitS: 30, escort: [{ enemy: "cuong-thi", count: 8, pack: 4 }], emergeM: 20, emergeAfterS: 6 },
+    boss: { night: 5, lullS: 12, lullAlive: 2, lullWaitS: 30, escort: [{ enemy: "cuong-thi", count: 8, pack: 4 }], emergeM: 25, emergeAfterS: 6 },
     unlock: { barracks: 2, "gold-mine": 3, cannon: 3, keep2: 3, upgrade: 4, keep3: 5 },
   },
 };

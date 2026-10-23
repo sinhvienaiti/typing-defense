@@ -242,6 +242,7 @@ function finishWord(w: World, s: number): void {
   if (!top) C.perfect[c] = 0;
   C.done[c] = C.done[c]! + 1;
   bump(w.stats, STAT.callWords);
+  if (C.burst[c] === 1) bump(w.stats, STAT.burstTyped);
   if (top) bump(w.stats, STAT.wordsPerfect);
   if (score.grade === "sloppy") bump(w.stats, STAT.wordsSloppy);
   bump(w.stats, STAT.rawWpmSum, rawWpm(len, W.firstMs[s]!, W.lastMs[s]!));

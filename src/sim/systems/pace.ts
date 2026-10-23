@@ -23,7 +23,7 @@ import { MODE } from "../stores/walkers";
 import type { World } from "../world";
 import { slotsOpen } from "./agents";
 import { bossWarning } from "./boss";
-import { lit } from "./calls";
+import { configureDeck, lit } from "./calls";
 import { dayTicks } from "./waves";
 
 /** The run header (BALANCE.md §4.1: set before the run, in the replay): pace k, rounded to 1/1000, and the director on or off. */
@@ -54,6 +54,15 @@ export function setPace(w: World, header: PaceHeader & { expected: number }): vo
   Object.assign(w.pace, createPace(w.mode, header));
   w.phaseEnd = dayTicks(w.mode, header.k);
   w.expected = header.expected;
+}
+
+/** The run's mode before its first step (the title's Học, a replay's header): the day's length, the directors' band, E's floor. */
+export function setMode(w: World, mode: Mode): void {
+  if (w.tick !== 0) return;
+  w.mode = mode;
+  w.phaseEnd = dayTicks(mode, w.pace.k);
+  setPaceMode(w);
+  configureDeck(w);
 }
 
 /** A new mode (the sandbox): the directors judge against its band from now on. */

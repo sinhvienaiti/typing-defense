@@ -33,7 +33,7 @@ export function damageEnemy(w: World, e: number, power: number, damageType: numb
     bump(w.stats, STAT.bossDamage, dmg);
     if (source === SOURCE.wordShot) bump(w.stats, STAT.bossTyped, dmg);
     if (source === SOURCE.hero) bump(w.stats, STAT.bossHero, dmg);
-    w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 8 + source, w.tick);
+    w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 32 + damageType * 8 + source, w.tick);
   }
   E.hp[e] = E.hp[e]! - dmg;
   bump(w.stats, STAT.damageTower + source, dmg);

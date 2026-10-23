@@ -6,7 +6,7 @@
  */
 import type { Grade } from "../content/types";
 
-/** bossHit: damage on the boss, value = damage × 8 + its SOURCE. */
+/** bossHit: damage on the boss, value = damage × 32 + damage type × 8 + its SOURCE. */
 export const FX = { spawn: 1, fire: 2, hit: 3, burst: 4, death: 5, leak: 6, coin: 7, block: 8, soldierDown: 9, fizzle: 10, bossHit: 11 } as const;
 
 const RING = 8192;
