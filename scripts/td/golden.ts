@@ -44,7 +44,7 @@ console.log(JSON.stringify({
 }));
 if (logAt >= 0) {
   const spec = goldenSpec(deck);
-  writeFileSync(args[logAt + 1]!, JSON.stringify({ seed: spec.seed, expected: spec.hands!.wpm, words, deck: deck.hash, content: golden.content, every: golden.every, ticks: golden.ticks, hashes: golden.hashes, log: run.log }));
+  writeFileSync(args[logAt + 1]!, JSON.stringify({ seed: spec.seed, expected: spec.hands!.wpm, pace: spec.pace, words, deck: deck.hash, content: golden.content, every: golden.every, ticks: golden.ticks, hashes: golden.hashes, log: run.log }));
 }
 if (flag("--check")) {
   if (!same) process.exitCode = 1;

@@ -46,3 +46,23 @@ export const STANDARD: Layout = {
   hireReserve: 20,
   foodKeep: 20,
 };
+
+/** "Tốt" (BALANCE.md §6 tactics good): the standard order, 3 villagers (a fourth eats gold the towers need: wood is plenty by night 3), 2 spare marked trees. */
+export const GOOD: Layout = { ...STANDARD, name: "Tốt", villagers: 3 };
+
+/** "Vừa" (BALANCE.md §6 tactics fair): the standard order, 3 villagers, 1 spare marked tree. */
+export const FAIR: Layout = { ...STANDARD, name: "Vừa", villagers: 3, marks: { spare: 1, woodAt: WOOD } };
+
+/** "Kém" (tactics poor): the farm by the Bastion, the poor mine N2, the Bastion before a second tower, the barracks late, no upgrades; 2 villagers, one helper out. */
+export const POOR: Layout = {
+  name: "Kém",
+  builds: [FARM_KEEP, ARCHER_MERGE, MINE_N2, { keep: 2 }, ARCHER_EAST, BARRACKS, CANNON],
+  helpers: [0, null],
+  marks: { spare: 1, woodAt: WOOD },
+  villagers: 2,
+  hireReserve: 20,
+  foodKeep: 20,
+};
+
+/** "Không mua" (the type-only bot): nothing is built, hired or marked; the helpers stay home. */
+export const NONE: Layout = { name: "Không mua", builds: [], helpers: [null, null] };

@@ -8,6 +8,9 @@
  * earned (gold from every source, wood, food, knowledge) at each nightfall and dawn, what became of the calls, and
  * the cost of a step; it may check the call invariants every tick (§12 gate 6).
  */
+import type { FlowSummary } from "../../src/kit/balance/flow";
+import type { PaceSummary } from "../../src/kit/balance/director";
+import type { TypistParams } from "../../src/kit/balance/typist";
 import { createRng } from "../../src/kit/platform/rng";
 import { MODES, TICK_HZ } from "../../src/content/rules";
 import type { Mode } from "../../src/content/types";
@@ -15,9 +18,11 @@ import type { Command, CommandBody } from "../../src/sim/commands";
 import { hashHex } from "../../src/sim/hash";
 import { STAT, statsObject, type StatName } from "../../src/sim/stats";
 import { CALL_STATE } from "../../src/sim/stores/calls";
+import type { PaceHeader } from "../../src/sim/systems/pace";
 import { createWorld, step, type World } from "../../src/sim/world";
 import { wordText, type Deck } from "../../src/typing/decks";
 import { withinOneEdit } from "../../src/typing/distance";
+import { HumanHands } from "./human";
 import { Keystrokes, type HandsSpec } from "./keystrokes";
 import { Plan } from "./policies/stand";
 import { Reader } from "./reader";
@@ -27,8 +32,12 @@ const STEP_MS = 1000 / TICK_HZ;
 export type BotSpec = {
   seed: number;
   deck: Deck;
-  /** null: never types. */
+  /** null: never types (unless `human`). */
   hands: HandsSpec | null;
+  /** A human-like typist (BALANCE.md §6) instead of the R3 hands; wpm 0 never types. */
+  human?: TypistParams;
+  /** The run header: pace k and the director (none: k 1, off). */
+  pace?: PaceHeader;
   /** Made fresh for each run: a plan keeps state. */
   plan: () => Plan;
   /** Stop when this night has ended (or the Bastion falls). */
@@ -46,6 +55,8 @@ export type BotSpec = {
   /** Time every step (performance.now): the report's sim cost. */
   timeSteps?: boolean;
   maxTicks?: number;
+  /** Called after every step (a probe). */
+  onTick?: (w: World) => void;
 };
 
 /** Resources earned since the start (not spent, not the starting stock): gold from every source, wood, food, knowledge. */
@@ -81,6 +92,10 @@ export type BotRun = {
   rejected: string[];
   problems: string[];
   defeat: boolean;
+  /** BALANCE.md §3 for the whole run (won: every night held), the directors' steps (night and day together), mean seconds from spawn to kill. */
+  flow: FlowSummary;
+  pace: PaceSummary;
+  killSeconds: number | null;
 };
 
 /** Eyes and hands: one key a tick at most, when the hands are free and there is something seen to type. */
@@ -148,8 +163,19 @@ export function callProblems(w: World): string[] {
   return out;
 }
 
-const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands">): World =>
-  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? 35, vocab: spec.vocab, mode: spec.mode });
+const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "human" | "pace">): World =>
+  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? (spec.human?.wpm || 35), vocab: spec.vocab, mode: spec.mode, pace: spec.pace });
+
+/** The night and day directors' steps as one stage's (BALANCE.md §7 B7): steps a wave over both, the spawn and call scales' range. */
+export function paceSummary(w: World): PaceSummary {
+  const night = w.pace.night.summary();
+  const day = w.pace.day.summary();
+  const waves = Math.max(1, w.wave);
+  return {
+    steps: night.steps + day.steps, waves, stepsPerWave: (night.steps + day.steps) / waves, maxWaveSteps: Math.max(night.maxWaveSteps, day.maxWaveSteps),
+    spawnMin: Math.min(night.spawnMin, day.spawnMin), spawnMax: Math.max(night.spawnMax, day.spawnMax), spawnScale: night.spawnScale, composition: night.composition, supports: night.supports,
+  };
+}
 
 /** What the world has earned so far (Earned). */
 export function earned(w: World): Earned {
@@ -197,13 +223,15 @@ class Meter {
 export function runBot(spec: BotSpec): BotRun {
   const world = worldOf(spec);
   const bot = createRng(spec.botSeed ?? spec.seed);
-  const typist = spec.hands === null ? null : new Typist(new Keystrokes(spec.hands, bot.ai), new Reader(bot.props));
+  const typist = spec.hands === null || spec.human !== undefined ? null : new Typist(new Keystrokes(spec.hands, bot.ai), new Reader(bot.props));
+  const human = spec.human === undefined ? null : new HumanHands(spec.human, bot.ai, bot.props);
   const plan = spec.plan();
   const queue: CommandBody[] = [];
   const view = { w: world, send: (body: CommandBody) => void queue.push(body) };
   const run: BotRun = {
     world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
     atNightfall: [], atDawn: [], calls: tally(), callsByKind: [], stepMs: null, livesAtWaveEnd: [], rejected: [], problems: [], defeat: false,
+    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null,
   };
   run.atDawn[1] = earned(world);
   const meter = new Meter(run);
@@ -211,8 +239,11 @@ export function runBot(spec: BotSpec): BotRun {
   const maxTicks = spec.maxTicks ?? 60 * 60 * 30;
   while (world.tick < maxTicks) {
     plan.tick(view);
+    // A placement or a menu takes the eyes off the words for a moment (BALANCE.md §6).
+    if (human !== null && queue.some((body) => body.t === "build" || body.t === "upgrade" || body.t === "hire" || body.t === "sandbox")) human.lookAway();
     const key = typist?.key(world) ?? null;
     if (key !== null) queue.push(key);
+    if (human !== null) queue.push(...human.keys(world));
     const commands = queue.splice(0).map((body) => ({ ...body, tick: world.tick }) as Command);
     run.log.push(...commands);
     const phase = world.phase;
@@ -229,6 +260,7 @@ export function runBot(spec: BotSpec): BotRun {
       else [day.nightTicks, day.nightTyped] = [day.nightTicks + 1, day.nightTyped + typed];
     }
     if (world.typing.typedSum > run.windowMax) [run.windowMax, run.windowAt] = [world.typing.typedSum, world.tick];
+    spec.onTick?.(world);
     meter.read(world);
     if (spec.check === true && run.problems.length < 20) run.problems.push(...callProblems(world).map((p) => "tick " + world.tick + ": " + p));
     if (spec.hashEvery !== undefined && world.tick % spec.hashEvery === 0) run.hashes.push(hashHex(world));
@@ -237,6 +269,9 @@ export function runBot(spec: BotSpec): BotRun {
   run.ticks = world.tick;
   run.stats = statsObject(world.stats);
   run.defeat = world.phase === "defeat";
+  run.flow = world.pace.meter.summary(run.defeat ? "lost" : world.wave >= spec.nights && world.waveEnded[spec.nights] === 1 ? "won" : "quit");
+  run.pace = paceSummary(world);
+  run.killSeconds = run.stats.kills > 0 ? run.stats.killTicks / run.stats.kills / 60 : null;
   if (times.length > 0) {
     const mean = times.reduce((sum, t) => sum + t, 0) / times.length;
     times.sort((a, b) => a - b);

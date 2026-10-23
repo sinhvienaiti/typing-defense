@@ -197,7 +197,7 @@ export default async function (page) {
     const { compileDeck } = await import("/src/typing/decks.ts");
     const run = ${JSON.stringify(golden)};
     const deck = compileDeck(run.words.flatMap((texts, index) => texts.map((text, k) => ({ id: "golden-" + (index + 1) + "-" + k, text, level: index + 1 }))));
-    const world = createWorld({ seed: run.seed, deck, expected: run.expected, vocab: run.vocab, mode: run.mode });
+    const world = createWorld({ seed: run.seed, deck, expected: run.expected, vocab: run.vocab, mode: run.mode, pace: run.pace });
     const hashes = [];
     let next = 0;
     while (world.tick < run.ticks) {

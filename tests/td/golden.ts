@@ -19,6 +19,7 @@ import { realDeck } from "./typing";
 export const GOLDEN_URL = new URL("../golden/td-1a.json", import.meta.url);
 export const GOLDEN_LEVELS = 3;
 export const GOLDEN_EVERY = 60;
+export const GOLDEN_PACE = { k: 1, director: true } as const;
 
 export type Golden = {
   about: string;
@@ -70,6 +71,8 @@ export function goldenSpec(deck: Deck): BotSpec {
     nights: 3,
     hashEvery: GOLDEN_EVERY,
     check: true,
+    // The game's default header for the standard player (BALANCE.md §4: k = 1, the pace director on): its state is hashed.
+    pace: GOLDEN_PACE,
   };
 }
 

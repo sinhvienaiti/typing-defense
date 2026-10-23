@@ -29,8 +29,9 @@ export type Runs = { mode: Mode; typing: boolean; runs: BotRun[] };
 
 export function play(mode: Mode, typing: boolean, seeds: number, nights: number): Runs {
   const deck = realDeck();
+  // The game's default header for the standard player: k = 1, the pace director on (BALANCE.md §4).
   const runs = Array.from({ length: seeds }, (_, k) => runBot({
-    seed: k + 1, deck, hands: typing ? HANDS : null, expected: 35, mode, nights, check: true, timeSteps: true,
+    seed: k + 1, deck, hands: typing ? HANDS : null, expected: 35, mode, nights, check: true, timeSteps: true, pace: { k: 1, director: true },
     plan: () => new Plan(STANDARD, [heroDay(), heroNight()]),
   }));
   return { mode, typing, runs };
