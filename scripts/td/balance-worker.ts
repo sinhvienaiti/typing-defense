@@ -3,6 +3,6 @@ import { parentPort, workerData } from "node:worker_threads";
 import { playCell, type CellSpec } from "../../tests/td/flow";
 import { realDeck } from "../../tests/td/typing";
 
-const { cells, seeds } = workerData as { cells: CellSpec[]; seeds: number };
+const { cells, seeds, from } = workerData as { cells: CellSpec[]; seeds: number; from: number };
 const deck = realDeck();
-parentPort!.postMessage(cells.map((cell) => playCell(cell, seeds, deck)));
+parentPort!.postMessage(cells.map((cell) => playCell(cell, seeds, deck, undefined, from)));

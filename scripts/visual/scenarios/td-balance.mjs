@@ -98,8 +98,8 @@ export default async function (page) {
     // The foes walk in from the gate (~20 s), then power calls light at the merge: type them; the picture mid-night.
     let typed = 0;
     let pictured = false;
-    for (const t0 = Date.now(); Date.now() - t0 < 40000 && !(pictured && typed >= 20); ) {
-      typed += (await typeFor(page, 1000, { wpm: 45, kinds: Date.now() - t0 < 30000 ? [KIND.power] : null })).keys;
+    for (const t0 = Date.now(); Date.now() - t0 < 60000 && !(pictured && typed >= 20); ) {
+      typed += (await typeFor(page, 1000, { wpm: 45, kinds: Date.now() - t0 < 40000 ? [KIND.power] : null })).keys;
       const now = await state(page);
       if (!pictured && now.phase === "night" && Date.now() - t0 > 20000 && now.enemies >= 4) {
         await shot("night-" + mode);

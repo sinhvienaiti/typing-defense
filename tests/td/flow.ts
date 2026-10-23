@@ -88,10 +88,10 @@ export function matrixCells(modes: readonly BandMode[] = STAGE_MODES, bots: read
   return cells;
 }
 
-/** Plays one cell over seeds 1..n. */
-export function playCell(spec: CellSpec, seeds: number, deck: Deck, nights = STAGE_NIGHTS): Cell {
+/** Plays one cell over seeds from + 1 .. from + n (a second set of seeds checks the first). */
+export function playCell(spec: CellSpec, seeds: number, deck: Deck, nights = STAGE_NIGHTS, from = 0): Cell {
   const bot = botById(spec.bot);
-  const runs = Array.from({ length: seeds }, (_, k) => record(playStage(bot, spec.mode, k + 1, deck, spec.director, nights)));
+  const runs = Array.from({ length: seeds }, (_, k) => record(playStage(bot, spec.mode, from + k + 1, deck, spec.director, nights)));
   return { ...spec, k: paceHeader(botProfile(bot, spec.mode), spec.director).k, summary: summarizeRuns(bot.id, spec.mode, runs, spec.director) };
 }
 
@@ -141,13 +141,14 @@ export { formatGates };
 const LABEL: Record<string, string> = Object.fromEntries(STANDARD_BOTS.map((bot) => [bot.id, bot.label]));
 
 /** The stage part of `pnpm td:balance` (BALANCE.md §3, §7; Markdown, Vietnamese): the bots, the §3 table, B1–B9, the measured profiles. */
-export function stageReport(cells: readonly Cell[], measured: readonly { bot: string; profile: SkillProfile }[], seeds: number, print: (text: string) => void): GateResult[] {
+export function stageReport(cells: readonly Cell[], measured: readonly { bot: string; profile: SkillProfile }[], seeds: number, print: (text: string) => void, from = 0): GateResult[] {
   const gates = stageGates(cells);
-  print(`## Lời Gọi: cân bằng nhiều yếu tố (BALANCE.md §3, §7, §9.2; ${seeds} seed mỗi ô, Đêm 1–${STAGE_NIGHTS}, sandbox, từ vựng thật)\n`);
+  print(`## Lời Gọi: cân bằng nhiều yếu tố (BALANCE.md §3, §7, §9.2; seed ${from + 1}–${from + seeds}, Đêm 1–${STAGE_NIGHTS}, sandbox, từ vựng thật)\n`);
   print("Bộ bot chuẩn (BALANCE.md §6) chơi qua lệnh của game: tay là `HumanTypist` (tốc E, độ chuẩn a, CV log-normal, nhận từ theo độ quen, bỏ khóa, phản xạ Bắn mạnh), kế hoạch xây và Tướng là kế hoạch R3 theo chiến thuật (Tốt, Vừa: bố cục chuẩn, Tướng Ngày và Đêm; Kém: Ruộng cạnh Lũy, Mỏ N2, Trại Lính muộn, Tướng Đêm nhìn chậm; Không mua: không xây). Đầu ván mỗi bot có hồ sơ đo đúng E, a, CV của nó (bot Không gõ: chưa đo, mức mặc định), nhịp k từ hồ sơ, bộ điều nhịp bật (một hàng tắt cho B7). Thắng: giữ được Đêm " + STAGE_NIGHTS + ". In đậm: ngoài dải đích §3 của chế độ.\n");
   print(metricsTable(cells).join("\n"));
   print("\n### Cổng B1–B9\n");
   print(formatGates(gates));
+  if (measured.length === 0) return gates;
   print("\n### Hồ sơ game đo được (một ải Cân bằng, tắt nhịp, `SkillTally` sau mỗi ngày đêm)\n");
   print("| Bot | E (đặt / đo) | a (đặt / đo) | CV (đặt / đo) | Nhận từ mới (s) | Lời khuyên |");
   print("|---|---|---|---|---|---|");
