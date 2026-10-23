@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1A.6**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của `BUILD_1A6.md` §0). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1A.7**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của `BUILD_1A6.md` §0). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -41,7 +41,8 @@ Mốc đang làm: **1A.6**. Test `td-boundary` đọc dòng này và cột "Cộ
 | 1A.3 Người và ô (xong, gồm sửa review) | 378 thật: 337 của mốc (mục 1.4: `nav/astar` 107, kho `agents` 36, hệ `agents` 174, `stream` −29, nối `commands` `world` `placement` `compile` `events` `main` +13, vẽ người, đường A*, dây +36) và 41 của bản sửa review 1A.3 (mục 1.6: `nav` +18, hệ `agents` +4, `debug-2d` +17, `cards` +2) | 340 + 41 | 4.960 |
 | 1A.4 Điều khiển, HUD (xong, gồm sửa review) | 496 thật: 499 của mốc (mục 1.7; bản đầu đủ mục 5.3–5.4 dài 822, cắt UI theo mục 1.8) và −3 của bản sửa review 1A.4 (mục 1.10) | 500 | 5.460 |
 | 1A.5 Bot, báo cáo (xong) | 41 thật (mục 1.11): op hộp cát `flood` (TK 25.12) ở `spawn.ts` +19 và `commands.ts` +6, đo khung ở `main.ts` +16; bot, chính sách, báo cáo nằm ở `tests/` và `scripts/` | 40 | 5.500 |
-| 1A.6 Lời Gọi (R1, R2 xong, R3 còn; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4) | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
+| 1A.6 Lời Gọi (R1, R2, R3 xong; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4); R3 6.012 (mục 5); tách repo và chủ đề Văn Điền: 7.064 | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
+| 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -634,3 +635,104 @@ Thẻ đang khóa phóng ×1,2 từ mép dưới nhưng hộp cột tính chiề
 - Thử thách: bot không gõ thua Đêm 4 ở 1 / 5 seed; bot gõ qua cả 5.
 - Lời gọi Xây ít khi sáng (thợ xây đứng xa Tướng); các bước nâng cấp của kế hoạch chuẩn chưa tới trong 4 đêm (thiếu Vàng).
 - Từ R1: Bắn mạnh tạo cuối Đêm sống tối đa 3 s sang Ngày (vô hại).
+
+---
+
+## 6. Bước cân bằng `docs/games/BALANCE.md` 4 (mốc 1A.7, 23/10/2026)
+
+Repo `games/typing-defense`, nhánh `main`. Làm mục 9.2 của BALANCE: kit `balance`, hồ sơ năng lực, nhịp k, FlowMeter cho Ngày và Đêm, bộ điều nhịp trong sim, bộ bot chuẩn, báo cáo §3 và cổng B1–B9, màn Hồ sơ gõ, dòng cài đặt "Nhịp tự điều". Changelog: `docs/changelog/2026-10-23-balance.md`.
+
+### 6.1 Nối kit và sim
+
+- `kit.config.json` thêm `balance`; chép bằng `scripts/sync-game-kit.mjs` của repo cha. Sim chỉ nạp `kit/balance/{bands,director,flow,math,profile}` (TS thuần, tất định); test ranh giới cho phép đúng các file đó, và bỏ qua tên biến cục bộ `window` (cửa sổ 20 s của FlowMeter) vì phép biên dịch không DOM đã bắt biến toàn cục thật.
+- **Đầu ván** (`PaceHeader`, ghi trong `flags()` và file chạy lại): E (từ hồ sơ), nhịp k, bộ điều nhịp bật hay tắt. Thiếu đầu ván thì k = 1, tắt (test cũ giữ nguyên).
+- `src/sim/systems/pace.ts` chạy sau bước 17: hai FlowMeter (Đêm là số đo của ải, Ngày riêng cho bộ điều nhịp ban Ngày), hai PaceDirector, áp quyết định, sự kiện `pace`. Trạng thái meter, director và các thang đo vào mã băm.
+
+### 6.2 Số đo §3 trong Lời Gọi
+
+| Ảnh chụp FlowMeter | Lời Gọi đọc gì |
+|---|---|
+| `danger` | Quái trong 24 m quanh Lũy (khúc nhập cách Lũy 28 m: vào tới làng). Nhà và dân không mất máu ở 1A.6 |
+| `hp` | Mạng Lũy / 20 |
+| `live` | Số từ đang sống (lời gọi SÁNG giữ từ) |
+| `capped`, `backlog` | Đủ trần lời gọi SÁNG mà còn lời gọi trong vòng giúp phải chờ: số từ chờ là backlog. Dưới trần, từ chờ vì ngân sách chú ý là thiết kế, không tính Ngộp. Ban Đêm lời gọi kinh tế chờ lượt theo luật, chỉ Bắn mạnh tính |
+| `busy` | Đang khóa từ, hoặc có quyết định mở: một lời gọi đang chờ trả lời (đưa người tới, hoặc quãng nghỉ ngân sách dành cho làng), một lệnh đang đi, kho đủ tiền xây một nhà |
+| `kills` | Phần đường đã đi của quái bị hạ (Q) |
+| `abandons`, `damage` | Lần nhả khóa (Esc); sát thương Phát Chữ và Cháy (gõ) so với tháp, nỏ, lính, Tướng |
+
+- Ải của báo cáo: **Đêm 1–5**, thắng khi giữ Đêm 5. Cổng 4 của §12 vẫn là Đêm 1–4.
+- Bộ điều nhịp Đêm chỉ chấm từ lúc quái đầu tiên vào trong 50 m quanh Lũy (đi bộ từ cổng ~20 s không phải quãng lặng). Bộ điều nhịp Ngày chấm theo dải của chế độ bỏ phần Áp lực (ban Ngày không có quái).
+
+### 6.3 Nhịp k nối vào đâu
+
+k từ hồ sơ trộn (`effectiveE`, `paceK` của kit; C_ref = sức gõ của bot Chuẩn 35 WPM, 95 %, CV 0,25 nên bot Chuẩn có k = 1). k là cường độ Đêm và tần suất lời gọi Ngày:
+
+- khoảng giữa các toán và độ dài Ngày (giờ đợt, BALANCE §4.1) ÷ k;
+- quái đi nhanh ×(1 + 0,25·(k − 1));
+- Hỏi bài và lời gọi Đào của Mỏ ÷ k (lời gọi đến sớm hơn chỉ chờ chỗ: AttentionDirector giữ ngân sách).
+
+Chỉ chia khoảng sinh thì gần như không đổi gì, có khi ngược chiều (đo ở bản trung gian, 8 seed, tắt nhịp, mạng còn trung vị):
+
+| Nối k vào | k 0,75 | k 1 | k 1,3 |
+|---|---|---|---|
+| Chỉ khoảng sinh (bot Chuẩn / bot Nhanh) | 5 / 5 | 6 / 10 | 7 / 10,5 |
+| Khoảng giữa toán và độ dài Ngày | 8,5 / 12 | 6 / 10 | 4 / 9,5 |
+
+Quái đến dồn thì tháp Pháo và Phát Chữ trúng nhiều hơn, nên dồn không làm Đêm khó hơn. Tốc quái là núm thời gian mạnh và một chiều: hệ số 0,5 làm bot Nhanh chỉ thắng 15 % còn bot Mới 100 %; chọn 0,25.
+
+### 6.4 Bảng bậc (`PACE` trong `rules.ts`)
+
+- Đêm, khó lên: khoảng sinh −7 % (với phần còn trong hàng), một thuộc tính tinh anh (quái kế ×1,3 máu lúc sinh, vòng hổ phách trên bản đồ), đỉnh sớm 3 s, quãng lặng ngắn 3 s.
+- Đêm, dễ xuống: rơi hỗ trợ +3 mạng khi mạng dưới 30 % và đang mất (tối đa 1 lần một Đêm), khoảng sinh +7 %, quãng lặng dài, đỉnh muộn, bớt một tinh anh.
+- Ngày: chỉ đồng hồ lời gọi ±7 %.
+- Trần của kit: ≤ 2 bậc một đợt, khoảng sinh ±15 %. Không đổi máu quái đang sống, không đổi luật gõ hay điểm từ.
+
+### 6.5 Đổi số (chỉ dữ liệu)
+
+| Chỗ | Trước | Sau | Lý do (đo) |
+|---|---|---|---|
+| `slice-1a` Phát Chữ `dBar` | Cung 7,5 / 11 / 15,5; Pháo 13 / 21 / 32 | ×9: 67,5 / 99 / 139,5; 117 / 189 / 288 | Trước: Phát Chữ ~10 % sát thương; bot gõ 35 WPM và bot không gõ mất mạng như nhau qua 4 đêm; mọi bot chết ở Đêm 5. B5 cần gõ là sức chính |
+| `slice-1a` Cháy của Draconis | 3/s, 2 s | 50/s, 3 s | Phát Chữ của Pháo cạnh Tướng gây sát thương thật: gõ là cách trị Thuồng Luồng giáp 60 % |
+| `AGENT.heroRingM` | 10 m | 14 m | 2/3 đời một lời gọi Bắn mạnh nằm ngoài mọi vòng giúp |
+| `CALL.powerLifeS`, Cân bằng `powerCdS` | 6 s, 8 s | 9 s, 9 s | Người gõ chậm kịp Bắn mạnh; nguồn Bắn mạnh giới hạn nên tốc gõ ít quyết định hơn |
+| `slice-1a` Ma Trơi `leak` | 2 | 1 | Đàn Ma Trơi bay qua mọi tháp ở Đêm 2–3 với mọi bot (mất 4–5 mạng không ai đỡ được) |
+| `COMBAT.critMul`, `REWARD.shotQ`, `CALL.sloppy` | 1,75; [0,8; 1,2]; 0,6 | 1,15; [1,6; 0,4]; 1 | k của kit (E_eff) đã trừ độ chính xác; phạt thêm trong game thì bot Ẩu (k 1,045) thua xa dải (48 % thắng). Ẩu vẫn mất thưởng Hoàn hảo, Chuỗi ÷2, vào sổ ôn |
+| `MODES` Thư giãn, Học `hpMul` | 0,75 | 0,6 | B3: bot Trẻ em thắng ≥ 85 % ở Thư giãn (trước 43–78 %) |
+| Đêm 5 | 3 Thuồng Luồng, 12 Cương Thi, 3 Ma Trơi | 6, 7, 3 | B5: bot không gõ thua ải 5 đêm (mọi seed) mà vẫn qua Đêm 1–4 (§12 cổng 4) |
+| Thuồng Luồng `hp` | 320 | 345 | B7: tắt bộ điều nhịp thì bot Chuẩn vẫn trong dải (trước 94–96 % thắng) |
+
+### 6.6 Bot (`tests/td/human.ts`, `flow.ts`)
+
+- Tay là `HumanTypist` của kit qua lệnh thật (`key`, `unlock`): thấy từ theo độ quen (Hỏi bài là "đang học", từ cấp cao nhất của ván là "mới"), tốc log-normal, phím sai, bỏ khóa, chậm khi đông, mệt. Phím sai không hiện trên thẻ nên Backspace theo thói quen không có gì để xóa: thời gian của nó vẫn trôi, không gửi phím.
+- Phản xạ báo trước: Bắn mạnh sáng khi từ đang cầm chưa gõ chữ nào thì bot chuyển sang nó với xác suất `reflex` (chữ đầu của nó lấy khóa).
+- Nhìn bảng (`lookAway`) sau khi xây, nâng, thuê, hộp cát: chờ xong từ đang gõ rồi mới nghỉ (không giữ khóa qua menu).
+- Kế hoạch R3 theo chiến thuật: Tốt (bố cục chuẩn, 3 dân), Vừa (bố cục chuẩn, 3 dân, 1 cây dư), Kém (Ruộng cạnh Lũy, Mỏ N2, Lũy cấp 2 trước tháp thứ hai, Trại Lính muộn, Tướng Đêm nhìn mỗi 2 s), Không mua. Hồ sơ của bot là E, a, CV của nó (tin hoàn toàn); bot Không gõ chưa đo nên dùng mặc định của chế độ.
+- Cổng học riêng (B8): cả ván, phần thời gian khóa từ không vượt ngân sách chú ý của chế độ (6/8/11 s mỗi 20 s), không bất biến lời gọi nào vỡ, không lệnh nào bị từ chối. Một từ chậm có thể làm một cửa sổ 20 s vượt (bot Trẻ em ở Thử thách tới 2,4 lần, vì sàn E 35 của chế độ).
+
+### 6.7 Cổng (120 seed mỗi ô, `pnpm td:balance --stage-seeds=120`, 122 s, 9 luồng)
+
+| Cổng | Kết quả |
+|---|---|
+| B1 | Đạt: Mới 83 % / S 35 %, Chậm chắc 86 / 35, Chuẩn 89 / 45, Khá 84 / 38, Ẩu 76 / 35, Nhanh 90 / 40; P 23–27 %, I ≤ 8,5 %, O ≤ 0,2 % |
+| B2 | Đạt |
+| B3 | Đạt: Mới 83 % ở Cân bằng, Trẻ em 90 % ở Thư giãn |
+| B4 | **Trượt** (hòa): S Chậm chắc 35 % = S Ẩu 35 %. Phần hai đạt: bot Chuẩn hạ quái 23,7 s, Ẩu 24,0 s |
+| B5 | Đạt: bot Không gõ 0 % ở Cân bằng và Thử thách (Thư giãn miễn: 83 %) |
+| B6 | Đạt: Tốt hơn Kém 86 / 31 % (Cân bằng), 63 / 22 % (Thử thách) |
+| B7 | Đạt: ≤ 2,3 bậc mỗi đợt, khoảng sinh 86–114 %; tắt nhịp bot Chuẩn 88 % / S 45 % |
+| B8 | Đạt ở mọi ô |
+| B9 | Thiếu số: chưa có buổi chơi thử của người thật (`__td.balance()` cho số đo và hồ sơ của một ván) |
+
+Cổng §12 (R3, 5 seed, 4 đêm, đầu ván mặc định k = 1, bộ điều nhịp bật): 4 đạt (mạng 13 / 14 / 15 / 10 / 15), 5a 7,93 s, 5b 30,7 %, 5c 22,8 %, 6 không lỗi, 7 +41,6 %. Cổng 2: file vàng làm lại (nội dung `f46dea17`, 19.290 tick, 321 mã băm, 334 lệnh), Chrome ra đủ 321 mã băm. Cổng 3: bước sim trung vị 0,0115 ms, p95 0,03 ms (Node, 300 quái). Cổng 8: 11 kịch bản × 2 cỡ đạt, 0 lỗi console (thêm `td-balance`).
+
+### 6.8 Số dòng
+
+7.064 (sau chủ đề) → 7.492: `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối vào sim, cài đặt, màn đầu, `main.ts` 104. Trần cứng `BUILD_1A6.md` §0 nâng 7.300 → 7.500 (mức nhỏ nhất trên số thật); mốc 1A.7 trong bảng 1.2.
+
+### 6.9 Còn lại
+
+- B4 hòa ở S; B1 nằm sát mép dải (Mới, Chậm chắc, Ẩu S 35 %; Nhanh 90 %). Với bộ seed khác, từng ô lệch ±5 điểm: Đêm 5 quyết bằng vài Thuồng Luồng lọt (mỗi con 3 mạng).
+- Kit: `effectiveE` cho bot Ẩu (50 WPM, 85 %) k 1,045, cao hơn bot Chuẩn, trong khi trong game Ẩu yếu hơn. Đề xuất xem lại trọng số độ chính xác ở kit (không sửa ở đây).
+- Game đo bot Chuẩn ở 30 WPM, 90 %, CV 0,34 (lỗi, gõ hụt khi lời gọi mờ đi, nhịp mỗi từ); với C_ref theo thông số danh nghĩa, người chơi như vậy được k ≈ 0,8. Hiệu chỉnh ở B9.
+- Thử thách (không là cổng B1): bot Nhanh 88 %, Khá 85 % trên dải 50–75 %; Ẩu 52 % / S 10 %. Thư giãn: S trung vị 65 % dưới dải ≥ 70 %.
+- Bộ điều nhịp Ngày phần lớn chỉ nới đồng hồ Hỏi bài và Đào (ban Ngày lời gọi thường đủ trần mà vẫn có lời gọi chờ).

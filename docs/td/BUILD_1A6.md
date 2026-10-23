@@ -11,7 +11,7 @@
 - Chữ cái chỉ để gõ. Phím lệnh không phải chữ cái.
 - Giữ lõi gõ: `typing/letters.ts`, `typing/router.ts`, `typing/scorer.ts`, `typing/picker.ts`, `typing/decks.ts`, thẻ chữ, làn thẻ.
 - Không media trong Git. Không đụng `src/defense`, `src/scene3d` (trừ import đã có), `src/vfx`, `src/audio`.
-- Ngân sách mã TD (không tính test, kịch bản): **≤ 7.300 dòng** (hiện 5.319). Ghi số thật vào `BUILD_NOTES.md` mục mới "1A.6".
+- Ngân sách mã TD (không tính test, kịch bản): **≤ 7.500 dòng** (hiện 5.319). Ghi số thật vào `BUILD_NOTES.md` mục mới "1A.6". Trần cũ 7.300 nâng lên 7.500 ở bước cân bằng `docs/games/BALANCE.md` 4 (23/10/2026): tách repo và chủ đề Văn Điền đã đưa mã lên 7.064, bước cân bằng thêm 428 dòng (hồ sơ gõ, nhịp k, bộ điều nhịp trong sim, thẻ Hồ sơ gõ, dòng cài đặt). Lý do và số từng phần: `BUILD_NOTES.md` mục 6.
 
 ## 1. Bỏ khỏi 1A
 

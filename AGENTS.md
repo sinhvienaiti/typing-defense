@@ -39,7 +39,12 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   make is `docs/audio/THEME_SOUND_LIST.md`.
 - The title shows at `/`; a link with `?sandbox=` (the scenarios) skips it,
   `?title=1` / `?title=0` force it.
-- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit`.
+- Balance (parent `docs/games/BALANCE.md` §9.2; `docs/td/BUILD_NOTES.md` §6): the typing profile
+  `src/app/skill.ts` (kit key `typing-defense.skill`, folded after each day and night) gives the run header
+  (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
+  meters and the pace directors inside the sim (hashed, `pace` events); "Hồ sơ gõ" is `src/ui/profile.ts`.
+  A replay needs the header: `flags()` and the replay files carry `expected` and `pace`.
+- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` included).
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`.
 - `scripts/td/`: balance report, golden update, Node replay.
 - `scripts/visual/scenarios/td-*.mjs`: browser scenarios (CDP).
@@ -52,11 +57,13 @@ pnpm dev                 # 127.0.0.1:3006
 pnpm test                # vitest run
 pnpm build               # tsc --noEmit && vite build
 pnpm check               # kit sha256 check, tests, build
-pnpm td:balance          # bot balance report (Markdown)
+pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B1–B9, then the BUILD_1A6 §12 table
+                         #   options: --stage-seeds=120 (matrix seeds, worker threads) --seeds=5 --nights=4 (§12 runs)
 pnpm td:golden:check     # golden run must match tests/golden/td-1a.json
 pnpm td:golden:update    # remake the golden after an intended change
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-theme.mjs --width=1280 --height=720  # title, settings, pause, results
+OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-balance.mjs --width=1280 --height=720  # Hồ sơ gõ, pace setting, nights
 ```
 
 The dev server serves `/vocabulary/` and `/typing-texts/` read-only from the
