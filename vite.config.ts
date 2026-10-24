@@ -33,5 +33,12 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
+    rollupOptions: {
+      output: {
+        // BUILD_1B §20: what the game needs to start is one chunk (scripts/bundle-budget.mjs, ≤ 85 kB gzip); sound, the
+        // title, the settings and Hồ sơ gõ cards, the pause and results cards and the sandbox panel load apart (src/main.ts).
+        manualChunks: (id) => (/[\\/]src[\\/](ui[\\/](title|settings|profile|sheets)|app[\\/]sandbox|view[\\/](audio-min|folk|music))\.ts$/.test(id) ? undefined : "game"),
+      },
+    },
   },
 });

@@ -1,21 +1,11 @@
 /**
- * The sandbox panel (docs/td/BUILD_NOW.md §5.3, BUILD_1A6 §9; F9 hides it).
- * Its buttons, and the level row of a building's card, are `sb:<op>:<value>`
- * actions that become `sandbox` commands, so a run's log replays them.
+ * The sandbox panel (docs/td/BUILD_NOW.md §5.3, BUILD_1A6 §9; F9 hides it), a chunk of its own (BUILD_1B §20).
+ * Its buttons, and the level row of a building's card, are `sb:<op>:<value>` actions that become `sandbox`
+ * commands (sandboxOp in app/selection.ts), so a run's log replays them.
  */
-import { MODE_IDS, type SandboxOp } from "../sim/commands";
+import { MODE_IDS } from "../sim/commands";
 import type { World } from "../sim/world";
 import { button, seg } from "../ui/hud";
-
-/** The level row sets the building in focus; gold and wood are added; the mode's value is a word. */
-export function sandboxOp(op: string, value: string, w: World, focus: number): SandboxOp {
-  if (op === "level") return { op, building: focus, value: Number(value) };
-  if (op === "gold") return { op, value: Math.floor(w.gold / 1000) + Number(value) };
-  if (op === "wood") return { op, value: w.wood + Number(value) };
-  if (op === "spawn") return { op, enemy: value, value: value === "tanuki" ? 1 : 3 };
-  if (op === "ult") return { op };
-  return { op, value: op === "mode" ? value : Number(value) } as SandboxOp;
-}
 
 export function sandboxHtml(w: World): string {
   return (

@@ -12,16 +12,17 @@
  * events, Esc's pause card and the results card sit over it, and window.__td
  * lets the browser scenarios drive it through commands. The typing profile
  * (app/skill.ts, BALANCE.md §2) gives the run its header (E, pace k, the pace
- * director by the settings) and takes each day and night's typing after it.
+ * director by the settings) and takes each day and night's typing after it. The title with its settings and Hồ sơ gõ
+ * cards, the pause and results cards and the sandbox panel are chunks of their own, loaded when wanted (BUILD_1B §20).
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { installDevHandle } from "./app/dev-handle";
 import { installKeys, installPointer } from "./app/input";
 import { learningBridge } from "./app/learning";
+import { loadSettings } from "./app/prefs";
 import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
 import { updateSkill } from "./kit/balance";
-import { sandboxHtml } from "./app/sandbox";
 import { Selection } from "./app/selection";
 import { Session } from "./app/session";
 import { loadDeck } from "./app/vocab";
@@ -32,18 +33,17 @@ import type { RareEvent } from "./sim/events";
 import { hashHex } from "./sim/hash";
 import { canPlace } from "./sim/placement";
 import { setMode, setPace } from "./sim/systems/pace";
-import { runLog } from "./sim/world";
+import { runLog, type World } from "./sim/world";
 import { statsObject } from "./sim/stats";
 import { PATH_MAX } from "./sim/stores/agents";
 import { wordText } from "./typing/decks";
 import { dockHtml } from "./ui/build-menu";
 import { actionsHtml, BossBanner, Hud, REASON, statusHtml, stripHtml } from "./ui/hud";
-import { ProfileCard } from "./ui/profile";
-import { loadSettings, SettingsCard } from "./ui/settings";
-import { Sheet, type SheetAction } from "./ui/sheets";
+import type { ProfileCard } from "./ui/profile";
+import type { Sheet, SheetAction } from "./ui/sheets";
 import { teamHtml } from "./ui/team-bar";
-import { TitleScreen, type TitleChoice } from "./ui/title";
-import { TypingAudio } from "./view/audio-min";
+import type { TitleChoice, TitleScreen } from "./ui/title";
+import type { TypingAudio, UiSound } from "./view/audio-min";
 import { DebugView } from "./view/debug-2d";
 import { WordCards } from "./view/words/cards";
 
@@ -61,19 +61,26 @@ const canvas = byId<HTMLCanvasElement>("tdCanvas");
 const view = new DebugView(canvas);
 let painted = false;
 const settings = loadSettings();
-const audio = new TypingAudio(settings);
+/** Sound and music, a chunk loaded right after the start: nothing sounds before a key or a click anyway (TypingAudio.resume). */
+let audio: TypingAudio | null = null;
+void import("./view/audio-min").then((m) => (audio = new m.TypingAudio(settings)));
 let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
 /** The run header from the profile and the "Nhịp tự điều" setting. */
 const header = () => paceHeader(profile, settings.pace);
 
-// The title, made on first use (a run opened by a scenario's link never loads its painting); its choice waits for the run.
+// The title, its chunk and its cards loaded on first use (a run opened by a scenario's link never loads them, nor its
+// painting); its choice waits for the run. `titleUp`: the title is up or on its way, so the world waits and keys wait too.
 let title: TitleScreen | null = null;
+let titleUp = false;
+let titleLoad: Promise<void> | null = null;
 let choose: (choice: TitleChoice) => void = () => {};
 function showTitle(canContinue: boolean): void {
-  const card = (): SettingsCard => new SettingsCard(settings, (changed) => audio.apply(changed), () => title?.settingsDone());
-  const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: audio.ui.bind(audio), wake: () => audio.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
-  title ??= new TitleScreen(document.body, hooks, card(), new ProfileCard(() => title?.settingsDone()), true);
-  title.show(canContinue);
+  titleUp = true;
+  titleLoad ??= Promise.all([import("./ui/title"), import("./ui/settings"), import("./ui/profile")]).then(([t, s, p]) => {
+    const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: (sound: UiSound) => audio?.ui(sound), wake: () => audio?.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
+    title = new t.TitleScreen(document.body, hooks, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => title?.settingsDone()), new p.ProfileCard(() => title?.settingsDone()), true);
+  });
+  void titleLoad.then(() => titleUp && title?.show(canContinue));
 }
 /** "Chơi lại Ngày n" (BUILD_1B §4.3): the run's header, its log up to day n's start, the hash there; one page load reads it. */
 type Retry = { seed: number; sandbox: boolean; deck: string; content: string; mode: Mode; header: PaceHeader & { expected: number }; day: number; tick: number; hashes: string[]; log: Command[] };
@@ -127,7 +134,7 @@ const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
 let imeWarning = false;
 const learnMode = (): void => setMode(world, (startMode = "learn"));
 /** A run has begun: the title was passed (or never shown); a new choice then opens a fresh page. */
-let begun = title === null;
+let begun = !titleUp;
 choose = (choice) => {
   if (choice === "continue") selection.paused = false;
   else if (begun) return void (window.location.search = freshRun(choice === "learn"));
@@ -135,33 +142,41 @@ choose = (choice) => {
   // Settings changed on the title apply to this run while it has not stepped (BALANCE.md §4.1: set before the run).
   if (world.tick === 0) setPace(world, (runHeader = header()));
   begun = true;
+  titleUp = false;
   title?.hide();
 };
+/** The sandbox panel's markup (?sandbox=1), its own chunk. */
+let sandboxPanel: ((w: World) => string) | null = null;
+if (sandbox) void import("./app/sandbox").then((m) => (sandboxPanel = m.sandboxHtml));
 
 /** Buttons and keys: the camera's and the sound's own, the rest the selection's. */
 function act(action: string): void {
   const [name, dx, dy] = action.split(":");
   if (name === "pan") view.panBy(Number(dx) * 60, Number(dy) * 60);
-  else if (name === "mute") audio.muted = !audio.muted;
+  else if (name === "mute" && audio !== null) audio.muted = !audio.muted;
   else selection.act(action);
 }
 
 const hud = new Hud(byId("tdHud"), act);
 const banner = new BossBanner();
-for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio.resume());
-/** Esc's pause card and the results card; "Xem bản đồ" puts the results away. */
+for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio?.resume());
+/** Esc's pause card and the results card, with their settings card: a chunk loaded as the run starts; "Xem bản đồ" puts the results away. */
 let mapOnly = false;
-const sheet = new Sheet(document.body, new SettingsCard(settings, (changed) => audio.apply(changed), () => sheet.settingsDone()), (action: SheetAction) => {
-  if (action === "resume") selection.act("pause");
-  else if (action === "map") mapOnly = true;
-  else if (action === "again") window.location.search = freshRun(false);
-  else if (action === "retry") retryDay();
-  else if (action === "copy") copyNumbers();
-  else if (action === "title") showTitle(world.phase !== "defeat");
+let sheet: Sheet | null = null;
+void Promise.all([import("./ui/sheets"), import("./ui/settings")]).then(([m, s]) => {
+  sheet = new m.Sheet(document.body, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => sheet?.settingsDone()), (action: SheetAction) => {
+    if (action === "resume") selection.act("pause");
+    else if (action === "map") mapOnly = true;
+    else if (action === "again") window.location.search = freshRun(false);
+    else if (action === "retry") retryDay();
+    else if (action === "copy") copyNumbers();
+    else if (action === "title") showTitle(world.phase !== "defeat");
+  });
 });
-// The title takes every key while it is up; a card takes its own (arrows, Enter, Esc) and lets the rest through.
+// The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
 window.addEventListener("keydown", (event) => {
-  const open = title?.open === true ? title : sheet.open ? sheet : null;
+  if (titleUp && title === null) return void (event.preventDefault(), event.stopImmediatePropagation());
+  const open = titleUp ? title : sheet?.open === true ? sheet : null;
   if (open === null) return;
   const taken = open.key(event);
   if (taken) event.preventDefault();
@@ -192,8 +207,8 @@ function showHud(): void {
   ];
   const now = performance.now();
   hud.update([
-    statusHtml(world, sandbox, selection.halted, audio.muted, notices.filter((notice) => notice !== ""), banner.hit(now)),
-    sandbox && selection.panel ? sandboxHtml(world) : "",
+    statusHtml(world, sandbox, selection.halted, audio?.muted === true, notices.filter((notice) => notice !== ""), banner.hit(now)),
+    sandbox && selection.panel && sandboxPanel !== null ? sandboxPanel(world) : "",
     teamHtml(world, selection.agent),
     stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical),
     dockHtml(world, selection),
@@ -202,7 +217,7 @@ function showHud(): void {
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
   const over = world.phase === "defeat" || world.phase === "victory";
-  sheet.show(title?.open === true ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world, { story: !sandbox, retried: retry?.day ?? 0 });
+  sheet?.show(titleUp ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world, { story: !sandbox, retried: retry?.day ?? 0 });
 }
 
 /** The boss bar takes the top of the screen from its warning on: the field moves down under it (BUILD_1B §13.1). */
@@ -234,7 +249,7 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted || title?.open === true;
+      session.paused = selection.halted || titleUp;
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       const fresh = world.events.rare.splice(0);
@@ -245,8 +260,8 @@ runFrameLoop({
       view.boss.read(fresh, world, now);
       view.fx.read(fresh, world, now);
       banner.read(fresh, world, now);
-      audio.read(fresh, world, now);
-      audio.frame(title?.open === true ? null : world, now);
+      audio?.read(fresh, world, now);
+      audio?.frame(titleUp ? null : world, now);
       recent.push(...fresh);
       if (recent.length > 400) recent.splice(0, recent.length - 400);
       showHud();
@@ -297,7 +312,8 @@ function retryDay(): void {
 }
 
 installDevHandle({
-  ready: () => painted,
+  // Painted, and the chunks this page wants are in (sound, the cards, the title when it is up, the sandbox panel).
+  ready: () => painted && audio !== null && sheet !== null && (!titleUp || title !== null) && (!sandbox || sandboxPanel !== null),
   // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
   flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director }, mode: startMode }),
   send: (command: CommandBody) => session.send(command),

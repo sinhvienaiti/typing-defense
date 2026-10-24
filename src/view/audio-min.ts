@@ -18,7 +18,7 @@ import { PROJECTILE } from "../sim/stores/projectiles";
 import { chainTier } from "../sim/systems/chain";
 import type { World } from "../sim/world";
 import { KEY } from "../typing/router";
-import type { Settings } from "../ui/settings";
+import type { Settings } from "../app/prefs";
 import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, trong, type Out } from "./folk";
 import { FolkMusic } from "./music";
 

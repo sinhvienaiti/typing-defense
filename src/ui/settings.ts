@@ -1,30 +1,12 @@
 /**
- * The settings (SPLIT_PLAN D7): master, music and effects volumes 0–100, and "Nhịp tự điều theo cách bạn gõ"
- * (BALANCE.md §4.2, on by default: the run's pace k and the pace director; a run keeps the value it started
- * with), kept under td.settings; the card the title and the pause card open. Keyboard first: ↑ ↓ pick a row,
+ * The settings card (SPLIT_PLAN D7) the title and the pause card open, over app/prefs.ts (td.settings): the volumes
+ * and "Nhịp tự điều theo cách bạn gõ". A chunk of its own (BUILD_1B §20). Keyboard first: ↑ ↓ pick a row,
  * ← → move a volume by 10 or switch the pace, Enter or Esc closes; a click on a bar sets it, on the pace row switches it.
  */
-import { safeLocalStorage } from "../kit/platform/safe-storage";
+import { saveSettings, SETTING_ROWS, type Settings } from "../app/prefs";
 
-export type Settings = { master: number; music: number; sfx: number; pace: boolean };
-
-const KEY = "td.settings";
-const DEFAULTS: Settings = { master: 80, music: 60, sfx: 80, pace: true };
-type Volume = Exclude<keyof Settings, "pace">;
-export const SETTING_ROWS: readonly (readonly [Volume, string])[] = [["master", "Âm lượng chung"], ["music", "Nhạc"], ["sfx", "Tiếng trận và gõ"]];
 export const PACE_LABEL = "Nhịp tự điều theo cách bạn gõ";
 const ROWS = SETTING_ROWS.length + 1;
-
-export function loadSettings(): Settings {
-  const stored = safeLocalStorage.readJson(KEY) as Partial<Record<keyof Settings, unknown>> | null;
-  const settings = { ...DEFAULTS };
-  for (const [key] of SETTING_ROWS) {
-    const value = stored?.[key];
-    if (typeof value === "number" && value >= 0 && value <= 100) settings[key] = Math.round(value);
-  }
-  settings.pace = stored?.pace !== false;
-  return settings;
-}
 
 export class SettingsCard {
   readonly el: HTMLElement;
@@ -60,7 +42,7 @@ export class SettingsCard {
   }
 
   private save(): void {
-    safeLocalStorage.writeJson(KEY, this.settings);
+    saveSettings(this.settings);
     this.changed(this.settings);
     this.render();
   }

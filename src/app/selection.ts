@@ -10,7 +10,7 @@
  */
 import { ticks } from "../content/compile";
 import { ECONOMY, FARM, MODES, SELL, TREE } from "../content/rules";
-import type { CommandBody } from "../sim/commands";
+import type { CommandBody, SandboxOp } from "../sim/commands";
 import { canPlace, nextSpot, spotCandidates, type Point } from "../sim/placement";
 import { PLOT } from "../sim/stores/buildings";
 import { CALL_STATE } from "../sim/stores/calls";
@@ -19,9 +19,18 @@ import { plotAt } from "../sim/systems/economy";
 import { ultSpot } from "../sim/systems/ult";
 import type { World } from "../sim/world";
 import { REASON } from "../ui/hud";
-import { sandboxOp } from "./sandbox";
 
 const q = (metres: number): number => Math.round(metres * 4);
+
+/** A sandbox button's `sb:<op>:<value>` as its command (app/sandbox.ts draws the panel): the level row sets the building in focus; gold and wood are added; the mode's value is a word. */
+export function sandboxOp(op: string, value: string, w: World, focus: number): SandboxOp {
+  if (op === "level") return { op, building: focus, value: Number(value) };
+  if (op === "gold") return { op, value: Math.floor(w.gold / 1000) + Number(value) };
+  if (op === "wood") return { op, value: w.wood + Number(value) };
+  if (op === "spawn") return { op, enemy: value, value: value === "tanuki" ? 1 : 3 };
+  if (op === "ult") return { op };
+  return { op, value: op === "mode" ? value : Number(value) } as SandboxOp;
+}
 const dist2 = (x: number, z: number, p: Point): number => (x - p.x) * (x - p.x) + (z - p.z) * (z - p.z);
 
 export class Selection {
