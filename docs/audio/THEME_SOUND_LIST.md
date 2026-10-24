@@ -15,6 +15,7 @@
 - **Định dạng file thật** (TK 24.9): gốc WAV 48 kHz 24-bit; trong game OGG Vorbis, mono cho tiếng ngắn, stereo cho nhạc và âm nền. Tiếng ngắn đỉnh −1 dBTP; nhạc −18 LUFS; âm nền −26 LUFS.
 - **Tiếng phím** (`key-right`, `key-wrong`) giữ tổng hợp bằng mã, không làm bằng AI (TK 24.6): phải bắt đầu dưới 20 ms và dài dưới 60 ms.
 - Prompt viết bằng tiếng Anh vì công cụ tạo âm hiểu tiếng Anh tốt hơn. Mỗi prompt ghép thêm đuôi chung: *"Single isolated sound, dry, no music, no speech, no reverb tail beyond the sound, starts instantly, clean end, 48 kHz."*
+- **Âm hành động** (`wordshot-fire`, `arrow-fire`, `blast`, `ink-puff`; quyết định Q6 của chủ dự án ngày 24/10/2026, ghi ở `tools/audio-lab/DECISIONS.md` của repo cha) không ghép đuôi chung trên, vì đuôi vang ngoài làng là một phần của âm. Prompt của các id này tự ghi đủ phần chuẩn bị (nếu hành động có), đầu tiếng, thân và đuôi ngắn, không có chữ phủ định. Cỡ âm theo nguồn: cung tre nhỏ thì tiếng nhỏ. Không dùng hướng "bụp", "puff", "pop", tiếng trầm ngắn đứng riêng.
 
 ## 2. Tiếng gõ và lời gọi (bus `typing`)
 
@@ -36,10 +37,10 @@
 
 | Id | Khi nào | Không khí | Hiện tại (mã) | Prompt cho file thật |
 |---|---|---|---|---|
-| `wordshot-fire` | Phát Chữ bay ra | Nhanh, có chữ trong đó | Tiếng "vút" giấy và một cú gõ tre | A fast bamboo arrow whoosh with a dry paper flutter, left to right, 0.18 s. |
-| `arrow-fire` | Tháp Cung bắn (tối đa 4 lần mỗi giây) | Nhẹ, nền | Giấy "phựt" rất ngắn | A soft twang of a small bamboo bow string, very short, 0.08 s, quiet. |
-| `blast` | Vụ nổ (Tháp Pháo, cụm Phát Chữ), tối đa 2 mỗi khung | Đầm, không ồn | Trống trầm và giấy bung | A deep thump of a large wooden drum with a burst of paper scraps and dust, 0.4 s, no explosion crackle. |
-| `ink-puff` | Quái Mực Câm tan (tối đa 8 mỗi giây) | Mềm, không máu | Giấy "bụp" | A soft puff of an ink-soaked paper bag popping, muffled, 0.15 s. |
+| `wordshot-fire` | Phát Chữ bay ra | Nhanh, có chữ trong đó: vung tay tre, chữ giấy phóng vút đi, giấy phần phật bay xa; vang làng ngắn | Tiếng "vút" giấy và một cú gõ tre | A word shot launched: a quick bamboo whip, a sharp release, a fast arrow whoosh with paper fluttering as it travels away, short village echo, 0.35 s. |
+| `arrow-fire` | Tháp Cung bắn (tối đa 4 lần mỗi giây) | Nhẹ, nền: cung tre kẽo kẹt, dây bật, mũi tên vút đi xa; vang làng ngắn | Giấy "phựt" rất ngắn | A small bamboo bow shot: a soft creak, a quick string snap, the arrow hissing away over the fields, short village echo, 0.2 s. |
+| `blast` | Vụ nổ (Tháp Pháo, cụm Phát Chữ), tối đa 2 mỗi khung | Đầm, không ồn: trống lớn nện có thân, giấy và bụi bung tung, mảnh giấy rơi lả tả; vang làng (không có lớp nổ lách tách) | Trống trầm và giấy bung | A village blast: a deep heavy hit of a large wooden drum bursting a cloud of paper scraps and dust, paper drifting down, echo across the fields, 0.8 s. |
+| `ink-puff` | Quái Mực Câm tan (tối đa 8 mỗi giây) | Mềm, không máu: túi giấy thấm mực rách, mực bắn tóe nhỏ, giấy lả tả; vang ngắn | Giấy "bụp" | An ink-soaked paper creature tearing apart: a soft wet paper rip, a small splash of ink spattering, paper scraps fluttering down, short village echo, 0.2 s. |
 | `coin` | Rơi đồng sau khi hạ quái (tối đa 3 mỗi giây) | Tiền, sáng | Chuông li ti rất nhỏ | One small bronze coin dropped on a wooden tray, tiny high ring, 0.3 s. |
 | `leak` | Quái lọt vào Lũy (cách nhau ít nhất 0,8 s) | Cảnh báo, không còi | Cồng đồng trầm | One low strike on a medium bronze village gong (cồng), warning, 1.2 s ring, not a temple gong. |
 | `night-fall` | Trời tối, đêm bắt đầu | Trang nghiêm, sắp đánh | Ba tiếng trống và cồng trầm | Three village drum beats (slow, slow-quick) followed by one deep bronze gong, evening alarm in a bamboo village, 3 s. |
