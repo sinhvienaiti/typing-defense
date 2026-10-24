@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { GATE_IDS, STANDARD_BOTS, type BotModeSummary } from "../src/kit/balance";
 import { STAT } from "../src/sim/stats";
 import { paceSummary } from "./td/bot";
-import { botById, learnOk, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS, TIGHT_BANDS, type Cell } from "./td/flow";
+import { emptyBossRun, type BossRun } from "./td/boss-probe";
+import { bossGates, bossGateValues, botById, learnOk, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS, TIGHT_BANDS, type Cell } from "./td/flow";
 import { realDeck } from "./td/typing";
 
 /**
@@ -84,5 +85,23 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     const status = (standardS: number) => ["B1", "B7"].map((id) => stageGates(cells(standardS), TIGHT_BANDS).find((gate) => gate.id === id)!.status);
     expect(status(550)).toEqual(["pass", "pass"]); // others at 35 % and 65 %: inside §3
     expect(status(650)).toEqual(["fail", "fail"]); // the standard bot past 60 %
+  });
+
+  it("grades G3 and G8 on the standard bot's boss runs, each seed set and the pool (R2 review fix 2)", () => {
+    // A run: risen at tick 0, first hit `hit` s later, retreated `engage` s after it (or not), idle share `idle`.
+    const run = (hit: number, engage: number | null, idle = 0.01): BossRun => ({
+      ...emptyBossRun(), reached: true, retreated: engage !== null, rise: 0, firstHit: hit * 60, retreat: engage === null ? -1 : (hit + engage) * 60, fed: 1000, idle: idle * 1000,
+    });
+    const cell = (boss: BossRun[]): Cell => ({ bot: "standard", mode: "balanced", director: true, k: 1, summary: {} as BotModeSummary, records: [], boss, extra: [] });
+    const [one, two] = [cell([run(24, 46), run(24, 48), run(25, null)]), cell([run(24, 44), run(23, 44.5), run(24, 47)])];
+    expect(bossGateValues([one])).toMatchObject({ engage: 47, firstHit: 24, g3: true, g8: true });
+    expect(bossGateValues([two])!.g3).toBe(false); // 44.5 s: under 45 s
+    expect(bossGates([one])).toMatch(/^G3 .*: 47,0 s: đạt\. G8 .*: 24,0 s, 1,0 %: đạt\.$/);
+    const pooled = cell([...one.boss, ...two.boss]);
+    expect(bossGates([pooled], [[one], [two]])).toMatch(/G3 .*bộ 1 47,0 s \/ bộ 2 44,5 s \/ gộp 46,0 s: \*\*trượt\*\*\./);
+    expect(bossGateValues([cell([run(36, 50)])])!.g8).toBe(false); // first hit past 35 s
+    expect(bossGateValues([cell([run(20, 50, 0.12)])])!.g8).toBe(false); // Nhàn I past Cân bằng's 10 %
+    expect(bossGates([cell([])])).toContain("—");
+    expect(bossGates([])).toBe(""); // the standard bot not played
   });
 });

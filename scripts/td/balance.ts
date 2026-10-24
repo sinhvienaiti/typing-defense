@@ -1,8 +1,9 @@
 /**
  * `pnpm td:balance` (docs/td/BUILD_NOW.md §6.3, BUILD_1A6 §12, docs/games/BALANCE.md §3, §7): first the stage matrix
  * (every standard bot × Thư giãn, Cân bằng, Thử thách × --stage-seeds seeds, on --stage-sets independent seed sets,
- * worker threads; the §3 metrics, B1–B9
- * and the profiles the game measures), then the R3 report (tests/td/balance.ts) with the §12 gate table, as Markdown.
+ * worker threads; the §3 metrics, B1–B9, the boss table with G3 and G8, R2's table with G2, G5, G6
+ * and the profiles the game measures; then the sets pooled: the tight targets, B1–B9, G2, G5, G6, the boss table, G3 and G8
+ * on each set and the pool), then the R3 report (tests/td/balance.ts) with the §12 gate table, as Markdown.
  * Never fails a build (tests/td-balance-gates.test.ts and tests/td-flow.test.ts do).
  *   node --import tsx scripts/td/balance.ts [--seeds=5] [--nights=4] [--stage-seeds=120] [--stage-sets=2] [--threads=6]
  *   tuning probes (BUILD_1B §6.5): [--modes=balanced] [--bots=standard,fast] [--quick] (no profiles, no §12 report) [--set=POWER.quick=0.8 …]
@@ -10,7 +11,7 @@
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
 import { balanceReport } from "../../tests/td/balance";
-import { botById, MATRIX_BOTS, matrixCells, measuredProfile, poolCells, r2Gates, stageGates, stageReport, STAGE_MODES, TIGHT_BANDS, tightTable, type Cell } from "../../tests/td/flow";
+import { bossGates, bossTable, botById, MATRIX_BOTS, matrixCells, measuredProfile, poolCells, r2Gates, stageGates, stageReport, STAGE_MODES, TIGHT_BANDS, tightTable, type Cell } from "../../tests/td/flow";
 import { formatGates, type BandMode } from "../../src/kit/balance";
 import { realDeck } from "../../tests/td/typing";
 import { applySets, setsOf } from "./overrides";
@@ -58,6 +59,10 @@ if (sets > 1) {
   const wide = stageGates(pooled).filter((gate) => gate.id === "B1" || gate.id === "B7");
   console.log(`\nĐể so, B1 và B7 gộp theo dải BALANCE §3 (75–90 %, 35–65 %): ${wide.map((gate) => gate.id + " " + (gate.status === "pass" ? "đạt" : gate.status === "fail" ? "trượt" : "thiếu số")).join(", ")}.`);
   console.log("\nR2 gộp: " + r2Gates(pooled));
+  // R2 review fix 2: the boss table pooled, and G3, G8 graded on each set and the pool (BUILD_1B §18.3, §21.6).
+  console.log(`\n### Đỉnh boss Mộc Tinh, gộp ${sets} bộ (BUILD_1B §18.2)\n`);
+  console.log(bossTable(pooled).join("\n"));
+  console.log("\n" + bossGates(pooled, played));
   console.log("");
 }
 

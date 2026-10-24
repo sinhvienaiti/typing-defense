@@ -375,6 +375,43 @@ export function r2Gates(cells: readonly Cell[]): string {
   ].join(" ");
 }
 
+/**
+ * G3 and G8 of BUILD_1B §18.3 on the standard bot in Cân bằng, read as the boss table reads them (R2 review fix 2): G3 the
+ * engagement p50 (first hit → retreat, runs it retreated in) in 45–75 s; G8 rise → first hit p50 ≤ 35 s and Nhàn I from
+ * the lull's end to the run's end within the mode's I band. Null: the cell was not played.
+ */
+export function bossGateValues(cells: readonly Cell[]): { engage: number | null; firstHit: number | null; idle: number | null; g3: boolean; g8: boolean } | null {
+  const c = cells.find((x) => x.bot === "standard" && x.mode === "balanced" && x.director);
+  if (c === undefined) return null;
+  const reached = c.boss.filter((b) => b.reached);
+  const engage = median(reached.filter((b) => b.retreated).map((b) => (b.retreat - b.firstHit) / 60));
+  const firstHit = median(reached.filter((b) => b.firstHit >= 0).map((b) => (b.firstHit - b.rise) / 60));
+  const fed = sum(reached.map((b) => b.fed));
+  const idle = fed > 0 ? sum(reached.map((b) => b.idle)) / fed : null;
+  return {
+    engage, firstHit, idle,
+    g3: engage !== null && engage >= 45 && engage <= 75,
+    g8: firstHit !== null && firstHit <= 35 && idle !== null && idle * 1000 <= BANDS.balanced.i.max!,
+  };
+}
+
+/**
+ * The G3 and G8 lines of the report: one seed set alone, or (`sets` given) each set and the pool, each of which must pass
+ * (§21.5–§21.6 read every gate on both seed sets; the pool is printed beside them, as for B1).
+ */
+export function bossGates(cells: readonly Cell[], sets: readonly (readonly Cell[])[] = []): string {
+  const rows = [...sets, cells].map(bossGateValues);
+  if (rows.some((row) => row === null)) return "";
+  const names = sets.length > 0 ? [...sets.map((_, k) => "bộ " + (k + 1) + " "), "gộp "] : [""];
+  const sec = (value: number | null): string => (value === null ? "—" : value.toFixed(1).replace(".", ",") + " s");
+  const mark = (pass: boolean): string => (pass ? "đạt" : "**trượt**");
+  const each = (pick: (row: NonNullable<ReturnType<typeof bossGateValues>>) => string): string => rows.map((row, k) => names[k] + pick(row!)).join(" / ");
+  return [
+    `G3 (bot Chuẩn, Cân bằng; giao chiến p50 45–75 s, núm là tốc boss §6.5 bước 1): ${each((r) => sec(r.engage))}: ${mark(rows.every((r) => r!.g3))}.`,
+    `G8 (bot Chuẩn, Cân bằng; trồi → trúng đầu p50 ≤ 35 s, Nhàn I đỉnh boss ≤ ${pct(BANDS.balanced.i.max!)}): ${each((r) => sec(r.firstHit) + ", " + (r.idle === null ? "—" : share1(r.idle * 1000, 1000)))}: ${mark(rows.every((r) => r!.g8))}.`,
+  ].join(" ");
+}
+
 const LABEL: Record<string, string> = Object.fromEntries(STANDARD_BOTS.map((bot) => [bot.id, bot.label]));
 
 /** The stage part of `pnpm td:balance` (BALANCE.md §3, §7; Markdown, Vietnamese): the bots, the §3 table, B1–B9, the measured profiles. */
@@ -387,6 +424,7 @@ export function stageReport(cells: readonly Cell[], measured: readonly { bot: st
   print(formatGates(gates));
   print("\n### Đỉnh boss Mộc Tinh (BUILD_1B §18.2)\n");
   print(bossTable(cells).join("\n"));
+  print("\n" + bossGates(cells));
   print("\n### Tách hai số: thắng do boss, Biên S do các đêm trước (BUILD_1B §6)\n");
   print(splitTable(cells).join("\n"));
   print("\n" + windowLine(cells));
