@@ -110,11 +110,12 @@ export const SLICE_1A: Content = {
       view: { name: "Mầm Gỗ", short: "MG", color: "#5f9a3a" },
     },
     // BUILD_1B §10 (R2; TK 22.6): Tanuki drums (Ngắt breaks it) only within 9 m of a tower's or the Bastion's rim (BUILD_NOTES
-    // §7.3: by the rift no ring lit it), Nuppeppō splits in two unless a blast kills it. Melee: starting numbers.
+    // §7.3: by the rift no ring lit it), Nuppeppō splits in two unless a blast kills it. Melee: starting numbers. R2 review
+    // (§7.4): 4 others by it, not 3: counted by the calls made, 3 gave one every 24.7 s of night 4 (§9.1: 25–40 s).
     {
       id: "tanuki", tier: "small", hp: 110, armorPct: 0, resistPct: 30, speed: 2.4, altitude: "ground", leak: 1, gold: 12,
       blockWeight: 1, radiusM: 0.8, packSize: 1, melee: { damage: [3, 5], periodS: 1.0 },
-      ability: { verb: "interrupt", cooldownS: 12, radiusM: 6, need: 3, reachM: 9, healPct: 25, stunS: 2, gold: 5 },
+      ability: { verb: "interrupt", cooldownS: 12, radiusM: 6, need: 4, reachM: 9, healPct: 25, stunS: 2, gold: 5 },
       view: { name: "Lửng Tanuki", short: "TN", color: "#9a6a3e" },
     },
     {
@@ -183,8 +184,9 @@ export const SLICE_1A: Content = {
   },
   // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.35 on its bark (heroMul).
   // R2 (BUILD_NOTES §7.3): k factor 0.3 / 6.5 (R1 review: 0.2 / 4.3), Thư giãn and Học ×0.78 like Thử thách (R1 review: 0.85).
+  // R2 review (§7.4): the cap 1.5 → 1.46, the fastest bot's boss walks ×1.09 with PACE.speedK 0.3.
   boss: {
-    enemy: "moc-tinh", retreatPct: 50, kHp: 0.3, kHp2: 6.5, kHpMax: 1.5, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
+    enemy: "moc-tinh", retreatPct: 50, kHp: 0.3, kHp2: 6.5, kHpMax: 1.46, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },
     slam: { damage: [40, 60], reachM: 3, everyS: 2.5, warnS: 1.2, knockM: 1.5 },
     stagger: { atPct: 70, stunS: 5, vulnerable: 1.25, burstLifeS: 5, burstReachM: 2, burstWords: 3, burstPerE: 20 },

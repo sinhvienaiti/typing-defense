@@ -78,9 +78,10 @@ export const POWER = { max: 5, perWord: 2, perfect: 1, quick: 0.8, quickS: 5 } a
  * within autoM of him): a feather every everyTicks, each at the enemy with the most hit points within radiusM not yet aimed at (round
  * and round; none: the spot), landing ~fallS later in a blastM blast of `damage` magic; the boss takes ×bossMul and never burns; at the
  * rain's end the enemies left in it burn burnS. Chữ Chiêu: a call of `words` known short words living lifeS; each word typed brings
- * perWordFeathers more delayS later, a whole Perfect call perfectFeathers more.
+ * perWordFeathers more delayS later, a whole Perfect call perfectFeathers more. R2 review (G5 for every bot, BALANCE §9.1):
+ * damage 25 → 21, the Khá bot's share of all damage 15–17 % → ~12 %; two feathers still fell a Cương Thi in Thử thách (2 × 21 ≥ 41.7).
  */
-export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 25, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
+export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 21, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
 export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, boss: 0, stagger: 6 } as const;
 /** BUILD_1B §9.1: direct calls open at once (3 with the boss up); a broken mechanic's gold and charge; its window clamp(base + directK·(len + 1)·12 / E; minS; maxS). */
 export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8 } as const;
@@ -140,14 +141,15 @@ export const PRESET = { keepLevel: 3, villagers: 5, marks: 8, plots: [[2, 0], [1
 /**
  * Balance step 4 (docs/games/BALANCE.md §4, §9.2). Pace k (the run header, 0.75–1.30) divides the night's pack gaps,
  * the day (the wave clock) and the day's call clocks (a quiz, a mine's half-full call), and enemies walk at
- * 1 + speedK·(k − 1) (spawn gaps alone barely moved a night, the other way at that: docs/changelog/2026-10-23-balance.md).
+ * 1 + speedK·(k − 1) (spawn gaps alone barely moved a night, the other way at that: docs/changelog/2026-10-23-balance.md;
+ * 1B R2 review: 0.2 → 0.3, Biên S of the slow and the fast bots towards each other, BUILD_NOTES §7.4).
  * An enemy within dangerM of the Bastion is danger (buildings and villagers cannot be hurt in 1A.6); the director
  * judges a night once a foe is within engageM. Step tables: at night spawn ±7 %, one elite affix (hit points
  * ×eliteHp at spawn), the peak and the lull ±3 s, a support drop near defeat (+supportLives lives, once a night);
  * by day only the call clocks ±7 %, against a band without pressure (no enemy comes by day).
  */
 export const PACE = {
-  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 2, mineCallMin: 0.25, speedK: 0.2,
+  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 2, mineCallMin: 0.25, speedK: 0.3,
   night: { up: ["spawn", "elite", "peak", "lull"], down: ["support", "spawn", "lull", "peak", "elite"], spawnStep: 70, eliteCost: 30, peakTicks: 180, lullTicks: 180 },
   day: { up: ["spawn"], down: ["spawn"], spawnStep: 70, eliteCost: 0, peakTicks: 0, lullTicks: 0 },
 } as const;

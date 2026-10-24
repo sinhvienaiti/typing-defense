@@ -91,7 +91,7 @@ describe("Tối Thượng (BUILD_1B §8)", () => {
     expect(w.stats[STAT.ultFeathers]).toBe(ULT.feathers);
     expect(aimed.slice(0, 3)).toEqual([foes[2], foes[1], foes[0]]);
     run(w, ticks(ULT.lifeS));
-    // 4 feathers each, 25 magic (no resist), then burning (Draconis' burn, by Tối Thượng).
+    // 4 feathers each, ULT.damage magic (no resist), then burning (Draconis' burn, by Tối Thượng).
     expect(w.stats[STAT.damageUlt]).toBeGreaterThanOrEqual(3 * 4 * ULT.damage);
     expect(w.ult.on).toBe(0);
     for (const e of foes) expect([w.enemies.burnUntil[e]! > w.tick, w.enemies.burnBy[e]]).toEqual([true, SOURCE.ult]);
@@ -158,15 +158,22 @@ describe("Tối Thượng (BUILD_1B §8)", () => {
 });
 
 describe("direct calls and Ngắt (BUILD_1B §9, §10)", () => {
-  /** A Tanuki walking by three Cương Thi held near Draconis. */
+  /** A Tanuki walking by four Cương Thi held near Draconis (R2 review: `need` 4, BUILD_NOTES §7.4). */
   function drumming(): { w: World; t: number; foes: number[] } {
     const w = world({ deck, vocab: 3 });
-    const foes = [8, 8.5, 9].map((back) => standing(w, "cuong-thi", back));
+    const foes = [8, 8.5, 9, 9.5].map((back) => standing(w, "cuong-thi", back));
     const t = standing(w, "tanuki", 8, true);
     return { w, t, foes };
   }
 
-  it("a Tanuki with 3 others within 6 m stands and drums for T; a direct call of one known short word follows it; typed, the drum breaks: stunned 2 s, +5 + 2 gold, Tối Thượng +3", () => {
+  it("with 3 others within 6 m a Tanuki walks on (R2 review: it needs 4)", () => {
+    const w = world({ deck, vocab: 3 });
+    [8, 8.5, 9].forEach((back) => standing(w, "cuong-thi", back));
+    const t = standing(w, "tanuki", 8, true);
+    expect([send(w).some((e) => e.t === "drum"), w.enemies.castEnd[t]]).toEqual([false, 0]);
+  });
+
+  it("a Tanuki with 4 others within 6 m stands and drums for T; a direct call of one known short word follows it; typed, the drum breaks: stunned 2 s, +5 + 2 gold, Tối Thượng +3", () => {
     const { w, t } = drumming();
     const events = send(w);
     const T = directTicks(w);
@@ -196,7 +203,7 @@ describe("direct calls and Ngắt (BUILD_1B §9, §10)", () => {
     const events: RareEvent[] = [];
     while (w.tick <= end) events.push(...send(w));
     expect(events.find((e) => e.t === "direct")).toMatchObject({ ok: false });
-    expect(foes.map((e) => w.enemies.hp[e])).toEqual([29, 29, 29]);
+    expect(foes.map((e) => w.enemies.hp[e])).toEqual([29, 29, 29, 29]);
     expect(w.enemies.hp[t]).toBe(50 + Math.round(110 * 0.25));
     expect([w.calls.live().filter((k) => w.calls.kind[k] === CALL_KIND.direct).length, w.gold, w.typing.chain, w.stats[STAT.directMissed]]).toEqual([0, gold, chain, 1]);
     expect(w.enemies.abilityAt[t]).toBe(w.tick - 1 + ticks(12));
@@ -204,7 +211,7 @@ describe("direct calls and Ngắt (BUILD_1B §9, §10)", () => {
 
   it("drums only where the village fights: by the rift, no attack building's rim within 9 m, it walks on (BUILD_NOTES §7.3)", () => {
     const w = world({ deck, vocab: 3 });
-    for (const d of [10, 10.5, 11]) w.enemies.stunUntil[enemyAt(w, "cuong-thi", 0, d)] = 1e9;
+    for (const d of [10, 10.5, 11, 11.5]) w.enemies.stunUntil[enemyAt(w, "cuong-thi", 0, d)] = 1e9;
     const t = enemyAt(w, "tanuki", 0, 10.5);
     const events = send(w);
     expect([events.some((e) => e.t === "drum"), w.enemies.castEnd[t], w.calls.live().length]).toEqual([false, 0, 0]);
