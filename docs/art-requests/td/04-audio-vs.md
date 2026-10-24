@@ -327,7 +327,7 @@ Câu không lời: làm bằng công cụ tiếng ngắn, dán prompt dưới + 
 ```text
 V188 td.vo.enemy-kamaitachi.bark: A tiny mischievous weasel giggle, quick, airy and squeaky, 0.6 seconds.
 V189 td.vo.enemy-nuppeppo.bark: A soft wet "blub-blub" gurgle of a silly dough blob creature, 0.5 seconds.
-V190 td.vo.enemy-thuong-luong.bark: A long low serpent hiss "sssss", wet and cold but not scary, 0.8 seconds.
+V190 td.vo.enemy-thuong-luong.bark: A long low serpent hiss "sssss", wet and cold yet gentle, 0.8 seconds.
 V191 td.vo.enemy-ma-troi.bark: A faint breathy whispering giggle of tiny ghost lights, airy and playful, 0.7 seconds.
 V192 td.vo.enemy-mam-go.bark: A tiny squeaky "eep!" of a small sapling creature, 0.3 seconds.
 ```

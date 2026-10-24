@@ -144,8 +144,10 @@ A short natural echo in the open air of a valley village, fading within a second
 
 | Mã | Khi | Dán thêm |
 |---|---|---|
-| LOOP | Tiếng lặp | `Seamless loop, even texture, no start or end accents.` |
-| SOFTPITCH | Tiếng có cao độ, dễ lệch giọng nhạc | `Keep pitched content subtle, no clear melody.` |
+| LOOP | Tiếng lặp | `Seamless loop, a steady even texture from start to end.` |
+| SOFTPITCH | Tiếng có cao độ, dễ lệch giọng nhạc | `Pitched content kept soft and in the background, blended into the texture.` |
+
+Hai dòng này viết khẳng định theo lời dặn số 10 ("Write only what you want to hear"); bản trước 25/10 ghi "no start or end accents", "no clear melody".
 
 ### 3.3 Luật chung
 
@@ -158,7 +160,7 @@ A short natural echo in the open air of a valley village, fading within a second
 - Lớp `transient` khoảng 20 ms. Lớp `body` 0,1–0,3 s. Lớp `tail` 0,3–0,8 s. Engine ghép các lớp lệch 0–12 ms (24.5).
 - Đòn trúng một quái (mũi nỏ, tên, giáo): engine lấy `transient` và `tail` của vũ khí, còn lớp thân lấy theo chất liệu quái (`td.mat.*`, mục 5.2). Lớp `body` riêng của vũ khí chỉ phát khi trúng đất (bắn trượt, quái chết trước).
 - Đạn pháo nổ: lớp `body` (tiếng nổ) và lớp `low` (tiếng trầm cho đòn nặng, 24.5) luôn phát, vì đạn vẫn nổ khi trượt. Trúng từ 3 quái trở lên trong 50 ms: cả tiếng to thêm 2 dB và thêm lớp `multi` (24.5).
-- Lính đâm trúng: `transient` của A04 + lớp thân chất liệu, không `tail`.
+- Lính đâm trúng: `transient` của A04 + lớp thân chất liệu. Không thêm lớp `tail` cho cú trúng: đòn đâm là một hành động, A18 (tiếng đâm "xoạt", đã dán SPACE) phát ngay trước cú trúng, và đuôi vang ngoài làng của nó (tắt trong khoảng một giây) phủ cả cú trúng, nên cả đòn đã có đuôi (luật Q6 số 1). `tail` của A04 là thân tên rung, không hợp mũi giáo; thêm một đuôi cho mỗi cú trúng thì vang chồng lên nhau khi nhiều lính cùng đánh (bus `crowd`, mục 6).
 - Tiếng có cao độ rõ (chuông, "boong", "ting"): AI tích hợp chỉnh về một nốt trong thang Đô trưởng khi cần, để không lệch giọng nhạc (24.1).
 - Engine đổi tốc 0,96–1,04 và ±1,5 dB mỗi lần phát, không lặp ngay bản vừa phát (24.5).
 
@@ -205,7 +207,7 @@ Mũi nỏ trúng, "phập". `world` · P4 · một lần · 3 lớp × 3 bản �
 Lưu: `sfx/td.keep.hit.transient-v1.wav` … `-v3`, tương tự `.body`, `.tail`
 - `transient`:
 ```text
-A crossbow bolt tip striking: one hard, dry "tock" attack, about 20 milliseconds, nothing after it.
+A crossbow bolt tip striking: one hard, dry "tock" attack that stops at once, about 20 milliseconds.
 ```
 - `body` (trúng đất):
 ```text
@@ -228,7 +230,7 @@ Tên trúng, "thock". `world` · P4 · một lần · 3 lớp × 3 bản · mono
 Lưu: `sfx/td.archer.hit.transient-v1.wav` … `-v3`, tương tự `.body`, `.tail`
 - `transient`:
 ```text
-An arrowhead striking: one crisp "tock" tick, about 20 milliseconds, nothing after it.
+An arrowhead striking: one crisp "tock" tick that stops at once, about 20 milliseconds.
 ```
 - `body` (cắm đất):
 ```text
@@ -258,7 +260,7 @@ Nổ 3 lớp + lớp `low` (đòn nặng, luôn phát). Trúng từ 3 quái tr�
 Lưu: `sfx/td.cannon.hit.transient-v1.wav` … `-v3`, tương tự `.body`, `.tail`; `sfx/td.cannon.hit.low-v1.wav` … `-v3`; `sfx/td.cannon.hit.multi-v1.wav` … `-v3`
 - `transient`:
 ```text
-The first crack of a small black-powder blast, a sharp "kssh" snap, about 20 milliseconds, nothing after it.
+The first crack of a small black-powder blast, a sharp "kssh" snap that stops at once, about 20 milliseconds.
 ```
 - `body`:
 ```text
@@ -483,7 +485,7 @@ A small wooden building being taken apart: planks prying loose and clattering aw
 Mất mạng. `warnings` · P3 · 0,8 s · một lần · 3 bản · mono, không theo vị trí.
 Lưu: `sfx/td.warn.leak-v1.wav` … `-v3.wav`
 ```text
-An enemy slipping past the gate: a low wooden alarm clapper knocking twice and a short deep horn note, urgent but not harsh, 0.8 seconds.
+An enemy slipping past the gate: a low wooden alarm clapper knocking twice and a short deep horn note, urgent yet warm and rounded, 0.8 seconds.
 ```
 
 #### A39 `td.warn.direct` · Mở cửa sổ gõ trực tiếp
@@ -530,7 +532,7 @@ Tự quyết: Cương Thi Đầu Đàn dùng bộ Cương Thi, hạ 3 bán cung,
 
 ```text
 td.enemy.ink-peel: Living ink peeling away and tearing into paper scraps: a quick paper rip and a flutter of small paper pieces, 0.5 seconds.
-td.enemy.cuong-thi.move: Small stiff hopping creatures in long robes: soft rhythmic two-footed hops on dirt, paper charms fluttering, a little comic, not scary, 1 second.
+td.enemy.cuong-thi.move: Small stiff hopping creatures in long robes: soft rhythmic two-footed hops on dirt, paper charms fluttering, a little comic and gentle, 1 second.
 td.enemy.cuong-thi.attack: A stiff-armed lunge: a quick cloth swish and a soft papery smack, 0.3 seconds.
 td.enemy.cuong-thi.death: A blank paper charm catching fire from the bottom up with a soft crackle, crumbling to ash, ending with one small clear bell "ting", 1 second.
 td.enemy.ma-troi.move: A flock of tiny will-o'-the-wisp lights drifting low: a soft airy shimmering hum with faint glassy flickers, magical and a little eerie but gentle, 4 seconds.
