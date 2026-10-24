@@ -1,5 +1,6 @@
 // Lời Gọi 1B R1 (docs/td/BUILD_1B.md §19 td-1b-build, §7, §12): the title's "Bắt đầu" opens the story: no sandbox
-// panel, a sandbox command refused (noSandbox), the build menu's locked rows say "Mở ở Ngày n". Then in the sandbox,
+// panel, a sandbox command refused (noSandbox), the build menu's locked rows say "Mở ở Ngày n", a Tháp Cung built on
+// day 1 whose card's sale reads its real price and fits (R2 review). Then in the sandbox,
 // by keyboard only: a Tháp Cung built (Insert, Enter) and undone in its 5 s (Tab to it, Delete; refunded in full),
 // built again and raised (63 gold, 27 wood), the Bastion raised (105 gold, 45 wood; Chấm comes out), the tower sold
 // by pressing Shift+Delete twice (60 % of 112 gold, 48 wood); the Bastion's card sells 10 wood for 4 gold (review R1),
@@ -35,6 +36,17 @@ export default async function (page) {
   const menu = await page.eval(`[...document.querySelectorAll(".td-kind")].map((el) => el.textContent)`);
   shots.push(await page.shot(out("td-1b-build-locked-" + size + ".png")));
   await key(page, "Escape");
+  // R2 review: a story card with a real sale label (a Tháp Cung built on day 1, past its 5 s undo; its raise locked till day 4).
+  await key(page, "Insert");
+  await key(page, "Enter");
+  await until(page, "return t.state().buildings.some((b) => b.def === 'archer' && b.ready);", 60000);
+  await page.sleep(5200);
+  const storyArcher = (await state(page)).buildings.find((b) => b.def === "archer");
+  const storyCard = storyArcher !== undefined && (await tabTo(page, storyArcher.id));
+  await page.sleep(200);
+  const storySale = await page.eval(`document.querySelector('.td-dock [data-act="sell"]')?.textContent ?? ""`);
+  const storyCut = (await overflowing(page, ".td-dock button")) ?? ["?"];
+  shots.push(await page.shot(out("td-1b-build-story-card-" + size + ".png")));
   // The sandbox, keyboard only (its money by the panel's logged commands).
   await boot(page, { mouse: false });
   await page.eval(td(`t.send({ t: "sandbox", op: { op: "gold", value: 2000 } }); t.send({ t: "sandbox", op: { op: "wood", value: 600 } }); return true;`));
@@ -117,9 +129,10 @@ export default async function (page) {
     soldAt60: g7 - g5 === Math.floor(112 * 0.6) && w7 - w5 === Math.floor(48 * 0.6),
     woodSells: woodButton.includes("Bán 10 Gỗ") && g9 - g8 === 4 && w8 - w9 === 10,
     keepCardFits: keepCut.length === 0,
+    storyCardFits: storyCard && /Bán · \+\d+ vàng, \+\d+ gỗ/.test(storySale) && !storySale.includes("+0 vàng") && storyCut.length === 0,
     buildingCardsFit: Object.keys(cards).length === 5 && Object.values(cards).every((list) => list.length === 0),
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { story, refused, menu, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7, g8, w8, g9, w9], helpers, armed, woodButton, keepCut, cards, replay, shots });
+  return finish(page, checks, { story, refused, menu, storySale, storyCut, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7, g8, w8, g9, w9], helpers, armed, woodButton, keepCut, cards, replay, shots });
 }

@@ -80,9 +80,11 @@ export class BossView {
         }
       } else if (event.t === "bossStrike" && event.hit && event.move === "slam") this.slamAt = now;
       else if (event.t === "bossEmerge") {
-        const p = w.lanes[event.route]!.point(w.c.content.stage!.boss.emergeM, 0, P); // R2: stones fly, rootlets whip out
-        fx.burst(0, p.x, p.z, 12, 5, 700, now);
-        for (let k = 0; k < 7; k += 1) fx.emit(2, p.x + Math.cos(k * 0.9) * 3.4, p.z + Math.sin(k * 0.9) * 3.4, 0, 0, 600, now);
+        // R2: stones fly, rootlets whip out past the bark (R2 review: big and inked enough to read at 1280 × 720).
+        const p = w.lanes[event.route]!.point(w.c.content.stage!.boss.emergeM, 0, P);
+        fx.burst(0, p.x, p.z, 8, 5, 800, now);
+        fx.burst(6, p.x, p.z, 10, 9, 1400, now, 2);
+        for (let k = 0; k < 8; k += 1) fx.emit(7, p.x + Math.cos(k * 0.785) * 2.2, p.z + Math.sin(k * 0.785) * 2.2, Math.cos(k * 0.785), Math.sin(k * 0.785), 1200, now, 3.6);
       } else if (event.t === "bossStrike" && event.hit && event.move === "summon" && bossSlot(w) >= 0) fx.burst(0, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 10, 3, 600, now); // R2: soil
       else if (event.t === "bossStrike" && event.hit && event.move === "keep") fx.burst(0, w.map.keep[0], w.map.keep[1] - 2, 10, 4.5, 650, now); // R2: stone chips
       else if (event.t === "bossPhase") {
