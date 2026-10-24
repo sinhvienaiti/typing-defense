@@ -3,7 +3,7 @@
 // Frames: a busy village (the sandbox preset at Bastion level 4, three more farms and two archers as
 // sites for the four builders, twelve more trees marked, the helpers among the farms) and a crowded
 // night (the sandbox's "Sinh đêm", then __td.flood(300)); words are typed for real at 70 WPM while for
-// ~10 s the page's own frame costs (__td.costs: the 2D view with the word cards, and the steps with the
+// ~10 s (longer, up to 20 s, until 30 keys are typed) the page's own frame costs (__td.costs: the 2D view with the word cards, and the steps with the
 // HUD and sound) and Chrome's main thread (CDP Performance.getMetrics) are read: the view and the cards
 // ≤ 8 ms a frame (p95) over ≥ 200 frames, the main thread ≤ 8 ms a frame (mean and p95 of ~0.5 s
 // intervals), ≥ 55 frames a second.
@@ -23,6 +23,10 @@ import { ROOT, boot, consoleChecks, finish, letter, out, replayOnNode, sandbox, 
 const WPM = Number(process.env.WPM ?? 70);
 const FLOOD = 300;
 const WINDOW_MS = 10000;
+// The window runs on past 10 s (at most 20 s) until 30 keys are typed: the words come as calls light, not at the
+// typist's pace (a Dell run typed 29 keys in 10 s, another 35); the frames of the longer window are measured alike.
+const MIN_KEYS = 30;
+const MAX_WINDOW_MS = 20000;
 const DRAW_P95_MS = 8;
 const FRAME_MS = 8;
 const SAMPLE_MS = 500;
@@ -136,7 +140,7 @@ export default async function (page) {
   let maxWords = 0;
   let maxCalls = 0;
   const started = Date.now();
-  while (Date.now() - started < WINDOW_MS) {
+  while (Date.now() - started < WINDOW_MS || (keys < MIN_KEYS && Date.now() - started < MAX_WINDOW_MS)) {
     const at = Date.now();
     const look = await page.eval(td(`const s = t.state(); return { words: t.liveWords(), enemies: s.enemies, calls: s.calls.length, frames: window.__perfFrames };`));
     if (look === null) break;
@@ -216,7 +220,7 @@ export default async function (page) {
     ready,
     busyVillage: village.npcs.length >= 10 && village.buildings.filter((b) => b.def === "farm").length >= 4 && village.calls.length >= 4,
     floodOnTheField: minEnemies >= FLOOD * 0.8,
-    typedInTheWindow: keys >= 30,
+    typedInTheWindow: keys >= MIN_KEYS,
     drawAndCardsWithin8msP95: draw.frames >= 200 && draw.p95 <= DRAW_P95_MS,
     mainThreadWithin8msPerFrame: main.frames >= 200 && main.intervals.count >= 10 && main.taskMean <= FRAME_MS && main.intervals.p95 <= FRAME_MS,
     holds55fps: frames / seconds >= 55,

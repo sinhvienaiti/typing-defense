@@ -12,8 +12,8 @@ import { DEV_URL, gesture, out } from "./common.mjs";
 export { out };
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 export const td = (code) => "(() => { const t = window.__td; if (!t) return null; " + code + " })()";
-/** CALL_KIND of src/sim/stores/calls.ts, and the bright cap of each mode (MODES[mode].open in rules.ts). */
-export const KIND = { power: 0, build: 1, harvest: 2, chop: 3, mine: 4, quiz: 5 };
+/** CALL_KIND of src/sim/stores/calls.ts (1B R2: Chữ Chiêu, direct), and the bright cap of each mode (MODES[mode].open in rules.ts). */
+export const KIND = { power: 0, build: 1, harvest: 2, chop: 3, mine: 4, quiz: 5, ult: 6, direct: 7 };
 export const CAP = { relax: 2, balanced: 3, challenge: 4, learn: 2 };
 export const sizeOf = (page) => page.width + "x" + page.height;
 
@@ -104,7 +104,7 @@ export async function wheel(page, x, z, steps) {
  * canvas pixel where DebugView.calls draws its arrow's middle, against the kind's colour (CALL_COLOR).
  */
 export const arrows = (steps, at) => td(`
-  const COLORS = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD"].map((hex) => [1, 3, 5].map((k) => parseInt(hex.slice(k, k + 2), 16)));
+  const COLORS = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD", "#F2994A", "#C23B22"].map((hex) => [1, 3, 5].map((k) => parseInt(hex.slice(k, k + 2), 16)));
   const canvas = document.getElementById("tdCanvas");
   const ctx = canvas.getContext("2d");
   const ratio = canvas.width / canvas.clientWidth;

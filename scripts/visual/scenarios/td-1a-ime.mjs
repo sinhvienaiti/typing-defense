@@ -5,8 +5,8 @@
 // VNI's digit never arrives). An OS input method composes: "Process" presses,
 // keyCode 229, a digit among them. Then plain keys: Digit2 / Digit4 / Digit1
 // pick an agent, Backquote steps through them, Tab and Enter send one; "-"
-// and "=" (the 1A tempo keys, gone in 1A.6 "Lời Gọi", BUILD_1A6 §8) make no
-// command. Checks: the Vietnamese and
+// (a 1A tempo key, gone in 1A.6 "Lời Gọi", BUILD_1A6 §8) makes no command,
+// "=" is Tối Thượng since 1B R2 (one `ult` command). Checks: the Vietnamese and
 // composing presses made only key and backspace commands and moved no
 // selection; the HUD asked to switch the input method off; digits pick, and
 // Backquote is safe right after them. Picture td-1a-ime with the notice up.
@@ -71,7 +71,7 @@ export default async function (page) {
   const shot = await page.shot(out("td-1a-ime-" + size + ".png"));
   const notice = await page.eval("document.querySelector('.td-chip').textContent.includes('Tắt bộ gõ tiếng Việt')");
 
-  // Plain keys: digits pick, Backquote steps, Tab + Enter send, "-" "=" do nothing (no tempo since 1A.6).
+  // Plain keys: digits pick, Backquote steps, Tab + Enter send, "-" does nothing (no tempo since 1A.6), "=" sends `ult`.
   const picked = [];
   for (const code of ["Digit2", "Digit4", "Digit1"]) {
     await command(page, code);
@@ -91,8 +91,10 @@ export default async function (page) {
     tabbed.push((await ui(page)).focus);
   }
   const beforeTempoKeys = (await ui(page)).logLength;
-  await command(page, "Equal");
   await command(page, "Minus");
+  await page.sleep(100);
+  const afterMinus = (await ui(page)).logLength;
+  await command(page, "Equal");
   await page.sleep(100);
   const afterTempoKeys = (await ui(page)).logLength;
   await command(page, "Enter");
@@ -115,7 +117,9 @@ export default async function (page) {
     backquoteSteps: cycled1 === 1 && cycled2 === 2,
     backquoteTypesNothing: after.filter((c) => c.t === "key").length === 1,
     tabFocuses: tabbed.length === 2 && tabbed[1] === archer?.id,
-    minusEqualMakeNoCommand: afterTempoKeys === beforeTempoKeys,
+    // "-" stays free (BUILD_1B §14); since 1B R2 "=" is Tối Thượng: one `ult` command (refused while the charge is empty).
+    minusMakesNoCommand: afterMinus === beforeTempoKeys,
+    equalCastsUlt: afterTempoKeys === afterMinus + 1 && log[afterMinus]?.t === "ult",
     enterSends: after.some((c) => c.t === "assignUnit" && c.agent === 0 && c.building === archer?.id),
     noConsoleErrors: page.logs.filter((line) => line.startsWith("error")).length === 0,
     noExceptions: page.exceptions.length === 0,

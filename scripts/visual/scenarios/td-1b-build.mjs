@@ -3,17 +3,18 @@
 // by keyboard only: a Tháp Cung built (Insert, Enter) and undone in its 5 s (Tab to it, Delete; refunded in full),
 // built again and raised (63 gold, 27 wood), the Bastion raised (105 gold, 45 wood; Chấm comes out), the tower sold
 // by pressing Shift+Delete twice (60 % of 112 gold, 48 wood); the Bastion's card sells 10 wood for 4 gold (review R1),
-// every label on it read in full (review fix: no button cut or past the card). The page's log replays on Node to its
-// hash. Pictures: the locked menu, the raised village, the Bastion's card.
+// every label on it read in full (review fix: no button cut or past the card); then the preset's tower, cannon, barracks,
+// mine and farm cards, the sale armed and not, the same (R2 review leftover). The page's log replays on Node to its
+// hash. Pictures: the locked menu, the raised village, the Bastion's card, each building's card.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720
 import { DEV_URL } from "./common.mjs";
 import { boot, consoleChecks, finish, key, out, overflowing, replayOnNode, sizeOf, state, td, until } from "./td-1a6-common.mjs";
 
 const focus = (page) => page.eval(td("return t.ui().focus;"));
 
-/** Tab until building `id` has the focus (at most 12 presses). */
+/** Tab until building `id` has the focus (at most 20 presses). */
 async function tabTo(page, id) {
-  for (let k = 0; k < 12 && (await focus(page)) !== id; k += 1) await key(page, "Tab");
+  for (let k = 0; k < 20 && (await focus(page)) !== id; k += 1) await key(page, "Tab");
   return (await focus(page)) === id;
 }
 
@@ -86,6 +87,24 @@ export default async function (page) {
   await page.eval(td(`t.send({ t: "sellWood" }); return true;`));
   await page.sleep(300);
   const [g9, w9] = await money();
+  // R2 review leftover: every building's card fits (the sale's label by "Gửi Draconis", the farm's seeds), armed or not.
+  await page.eval(td(`t.send({ t: "sandbox", op: { op: "preset" } }); return true;`));
+  await page.sleep(400);
+  const cards = {};
+  for (const def of ["archer", "cannon", "barracks", "gold-mine", "farm"]) {
+    const b = (await state(page)).buildings.find((x) => x.def === def && x.ready);
+    if (b === undefined || !(await tabTo(page, b.id))) {
+      cards[def] = ["no card"];
+      continue;
+    }
+    await page.sleep(150);
+    cards[def] = (await overflowing(page, ".td-dock button")) ?? ["?"];
+    shots.push(await page.shot(out("td-1b-build-card-" + def + "-" + size + ".png")));
+    await key(page, "Delete", { shift: true }); // armed: "Bấm lần nữa: bán"
+    await page.sleep(150);
+    cards[def].push(...((await overflowing(page, ".td-dock button")) ?? ["?"]));
+    await page.sleep(3200); // the press lapses: nothing sold
+  }
   const replay = await replayOnNode(page, "td-1b-build");
   const checks = {
     storyFromTitle: story?.flags?.sandbox === false && story.panel === false,
@@ -98,8 +117,9 @@ export default async function (page) {
     soldAt60: g7 - g5 === Math.floor(112 * 0.6) && w7 - w5 === Math.floor(48 * 0.6),
     woodSells: woodButton.includes("Bán 10 Gỗ") && g9 - g8 === 4 && w8 - w9 === 10,
     keepCardFits: keepCut.length === 0,
+    buildingCardsFit: Object.keys(cards).length === 5 && Object.values(cards).every((list) => list.length === 0),
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { story, refused, menu, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7, g8, w8, g9, w9], helpers, armed, woodButton, keepCut, replay, shots });
+  return finish(page, checks, { story, refused, menu, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7, g8, w8, g9, w9], helpers, armed, woodButton, keepCut, cards, replay, shots });
 }
