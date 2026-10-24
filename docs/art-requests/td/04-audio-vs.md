@@ -12,11 +12,14 @@
 Instructions for ChatGPT
 1. This is the tier VS part of the Typing Defense audio pack. Read 04-audio.md first
    (same folder, same repo and branch):
-   it holds the rules, the Common SFX tail (3.1), the LOOP and SOFTPITCH lines (3.2),
+   it holds the rules (3.3, with the owner's rule Q6 for action sounds), the Common SFX tail and
+   the SPACE line (3.1), the LOOP and SOFTPITCH lines (3.2),
    file naming (2.4), the music method (section 8) and the voice designs of tier P speakers (7.2).
 2. Each SFX line here is "code id · Vietnamese name | length | variants | prompt".
    Final prompt = that prompt, ending with its length (e.g. "1.2 seconds"),
-   + the Common SFX tail (+ LOOP when the length says "loop",
+   + the Common SFX tail (+ SPACE when the line is an action sound in one layer: an enemy
+   attack, skill or death, a weapon shot, hit or blast, a hero or boss move, and every
+   "Tail only" line; + LOOP when the length says "loop",
    + SOFTPITCH when the line says "add SOFTPITCH"). Notes in parentheses are instructions,
    not prompt text. One final prompt per file (one per layer for layered items).
    Save as sfx/<id>-v<n>.wav unless the item says otherwise. Sound effects are mono
@@ -27,6 +30,8 @@ Instructions for ChatGPT
    a wordless sound (giggle, hiss): never read it as words; use its prompt in section 2.9.
 4. Exact file names only. One sound per prompt. No music or speech inside SFX unless asked.
    Never name commercial games, brands, real people or living artists.
+   Write only what you want to hear: never the words puff, pop, poof, balloon, boing, bonk,
+   toy, cartoon, retro, 8-bit, chiptune, and never a lone thump or thud (rule Q6).
 5. If something is unclear or seems to contradict the design, ask the owner. Do not guess.
 ```
 
@@ -365,35 +370,35 @@ Tự quyết: 14 bộ = 12 loài của MVP + Cương Thi Đầu Đàn + Mầm G�
 Ba bản mỗi id; muốn thì thêm bản thứ tư cho các nhóm P (22.6 cho 3–4 bản).
 
 ```text
-A71 td.enemy.cuong-thi-lead.move · Đầu Đàn đi | 1.2 s | 3 | Heavier stiff hopping of a bigger robed creature leading a pack: thumping two-footed hops, paper charms flapping, a small bell jingling on each hop.
-A72 td.enemy.cuong-thi-lead.attack · Đầu Đàn đánh | 0.4 s | 3 | A heavy stiff-armed shove: a cloth swish and a firm papery thump.
+A71 td.enemy.cuong-thi-lead.move · Đầu Đàn đi | 1.2 s | 3 | Heavier stiff hopping of a bigger robed creature leading a pack: weighty two-footed hops landing on packed dirt, paper charms flapping, a small bell jingling on each hop.
+A72 td.enemy.cuong-thi-lead.attack · Đầu Đàn đánh | 0.4 s | 3 | A heavy stiff-armed shove: a cloth swish, a firm papery impact with a short body of rustling robes.
 A73 td.enemy.cuong-thi-lead.skill · Đầu Đàn rung chuông giục bầy | 1.5 s | 3 | A pack leader ringing a small handbell twice to hurry its pack, a bright urgent jingle, quick hops gathering around.
 A74 td.enemy.cuong-thi-lead.death · Đầu Đàn chết | 1.2 s | 3 | A large blank paper charm burning up from the bottom with crackles, crumbling to ash, ending with a deeper bell "tinng".
-A75 td.enemy.nuppeppo.skill · Nuppeppō tách đôi | 0.8 s | 3 | A dough blob splitting in two: a stretchy rubbery pull and a wet "plop" as the halves separate.
-A76 td.enemy.oni.move · Oni đi | 1.2 s | 3 | A big ogre stomping: heavy bare feet thudding, an iron-studded club tapping the ground.
+A75 td.enemy.nuppeppo.skill · Nuppeppō tách đôi | 0.8 s | 3 | A dough blob splitting in two: a stretchy rubbery pull and a wet sticky tear as the halves separate.
+A76 td.enemy.oni.move · Oni đi | 1.2 s | 3 | A big ogre stomping: heavy bare feet pounding the earth with weight, an iron-studded club tapping the ground.
 A77 td.enemy.oni.attack · Oni đập nhà | 0.8 s | 3 | An ogre slamming an iron-studded club into a wooden building: a deep swing whoosh and a crunching wood-and-stone smash.
 A78 td.enemy.oni.skill · Oni Nổi Giận | 1.5 s | 3 | An ogre flying into a rage: a deep huffing snort, stomping feet and the club pounding the ground three times.
 A79 td.enemy.oni.death · Oni chết | 1.2 s | 3 | An ogre horn snapping off with a crack, then a heavy club falling with a ringing metallic "klang".
 A80 td.enemy.troll.skill · Troll khiên vòm | 3 s loop | 1 | A dome shield of earth magic humming: a low earthy drone with a faint crystal-rock shimmer.
 A81 td.enemy.troll.skill-break · Khiên vòm vỡ (Phá Khiên) | 0.8 s | 3 | A stone dome shield shattering into pebbles with a glassy crack.
 A82 td.enemy.alicanto.sack · Bao vàng của Alicanto bục | 1 s | 3 | A small sack of stolen coins bursting open: a cloth rip and coins spilling out with bright jingles.
-A83 td.enemy.tat-phuong.move · Tất Phương lò cò | 1 s | 3 | A one-legged fire bird hopping: quick single-foot hops "tok, tok", ruffled feathers, a crackle of embers.
-A84 td.enemy.tat-phuong.skill · Tất Phương nổ | 1 s | 3 | A clay jar fuse hissing fast for half a second, then a punchy fire blast "fwoomp" with crackling embers.
-A85 td.enemy.tat-phuong.death · Tất Phương chết | 1 s | 3 | A small fireball puff and a burst of feathers fluttering down.
+A83 td.enemy.tat-phuong.move · Tất Phương lò cò | 1 s | 3 | A one-legged fire bird hopping: quick single-foot hops tapping on dirt, ruffled feathers, a crackle of embers.
+A84 td.enemy.tat-phuong.skill · Tất Phương nổ | 1 s | 3 | A clay jar fuse hissing fast for half a second, then a punchy fire blast with a roaring body of flame and crackling embers.
+A85 td.enemy.tat-phuong.death · Tất Phương chết | 1 s | 3 | A small fireball flaring and burning out with a short roar, then a burst of feathers fluttering down.
 A86 td.enemy.ma-da.move · Ma Da đi | 2 s loop | 1 | Invisible wet footsteps: slow drips and soft squelching steps with a faint watery shimmer.
 A87 td.enemy.ma-da.attack · Ma Da Kéo Chân | 1 s | 3 | Something grabbing a leg and pulling it into water: a sudden splash, a gurgle and bubbles.
 A88 td.enemy.ma-da.skill · Ma Da tàng hình | 1 s | 3 | A water wraith turning invisible: a glassy shimmer fading out with a soft watery hush.
-A89 td.enemy.ma-da.skill-reveal · Ma Da lộ hình (Hiện Hình) | 0.8 s | 3 | A hidden water spirit revealed: a bright glassy pop and a splash ripple.
+A89 td.enemy.ma-da.skill-reveal · Ma Da lộ hình (Hiện Hình) | 0.8 s | 3 | A hidden water spirit revealed: a bright glassy shimmer bursting open and a splash rippling outward.
 A90 td.enemy.ma-da.death · Ma Da chết | 1.2 s | 3 | A spirit dissolving into a puddle with a soft splash, then eight lotus petals floating up with a gentle airy chime.
 A91 td.enemy.dokkaebi.move · Dokkaebi đi | 1.2 s | 3 | A sturdy goblin stomping cheerfully, a knobbly wooden club tapping the ground in rhythm.
-A92 td.enemy.dokkaebi.attack · Dokkaebi đánh gậy | 0.6 s | 3 | A goblin bonking with a knobbly wooden club: a comic hollow "bonk" with a swing whoosh.
+A92 td.enemy.dokkaebi.attack · Dokkaebi đánh gậy | 0.6 s | 3 | A goblin swinging a knobbly wooden club: a swing whoosh and a solid woody knock with a short body of wood ringing.
 A93 td.enemy.dokkaebi.skill · Dokkaebi gọi Ma Trơi nhỏ | 1.5 s | 3 | A goblin knocking a magic club on the ground three times, then small wisp lights whooshing out with glassy twinkles.
-A94 td.enemy.dokkaebi.death · Dokkaebi chết | 1.2 s | 3 | A wooden club rolling and clattering away, then a puff of green smoke "poof".
+A94 td.enemy.dokkaebi.death · Dokkaebi chết | 1.2 s | 3 | A wooden club rolling and clattering away, then a soft whoosh of green smoke swirling off.
 A95 td.enemy.kamaitachi.move · Chồn Liềm lốc chạy | 2 s loop | 1 | A small whirlwind racing low over the ground: a swirling gust with dry leaves.
 A96 td.enemy.kamaitachi.attack · Chồn Liềm chém | 0.3 s | 3 | A sickle-clawed weasel slashing: a sharp airy "shhing" swipe.
 A97 td.enemy.kamaitachi.skill · Chồn Liềm né | 0.4 s | 3 | A quick dodge in the wind: a fast airy whoosh zipping aside.
 A98 td.enemy.kamaitachi.death · Chồn Liềm chết | 1.2 s | 3 | A whirlwind collapsing, then three small weasels tumbling away with tiny squeaks and scampering paws.
-A99 td.enemy.mam-go.skill · Mầm Gỗ mọc lên | 0.8 s | 3 | A sapling sprouting out of the soil: a soft earthy push and a leafy pop.
+A99 td.enemy.mam-go.skill · Mầm Gỗ mọc lên | 0.8 s | 3 | A sapling sprouting out of the soil: a soft earthy push and leaves snapping open.
 A100 td.mat.wind · Chất liệu gió | 0.25 s | 3 | An airy, sharp "shhk" as a hit cuts through a small whirlwind, swishing air, soft onset.
 ```
 
@@ -402,9 +407,9 @@ A100 td.mat.wind · Chất liệu gió | 0.25 s | 3 | An airy, sharp "shhk" as a
 Tháp cấp cao (23.8): L2 thêm lớp trầm, L3 đuôi dài hơn. Tháp Thư Pháp, 18 nhánh (id theo tên Việt viết ASCII, Tự quyết), Tướng, phép, bùa.
 
 ```text
-A101 td.archer.fire.l2 · Tháp Cung L2, lớp trầm | 0.3 s | 3 | Low layer only: a deeper wooden bow thump under an arrow shot, soft onset.
+A101 td.archer.fire.l2 · Tháp Cung L2, lớp trầm | 0.3 s | 3 | Low layer only: a deeper wooden bow resonance with weight under an arrow shot, soft onset (the tower's shot and tail sit on top).
 A102 td.archer.fire.l3 · Tháp Cung L3, đuôi dài | 0.6 s | 3 | Tail only: a longer bow-string ring and an arrow whistle trailing away.
-A103 td.cannon.fire.l2 · Tháp Pháo L2, lớp trầm | 0.5 s | 3 | Low layer only: a heavy sub-bass cannon thump, soft onset.
+A103 td.cannon.fire.l2 · Tháp Pháo L2, lớp trầm | 0.5 s | 3 | Low layer only: a heavy sub-bass cannon push of weight swelling and fading, soft onset (the cannon shot and tail sit on top).
 A104 td.cannon.fire.l3 · Tháp Pháo L3, đuôi dài | 1 s | 3 | Tail only: a long rolling smoke hiss and a distant boom tail.
 A105 td.scribe.fire · Tháp Thư Pháp bắn | 0.4 s | 3 | A big calligraphy brush swung through the air: a soft silky "swish" with a crisp rustle of paper.
 A106 td.scribe.hit · Nét mực trúng (lưu sfx/td.scribe.hit.<lớp>-v<n>.wav) | 3 lớp × 3 | transient: a wet ink-splat tip, about 20 ms / body (ground): ink splashing onto earth, a soft wet patter, 0.2 s / tail: tiny paper letters scattering with a light flutter, 0.5 s.
@@ -414,13 +419,13 @@ A109 td.scribe.fire.l3 · Thư Pháp L3, đuôi dài | 0.8 s | 3 | Tail only: a 
 A110 td.overdrive.scribe · Bùng Nổ Thư Pháp: Đại Tự | 2 s | 2 | A giant letter painted onto the ground: one huge slow brush stroke, ink splashing, a soft low gong-like shimmer.
 A111 td.branch.en-bao.fire · Én Bão bắn | 0.35 s | 3 | Two light bamboo bows releasing almost together: a quick double "thwip-thwip" with twin arrow whooshes.
 A112 td.branch.than-tien.fire · Thần Tiễn bắn | 0.6 s | 3 | A huge tower crossbow firing a heavy bolt: a deep wooden thunk, a taut cable twang and a piercing whistle.
-A113 td.branch.coi-lon.fire · Cối Lớn bắn | 0.8 s | 3 | A big mortar firing straight up: a deep hollow "thoom" with a long rising whoosh.
+A113 td.branch.coi-lon.fire · Cối Lớn bắn | 0.8 s | 3 | A big mortar firing straight up: a deep heavy launch blast with a ringing iron body and a long rising whoosh.
 A114 td.branch.vac-lua.fire · Vạc Lửa hắt dầu | 0.8 s | 3 | A fire cauldron on a tripod flinging burning oil: a sloshing whoosh and a crackling flame burst.
 A115 td.branch.vac-lua.pool · Vũng lửa Vạc Lửa | 3 s loop | 1 | A small pool of fire burning on the ground: a steady soft crackle and hiss.
 A116 td.branch.but-loi.fire · Bút Lôi | 0.7 s | 3 | A brush of lightning: a bright electric crackle jumping between targets in quick zaps.
 A117 td.branch.muc-bang.fire · Mực Băng bắn | 0.6 s | 3 | An icy ink stroke: a cold glassy swish and a crackle of frost forming.
 A118 td.branch.muc-bang.freeze · Mực Băng đóng băng | 0.8 s | 3 | An enemy freezing solid: crunchy ice growing fast with a glassy creak.
-A119 td.branch.khien-dong.bash · Khiên Đồng đập khiên | 0.4 s | 3 | A bronze shield bash "doang": a ringing metallic clang with a soft thud.
+A119 td.branch.khien-dong.bash · Khiên Đồng đập khiên | 0.4 s | 3 | A bronze shield bash "doang": a ringing metallic clang with a solid bronze body.
 A120 td.branch.khien-dong.wall · Tường Đồng | 3 s loop | 1 | A dome of faint bronze light humming: a steady warm metallic resonance.
 A121 td.branch.giao-dai.thrust · Giáo Dài đâm xuyên | 0.4 s | 3 | A long spear thrust piercing two targets: a long whoosh and a double "thup-thup".
 A122 td.branch.ham-sau.work · Hầm Sâu làm việc | 0.8 s | 3 | Deep mine work: a hollow pickaxe strike far down a shaft and a heavy cart rumble.
@@ -429,25 +434,25 @@ A124 td.branch.bac-thang.work · Bậc Thang nước chảy | 1.5 s | 2 | Water 
 A125 td.branch.chuong-trau.charge · Chuồng Trâu: trâu húc | 1.5 s | 3 | A water buffalo charging down a dirt road: heavy hooves pounding, a snort, a deep "mooo" at the start.
 A126 td.branch.xuong-cua.work · Xưởng Cưa | 2 s loop | 1 | A water-wheel saw cutting wood: a steady creaking wheel, rhythmic saw strokes, falling wood chips.
 A127 td.branch.xuong-rao.build · Xưởng Rào dựng rào | 1 s | 3 | A wooden fence springing up on a road: stakes hammered quickly and planks snapping into place.
-A128 td.branch.phong-an.cast · Phong Ấn xích chữ | 1 s | 3 | Chains of glowing letters binding a boss: rattling magical chains and a firm stone-seal thump.
+A128 td.branch.phong-an.cast · Phong Ấn xích chữ | 1 s | 3 | Chains of glowing letters binding a boss: rattling magical chains and a heavy stone seal stamping down with a deep body.
 A129 td.branch.vang-am.chime · Vang Âm chuông gió | 1.5 s | 3 | Hollow bamboo wind chimes clacking softly in a breeze, airy and clear.
 A130 td.branch.vuon-thao-duoc.cleanse · Vườn Thảo Dược gỡ trạng thái | 1 s | 3 | Herbs swirling: a leafy whoosh, a fresh sparkle and a soft rinse of water.
-A131 td.branch.tram-cuu-thuong.revive · Trạm Cứu Thương hồi sinh lính | 1 s | 3 | A bamboo stretcher clattering down and a quick puff of healing light, someone hopping back up.
+A131 td.branch.tram-cuu-thuong.revive · Trạm Cứu Thương hồi sinh lính | 1 s | 3 | A bamboo stretcher clattering down and a quick soft shimmer of healing light, someone hopping back up.
 A132 td.hero.lam.skill-2 · Lam: vệt lửa lam | 2 s loop | 1 | A trail of blue fire burning along a road: a soft rushing flame crackle.
 A133 td.hero.lam.attack · Lam đánh | 0.3 s | 3 | Two quick claw slashes "shhk-shhk" with small flame sparks crackling.
 A134 td.hero.lam.skill-1 · Lam: Vuốt Lam Liên Hoàn | 0.8 s | 3 | Three fast fanned claw arcs "shhk-shhk-shhk", a flame whoosh on each.
 A135 td.hero.lam.dash · Lam lướt | 0.4 s | 3 | A fast dash: a sharp air whoosh with a flick of flame.
 A136 td.hero.lam.ult · Lam Tối Thượng: Hỏa Tốc | 2 s | 2 | Winding up, then a comet-like dash: a rising wind howl, a streaking fire roar and a flame burst on landing.
 A137 td.hero.lam.death · Lam gục | 1 s | 2 | A small flame shrinking to a tiny ember with a soft hiss.
-A138 td.hero.lam.respawn · Lam hồi sinh | 0.8 s | 2 | A flame flaring back to life with a bright "whoomp".
+A138 td.hero.lam.respawn · Lam hồi sinh | 0.8 s | 2 | A flame flaring back to life: a bright rush of fire catching and roaring up.
 A139 td.hero.tre.attack · Tre bắn ná | 0.3 s | 3 | A rubber slingshot release "fwip" and a pebble flying off.
 A140 td.hero.tre.skill-1 · Tre: Rào Tre | 1 s | 3 | A bundle of bamboo thrown down and a fence springing up with a bouncy wooden rattle.
 A141 td.hero.tre.respawn · Tre hồi sinh (chạy ra) | 0.6 s | 2 | Quick light running footsteps out of a wooden gate.
 A142 td.hero.tre.shards · Tre gõ gỗ (hút nhiều Mảnh Chữ) | 0.6 s | 2 | Three quick happy knocks on a wooden beam.
-A143 td.hero.tre.skill-2 · Tre: Chuồn Chuồn Tre | 1.5 s | 2 | A bamboo dragonfly toy whirring into flight: a light spinning buzz.
+A143 td.hero.tre.skill-2 · Tre: Chuồn Chuồn Tre | 1.5 s | 2 | A Vietnamese bamboo dragonfly (chuon chuon tre) whirring into flight: a light spinning buzz.
 A144 td.hero.tre.ult · Tre Tối Thượng: Giàn Giáo Thần Tốc | 2 s | 2 | Many bamboo scaffold poles clattering into place around a house: layered wooden clacks and hammer taps.
 A145 td.hero.tre.bridge · Tre bắc Cầu Tre | 1.5 s | 2 | A bamboo bridge laid across a stream: poles dropping, ropes tightening, quick lashing knocks.
-A146 td.hero.tre.death · Tre gục | 0.8 s | 2 | Someone plopping down to sit with a dizzy cartoon twinkle.
+A146 td.hero.tre.death · Tre gục | 0.8 s | 2 | Someone sitting down hard on the grass with a soft cloth landing, then a small dizzy twinkle of chimes.
 A147 td.hero.draconis.ult-feather · Draconis: lông lửa rơi | 0.8 s | 3 | A flaming feather falling from high: a fiery whoosh descending, then a soft ember burst on the ground.
 A148 td.hero.draconis.ult-word · Draconis: trống mỗi Chữ Chiêu | 0.6 s | 4 | One big festival drum hit; make v1 soft, v2 medium, v3 strong, v4 strongest (one per extra ult word, 23.8).
 A149 td.hero.draconis.takeoff · Draconis cất cánh | 0.8 s | 3 | Huge feathered wings beating hard to take off: two deep whooshing wingbeats and a gust.
@@ -455,7 +460,7 @@ A150 td.hero.draconis.land · Draconis đậu mái | 0.6 s | 3 | A large winged 
 A151 td.hero.draconis.death · Draconis gục | 1.5 s | 2 | A fiery creature collapsing into ash and feathers: a soft crumble, embers crackling down, a fading low rumble.
 A152 td.hero.draconis.respawn · Draconis hồi sinh | 1.5 s | 2 | A phoenix rising from flames: a deep fire bloom whoosh and a bright crackling burst.
 A153 td.power.meteor · Mưa Đá Lửa | 1.2 s | 3 | A flaming rock falling at an angle: a rising fiery whistle, a heavy impact and crackling flames.
-A154 td.power.reinforce · Viện Binh | 1 s | 2 | Two soldiers dropping in on a road: a thud of boots, a puff of dust and a short horn call.
+A154 td.power.reinforce · Viện Binh | 1 s | 2 | Two soldiers dropping in on a road: boots landing firmly on packed earth, a burst of dust and a short horn call.
 A155 td.charm-mend.use · Bùa Sửa | 1 s | 2 | Quick magical repair: hammer taps and a warm sparkle as wood knits together.
 A156 td.charm-frost.use · Bùa Băng | 0.8 s | 2 | A burst of frost: a crisp icy crackle spreading outward.
 A157 td.charm-gale.use · Bùa Gió | 1 s | 2 | A friendly gust of wind sweeping past, light and fast.
@@ -470,14 +475,14 @@ A158 td.charm.pickup · Nhặt bùa | 0.5 s | 3 | A paper charm fluttering into 
 ### 3.3 Nhà
 
 ```text
-A159 td.building.hit.wood · Nhà gỗ bị đánh | 0.4 s | 3 | A blow on a wooden building: a cracking thud and splinters.
+A159 td.building.hit.wood · Nhà gỗ bị đánh | 0.4 s | 3 | A blow on a wooden building: a cracking impact with a dense wooden body and splinters scattering.
 A160 td.building.hit.stone · Nhà đá bị đánh | 0.4 s | 3 | A blow on a stone wall: a heavy knock and crumbling grit.
 A161 td.building.damaged · Nhà hư, khói | 4 s loop | 1 | A damaged hut smoldering: a soft crackle and a creaking beam.
 A162 td.building.ruin · Nhà Đổ Nát | 1.5 s | 3 | A small building collapsing: wood and roof tiles crashing down and a big whoosh of dust.
 A163 td.building.repair · Sửa bằng gõ | 0.6 s | 3 | A repair word: a sparkly hammer strike and a new plank nailed in.
-A164 td.building.branch · Chọn nhánh | 1 s | 2 | A building changing form in a puff of smoke: a whoosh, a rattle and a bright pop.
-A165 td.building.relocate · Dời nhà | 1 s | 2 | A building lifted and set down: a creak, a swish and a firm thump.
-A166 td.keep.upgrade · Nâng Lũy | 3 s | 1 | A fortress growing taller: stones stacking, beams hammered, a big gate creaking, a solid final thud.
+A164 td.building.branch · Chọn nhánh | 1 s | 2 | A building changing form in a swirl of smoke: a whoosh, a rattle and a bright magical chime.
+A165 td.building.relocate · Dời nhà | 1 s | 2 | A building lifted and set down: a creak, a swish and a firm wooden landing as it settles.
+A166 td.keep.upgrade · Nâng Lũy | 3 s | 1 | A fortress growing taller: stones stacking, beams hammered, a big gate creaking, a final heavy stone settling into place.
 A167 td.infirmary.idle · Nhà Thuốc tự chạy | 4 s loop | 1 | A small clay pot of herbal medicine bubbling at a soft simmer.
 A168 td.infirmary.word · Nhà Thuốc mỗi từ | 0.6 s | 3 | A pouch of herbs tossed: a soft leafy whoosh and a cool minty sparkle.
 A169 td.lumber.idle · Trại Gỗ tự chạy | 2 s loop | 1 | Two people pulling a long saw through a log: a rhythmic push-pull rasp, sawdust falling.
@@ -513,27 +518,27 @@ A191 td.seal.open · Mở cửa sổ ấn | 1.5 s | 2 | A seal window opening: a
 A192 td.seal.success · Ấn đúng | 1.2 s | 2 | A seal stamped successfully: a heavy stone stamp "thunk" and a bright magic chime burst.
 A193 td.seal.fail · Ấn sai | 1 s | 2 | A seal failing: a dull cracking stamp and a fizzling sigh of magic.
 A194 td.direct.success · Gõ trực tiếp xong | 0.6 s | 3 | A red-edged paper scroll stamped and folded shut: a crisp paper snap and a firm stamp.
-A195 td.direct.anchor · Neo | 0.8 s | 2 | A glowing chain of letters anchoring a creature in place: a heavy chain clank and a stone thump.
-A196 td.direct.interrupt · Ngắt | 0.6 s | 2 | A drumming creature cut off: a muffled thump on a drum skin and a comic deflating puff.
+A195 td.direct.anchor · Neo | 0.8 s | 2 | A glowing chain of letters anchoring a creature in place: a heavy chain clank and a stone weight dropping into the ground.
+A196 td.direct.interrupt · Ngắt | 0.6 s | 2 | A drumming creature cut off: a hand slapped flat on a drum skin, the drum ring choked short, a soft sigh of breath.
 A197 td.direct.seal-club · Phong Gậy | 0.8 s | 2 | A paper charm wrapping a wooden club: a fast paper swirl and a dull wooden clunk.
-A198 td.chest.small · Rương nhỏ | 1.5 s | 2 | A small treasure chest popping open with coins and a sparkle.
+A198 td.chest.small · Rương nhỏ | 1.5 s | 2 | A small treasure chest springing open with coins and a sparkle.
 A199 td.warn.keep-weak · Lũy yếu | 1.2 s | 2 | An old fortress in danger: a low horn note twice and a creaking gate.
 A200 td.warn.boss-attack · Boss báo đòn (chung) | 1 s | 2 | A big danger is coming: a deep rising whoosh and a low drum hit.
-A201 td.ui.slot-unlock · Lễ mở ô | 1.5 s | 1 | A fortress gate swinging open and a puff of chalk dust, small footsteps running out.
+A201 td.ui.slot-unlock · Lễ mở ô | 1.5 s | 1 | A fortress gate swinging open and a soft cloud of chalk dust, small footsteps running out.
 ```
 
 ### 3.5 Người và thú
 
 ```text
 A202 td.helper.step · Thư Đồng đi | 0.8 s | 3 | A tiny owlet waddling: soft little footsteps "pat-pat" with a fluffy rustle.
-A203 td.helper.arrive · Thư Đồng tới nhà | 0.4 s | 3 | A puff of chalk dust "poof" on a small slate.
+A203 td.helper.arrive · Thư Đồng tới nhà | 0.4 s | 3 | A soft brush of chalk dust over a small slate.
 A204 td.helper.chirp · Thư Đồng reo "chíp!" | 0.3 s | 4 | A tiny owlet chirp "cheep!", bright and happy.
 A205 td.helper.scared · Thư Đồng hoảng | 0.8 s | 3 | A startled owlet: frantic little wing flaps, a few loose feathers, a tiny squeak.
-A206 td.helper.catch · Thư Đồng bắt túi | 0.4 s | 3 | Small wings catching a soft bag: a fluffy flap and a soft thump.
+A206 td.helper.catch · Thư Đồng bắt túi | 0.4 s | 3 | Small wings catching a soft bag: a fluffy flap and a soft cloth catch with a coin jingle.
 A207 td.helper.chalk · Thư Đồng viết bảng đá | 0.3 s | 3 | Chalk scratching quickly on a small slate.
-A208 td.soldier.spawn · Lính ra cổng | 0.8 s | 3 | Small soldiers running out of a wooden gate: quick footsteps and a puff of dust.
+A208 td.soldier.spawn · Lính ra cổng | 0.8 s | 3 | Small soldiers running out of a wooden gate: quick footsteps and a soft burst of dust.
 A209 td.soldier.shield · Lính Khiên đỡ | 0.3 s | 3 | A small shield blocking a blow: a short metallic "doang".
-A210 td.crowd.walla · Tiếng ồn trận | 6 s loop | 1 | A small cartoon skirmish in the distance: many tiny clashes and scuffles with muffled wordless shouts.
+A210 td.crowd.walla · Tiếng ồn trận | 6 s loop | 1 | A small storybook skirmish in the distance: many tiny clashes and scuffles with muffled wordless shouts.
 A211 td.animal.buffalo · Trâu kêu | 1 s | 3 | A water buffalo's deep, calm "mooo".
 A212 td.animal.egrets · Đàn cò bay | 1.5 s | 2 | A flock of egrets taking off: many soft wing flaps and light calls.
 ```
@@ -545,23 +550,23 @@ A212 td.animal.egrets · Đàn cò bay | 1.5 s | 2 | A flock of egrets taking of
 Mộc Tinh đầy đủ (bản đồ 3, thêm vào bộ P) và Đại Bàng Tinh. Tự quyết: trúng Đại Bàng Tinh dùng `td.mat.flesh` (lông), 23.8 không ghi.
 
 ```text
-A213 td.boss.moc-tinh.move · Mộc Tinh đi | 1.5 s | 3 | A giant tree creature stepping slowly: a deep creaking trunk and roots thudding into soil.
+A213 td.boss.moc-tinh.move · Mộc Tinh đi | 1.5 s | 3 | A giant tree creature stepping slowly: a deep creaking trunk and heavy roots driving into soil.
 A214 td.boss.moc-tinh.seed · Mộc Tinh rải hạt | 0.8 s | 3 | A big seed falling from a canopy: a rustling drop and a heavy wooden "thok".
-A215 td.boss.moc-tinh.wall · Tường Rễ mọc | 2 s | 2 | A wall of roots rising across a road: roaring soil, twisting wood creaks, a solid final thud.
+A215 td.boss.moc-tinh.wall · Tường Rễ mọc | 2 s | 2 | A wall of roots rising across a road: roaring soil, twisting wood creaks, the wall locking into place with a heavy final crack.
 A216 td.boss.moc-tinh.wall-end · Tường Rễ tan | 1.5 s | 2 | A root wall crumbling into soil and splinters.
 A217 td.boss.moc-tinh.sleep · Ngủ Rễ | 4 s loop | 1 | A giant tree breathing in sleep: a slow creaking inhale and exhale with rustling leaves.
 A218 td.boss.moc-tinh.stun · Mộc Tinh choáng | 1.5 s | 2 | A giant tree staggering: a confused groan of wood and leaves falling.
 A219 td.boss.moc-tinh.chase · Rễ đuổi Tướng | 2 s loop | 1 | A single root burrowing fast under the ground: a crunching, ripping trail of soil.
 A220 td.boss.moc-tinh.finale · Mộc Tinh hóa lại thành cây | 3 s | 1 | A tree spirit remembering its name: a soft magical exhale, leaves settling, wood relaxing into a calm tree.
 A221 td.boss.dai-bang-tinh.wings · Đại Bàng vỗ cánh | 2 s loop | 1 | Huge eagle wings beating slowly overhead: deep whooshing gusts.
-A222 td.boss.dai-bang-tinh.screech · Đại Bàng rít | 1.5 s | 3 | A giant storm eagle screech: a piercing, raspy cry, powerful but cartoon-friendly.
+A222 td.boss.dai-bang-tinh.screech · Đại Bàng rít | 1.5 s | 3 | A giant storm eagle screech: a piercing, raspy cry, powerful but storybook-friendly.
 A223 td.boss.dai-bang-tinh.swoop-warn · Báo Sà Cắp | 1.5 s | 2 | A giant bird diving: a descending whistle of wind growing louder.
 A224 td.boss.dai-bang-tinh.grab · Đại Bàng nhấc nhà | 1.2 s | 2 | Talons gripping a wooden building and lifting it: creaking timber and a heavy gust.
-A225 td.boss.dai-bang-tinh.drop · Nhà rơi xuống | 1 s | 3 | A building dropped from the air: a heavy crashing thud with rattling roof tiles.
+A225 td.boss.dai-bang-tinh.drop · Nhà rơi xuống | 1 s | 3 | A building dropped from the air: a heavy crash with a deep wooden body, roof tiles rattling and sliding off.
 A226 td.boss.dai-bang-tinh.gust · Bão Cánh | 1.5 s | 2 | A storm blast from huge wings: a roaring gust sweeping across.
 A227 td.boss.dai-bang-tinh.quill · Mũi lông | 0.6 s | 3 | Three sharp quills thunking into wood one after another.
 A228 td.boss.dai-bang-tinh.steal · Đại Bàng cướp vàng | 1 s | 2 | A giant eagle snatching gold: a swooping whoosh and a jangling sack of coins.
-A229 td.boss.dai-bang-tinh.fall · Đại Bàng rơi xuống | 1.5 s | 2 | A stunned giant eagle crashing onto a road: a heavy feathered thud and scattering feathers.
+A229 td.boss.dai-bang-tinh.fall · Đại Bàng rơi xuống | 1.5 s | 2 | A stunned giant eagle crashing onto a road: a heavy feathered impact with weight, dust and scattering feathers.
 A230 td.boss.dai-bang-tinh.death · Đại Bàng gục | 2.5 s | 1 | A giant eagle fading away: light feathers drifting down in a soft calming wind.
 A231 td.boss.dai-bang-tinh.phase · Đại Bàng đổi pha | 2 s | 2 | A storm gathering around a giant eagle: rising wind, distant thunder rumble, wings flaring.
 ```
@@ -589,14 +594,14 @@ Như file chính mục 6: `gainJitterDb 1.5`, `noRepeat true`, `beatQuantizeMs 0
 
 Tự quyết: lớp 1 là **nền lặp** (stereo, 90 s, lặp kín). Lớp 2 là **bộ tiếng chi tiết** (mono, 6 bản, 2–6 s mỗi bản). Engine rải lớp 2 ngẫu nhiên 4–12 s một lần, pan ngẫu nhiên. Độ to −26 LUFS.
 
-Lưu: `ambience/td.amb.<bản đồ>.bed.wav`; `ambience/td.amb.<bản đồ>.detail-v1.wav` … `-v6`. Lớp nền thêm dòng LOOP. Không dán đuôi chung tiếng ngắn (âm nền cần không gian); thay bằng: `No music, no speech, natural and calm.`
+Lưu: `ambience/td.amb.<bản đồ>.bed.wav`; `ambience/td.amb.<bản đồ>.detail-v1.wav` … `-v6`. Lớp nền thêm dòng LOOP. Không dán đuôi chung tiếng ngắn (âm nền cần không gian); thay bằng: `Natural outdoor field recording, environmental sounds only, calm and even.` (Q6, 24/10: chỉ ghi điều muốn có; chữ phủ định như "no music", "no birds" dễ làm ra đúng thứ bị nhắc tên.)
 
 - Công cụ không cho tạo dài 90 s thì tạo 3–4 đoạn cùng prompt, mỗi đoạn dài nhất công cụ cho. Lưu `td.amb.<bản đồ>.bed-part1.wav`, `-part2`… AI tích hợp nối thành một vòng 90 s.
 
 ```text
-N01 td.amb.w1-silverfall.bed · Nền Đồng Cỏ Thác Bạc | 90 s stereo loop | Highland meadow at 7:30 in the morning after rain: a distant silver waterfall rumbling softly, gentle wind over short grass and reeds, very calm and wide, no birds.
+N01 td.amb.w1-silverfall.bed · Nền Đồng Cỏ Thác Bạc | 90 s stereo loop | Highland meadow at 7:30 in the morning after rain: a distant silver waterfall rumbling softly, gentle wind over short grass and reeds, very calm and wide, only water and wind.
 N02 td.amb.w1-silverfall.detail · Chi tiết Đồng Cỏ Thác Bạc | 2-6 s mono × 6 | One natural sound per file: a cheerful morning songbird call; a far egret call; water drops falling from leaves; a bee buzzing past; a soft gust through bamboo; a distant buffalo neck bell.
-N03 td.amb.w1-whitestone.bed · Nền Vịnh Đá Trắng | 90 s stereo loop | White limestone shore at golden hour: gentle waves washing over rocks, a warm sea wind, wide and calm, no gulls.
+N03 td.amb.w1-whitestone.bed · Nền Vịnh Đá Trắng | 90 s stereo loop | White limestone shore at golden hour: gentle waves washing over rocks, a warm sea wind, wide and calm, only sea and wind.
 N04 td.amb.w1-whitestone.detail · Chi tiết Vịnh Đá Trắng | 2-6 s mono × 6 | One natural sound per file: seagull calls; hollow bamboo wind chimes; a wooden boat creaking against a pier; a small wave splashing on rocks; a fishing net rustling; a far gull flock.
 N05 td.amb.w1-rootwood.bed · Nền Rừng Rễ Cổ | 90 s stereo loop | Humid rainforest at mid-morning: a dense soft insect hum, a flowing river nearby, slow drips from leaves, wide and calm.
 N06 td.amb.w1-rootwood.detail · Chi tiết Rừng Rễ Cổ | 2-6 s mono × 6 | One natural sound per file: an exotic forest bird call; a distant wood creak; a frog croak; leaves rustling as a small animal passes; a branch dropping; a far hornbill-like call.

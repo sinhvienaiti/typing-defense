@@ -16,7 +16,8 @@ Instructions for ChatGPT
    Work only on the item codes, ids or sections the owner names
    (e.g. "A01-A08", "td.archer.*", "V13-V18", "section 5.9").
 2. Sound effects (codes A..): final prompt = the item prompt (or one layer prompt)
-   + the Common SFX tail in section 3.1 (+ a line from 3.2 when the item says so).
+   + the Common SFX tail in section 3.1 (+ the SPACE line of 3.1 for the items and layers
+   3.1 lists) (+ a line from 3.2 when the item says so).
    In blocks with one line per id, each line starts with the id and a colon:
    drop that id, keep only the text after the colon.
    One final prompt per layer. Variants come from generating the same prompt again.
@@ -36,6 +37,11 @@ Instructions for ChatGPT
 8. For every file, give one CSV row in the format of section 2.5 (file,tool,plan,date,prompt,notes).
    Fill file and prompt; leave tool, plan, date and notes empty for the owner. Do not ask about them.
 9. If something is unclear, rules conflict, or a needed detail is missing, ask the owner. Do not guess.
+10. Action sounds (shots, blasts, hits, attacks, deaths, creature skills, boss moves) follow the
+    owner's rule Q6 (section 3.3): the shape of the action (wind-up when it has one, a strong
+    onset, a body, a short tail in the map's open air), sized to what makes the sound.
+    Write only what you want to hear: never the words puff, pop, poof, balloon, boing, bonk,
+    toy, cartoon, retro, 8-bit, chiptune, and never a lone thump or thud.
 ```
 
 ## 1. Tóm tắt
@@ -120,10 +126,19 @@ Tự quyết: sổ nguồn là file `sources.csv` cạnh các file âm.
 ### 3.1 Đuôi chung (dán sau mọi prompt tiếng ngắn)
 
 ```text
-Storybook fantasy game sound effect, warm and clean, close and dry with no reverb or echo, no music, no speech, no background noise, no silence before the sound.
+Storybook fantasy game sound effect, warm and clean, close, a single sound that starts on its first instant and ends on its own natural decay.
 ```
 
+Dòng SPACE (dán thêm sau đuôi chung cho âm hành động một lớp và cho mọi lớp `tail`; xem danh sách dưới):
+
+```text
+A short natural echo in the open air of a valley village, fading within a second.
+```
+
+- **Dán SPACE cho:** mọi lớp `tail`; tiếng bắn một lớp (A01, A03, A05, A06, lớp `launch` của A08); lính đâm và ngã (A18, A19); quái đánh, kỹ năng, chết (A40, A42–A43, A45, A47–A48, A50–A52, A54–A56, A58–A59, A61–A62, A64–A65); Mộc Tinh (A66, A68–A70); Bùng Nổ có đòn (A27–A30). **Không dán SPACE cho:** lớp `transient`, `body`, `low`, `multi` (engine đặt lớp `tail` lên trên); tiếng lặp (LOOP); tiếng thưởng, nhặt, xây và UI.
+- Đuôi chung chỉ ghi điều muốn có, không có chữ phủ định ("no reverb", "no music"): công cụ tạo âm dễ làm ra đúng thứ bị nhắc tên. Đuôi chung cũ (22/10) ghi "close and dry with no reverb or echo, no music, no speech, no background noise"; quyết định Q6 của chủ dự án (24/10/2026) bỏ hướng đó cho âm hành động.
 - Đuôi này không ghi "mạnh" hay "bật ngay": lớp `body` và `tail` cần đầu mềm (soft onset), vì engine đặt lớp `transient` lên trước. Độ "chắc, mạnh" ghi trong prompt riêng của từng mục.
+- Engine vẫn thêm vang dài theo vùng (24.4, cột `reverbSend` ở mục 6). SPACE chỉ là vang sớm, ngắn, nằm trong file.
 
 ### 3.2 Dòng thêm khi mục yêu cầu
 
@@ -134,7 +149,12 @@ Storybook fantasy game sound effect, warm and clean, close and dry with no rever
 
 ### 3.3 Luật chung
 
-- Sách tranh, đồ chơi, ấm. Không máu, không tiếng đau thật, không súng, không chiến tranh hiện đại.
+- Sách tranh, ấm, có trọng lượng theo cỡ thứ phát ra âm. Không máu, không tiếng đau thật, không súng, không chiến tranh hiện đại.
+- **Âm hành động theo hình dạng của hành động** (quyết định Q6 của chủ dự án, 24/10/2026, `tools/audio-lab/DECISIONS.md` ở repo cha). Bắn, nổ, trúng, quái đánh, chết, kỹ năng, boss:
+  - đủ các phần mà hành động có: chuẩn bị (kéo dây, châm ngòi, vung), phát (đầu tiếng có lực), thân (lửa, gió, vật bay, vật vỡ), đuôi vang ngoài làng, đồng lúa;
+  - cỡ âm theo nguồn: tháp pháo, Troll, Mộc Tinh nghe to xác; Thư Đồng, mầm cây thì nhỏ;
+  - bỏ hẳn hướng "bụp, thụp", "puff", "pop", "poof", tiếng kiểu đồ chơi, hoạt hình, retro, 8-bit, và một tiếng trầm ngắn đứng riêng. Lớp trầm (`low`) chỉ làm lớp dưới, có thân và đuôi đè lên;
+  - dải 1–4 kHz chỉ ở đầu tiếng, đuôi nằm dưới 1 kHz hoặc trên 4 kHz, để không che tiếng phát âm từ.
 - Lớp `transient` khoảng 20 ms. Lớp `body` 0,1–0,3 s. Lớp `tail` 0,3–0,8 s. Engine ghép các lớp lệch 0–12 ms (24.5).
 - Đòn trúng một quái (mũi nỏ, tên, giáo): engine lấy `transient` và `tail` của vũ khí, còn lớp thân lấy theo chất liệu quái (`td.mat.*`, mục 5.2). Lớp `body` riêng của vũ khí chỉ phát khi trúng đất (bắn trượt, quái chết trước).
 - Đạn pháo nổ: lớp `body` (tiếng nổ) và lớp `low` (tiếng trầm cho đòn nặng, 24.5) luôn phát, vì đạn vẫn nổ khi trượt. Trúng từ 3 quái trở lên trong 50 ms: cả tiếng to thêm 2 dB và thêm lớp `multi` (24.5).
@@ -189,7 +209,7 @@ A crossbow bolt tip striking: one hard, dry "tock" attack, about 20 milliseconds
 ```
 - `body` (trúng đất):
 ```text
-A heavy crossbow bolt thudding deep into packed earth, a short firm "thup", 0.2 seconds, soft onset.
+A heavy crossbow bolt driving deep into packed earth: a firm biting impact with a short gritty body of soil and wood, 0.2 seconds, soft onset.
 ```
 - `tail`:
 ```text
@@ -227,10 +247,10 @@ Empowered magic bow shot: a deep, heavy string release "thwoom" with a strong te
 ```
 
 #### A06 `td.cannon.fire` · Tháp Pháo bắn
-"Thoomp" và khói. `world` · P4 · 0,5 s · một lần · 3 bản · 1 lớp · mono.
+Ngòi xì, nổ "đoàng" có thân, khói phụt ra. `world` · P4 · 0,5 s · một lần · 3 bản · 1 lớp · mono.
 Lưu: `sfx/td.cannon.fire-v1.wav` … `-v3.wav`
 ```text
-Short bronze cannon on an earthen mound firing: a round, deep, punchy "thoomp" with a quick puff-of-smoke hiss. Toy-like and friendly, not realistic war, 0.5 seconds.
+Short bronze cannon on an earthen mound firing: a quick fuse hiss, a deep punchy blast with a warm bronze body, smoke rushing out of the barrel. Friendly storybook scale, like a village festival cannon, 0.5 seconds.
 ```
 
 #### A07 `td.cannon.hit` · Đạn pháo nổ
@@ -242,7 +262,7 @@ The first crack of a small black-powder blast, a sharp "kssh" snap, about 20 mil
 ```
 - `body`:
 ```text
-A round, chunky cartoon explosion "boomf" with a puff of dust, short and full, 0.3 seconds, soft onset.
+A small black-powder blast: a full, chunky burst with a warm body of rushing air, dirt and dust thrown up, 0.3 seconds, soft onset.
 ```
 - `tail`:
 ```text
@@ -250,23 +270,23 @@ Dirt clods and small pebbles pattering down after a blast, a light rain of debri
 ```
 - `low` (luôn phát):
 ```text
-A deep low thump with sub-bass weight under a small cartoon blast, 0.4 seconds, soft onset, no high frequencies.
+Low layer under a small black-powder blast: a deep sub-bass push of weight that swells and fades with the blast, only low frequencies, 0.4 seconds, soft onset.
 ```
 - `multi` (từ 3 quái):
 ```text
-Several small soft thuds and puffs of cloth and paper overlapping in one quick scatter, as if many small creatures are knocked back at once, 0.5 seconds, soft onset.
+Many small creatures knocked back at once: a quick scatter of soft cloth and paper impacts overlapping, with a short body of fluttering paper, 0.5 seconds, soft onset.
 ```
 
 #### A08 `td.cannon.wordshot` · Đạn Chữ
-Thợ nhét đạn vằn rồi bắn ngay: "cạch", "pụp". Tiếng nổ dùng A07, lấp lánh do mã thêm. `world` · P3 · một lần · 2 lớp × 3 bản · mono.
-Lưu: `sfx/td.cannon.wordshot.clack-v1.wav` … `-v3`; `sfx/td.cannon.wordshot.pop-v1.wav` … `-v3`
+Thợ nhét đạn vằn rồi bắn ngay: "cạch", rồi một phát bắn nhẹ. Tiếng nổ dùng A07, lấp lánh do mã thêm. `world` · P3 · một lần · 2 lớp × 3 bản · mono.
+Lưu: `sfx/td.cannon.wordshot.clack-v1.wav` … `-v3`; `sfx/td.cannon.wordshot.launch-v1.wav` … `-v3` (lớp này trước 24/10 tên là `pop`)
 - `clack`:
 ```text
 A heavy iron cannonball slammed into a short bronze barrel: one metallic "clack" with a little rattle, 0.25 seconds.
 ```
-- `pop` (engine phát sau `clack` 90 ms):
+- `launch` (engine phát sau `clack` 90 ms; dán thêm SPACE):
 ```text
-A quick, light cannon launch "poonk", rounder and softer than a full shot, 0.3 seconds.
+A quick, light cannon launch: a short bright blast with a small bronze body and the ball rushing away, lighter than a full shot, 0.3 seconds.
 ```
 
 ### 5.2 Lớp thân theo chất liệu (23.8)
@@ -275,9 +295,9 @@ Một lớp `body`, 3 bản mỗi id. `world` · P4 · 0,2–0,25 s · một l�
 
 | Mã | id | Chất liệu, quái (bậc P) | Tiếng |
 |---|---|---|---|
-| A09 | `td.mat.cloth` | Vải, giấy: Cương Thi | "bụp" mềm |
-| A10 | `td.mat.flesh` | Thịt, lông: Tanuki (Oni ở VS) | "thịch" |
-| A11 | `td.mat.dough` | Bột: Nuppeppō | "bọp" ướt |
+| A09 | `td.mat.cloth` | Vải, giấy: Cương Thi | "phạch" vải, giấy bùa sột soạt |
+| A10 | `td.mat.flesh` | Thịt, lông: Tanuki (Oni ở VS) | "bịch" có độ nảy, lông xào |
+| A11 | `td.mat.dough` | Bột: Nuppeppō | "nhóp" ướt, dính |
 | A12 | `td.mat.scale` | Vảy, nước: Thuồng Luồng | "cạch" ướt |
 | A13 | `td.mat.stone` | Đá: Troll | "cộc" |
 | A14 | `td.mat.metal` | Kim loại: Alicanto | "keng" |
@@ -285,8 +305,8 @@ Một lớp `body`, 3 bản mỗi id. `world` · P4 · 0,2–0,25 s · một l�
 | A16 | `td.mat.wood` | Gỗ: Mộc Tinh; Mầm Gỗ (tự quyết, 23.8 không ghi) | "cộp" |
 
 ```text
-td.mat.cloth: A soft muffled "bup" thump into layered cloth robes, with a short papery rustle of paper charms, 0.2 seconds, soft onset.
-td.mat.flesh: A padded cartoon "thud" into a chubby, furry body, soft and springy, no blood, no gore, 0.2 seconds, soft onset.
+td.mat.cloth: A blow landing in layered cloth robes: a soft muffled cloth slap with a short papery rustle of paper charms, 0.2 seconds, soft onset.
+td.mat.flesh: A blow landing on a chubby, furry body: a padded, springy smack with a short fur rustle, clean and gentle, 0.2 seconds, soft onset.
 td.mat.dough: A wet, squishy "blop" into a soft dough-like blob, like slapping thick bread dough, a slightly sticky release, 0.25 seconds, soft onset.
 td.mat.scale: A hard, glossy "clack" on wet serpent scales with a small splash of droplets, 0.25 seconds, soft onset.
 td.mat.stone: A dull, solid "tock" on hard rock with a tiny crumble of grit, 0.2 seconds, soft onset.
@@ -315,7 +335,7 @@ A quick spear thrust: a short, sharp whoosh of a wooden spear shaft and a light 
 Ngã ngồi, tan thành chữ cái; kêu "Á!" (id giọng riêng phát kèm, mục 7.4). `crowd` · P4 · 0,8 s · một lần · 3 bản + giọng 6 bản · mono.
 Lưu: `sfx/td.soldier.death-v1.wav` … `-v3`; giọng `voice/linh-giao/td.vo.linh-giao.death-v1.wav` … `-v6`
 ```text
-A small cartoon soldier plopping down to sit: a soft cloth-and-leather thump, then a light flutter of paper letters lifting up and fading, gentle and not sad, 0.8 seconds.
+A small storybook soldier sitting down hard: a soft cloth-and-leather landing with a short rattle of gear, then a light flutter of paper letters lifting up and fading into the air, gentle and light-hearted, 0.8 seconds.
 ```
 
 ### 5.4 Mỏ Vàng và Ruộng Lúa
@@ -349,10 +369,10 @@ Ripe rice plants swaying in a light breeze over a small wet paddy: a soft, conti
 ```
 
 #### A24 `td.farm.word` · Lúa mọc vọt
-Cú đáp mỗi từ ở Ruộng: "bụp", "sột". `world` · P3 · 0,6 s · một lần · 3 bản · mono.
+Cú đáp mỗi từ ở Ruộng: "sột", lúa vọt lên. `world` · P3 · 0,6 s · một lần · 3 bản · mono.
 Lưu: `sfx/td.farm.word-v1.wav` … `-v3.wav`
 ```text
-Rice shoots springing up from wet paddy mud with a soft "bup" pop and a leafy rustle, then a small rice bundle swishing up into the air, 0.6 seconds.
+Rice shoots springing up from wet paddy mud: a soft wet squelch and a leafy rustle, then a small rice bundle swishing up into the air, 0.6 seconds.
 ```
 
 ### 5.5 Từ Vàng, cụm chốt, Bùng Nổ
@@ -412,7 +432,7 @@ Gold bursting up from the ground like a geyser: a big whoosh upward, then a show
 Túi rơi chỗ quái chết, nảy một lần. `rewards` · P4 · 0,4 s · một lần · 3 bản · mono.
 Lưu: `sfx/td.bag.drop-v1.wav` … `-v3.wav`
 ```text
-A small cloth loot bag dropping and bouncing once on grass: a soft thud with a few coins jingling inside, 0.4 seconds.
+A small cloth loot bag dropping and bouncing once on grass: a soft cloth landing with a few coins jingling inside, 0.4 seconds.
 ```
 
 #### A33 `td.bag.pickup` · Nhặt túi
@@ -427,7 +447,7 @@ Rơi giữa sân, tự mở sau 1,5 s (17.4). Một id, 2 lớp; engine phát l�
 Lưu: `sfx/td.chest.open.land-v1.wav`, `-v2`; `sfx/td.chest.open.open-v1.wav`, `-v2`
 - `land`:
 ```text
-A heavy wooden treasure chest landing on the ground: a solid wooden thump with iron corners rattling, 0.5 seconds.
+A heavy wooden treasure chest landing on the ground: a solid wooden impact with weight, iron corners rattling as it settles, 0.5 seconds.
 ```
 - `open`:
 ```text
@@ -440,7 +460,7 @@ A wooden treasure chest lid creaking open quickly, then a bright gush of gold co
 Giàn tre, búa, bụi. Thợ hô "Hò dô!" (id giọng riêng phát kèm, mục 7.4). `world` · P4 · 1,3 s · một lần · 3 bản + giọng 6 bản · mono.
 Lưu: `sfx/td.build.place-v1.wav` … `-v3`; giọng `voice/crew/td.vo.crew.heave-ho-v1.wav` … `-v6`
 ```text
-A small builder crew putting up a hut: bamboo poles clattering into a scaffold, quick hammer taps and a puff of dust, cheerful and busy, 1.3 seconds.
+A small builder crew putting up a hut: bamboo poles clattering into a scaffold, quick hammer taps and a soft burst of dust, cheerful and busy, 1.3 seconds.
 ```
 
 #### A36 `td.build.upgrade` · Nâng cấp
@@ -454,7 +474,7 @@ Bamboo scaffold rattling, a quick flurry of hammer blows, then a heavy wooden ro
 Nhà tháo thành ván bay đi, đồng bung. `world` · P4 · 0,9 s · một lần · 3 bản · mono.
 Lưu: `sfx/td.build.sell-v1.wav` … `-v3.wav`
 ```text
-A small wooden building being taken apart: planks popping loose and clattering away, then a quick burst of jingling coins, 0.9 seconds.
+A small wooden building being taken apart: planks prying loose and clattering away, then a quick burst of jingling coins, 0.9 seconds.
 ```
 
 ### 5.8 Cảnh báo
@@ -514,21 +534,21 @@ td.enemy.cuong-thi.move: Small stiff hopping creatures in long robes: soft rhyth
 td.enemy.cuong-thi.attack: A stiff-armed lunge: a quick cloth swish and a soft papery smack, 0.3 seconds.
 td.enemy.cuong-thi.death: A blank paper charm catching fire from the bottom up with a soft crackle, crumbling to ash, ending with one small clear bell "ting", 1 second.
 td.enemy.ma-troi.move: A flock of tiny will-o'-the-wisp lights drifting low: a soft airy shimmering hum with faint glassy flickers, magical and a little eerie but gentle, 4 seconds.
-td.enemy.ma-troi.death: Small floating lights going out one by one: three quick soft glassy "plink" pops, like tiny crystal bubbles, 0.6 seconds.
+td.enemy.ma-troi.death: Small floating lights going out one by one: three quick soft glassy "plink" notes, like tiny crystal bubbles bursting, each leaving a faint shimmer, 0.6 seconds.
 td.enemy.nuppeppo.move: A soft dough blob creature waddling: slow squishy squelches on dirt, gentle and silly, 1 second.
 td.enemy.nuppeppo.attack: A squishy blob creature slapping: a wet doughy "splat" of a soft arm, 0.3 seconds.
-td.enemy.nuppeppo.death: A soft dough blob squeezed and stretched with a rubbery squeak, then a gentle "poof" of cream-colored powder, 0.8 seconds.
+td.enemy.nuppeppo.death: A soft dough blob squeezed and stretched with a rubbery squeak, then a gentle breath of cream-colored powder scattering and settling, 0.8 seconds.
 td.enemy.thuong-luong.move: A heavy river serpent sliding over wet ground: slow wet scales scraping, small splashes, a low rumble, 1.5 seconds.
-td.enemy.thuong-luong.attack: A river serpent snapping its jaws and slapping its tail: a wet bite clack and a splashy thump, 0.5 seconds.
+td.enemy.thuong-luong.attack: A river serpent snapping its jaws and slapping its tail: a wet bite clack, then a heavy tail slap into water with a short burst of spray, 0.5 seconds.
 td.enemy.thuong-luong.skill: A river serpent spitting a ring of water: a short gurgle, then a strong splash wave whooshing outward in a circle, 0.8 seconds.
 td.enemy.thuong-luong.death: A tall column of water bursting up and splashing down, then small jade scales clinking onto stones, 1.2 seconds.
 td.enemy.tanuki.move: A chubby raccoon-dog trotting: quick soft paw pats on dirt, playful, 1 second.
 td.enemy.tanuki.attack: A chubby raccoon-dog swiping with stubby claws: a quick fur swish and a soft padded smack, 0.4 seconds.
 td.enemy.tanuki.skill: A chubby raccoon-dog drumming its round belly: hollow, bouncy "pom-pom-pom" hand-drum beats, playful and cheeky, 1.5 seconds.
-td.enemy.tanuki.death: A soft "poof" of beige smoke, then a single dry leaf spinning down with a tiny rustle, a comic vanishing, 0.9 seconds.
+td.enemy.tanuki.death: A soft whoosh of beige smoke swirling away, then a single dry leaf spinning down with a tiny rustle, a playful vanishing, 0.9 seconds.
 td.enemy.troll.move: A big mountain troll walking: slow heavy stony footsteps with grinding pebbles, 1.5 seconds.
-td.enemy.troll.attack: A big mountain troll slamming a huge stone fist down: a heavy whoosh and a deep rocky "crunch" thud, 0.6 seconds.
-td.enemy.troll.death: A troll turning to stone with a grinding crackle, then breaking into three big rock chunks that thud down, 1.4 seconds.
+td.enemy.troll.attack: A big mountain troll slamming a huge stone fist down: a heavy whoosh, a deep rocky crunch with the weight of stone, gravel scattering, 0.6 seconds.
+td.enemy.troll.death: A troll turning to stone with a grinding crackle, then breaking into three big rock chunks that crash down with weight and roll to rest, 1.4 seconds.
 td.enemy.alicanto.move: A golden bird with metal feathers flying past: quick wingbeats with a light jingle of metallic feathers, 1 second.
 td.enemy.alicanto.skill: A golden bird diving fast with a sharp whoosh and scooping coins: a quick greedy jingle of coins dropping into a small sack, 0.8 seconds.
 td.enemy.alicanto.death: Golden metal feathers bursting and falling with bright tinkles that turn into a cascade of coins, 1 second.
@@ -553,7 +573,7 @@ Một lần · 1 lớp · mono. Lưu: `sfx/<id>-v1.wav` … theo số bản ở 
 - Trúng Mộc Tinh: lớp thân `td.mat.wood` (A16).
 
 ```text
-td.boss.moc-tinh.attack: A giant tree creature whipping a huge branch down: a deep creaking swing and a massive woody "crack-thud" slam on the ground, leaves shaking, 1 second.
+td.boss.moc-tinh.attack: A giant tree creature whipping a huge branch down: a deep creaking swing, a massive woody crack and a heavy slam on the ground with a deep body, leaves shaking, 1 second.
 td.boss.moc-tinh.roots-warn: A deep underground rumble building for 1.5 seconds: roots shifting under the earth, low creaks and soil crackling, rising tension, ending abruptly.
 td.boss.moc-tinh.roots: Thick tree roots bursting up through the ground: an eruption of soil, cracking wood and roots slapping against stones, 1 second.
 td.boss.moc-tinh.roar: A colossal ancient tree spirit roaring: a deep groaning wooden roar like a huge trunk bending in a storm, with rustling leaves, sad and powerful rather than evil, 2 seconds.
@@ -595,7 +615,7 @@ Trường theo 24.2. Bảng dùng dấu chấm như trong mã. Số là số kh�
 | A05 | td.archer.wordshot | world | v1–v3 | 1 | -1 | 0.03 | P3 | 2 | 60 | 0 | true | 0.12 | 0 | sổ nguồn |
 | A06 | td.cannon.fire | world | v1–v3 | 1 | -2 | 0.04 | P4 | 3 | 60 | 0 | true | 0.12 | 0 | sổ nguồn |
 | A07 | td.cannon.hit | world | v1–v3 ×3, low v1–v3, multi v1–v3 | transient 0, body 6, tail 12, low 0 (-3 dB); multi 0 khi ≥ 3 quái trong 50 ms (cả tiếng +2 dB) | 0 | 0.04 | P4 | 4 | 30 | 0 | true | 0.20 | 0 | sổ nguồn |
-| A08 | td.cannon.wordshot | world | v1–v3 ×2 | clack 0, pop 90 | -1 | 0.03 | P3 | 2 | 80 | 0 | true | 0.12 | 0 | sổ nguồn |
+| A08 | td.cannon.wordshot | world | v1–v3 ×2 | clack 0, launch 90 | -1 | 0.03 | P3 | 2 | 80 | 0 | true | 0.12 | 0 | sổ nguồn |
 | A09–A16 | td.mat.* | world | v1–v3 | thay body khi trúng một quái | 0 | 0.05 | P4 | 4 | 25 | 0 | true | 0.12 | 0 | sổ nguồn |
 | A17 | td.barracks.drum | world | v1–v3 | 1; engine phát kèm `td.vo.linh-giao.hup` sau 120 ms | -2 | 0.03 | P3 | 2 | 150 | 0 | true | 0.20 | 0 | sổ nguồn |
 | A18 | td.soldier.spear | crowd | v1–v3 | 1 | -6 | 0.05 | P4 | 3 | 60 | 0 | true | 0.20 | 0 | sổ nguồn |
@@ -665,7 +685,7 @@ Tự quyết: tiếng cú đáp mỗi từ (A05, A08, A17, A24, A20 khi có từ
 - Giọng xuất ra khô: không vang, không nhạc nền, không hiệu ứng. Engine lọc, nén và thêm vang theo vùng (24.4).
 - Tiếng Việt: chọn công cụ đọc tiếng Việt tốt. Nghe kỹ dấu thanh; sai dấu thì tạo lại. Đọc sai "Draconis" thì khi tạo viết "Đra-cô-nít", phụ đề vẫn giữ chữ đúng.
 - Tự quyết: giọng tiếng Anh trung tính, không giả giọng vùng miền.
-- Tự quyết: nhân vật nhỏ (Thư Đồng, Em Sẻ) mô tả là "nhân vật hoạt hình, người trẻ lồng tiếng". Không tạo giọng giống trẻ em thật.
+- Tự quyết: nhân vật nhỏ (Thư Đồng, Em Sẻ) mô tả là "nhân vật sách tranh, người lớn trẻ lồng tiếng" ("an animated storybook creature performed by an adult"). Không tạo giọng giống trẻ em thật.
 
 ### 7.2 Thiết kế giọng (dán vào công cụ thiết kế giọng)
 
@@ -676,17 +696,17 @@ Voice of Draconis, an ancient phoenix dragon who guards the star sea. Deep, reso
 
 **`helper-cham`** · Thư Đồng Chấm, cẩn thận (22.3)
 ```text
-Voice of Cham, a tiny round owlet apprentice scribe in a storybook fantasy game, voiced by a young adult with a light, high, youthful timbre. Careful, polite and a little nervous; soft, clear, precise diction; medium-slow pace; small gasps when startled. A cute cartoon creature, not a real child's voice. Neutral English.
+Voice of Cham, a tiny round owlet apprentice scribe in a storybook fantasy game, voiced by a young adult with a light, high, youthful timbre. Careful, polite and a little nervous; soft, clear, precise diction; medium-slow pace; small gasps when startled. A cute animated storybook creature performed by an adult. Neutral English.
 ```
 
 **`helper-phay`** · Thư Đồng Phẩy, lắm lời (câu ở VS; thiết kế cùng lúc để ba giọng khác nhau rõ)
 ```text
-Voice of Phay, a chatty owlet apprentice, voiced by a young adult with a bright, bubbly, high youthful timbre. Talks fast, repeats words, fills gaps with "um", excited and warm, slightly breathless. A cartoon creature, not a real child's voice. Neutral English.
+Voice of Phay, a chatty owlet apprentice, voiced by a young adult with a bright, bubbly, high youthful timbre. Talks fast, repeats words, fills gaps with "um", excited and warm, slightly breathless. An animated storybook creature performed by an adult. Neutral English.
 ```
 
 **`helper-gach`** · Thư Đồng Gạch, ít nói (câu ở VS)
 ```text
-Voice of Gach, a quiet owlet apprentice, voiced by a young adult with a slightly lower, husky youthful timbre. Terse, one or two words at a time, flat but kind, unhurried, a tiny dry humor. A cartoon creature, not a real child's voice. Neutral English.
+Voice of Gach, a quiet owlet apprentice, voiced by a young adult with a slightly lower, husky youthful timbre. Terse, one or two words at a time, flat but kind, unhurried, a tiny dry humor. An animated storybook creature performed by an adult. Neutral English.
 ```
 
 **`narrator`** · Bà Cú Mực, người kể (22.3). Tự quyết: giọng Bắc chuẩn.
@@ -708,7 +728,7 @@ Voice of Chi En, a teenage girl archer of about fifteen, voiced by a young adult
 
 **`archer-em-se`** · Em Sẻ, tổ thợ Tháp Cung. Tự quyết: em trai nhỏ của Chị Én.
 ```text
-Voice of Em Se, a cheeky little boy archer, the younger brother of a teenage archer girl, voiced by a young adult with a high, squeaky youthful timbre. Excitable, loud for his size, always arguing back. A cartoon character, not a real child's voice. Neutral English.
+Voice of Em Se, a cheeky little boy archer, the younger brother of a teenage archer girl, voiced by a young adult with a high, squeaky youthful timbre. Excitable, loud for his size, always arguing back. An animated storybook character performed by an adult. Neutral English.
 ```
 
 **`cannon-bac-dong`** · Bác Đồng, tổ thợ Tháp Pháo
