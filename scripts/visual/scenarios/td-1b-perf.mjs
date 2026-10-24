@@ -60,13 +60,15 @@ export default async function (page) {
   await send(page, { t: "move", agent: 0, qx: 4 * 4, qz: -22 * 4 }); // by the fork, among the flood (R2: Tối Thượng)
   await sandbox(page, "boss");
   await until(page, "return t.state().boss.stage === 3 && t.state().tick >= t.state().boss.emergeAt - 40;", 30000, 100);
-  await page.eval(td("t.costs(); return true;"));
+  // Frames are counted by requestAnimationFrame from here: t.costs() keeps only the last 600, fewer than 10 s holds above
+  // 60 fps, more than the 2.5 s of the rise. R2 review fix 2: the rise reads only its own frames (at 60 Hz the 600 reached
+  // back past the boss call, whose one repaint of the ground is not the rise).
+  await page.eval(`window.__perfFrames = 0; (function count() { window.__perfFrames += 1; requestAnimationFrame(count); })(); true`);
   await page.sleep(2500); // the rise
-  const rise = await page.eval(td("return t.costs();"));
+  const riseFrames = await page.eval("window.__perfFrames");
+  const rise = await page.eval(td(`const c = t.costs(); return { draw: c.draw.slice(-${riseFrames}), update: c.update.slice(-${riseFrames}) };`));
   await page.eval(td("t.flood(300); return true;"));
   await page.sleep(500);
-  // Frames are counted by requestAnimationFrame: t.costs() keeps only the last 600, fewer than 10 s holds above 60 fps.
-  await page.eval(`window.__perfFrames = 0; (function count() { window.__perfFrames += 1; requestAnimationFrame(count); })(); true`);
   await page.send("Performance.enable");
   const before = await page.send("Performance.getMetrics");
   const framesBefore = await page.eval("window.__perfFrames");
@@ -112,5 +114,5 @@ export default async function (page) {
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { hz: HZ, draw, update, mainMsPerFrame: busy / Math.max(1, frames), mainBusyShare: busy / (seconds * 1000), frames, fps, riseMax: Math.max(...rise.draw, ...rise.update), enemies: s.enemies, beforeTopUp: live, ult: { casts: ultStats.ultCasts, feathers: ultStats.ultFeathers, damage: ultStats.damageUlt }, shot, replay });
+  return finish(page, checks, { hz: HZ, draw, update, mainMsPerFrame: busy / Math.max(1, frames), mainBusyShare: busy / (seconds * 1000), frames, fps, riseFrames, riseMax: Math.max(...rise.draw, ...rise.update), enemies: s.enemies, beforeTopUp: live, ult: { casts: ultStats.ultCasts, feathers: ultStats.ultFeathers, damage: ultStats.damageUlt }, shot, replay });
 }
