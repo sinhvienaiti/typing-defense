@@ -39,7 +39,7 @@
 | Vòng chơi | Ngày (75 s ở Cân bằng), Đêm (hết khi đợt sinh xong và hết quái), Bình minh 3 s; pha `defeat`. **Không có pha thắng.** Hết danh sách 6 đợt thì lặp đợt cuối, tăng 15 % mỗi đợt | Thêm pha `victory` và một **ải** 5 đêm |
 | Ải của bot | `tests/td/flow.ts`: thắng = giữ được Đêm 5 trên hộp cát (`sandbox: true`). Lũy lên cấp bằng lệnh hộp cát `keepLevel`, bot tự trừ giá 105 + 45, 182 + 78, 280 + 120 | Bot chơi ải truyện (`sandbox: false`), nâng Lũy bằng lệnh thật |
 | Đợt | Đêm 1: 8 Cương Thi. Đêm 2: 10 Cương Thi, 1 Ma Trơi. Đêm 3: 12, 2. Đêm 4: 1 Thuồng Luồng, 10 Cương Thi. Đêm 5: 7 Thuồng Luồng (toán 6), 7 Cương Thi, 3 Ma Trơi | Đêm 5 đổi (§4.2) |
-| Quái | Cương Thi 35 máu; Ma Trơi 60 máu, KP 60 %, lọt 1; Thuồng Luồng 365 máu, giáp 60 %, lọt 3, toán 6 | Thêm Mộc Tinh, Mầm Gỗ (R1), Tanuki, Nuppeppō (R2), Troll, Đầu Đàn (R3). Sửa review R1: Thuồng Luồng 385 máu (§4.2, §6.5 bước 5) |
+| Quái | Cương Thi 35 máu; Ma Trơi 60 máu, KP 60 %, lọt 1; Thuồng Luồng 365 máu, giáp 60 %, lọt 3, toán 6 | Thêm Mộc Tinh, Mầm Gỗ (R1), Tanuki, Nuppeppō (R2), Troll, Đầu Đàn (R3). Sửa review R1: Thuồng Luồng 385 máu (§4.2, §6.5 bước 5); R2: 420 máu (BUILD_NOTES §7.3) |
 | Nhà | Máu có trong dữ liệu nhưng **không gì gây hại nhà**. Nâng cấp có giá (Vàng + 30 % Gỗ, giá cộng dồn TK 12.2). "Bán" chỉ là hoàn tác 5 s | Boss làm tê nhà (không trừ máu, §2); bán 60 % |
 | Lũy | Cấp 1–4 chỉ qua hộp cát; cấp Lũy mở người (1 + số Thư Đồng) và thợ xây. Lệnh `upgrade` từ chối id 0 | Nâng Lũy bằng lệnh thật, qua thợ xây; mở theo ngày |
 | Lời gọi | `calls.ts`, `attention.ts`: 6 loại (Bắn mạnh, Xây, Gặt, Chặt, Đào, Hỏi bài); trần SÁNG theo chế độ; ngân sách gõ giữ **từng từ**, nhìn trước (BUILD_NOTES §5.4) | Thêm loại `ult`, `direct` (R2); boss dùng Bắn mạnh có sẵn |
@@ -116,13 +116,13 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 
 ### 4.2 Thành phần các Đêm
 
-| Đêm | R1 (chỉ đổi Đêm 5) | R2 (thêm quái mới, cân bằng lại) | Ý mới (bảng dạy §12) |
+| Đêm | R1 (chỉ đổi Đêm 5) | R2 (thêm quái mới, cân bằng lại; theo mã, BUILD_NOTES §7.3) | Ý mới (bảng dạy §12) |
 |---|---|---|---|
-| 1 | 8 Cương Thi | như R1 | Lời gọi Bắn mạnh |
-| 2 | 10 Cương Thi, 1 Ma Trơi | như R1 | Quái bay |
-| 3 | 12 Cương Thi, 2 Ma Trơi | 8 Cương Thi, 3 Nuppeppō, 2 Ma Trơi | Pháo khắc Nuppeppō; Tối Thượng |
-| 4 | 1 Thuồng Luồng, 10 Cương Thi | 1 Thuồng Luồng, 7 Cương Thi, 2 Tanuki | Ngắt |
-| 5, phần đầu | **5 Thuồng Luồng (một toán 5)**, 7 Cương Thi, 3 Ma Trơi. R1 vòng 1 hạ còn 4; sửa review R1 trả về 5, Thuồng Luồng 385 máu (BUILD_NOTES §7.2) | như R1, chỉnh theo bot | — |
+| 1 | 8 Cương Thi | 10 Cương Thi (quyết định (b): Đêm 1–4 khó hơn) | Lời gọi Bắn mạnh |
+| 2 | 10 Cương Thi, 1 Ma Trơi | 12 Cương Thi, 2 Ma Trơi | Quái bay |
+| 3 | 12 Cương Thi, 2 Ma Trơi | 10 Cương Thi, 4 Nuppeppō, 2 Ma Trơi (bản đầu của đặc tả: 8, 3, 2) | Pháo khắc Nuppeppō; Tối Thượng |
+| 4 | 1 Thuồng Luồng, 10 Cương Thi | 3 Tanuki đi trước, 1 Thuồng Luồng, 9 Cương Thi (bản đầu: 2 Tanuki, 1, 7; 3 Tanuki cho một trống mỗi ~29 s, §9.1) | Ngắt |
+| 5, phần đầu | **5 Thuồng Luồng (một toán 5)**, 7 Cương Thi, 3 Ma Trơi. R1 vòng 1 hạ còn 4; sửa review R1 trả về 5, Thuồng Luồng 385 máu (BUILD_NOTES §7.2) | **6 Thuồng Luồng (một toán 6), 420 máu**, 7 Cương Thi, 3 Ma Trơi | — |
 | 5, đỉnh boss | Lặng 12 s → 2 toán × 4 Cương Thi ra ở Khe Nứt (mỗi nhánh một toán); **Mộc Tinh trồi lên ở ngã ba** (6, −34) 6 s sau, đi nhánh đã báo từ Ngày 5; pha 2 gọi Mầm Gỗ | như R1 | Mộc Tinh |
 
 - Đêm 5 phần đầu nhẹ hơn hiện nay (7 Thuồng Luồng, toán 6). Lý do và số đo ở §6.3: Thuồng Luồng toán lớn giờ là việc của **Biên S**, còn việc quyết thắng thua chuyển sang boss.
@@ -157,10 +157,10 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 
 | Thứ | Số khởi điểm | Ghi chú |
 |---|---|---|
-| Máu | **3.800** × máu chế độ × hệ số riêng của chế độ × hệ số k (§5.6) | TK 22.7 ghi 4.000; số đo §6.3 cho thấy khoảng 3.000–3.400 mới cho bot Chuẩn thắng ~85 %. R1 chỉnh theo §6.5: 3.200 → 3.400 (vòng 1) → 3.800 (sửa review R1, sau khi bán gỗ, Bắn mạnh nối và Dồn lửa làm mọi bot mạnh lên). Hệ số riêng: Thư giãn và Học ×0,85, Thử thách ×0,78 |
-| Rút lui | Ở 50 % máu | Lượng máu phải gỡ: 1.900 ở Cân bằng, k = 1 (khởi điểm 3.200: 1.600) |
+| Máu | **4.200** × máu chế độ × hệ số riêng của chế độ × hệ số k (§5.6) | TK 22.7 ghi 4.000; số đo §6.3 cho thấy khoảng 3.000–3.400 mới cho bot Chuẩn thắng ~85 %. R1 chỉnh theo §6.5: 3.200 → 3.400 (vòng 1) → 3.800 (sửa review R1, sau khi bán gỗ, Bắn mạnh nối và Dồn lửa làm mọi bot mạnh lên) → 4.200 (R2, sau Tối Thượng và quyết định (b), BUILD_NOTES §7.3). Hệ số riêng: Thư giãn, Học và Thử thách ×0,78 (R2; sửa review R1: Thư giãn, Học ×0,85) |
+| Rút lui | Ở 50 % máu | Lượng máu phải gỡ: 2.100 ở Cân bằng, k = 1 (khởi điểm 3.200: 1.600) |
 | Giáp / KP | 30 % / 0 % | |
-| Tốc | 0,9 m/s × tốc quái của ải (`foeSpeed`) | Trồi ở ngã ba (mét 20): còn 93–96 m, đi hết ~105 s; tới khúc nhập (mét 79, ≈ 68 % đường) sau ~63 s. R1 vòng 1 (G3, G8): 0,8 m/s, trồi ở mét 25 (BUILD_NOTES §7.1) |
+| Tốc | 0,9 m/s × tốc quái của ải (`foeSpeed` = 1 + `PACE.speedK` × (k − 1); sửa phản biện R2: `speedK` 0,2 → 0,3, BUILD_NOTES §7.4) | Trồi ở ngã ba (mét 20): còn 93–96 m, đi hết ~105 s; tới khúc nhập (mét 79, ≈ 68 % đường) sau ~63 s. R1 vòng 1 (G3, G8): 0,8 m/s, trồi ở mét 25 (BUILD_NOTES §7.1) |
 | Chặn | **Không bị chặn.** Lính vẫn đánh được, bị Quật cành đẩy lùi | Lệch luật chặn chung: cờ `unblockable` |
 | Bán kính | 2,5 m | Vẽ ~5 m bề ngang ở bản 2D |
 | Điểm yếu | Cháy gây ×1,25 | Phát Chữ của Pháo khi Draconis trong vòng: gõ là cách trị chính |
@@ -223,12 +223,13 @@ Mỗi đòn có báo trước **và** một việc người chơi làm được.
 
 ```
 d = k − 1
-máu = round(3800 × hpMul(chế độ) × modeHp(chế độ) × min(kHpMax; 1 + kHp × d + kHp2 × max(0; d)²))
-kHp = 0,2 · kHp2 = 4,3 · kHpMax = 1,5 · modeHp: Thư giãn, Học 0,85; Thử thách 0,78
+máu = round(4200 × hpMul(chế độ) × modeHp(chế độ) × min(kHpMax; 1 + kHp × d + kHp2 × max(0; d)²))
+kHp = 0,3 · kHp2 = 6,5 · kHpMax = 1,46 · modeHp: Thư giãn, Học, Thử thách 0,78
 ```
 
 - Số đo §6.3: bot Nhanh (k 1,3) gây lên boss nhiều hơn bot Chuẩn ~15 %; bot Mới (k 0,75) gây gần bằng bot Chuẩn vì boss của nó đi chậm hơn. Vì vậy R1 vòng 1 chỉ nâng máu khi k > 1 (0,4, trần ×1,12).
 - **Sửa review R1:** Bắn mạnh nối và Dồn lửa theo E cho tốc gõ đòn bẩy trong ván, nên bot Nhanh (k bị kit chặn ở 1,30) gây gấp ~1,4 lần bot Chuẩn, còn bot Mới, Chậm chắc (k < 1) gây ít hơn. Vì vậy hệ số k đi hai chiều (−5 % máu ở k 0,75) và có số hạng bậc hai ở trên 1 (k 1,2: ×1,21; k 1,3: ×1,45). Vẫn không có luật riêng cho từng bot.
+- **R2** (BUILD_NOTES §7.3): 3.800 → 4.200, `kHp` 0,2 → 0,3, `kHp2` 4,3 → 6,5 (k 0,75: ×0,925; k 1,2: ×1,33; k 1,3: chạm trần). **Sửa phản biện R2** (§7.4): trần 1,5 → 1,46, vì `PACE.speedK` 0,3 cho boss của bot Nhanh đi nhanh ×1,09 (trước ×1,06).
 - Máu tính **một lần lúc sinh** từ đầu ván (BALANCE §4.1: tham số đầu ải), không đổi khi boss đang sống.
 
 ---
@@ -278,7 +279,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 
 | Chế độ | Bot | Thắng | Biên S |
 |---|---|---|---|
-| Cân bằng | Mới, Chậm chắc, Chuẩn, Khá, Ẩu, Nhanh, **từng bot, cả hai bộ seed** | **78–88 %** | **40–60 %** |
+| Cân bằng | Mới, Chậm chắc, Chuẩn, Khá, Ẩu, Nhanh, **từng bot, cả hai bộ seed** | **78–88 %** | **40–60 % bot Chuẩn**; bot khác 35–65 % như BALANCE §3 (sửa phản biện R2) |
 | Cân bằng | Không gõ | 0 % (B5) | — |
 | Cân bằng | Chuẩn Tốt − Chuẩn Kém | ≥ 10 điểm % (B6) | — |
 | Thư giãn | Mới tới Nhanh | ≥ 92 % | ≥ 70 % |
@@ -287,6 +288,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 
 - Cùng lúc giữ các dải còn lại của BALANCE §3 (P, I, O, N, Q) ở từng chế độ (bảng §18.3).
 - B4: S của Chậm chắc > S của Ẩu; bot Chuẩn hạ quái nhanh hơn bot Ẩu (hạ boss cũng vậy).
+- **Biên S chặt chỉ đọc ở bot Chuẩn** (sửa phản biện R2, đã chọn theo đề xuất của BUILD_NOTES §7.3): các bot khác giữ dải BALANCE §3 (35–65 %), không bao giờ rộng hơn dải chung; thắng 78–88 % vẫn cho mọi bot. Lý do: mạng còn khác nhau theo sức gõ là điều game muốn người chơi thấy, miễn vẫn trong dải chung (số đo ở BUILD_NOTES §7.3, §7.4).
 - **Đo đích thế nào (cổng).** Đích chặt 1B (78–88 %, 40–60 %) tính trên **hai bộ seed gộp (240 ván) của từng bot**. Mỗi bộ 120 seed riêng chỉ phải nằm trong dải BALANCE §3 (75–90 %, 35–65 %), như B1. Lý do: 120 ván cho sai số chuẩn ~3,4 điểm ở tỉ lệ thắng 83 %; dải rộng 10 điểm thì một ô đạt ~86 % số lần dù đúng tâm, 12 ô (6 bot × 2 bộ) cùng đạt chỉ ~16 %: cổng sẽ hỏng vì nhiễu và đẩy người chỉnh tới số khớp seed. Gộp 240 ván: sai số ~2,4 điểm, 6 bot cùng đạt ~79 %. Biên S (trung vị, bước 5 % vì mạng nguyên) đo cùng cách. Báo cáo in cả ba cột: bộ 1, bộ 2, gộp.
 
 ### 6.5 Thứ tự chỉnh ở R1 (chỉ dữ liệu)
@@ -298,6 +300,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 4. **Nhịp k của boss** (`BOSS.kHp` 0–0,6): chỉ khi Khá, Nhanh lệch dải thắng.
 5. **Máu Thuồng Luồng** (325–385) hoặc Cháy của Draconis (45–65/s): khi Mới, Ẩu (S thấp) và Chậm chắc (S cao) cách nhau quá dải, vì Thuồng Luồng giáp 60 % là chỗ độ chính xác và Phát Chữ quyết.
 6. Sau mỗi lần đổi: `pnpm td:balance` đủ hai bộ seed × 120. Không đạt sau 6 vòng chỉnh thì ghi lại bảng và quyết định thiết kế cần có vào `BUILD_NOTES.md` §7, không ép bằng một số toàn cục.
+7. **Sửa phản biện R2** (BUILD_NOTES §7.4): Biên S tách theo tốc gõ (bot E 25 mất Thuồng Luồng ở đầu đỉnh boss, bot E ≥ 35 không). Núm là phần của nhịp k trong tốc quái (`PACE.speedK` 0,2 → 0,3: quái của bot k 0,75 đi ×0,925, của bot k 1,3 ×1,09), rồi trần hệ số máu boss (`kHpMax`) cho bot Nhanh. Núm độ chính xác (`CALL.sloppy`, `SCORE.qA`) đã đo, không nâng được bot Ẩu. Tanuki cần ≥ 4 quái quanh nó (G6) cũng hạ Biên S của bot Chuẩn (ít trống được Ngắt hơn: ít vàng, ít nạp Tối Thượng).
 
 ---
 
@@ -331,13 +334,13 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 | Ban Đêm, mỗi giây | +0,3 |
 
 - Không nạp khi đã đầy. Đầu ải 0. Hồi tối thiểu 45 s giữa hai lần dùng. Giữ điểm qua Ngày.
-- Đích (báo cáo, không là cổng): bot Chuẩn dùng 2–3 lần mỗi ải; bot Không gõ ≤ 1.
+- Đích (báo cáo, không là cổng): bot Chuẩn dùng 2–3 lần mỗi ải; bot Không gõ ≤ 1. Đo ở R2 và sửa phản biện R2: bot Chuẩn ~1,9–2,0 lần (sát mép dưới), số ở BUILD_NOTES §7.4.
 
 ### 8.2 Dùng
 
 - Phím **`=`** (Equal; không bị Telex, VNI dùng) hoặc nút trên HUD. Lệnh `ult` mang điểm đặt (`qx`, `qz`): chuột đang trên bản đồ và trong 20 m quanh Draconis thì lấy điểm chuột; không thì app chọn điểm có nhiều máu quái nhất trong 6 m, trong vòng 14 m quanh Draconis (tính từ trạng thái thế giới, ghi vào lệnh nên vẫn tất định). Ngoài 20 m: lệnh bị từ chối (`ultFar`).
-- **Mưa Lông Lửa** (TK 22.2): vùng bán kính 6 m, 12 lông trong 2 s (mỗi 10 tick một lông). Mỗi lông nhắm quái còn nhiều máu nhất trong vùng chưa bị lông này nhắm (xoay vòng; không còn quái thì rơi vào điểm đặt), nổ 1,5 m, **25** sát thương phép (2 lông hạ một Cương Thi 35 máu: 12 lông xóa một toán 5 con). Hết mưa: quái còn trong vùng bị Cháy 3 s (luật Cháy hiện có), **trừ boss**.
-- Boss nhận **×0,25** sát thương Tối Thượng. Một lần dùng tối đa lên boss: (12 + 10 lông Chữ Chiêu) × 25 × 0,25 ≈ 140 = ~9 % lượng máu phải gỡ; trong ~2 phút đỉnh boss chỉ nạp được ~60 điểm, nên tối đa một lần. Cổng G5: Tối Thượng ≤ 15 % sát thương lên boss và ≤ 15 % sát thương cả ải (mức BALANCE §9.1 cho một kỹ năng vùng).
+- **Mưa Lông Lửa** (TK 22.2): vùng bán kính 6 m, 12 lông trong 2 s (mỗi 10 tick một lông). Mỗi lông nhắm quái còn nhiều máu nhất trong vùng chưa bị lông này nhắm (xoay vòng; không còn quái thì rơi vào điểm đặt), nổ 1,5 m, **21** sát thương phép (sửa phản biện R2, trước 25; 2 lông vẫn hạ một Cương Thi 35 máu, cả ở Thử thách 41,7: 12 lông xóa một toán 5 con). Hết mưa: quái còn trong vùng bị Cháy 3 s (luật Cháy hiện có), **trừ boss**.
+- Boss nhận **×0,25** sát thương Tối Thượng. Một lần dùng tối đa lên boss: (12 + 10 lông Chữ Chiêu) × 21 × 0,25 ≈ 115 = ~5,5 % lượng máu phải gỡ (2.100); trong ~2 phút đỉnh boss chỉ nạp được ~60 điểm, nên tối đa một lần. Cổng G5: Tối Thượng ≤ 15 % sát thương lên boss và ≤ 15 % sát thương cả ải (mức BALANCE §9.1 cho một kỹ năng vùng), **cho mọi bot gõ** (sửa phản biện R2: lông 25 cho bot Khá 15–17 % cả ải).
 - Số trước phản biện (60 sát thương, boss ×0,5, Cháy cả boss) cho một lần dùng ~660 lên boss, tức ~40 % lượng máu phải gỡ, gần gấp ba cổng.
 
 ### 8.3 Chữ Chiêu là một lời gọi
@@ -346,7 +349,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 |---|---|
 | Loại | `ult`, bậc 0 trong hàng ưu tiên (cùng Bắn mạnh, gõ trực tiếp) |
 | Từ | 3 từ, mỗi lần một từ; từ ngắn (nửa dưới dải độ dài như Bắn mạnh), chỉ từ đã thuộc (cấp ≤ cấp ván − 1; cấp 1 thì cấp 1); không bao giờ là từ mới |
-| Đời | Cả lời gọi sống 4 s từ lúc dùng Tối Thượng; từ kế hiện ngay khi từ trước xong |
+| Đời | Cả lời gọi sống 4 s từ lúc dùng Tối Thượng; từ kế hiện ngay khi từ trước xong. Quá đời thì từ đang gõ vẫn gõ xong được (có lông), nhưng không có từ kế (R2, `finishWord` trong `calls.ts`; luật này cũng giữ lời gọi Dồn lửa trong 5 s của nó, BUILD_NOTES §7.4) |
 | Sáng | Luôn sáng (điểm đặt trong vòng Tướng) nhưng vẫn phải vừa ngân sách chú ý; không vừa thì chờ, hết 4 s thì tắt, không mất gì |
 | Mỗi từ xong | +3 lông lửa rơi vào vùng sau 0,3 s |
 | Cả lời gọi Hoàn hảo | +1 lông nữa |
@@ -363,13 +366,13 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 - Bậc 0 trong hàng ưu tiên. Tối đa **2** lời gọi `direct` mở cùng lúc (3 khi có boss); cái thứ ba không mở, cơ chế của nó chạy như bỏ qua.
 - **Thành công:** hủy cơ chế, hiệu ứng riêng (§9.2), +2 Vàng, Tối Thượng +3, Chuỗi +1.
 - **Bỏ qua hoặc hết giờ:** cơ chế xảy ra. Không mất gì khác, Chuỗi giữ.
-- Đích (báo cáo): 5–10 % số từ của ải là từ trực tiếp (TK 9.1); trung bình một lời gọi mỗi 25–40 s ở đêm có quái đó.
+- Đích (báo cáo): 5–10 % số từ của ải là từ trực tiếp (TK 9.1); trung bình một lời gọi mỗi 25–40 s ở đêm có quái đó. Bản đồ 1 ở R2 chỉ có Ngắt ở Đêm 4, nên G6 đọc theo tần suất (đã chọn theo đề xuất, BUILD_NOTES §7.3; §18.3).
 
 ### 9.2 Ba động từ
 
 | Động từ | Quái | Bắt đầu khi | Thành công | Bỏ qua | Ở đâu |
 |---|---|---|---|---|---|
-| **Ngắt** | Lửng Tanuki | Có ≥ 3 quái khác trong 6 m, hồi 12 s đã qua: đứng lại đánh Trống Bụng Lớn trong T | Hủy trống, Tanuki choáng 2 s, +5 Vàng (Lá Tanuki) | Hết T: quái trong 6 m (cả nó) hồi 25 % máu tối đa | Bản đồ 1 Đêm 4 (R2) |
+| **Ngắt** | Lửng Tanuki | Có ≥ 3 quái khác trong 6 m (theo mã: ≥ 4, sửa phản biện R2 cho G6, BUILD_NOTES §7.4; và mép một nhà đánh trong 9 m, §7.3), hồi 12 s đã qua: đứng lại đánh Trống Bụng Lớn trong T | Hủy trống, Tanuki choáng 2 s, +5 Vàng (Lá Tanuki) | Hết T: quái trong 6 m (cả nó) hồi 25 % máu tối đa | Bản đồ 1 Đêm 4 (R2) |
 | **Neo** | Cương Thi Đầu Đàn | Bầy ≥ 4 trong 6 m và cách một nhà < 20 m (hồi 15 s) | Bầy trong 6 m đứng sững 3 s; Đầu Đàn nhận +30 % sát thương 6 s | Bầy đi tiếp (hào quang +20 % tốc trong 6 m luôn có) | Hộp cát (R3) |
 | **Phá Khiên** | Quỷ Núi Troll | Cách một nhà đánh < 25 m (hồi 6 s sau khi vòm tắt): dựng Vòm Đá 4 m trong T | Vòm vỡ, Troll choáng 1,5 s, không dựng lại 10 s | Vòm giữ T giây: đạn từ ngoài vòm vào quái trong vòm −70 % | Hộp cát (R3) |
 
@@ -385,9 +388,9 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 
 | id | Tên | Đợt | Bậc | Máu | Giáp / KP | Tốc | Lọt | Vàng | Chặn | Toán | Khác |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `moc-tinh` | Mộc Tinh | R1 | `boss` (mới) | 3.800 (§5.1, §5.6; khởi điểm 3.200) | 30 / 0 | 0,8 (khởi điểm 0,9) | 0 | 0 (rương 150) | không bị chặn | 1 | §5 |
+| `moc-tinh` | Mộc Tinh | R1 | `boss` (mới) | 4.200 (§5.1, §5.6; khởi điểm 3.200; R1 sửa review 3.800) | 30 / 0 | 0,8 (khởi điểm 0,9) | 0 | 0 (rương 150) | không bị chặn | 1 | §5 |
 | `mam-go` | Mầm Gỗ | R1 | bầy | 40 | 0 / 0 | 3,0 | 1 | 1 | 1 | 4 | Chỉ do boss gọi |
-| `tanuki` | Lửng Tanuki | R2 | nhỏ | 110 | 0 / 30 | 2,4 | 1 | 12 | 1 | 1 | Ngắt |
+| `tanuki` | Lửng Tanuki | R2 | nhỏ | 110 | 0 / 30 | 2,4 | 1 | 12 | 1 | 1 | Ngắt; chỉ trống khi mép một nhà đánh (Lũy, tháp) trong 9 m (`reachM`, BUILD_NOTES §7.3) và ≥ 4 quái khác trong 6 m (`need`, sửa phản biện R2) |
 | `nuppeppo` | Nuppeppō | R2 | nhỏ | 90 | 0 / 0 | 2,6 | 1 | 6 | 1 | 3 | Chết vì sát thương không nổ thì tách 2 con |
 | `nuppeppo-con` | Nuppeppō con | R2 | bầy | 30 | 0 / 0 | 4,0 | 1 | 2 | 1 | 2 | — |
 | `cuong-thi-lead` | Cương Thi Đầu Đàn | R3 | vừa | 160 | 30 / 0 | 3,4 | 2 | 25 | 1 | 1 | Neo; hộp cát |
@@ -540,9 +543,9 @@ Chủ dự án chơi bản R1 (§17), và đã từng loại một bản vì hi�
 ```ts
 // src/content/types.ts (thêm)
 export type EnemyTier = "swarm" | "small" | "medium" | "heavy" | "boss";
-export type EnemyDef = { /* … */ unblockable?: true; burnTakenMul?: number; ability?: AbilitySpec };
-/** R2/R3: a mechanic a direct call can break (TK 9.2). */
-export type AbilitySpec = { verb: "interrupt" | "anchor" | "shield"; cooldownS: number; radiusM: number; need?: number; reachM?: number };
+export type EnemyDef = { /* … */ unblockable?: true; burnTakenMul?: number; ability?: AbilitySpec; split?: { enemy: string; count: number } };
+/** R2 (theo mã sau R2; R3 thêm "anchor" | "shield"): a mechanic a direct call can break (TK 9.2); drums only with an attack building's rim within reachM; broken: stunned stunS, `gold`; let run: heals healPct within radiusM. */
+export type AbilitySpec = { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number };
 export type BossDef = {
   enemy: string; retreatPct: number; retreatS: number; chestGold: number; // hit points: the enemy's `hp` (one source)
   kHp: number; kHp2: number; kHpMax: number; modeHp: Partial<Record<Mode, number>>; // §5.6, two-way k, ×modeHp of the run's mode
@@ -566,15 +569,18 @@ export type Content = { /* … */ boss?: BossDef; stage?: StageDef };
 // src/content/rules.ts (thêm)
 export const MODES = { /* … mỗi chế độ thêm */ warnK: 1 /* relax, learn 1.33; challenge 0.8 */, directK: 2.2 /* 2.8; 1.6 */ };
 export const SELL = { refund: 0.6, confirmS: 3 } as const;
-export const ULT = { max: 100, perWord: 1.2, direct: 3, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, radiusM: 6, feathers: 12, everyTicks: 10, damage: 25, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3 } as const;
-export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, stagger: 6 } as const;
+// theo mã sau sửa phản biện R2 (damage 25 → 21; trực tiếp +3 nằm ở DIRECT.ult)
+export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 21, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
+export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, boss: 0, stagger: 6 } as const;
 export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8 } as const;
+export const PANIC = { m: 6, s: 5 } as const; // a helper within m of a rooted building's rim runs home for s seconds
+// PACE.speedK (sẵn có từ bước cân bằng): 0,2 → 0,3 ở sửa phản biện R2 (§6.5 bước 7)
 export const LEARN = { returnS: [25, 45], reviewShare: 0.25, returns: 2, plan: { due: 0.6, current: 0.25, fresh: 0.15 }, freshMax: 8, bookSaved: 40 } as const;
 ```
 
 - Bản phác `BossDef` theo mã sau sửa review R1 (`src/content/types.ts`): không có `hp` (máu gốc là `hp` của quái `moc-tinh`, BUILD_NOTES §7.1); thêm `kHp2`, `modeHp` (§5.6) và `burstWords`, `burstPerE` (Dồn lửa, §5.2); `shards` (Mảnh Chữ ở cú choáng) để R2.
 - Mộc Tinh, Mầm Gỗ và `boss`, `stage` nằm trong `src/content/slice-1a.ts` (đổi id nội dung thành `w1-silverfall`, giữ tên file để đỡ đổi import).
-- Trạng thái boss là một store nhỏ (`src/sim/stores/boss.ts`: nhánh, tick các đòn kế, tick hết báo, nhà bị nhắm, pha, choáng, Dễ Tổn Thương, máu gốc), băm như mọi store. Nhà thêm `stunUntil`, `spentGold`, `spentWood`. Thế giới thêm `dayStarts` (tick đầu mỗi Ngày, cho "Chơi lại Ngày n"; app giữ mã băm lúc đó). Thống kê thêm ở cuối mảng `STATS` (`bossDamage`, `bossTyped`, `bossRetreats`, `livesBoss`, `rootsHits`, `ultCasts`, `ultDamage`, `directOk`, `directMissed`, `reviewRedeemed`).
+- Trạng thái boss là một store nhỏ (`src/sim/stores/boss.ts`: nhánh, tick các đòn kế, tick hết báo, nhà bị nhắm, pha, choáng, Dễ Tổn Thương, máu gốc), băm như mọi store. Nhà thêm `stunUntil`, `spentGold`, `spentWood`. Thế giới thêm `dayStarts` (tick đầu mỗi Ngày, cho "Chơi lại Ngày n"; app giữ mã băm lúc đó). Thống kê thêm ở cuối mảng `STATS` (R1: `bossDamage`, `bossTyped`, `bossHero`, `bossRetreats`, `livesBoss`, `rootsHits`, `goldChest`, `burstTyped`, `burstWords`; R2 theo mã: `ultCasts`, `ultFeathers`, `bossUlt`, `shards`, `directOk`, `directMissed`, `panics`, cùng `damageUlt` trong nhóm sát thương; R3: `reviewRedeemed`).
 - Sự kiện hiếm mới: `bossWarn`, `bossLull`, `bossEmerge`, `bossPhase`, `bossStrike`, `bossRetreat`, `victory`, `stun`, `ult`, `direct`, `review`. Vòng hiệu ứng thêm `FX.root`, `FX.slam`, `FX.sprout`, `FX.feather`. Lý do từ chối mới: `locked` (lịch mở), `keepMax`, `ultFar`.
 
 ---
@@ -674,7 +680,7 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 | Chỉ số | Thư giãn | Cân bằng | Thử thách |
 |---|---|---|---|
 | Thắng | ≥ 92 % | 75–90 % (**1B: 78–88 % từng bot, hai bộ gộp**) | 50–75 % |
-| Biên S (trung vị) | ≥ 70 % | 35–65 % (**1B: 40–60 % từng bot, hai bộ gộp**) | 15–45 % |
+| Biên S (trung vị) | ≥ 70 % | 35–65 % (**1B: 40–60 % bot Chuẩn, hai bộ gộp**; bot khác giữ 35–65 %, sửa phản biện R2) | 15–45 % |
 | Áp lực P | 5–15 % | 15–35 % | 30–50 % |
 | Nhàn I | ≤ 20 % | ≤ 10 % | ≤ 5 % |
 | Ngộp O | ≤ 3 % | ≤ 8 % | ≤ 15 % |
@@ -683,7 +689,7 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 
 | Cổng | Ngưỡng ở 1B |
 |---|---|
-| B1 | Cân bằng: Mới tới Nhanh trong dải BALANCE §3 (thắng, S, P, I, O) ở từng bộ seed; đích chặt 1B trên hai bộ gộp (§6.4) |
+| B1 | Cân bằng: Mới tới Nhanh trong dải BALANCE §3 (thắng, S, P, I, O) ở từng bộ seed (cổng chung, luôn in); đích chặt 1B trên hai bộ gộp (§6.4): thắng 78–88 % mọi bot, Biên S 40–60 % bot Chuẩn, bot khác 35–65 % (sửa phản biện R2, đã chọn theo đề xuất của BUILD_NOTES §7.3) |
 | B2 | Không bot nào có S ≥ 90 % kèm I ≥ 20 % ở Cân bằng |
 | B3 | Mới ≥ 70 % ở Cân bằng; Trẻ em ≥ 85 % ở Thư giãn |
 | B4 | S Chậm chắc > S Ẩu; Chuẩn hạ quái và hạ boss nhanh hơn Ẩu. Sửa review R1: "hạ quái" đo từ đòn trúng đầu tới khi chết (thời gian chịu đòn, cột "Hạ quái (s)"), không còn từ lúc sinh; "hạ boss" là sát thương mỗi giây lên boss từ đòn trúng đầu tới lúc rút (hoặc hết ván), trung vị, ở Cân bằng |
@@ -701,8 +707,8 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 | G2 | Tỉ lệ gõ Đêm | Đêm 1–4: 15–25 %; Đêm 5: ≤ 35 % (bot Chuẩn) |
 | G3 | Giao chiến boss | Bot Chuẩn p50 45–75 s (TK 18.8); núm là tốc boss (§6.5 bước 1) |
 | G4 | Báo trước | Mọi đòn boss có sự kiện báo ≥ thời gian báo của chế độ trước đòn; mọi ván thua do boss có báo Ngày 5 và đếm ngược Đêm 5 |
-| G5 | Tối Thượng | ≤ 15 % sát thương lên boss, ≤ 15 % cả ải (R2; BALANCE §9.1) |
-| G6 | Gõ trực tiếp | 5–10 % số từ của ải (Chuẩn); ≤ 2 lời gọi `direct` mở cùng lúc (≤ 3 khi có boss) (R2) |
+| G5 | Tối Thượng | ≤ 15 % sát thương lên boss, ≤ 15 % cả ải, **mọi bot gõ** ở Cân bằng trên hai bộ gộp; Thử thách in báo cáo (R2; BALANCE §9.1 qua §8.2; sửa phản biện R2: trước chỉ chấm bot Chuẩn) |
+| G6 | Gõ trực tiếp | Bot Chuẩn: một lời gọi `direct` được tạo mỗi 25–40 s ở đêm có quái đó (Đêm 4); ≤ 2 mở cùng lúc khi không có boss, ≤ 3 khi có boss (R2). Đọc theo tần suất của §9.1 vì bản đồ 1 chỉ có một động từ ở một đêm (đã chọn theo đề xuất, BUILD_NOTES §7.3); "5–10 % số từ của ải" (TK 9.1) in báo cáo, thành cổng khi đủ ba động từ. Báo cáo in tần suất của mọi bot |
 | G7 | Tiền | Không chuỗi xây, nâng, bán, hoàn tác nào sinh Vàng hay Gỗ; rương boss ghi đúng một lần |
 | G8 | Không chờ không ở đỉnh boss | Bot Chuẩn: boss trồi → trúng đầu p50 ≤ 35 s; Nhàn I từ lúc hết lặng tới kết ải trong dải I của chế độ (Cân bằng ≤ 10 %). Núm: chỗ trồi `emergeM` 20–35 m (luôn cách khúc nhập ≥ 40 m) |
 
@@ -738,7 +744,7 @@ Chạy với máy chủ dev cổng 3046: `pnpm exec vite --host 127.0.0.1 --port
 | Lớp boss (`boss-2d.ts`) | p95 ≤ 0,6 ms |
 | Hạt 2D | ≤ 300 sống, ≤ 40 mới mỗi khung, pool (không cấp phát mỗi khung); gai rễ ≤ 7 mỗi nhà |
 | Luồng chính Chrome | ≤ 4 ms mỗi khung trung bình; không khung > 16,7 ms lúc boss vào, chuyển pha, rút |
-| Gói JS | gzip ≤ 85 kB (hiện 68,9 kB) |
+| Gói JS | Phần khởi động (chunk vào, cái trang cần để vẽ khung đầu và chạy vòng chơi) gzip ≤ 85 kB, kiểm trong `pnpm build` (`scripts/bundle-budget.mjs`). Màn đầu, thẻ Cài đặt, Hồ sơ gõ, thẻ tạm dừng và kết, bảng hộp cát, tiếng là chunk nạp sau, in riêng cùng tổng (sửa phản biện R2: một chunk 87,2 kB → khởi động 77,2 kB, nạp sau 13,5 kB; trước 1B 68,9 kB) |
 | Âm | ≤ 12 nốt tổng hợp cùng lúc; tiếng báo đòn không bị tiếng khác nuốt (ưu tiên cao nhất) |
 
 ---
@@ -802,12 +808,12 @@ Trước khi chơi: Cài đặt → Nhịp tự điều **Bật**, chế độ C
 ## 24. Mặc định đã chọn (chủ dự án đổi được)
 
 1. Bản đồ 1 có 5 Ngày, 5 Đêm (không 8 đợt); Mộc Tinh ở cuối Đêm 5.
-2. Máu Mộc Tinh khởi điểm 3.200 (có thể về ~2.900 sau khi đo với Vỏ dày), rút ở 50 %, nâng theo k khi k > 1. Sau R1 (sửa review): 3.800, hệ số k hai chiều có số hạng bậc hai và hệ số riêng theo chế độ (§5.6).
+2. Máu Mộc Tinh khởi điểm 3.200 (có thể về ~2.900 sau khi đo với Vỏ dày), rút ở 50 %, nâng theo k khi k > 1. Sau R1 (sửa review): 3.800, hệ số k hai chiều có số hạng bậc hai và hệ số riêng theo chế độ (§5.6). Sau R2: 4.200, hệ số k 0,3 / 6,5, trần 1,46 (sửa phản biện R2).
 3. Boss tới Lũy thì đập 3 mạng mỗi 2,5 s (không thua ngay).
 4. Thắng thì quái còn lại tan; truyện không có đêm vô tận.
 5. Lũy tối đa cấp 3 ở bản đồ 1 truyện.
 6. Bán hoàn 60 %, bấm hai lần; không Đổ Nát ở 1B; boss không trừ máu nhà, chỉ làm tê.
-7. Tối Thượng ở phím `=`; lông 25 sát thương; boss nhận ×0,25 sát thương Tối Thượng, không bị Cháy của nó.
+7. Tối Thượng ở phím `=`; lông 21 sát thương (sửa phản biện R2, trước 25); boss nhận ×0,25 sát thương Tối Thượng, không bị Cháy của nó.
 8. Neo, Phá Khiên chỉ ở hộp cát; Ngắt ở Đêm 4 bản đồ 1.
 9. Không túi, bùa, Từ Vàng, Đài Ấn, Bùng Nổ, Lam ở 1B.
 10. Nghĩa tiếng Việt: hai lần đầu ở Cân bằng, lần đầu ở Thử thách, luôn ở Thư giãn, Học, trẻ em.
