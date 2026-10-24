@@ -4,7 +4,7 @@
  * open yet is waited for, never skipped: BUILD_1B §18.1), a building on its spot, or the Bastion's next level through
  * the `upgrade` command (its builders raise it), send each helper to its building once it stands and the helper's slot is open, keep
  * enough marked trees standing for the villagers (nearest the layout's wood anchor first), hire villagers when food
- * allows, and (if the layout says so) call the night early. Rules (where the hero stands by day and by night) run
+ * allows, sell food and wood past what the layout keeps, and (if the layout says so) call the night early. Rules (where the hero stands by day and by night) run
  * after, every tick. A plan only reads the world and sends commands.
  */
 import { MODES, VILLAGERS, ECONOMY } from "../../../src/content/rules";
@@ -36,6 +36,8 @@ export type Layout = {
   readonly marks?: { readonly spare: number; readonly woodAt: readonly (readonly [number, number])[] };
   /** Food kept for hires and soldiers; above it food is sold 10 at a time (none: never sold). */
   readonly foodKeep?: number;
+  /** Wood kept for prices; above it wood is sold 10 at a time (none: never sold; 1B R1 review). */
+  readonly woodKeep?: number;
   /** Villagers to hire up to, as food and gold allow (gold kept back besides the price). */
   readonly villagers?: number;
   readonly hireReserve?: number;
@@ -94,6 +96,7 @@ export class Plan {
     const hire = this.asked !== w.tick && villagers < Math.min(layout.villagers ?? 0, villagerCap(w));
     if (hire && w.food >= VILLAGERS.food && w.gold >= (VILLAGERS.gold + (layout.hireReserve ?? 0)) * 1000 && w.tick % 60 === 30) bot.send({ t: "hire" });
     else if (layout.foodKeep !== undefined && w.food >= layout.foodKeep + ECONOMY.sale.food && w.tick % 60 === 30) bot.send({ t: "sellFood" });
+    if (layout.woodKeep !== undefined && this.asked !== w.tick && w.wood >= layout.woodKeep + ECONOMY.sale.wood && w.tick % 60 === 45) bot.send({ t: "sellWood" });
     for (const rule of this.rules) rule(bot, this);
     const callAt = layout.callAfterS;
     if (callAt !== undefined && w.phase === "day" && w.phaseEnd - w.tick <= (MODES[w.mode].dayS - callAt) * 60) bot.send({ t: "callNight" });

@@ -414,3 +414,100 @@ def dominant_mask(mesh, bones):
             best = max(v.groups, key=lambda g: g.weight)
             mask[v.index] = index.get(best.group) in bones
     return mask
+
+
+# ----------------------------------------------------------------------------
+# Batch 2 (moc-tinh, helper-owlet, mam-go): flat feet, hidden bones.
+# ----------------------------------------------------------------------------
+def _yaw_only(q):
+    """The turn about world Z contained in a rotation (forward vector projected)."""
+    f = q @ Vector((0, -1, 0))
+    if f.xy.length < 1e-6:
+        return Quaternion()
+    return Quaternion((0, 0, 1), math.atan2(f.x, -f.y))
+
+
+def flat_feet(rest, frames, options):
+    """Feet near the ground take their rest tilt (turned only about Z), so wide
+    root or bird toes never dig in: the ground clamp would lift the whole body
+    for them and a planted foot would float. Full weight up to `band` m above
+    the rest ankle height, fading out by `reach` m; the ankle does not move."""
+    if not options:
+        return frames
+    band = float(options.get("band", 0.04))
+    reach = float(options.get("reach", 0.12))
+    out = []
+    for basis in frames:
+        basis = dict(basis)
+        for _thigh, _calf, foot in LEGS:
+            if foot not in rest.rot:
+                continue
+            world = rest.fk(basis)
+            h = world[foot].translation.z - rest.matrix[foot].translation.z
+            w = max(0.0, min(1.0, 1 - (h - band) / max(reach - band, 1e-6)))
+            if w <= 0:
+                continue
+            cur = _rot(world[foot])
+            yaw = _yaw_only(cur @ rest.rot[foot].inverted())
+            goal = yaw @ rest.rot[foot]
+            if cur.dot(goal) < 0:
+                goal = -goal
+            set_world_rot(rest, basis, world, foot, cur.slerp(goal, w))
+            ball = "ball" + foot[4:]
+            if ball in rest.rot:
+                world = rest.fk(basis)
+                cur_b = _rot(world[ball])
+                goal_b = yaw @ rest.rot[ball]
+                if cur_b.dot(goal_b) < 0:
+                    goal_b = -goal_b
+                set_world_rot(rest, basis, world, ball, cur_b.slerp(goal_b, w))
+        out.append(basis)
+    return out
+
+
+def scale_frames(count, spec_bones, hide, existing=None):
+    """Scale keys per frame: bones in `spec_bones` (the preset's "scaleBones")
+    get a curve in every clip (1 = shown) so a clip that hides one never
+    leaves it hidden in the next; `hide` {bone: s} holds them at s (a back
+    brush shrunk into the body while the hand holds its twin)."""
+    if not spec_bones and not hide and not existing:
+        return existing
+    out = [dict(s) for s in existing] if existing else [{} for _ in range(count)]
+    for f in range(count):
+        for bone in spec_bones or []:
+            out[f].setdefault(bone, Vector((1, 1, 1)))
+        for bone, s in (hide or {}).items():
+            out[f][bone] = Vector((s, s, s))
+    return out
+
+
+def plant_feet(rest, frames, anchor=None):
+    """Both ankles pinned to the anchor's (default: rest) stance, feet flat as
+    in the anchor: a retargeted idle whose source shifts its weight onto one
+    leg lifts the other foot of a short-legged chibi off the ground."""
+    anchor = anchor or identity_basis(rest)
+    goal = ankles(rest, anchor)
+    rots = foot_rots(rest, anchor)
+    return foot_ik(rest, frames, [goal] * len(frames), rots)
+
+
+def identity_basis(rest):
+    return {n: (Quaternion(), Vector()) for n in rest.names}
+
+
+def roll_to(rest, basis, bone, target, ref=(0, 0, 1)):
+    """Roll a bone about its own axis so `ref` (a direction in the rest pose,
+    default up: a held item's long axis at its socket) points as close as it
+    can to `target` (world): a brush tip toward the slate, a mallet head up."""
+    world = rest.fk(basis)
+    r = _rot(world[bone])
+    axis = (r @ Vector((0, 1, 0))).normalized()
+    u = (r @ rest.rot[bone].inverted()) @ Vector(ref)
+    t = Vector(target).normalized()
+    up = u - axis * u.dot(axis)
+    tp = t - axis * t.dot(axis)
+    if up.length < 1e-6 or tp.length < 1e-6:
+        return basis
+    angle = math.atan2(axis.dot(up.cross(tp)), up.dot(tp))
+    set_world_rot(rest, basis, world, bone, Quaternion(axis, angle) @ r)
+    return basis

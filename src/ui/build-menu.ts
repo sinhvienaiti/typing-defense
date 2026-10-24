@@ -54,7 +54,7 @@ function cardHtml(w: World, sel: Selection, b: number): string {
     spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Hạt giống <b>${w.seeds}</b> · tự mua ${FARM.seedGold} vàng một hạt</p>` +
       `<div class="td-row">${button("seeds", "Mua " + FARM.pack.seeds + " hạt · " + FARM.pack.gold + " vàng")}${button("autoSeeds", "Tự mua hạt", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
     : b === 0 ? `<p>Dân <b>${countNpcs(w, NPC_KIND.villager)}/${villagerCap(w)}</b> · Thợ xây <b>${countNpcs(w, NPC_KIND.builder)}</b> · Lúa <b>${w.food}</b></p>` +
-      `<div class="td-row">${button("hire", "Thuê dân · " + VILLAGERS.gold + " vàng, " + VILLAGERS.food + " lúa", "⇧ \\")}</div><div class="td-row">${button("sellFood", "Bán " + ECONOMY.sale.food + " Lúa · +" + ECONOMY.sale.gold + " vàng")}</div>` + keepRow(w)
+      `<div class="td-row">${button("hire", "Thuê dân · " + VILLAGERS.gold + " vàng, " + VILLAGERS.food + " lúa", "⇧ \\")}</div><div class="td-row">${button("sellFood", "Bán " + ECONOMY.sale.food + " Lúa · +" + ECONOMY.sale.gold + " vàng")}${button("sellWood", "Bán " + ECONOMY.sale.wood + " Gỗ · +" + ECONOMY.sale.woodGold + " vàng")}</div>` + keepRow(w)
     : spec.attack !== null && B.ready[b] === 1 ? `<p>Lượt mạnh <b>${B.charges[b]}/${POWER.max}</b> · ban đêm gõ lời gọi Bắn mạnh để nạp</p>`
     : "";
   return (

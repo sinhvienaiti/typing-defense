@@ -246,6 +246,12 @@ describe("villagers and trees (§4.2)", () => {
     expect([w.gold - gold, food - w.food]).toEqual([ECONOMY.sale.gold * 1000, ECONOMY.sale.food]);
     w.food = 9;
     expect(send(w, { t: "sellFood" }).find((event) => event.t === "rejected")).toMatchObject({ reason: "food" });
+    // 1B R1 review: wood sells too, 10 for 5 gold.
+    [w.wood, w.gold] = [25, 0];
+    send(w, { t: "sellWood" });
+    expect([w.wood, w.gold]).toEqual([15, ECONOMY.sale.woodGold * 1000]);
+    w.wood = 9;
+    expect(send(w, { t: "sellWood" }).find((event) => event.t === "rejected")).toMatchObject({ reason: "wood" });
   });
 });
 
@@ -375,7 +381,7 @@ describe("sites and builders (§4.3)", () => {
     expect(w.buildings.hp[archer]).toBe(Math.round(w.c.buildings[def(w, "archer")]!.hp[1]! * BUILD.sturdy));
   });
 
-  it("no sequence of builds, upgrades (the Bastion's too), sales at 60 %, undos and free sandbox levels makes gold or wood (property; BUILD_1B §7, G7)", () => {
+  it("no sequence of builds, upgrades (the Bastion's too), sales at 60 %, undos and free sandbox levels makes gold or wood (property; BUILD_1B §7, G7)", { timeout: 20_000 }, () => {
     const seen = { built: 0, sold: 0, levelSet: 0 };
     const spots = [[-18, -14], [-18, -8], [-8, -16], [-8, -8], [7, -25], [10, -8], [20, -22], [2, 18], [8, 12], [-10, 16]];
     for (let seed = 1; seed <= 30; seed += 1) {

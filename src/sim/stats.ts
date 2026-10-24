@@ -9,8 +9,8 @@ export const STATS = [
   "damageTower", "damageCrossbow", "damageSoldier", "damageWordShot", "damageHero",
   "calls", "callWords", "callsPerfect", "wordsPerfect", "wordsSloppy", "jams", "food", "foodEaten", "wood", "seedsBought",
   "keys", "keyErrors", "strays", "wordShots", "fizzles", "rawWpmSum", "backspaces", "abandons", "killTicks",
-  // BUILD_1B §15: damage on the boss (all, typed, Draconis' own), retreats, lives lost at the peak, buildings rooted, the chest, Dồn lửa words typed.
-  "bossDamage", "bossTyped", "bossHero", "bossRetreats", "livesBoss", "rootsHits", "goldChest", "burstTyped",
+  // BUILD_1B §15: damage on the boss (all, typed, Draconis' own), retreats, lives lost at the peak, buildings rooted, the chest, Dồn lửa words typed and asked.
+  "bossDamage", "bossTyped", "bossHero", "bossRetreats", "livesBoss", "rootsHits", "goldChest", "burstTyped", "burstWords",
 ] as const;
 
 export type StatName = (typeof STATS)[number];

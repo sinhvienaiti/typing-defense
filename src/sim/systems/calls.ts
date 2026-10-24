@@ -13,6 +13,7 @@ import { bandWords } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
 import { createBag, pickWord, type Bag } from "../../typing/picker";
 import { KEY, routeKey } from "../../typing/router";
+import { ticks } from "../../content/compile";
 import { lifeTicks, rawWpm, scoreWord } from "../../typing/scorer";
 import { STAT, bump } from "../stats";
 import { CALL_KIND } from "../stores/calls";
@@ -177,7 +178,7 @@ export function closeCallsOf(w: World, b: number): void {
 }
 
 /** The work a word moves, `share` of one word's part (§5.1); returns whether the call's own work is now done. */
-function work(w: World, c: number, share: number, word: number, len: number, quality: number, crit: boolean): boolean {
+function work(w: World, c: number, share: number, word: number, len: number, quality: number, crit: boolean, soon: number): boolean {
   const C = w.calls;
   const B = w.buildings;
   const b = C.b[c]!;
@@ -206,6 +207,8 @@ function work(w: World, c: number, share: number, word: number, len: number, qua
       const burn = w.c.content.hero.affinity.includes(def.id) && dx * dx + dz * dz <= AGENT.heroRingM * AGENT.heroRingM;
       w.typing.shots.push({ b, power: spec ? shotPower(spec.dBar[B.level[b]! - 1]!, len, quality) : 0, crit, word, burn, bolt: spec === undefined, boss: C.burst[c] === 1 });
       B.charges[b] = Math.min(POWER.max, B.charges[b]! + Math.round(POWER.perWord * share));
+      // A word typed soon after it showed brings the next call sooner (1B R1 review: speed counts within the run).
+      B.powerAt[b] = Math.min(B.powerAt[b]!, w.tick - Math.round(ticks(MODES[w.mode].powerCdS) * POWER.quick * soon));
       return false;
     }
     default:
@@ -251,7 +254,8 @@ function finishWord(w: World, s: number): void {
   w.events.rare.push({ t: "wordHit", tick: w.tick, word: W.id(s), call: C.id(c), grade: score.grade, errors: W.errors[s]!, quality: score.quality, len, ms: W.lastMs[s]! - W.firstMs[s]!, wait: W.firstTick[s]! - W.born[s]!, fam });
   dropWord(w, s);
   // A job this word finished ends at its worker's step this tick (economy.ts), with its yield and the bonus.
-  if (work(w, c, score.grade === "sloppy" ? CALL.sloppy : 1, word, len, score.quality, top)) {
+  const soon = Math.max(0, 1 - (w.tick - W.born[s]!) / ticks(POWER.quickS)); // 1 at once, 0 after quickS
+  if (work(w, c, score.grade === "sloppy" ? CALL.sloppy : 1, word, len, score.quality, top, soon)) {
     C.finished[c] = 1;
     return;
   }
@@ -283,5 +287,5 @@ export function typeKey(w: World, letter: number, atMs: number): string | null {
   return null;
 }
 
-/** Whether call c lies in a help ring now (or is the locked one): bright. */
-export const lit = (w: World, c: number, locked: number): boolean => c === locked || inRing(w, w.calls.x[c]!, w.calls.z[c]!);
+/** Whether call c lies in a help ring now (or is the locked one, or a Dồn lửa call: 1B R1 review): bright. */
+export const lit = (w: World, c: number, locked: number): boolean => c === locked || w.calls.burst[c] === 1 || inRing(w, w.calls.x[c]!, w.calls.z[c]!);

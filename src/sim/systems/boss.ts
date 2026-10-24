@@ -4,18 +4,17 @@
  * two escort packs leave the rift and, 6 s later, the boss comes up at the fork. It walks on, never blocked, and
  * strikes after a warning: Rễ Trồi stuns the buildings within 8 m (no damage), Quật cành hits and knocks back the
  * soldiers in front, at 70 % it staggers (5 s still and vulnerable, every stun lifted, "Dồn lửa" power calls on the
- * nearest attack buildings in a help ring), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow. At
+ * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow. At
  * 50 % it retreats: the chest is paid, 2 s later every enemy left melts and the stage is won.
  */
-import { ticks } from "../../content/compile";
+import { packSchedule, ticks } from "../../content/compile";
 import { MODES } from "../../content/rules";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
 import { CALL_KIND } from "../stores/calls";
 import type { World } from "../world";
-import { inRing } from "./agents";
-import { makeCall } from "./calls";
+import { expectedE, makeCall } from "./calls";
 import { hurtSoldier } from "./combat";
 import { SINKING } from "./move";
 import { maxHp } from "./spawn";
@@ -36,11 +35,12 @@ export const bossSlot = (w: World): number => (w.boss.e < 0 ? -1 : w.enemies.slo
 /** A move is being warned: the flow meter's danger (§5.5). */
 export const bossWarning = (w: World): boolean => w.boss.rootsEnd >= 0 || w.boss.slamEnd >= 0 || w.boss.keepEnd >= 0;
 
-/** Its hit points at spawn: the enemy's × the mode's × (1 + kHp·max(0, k − 1)), at most ×kHpMax (§5.6). */
+/** Its hit points at spawn: the enemy's × the mode's (×its own mode factor) × (1 + kHp·d + kHp2·max(0, d)²), d = k − 1, at most ×kHpMax (§5.6; 1B R1 review). */
 export function bossHp(w: World): number {
   const boss = w.c.content.boss!;
   const def = w.c.enemies[w.c.enemyIndex(boss.enemy)]!;
-  return Math.round(def.hp * MODES[w.mode].hpMul * Math.min(boss.kHpMax, 1 + boss.kHp * Math.max(0, w.pace.k - 1)));
+  const [d, up] = [w.pace.k - 1, Math.max(0, w.pace.k - 1)];
+  return Math.round(def.hp * MODES[w.mode].hpMul * (boss.modeHp[w.mode] ?? 1) * Math.min(boss.kHpMax, 1 + boss.kHp * d + boss.kHp2 * up * up));
 }
 
 function warnDay(w: World): void {
@@ -72,26 +72,12 @@ export function callBoss(w: World): boolean {
 
 /** The lull is over: the escort packs leave the rift, one a branch, in tonight's wave. */
 function escort(w: World): void {
-  const { escort: list } = w.c.content.stage!.boss;
-  const { packGapS, memberGapS } = w.c.content.waves;
-  const wave = w.wave;
-  const grounds = w.lanes.length - 1;
-  let at = w.tick;
-  let pack = 0;
-  for (const entry of list) {
-    const enemy = w.c.enemyIndex(entry.enemy);
-    const size = entry.pack ?? w.c.enemies[enemy]!.packSize;
-    for (let k = 0; k < entry.count; k += size, pack += 1) {
-      const n = Math.min(size, entry.count - k);
-      for (let m = 0; m < n; m += 1) w.spawnQueue.push({ tick: at + m * ticks(memberGapS), enemy, route: pack % grounds, wave });
-      at += (n - 1) * ticks(memberGapS) + ticks(packGapS);
-    }
-    w.waveLeft[wave] = (w.waveLeft[wave] ?? 0) + entry.count;
-  }
-  w.waveAlive[wave] ??= 0;
+  const [wave, grounds] = [w.wave, w.lanes.length - 1];
+  const list = packSchedule(w.c, w.c.content.stage!.boss.escort);
+  for (const s of list) w.spawnQueue.push({ tick: w.tick + s.at, enemy: s.enemy, route: s.lane < 0 ? grounds : s.lane % grounds, wave });
   w.spawnQueue.sort((a, b) => a.tick - b.tick);
-  w.boss.stage = BOSS.emerge;
-  w.boss.emergeAt = w.tick + ticks(w.c.content.stage!.boss.emergeAfterS);
+  [w.waveLeft[wave], w.waveAlive[wave]] = [(w.waveLeft[wave] ?? 0) + list.length, w.waveAlive[wave] ?? 0];
+  Object.assign(w.boss, { stage: BOSS.emerge, emergeAt: w.tick + ticks(w.c.content.stage!.boss.emergeAfterS) });
 }
 
 /** Puts enemy `index` on route `route` at `dist` m (lateral `lateral`), in tonight's wave; its slot, −1 none free. */
@@ -245,7 +231,11 @@ function keepSlam(w: World, e: number): void {
   w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "keep", hit: false, end: S.keepEnd, count: spec.lives });
 }
 
-/** At 70 %: 5 s still, vulnerable, the roots pulled back (every stun ends), the "Dồn lửa" calls (§5.2). */
+/**
+ * At 70 %: 5 s still, vulnerable, the roots pulled back (every stun ends), and "Dồn lửa" (§5.2; 1B R1 review): attack
+ * buildings with it in reach + 2 m, nearest first, up to the mode's bright cap, get a power call of 1–3 words by E that
+ * lights in a help ring or not; a power call already open becomes it.
+ */
 function stagger(w: World, e: number): void {
   const S = w.boss;
   const B = w.buildings;
@@ -257,20 +247,20 @@ function stagger(w: World, e: number): void {
   S.summonAt = end + ticks(w.c.content.boss!.summon.firstS);
   E.stunUntil[e] = end;
   for (let b = 0; b < B.top; b += 1) if (B.stunUntil[b]! > w.tick) B.stunUntil[b] = w.tick;
-  // Attack buildings with it in reach + 2 m and in a help ring, nearest first, up to the mode's bright cap: a 1-word power call each.
   const near: [number, number][] = [];
   for (let b = 0; b < B.top; b += 1) {
     const attack = B.used[b] === 1 && B.ready[b] === 1 ? w.c.buildings[B.def[b]!]!.attack : null;
-    if (attack === null || B.call[b]! >= 0 || !inRing(w, B.x[b]!, B.z[b]!)) continue;
-    const d2 = dist2(B.x[b]!, B.z[b]!, E.x[e]!, E.z[e]!);
-    const reach = attack.levels[B.level[b]! - 1]!.range + spec.burstReachM;
-    if (d2 <= reach * reach) near.push([d2, b]);
+    const reach = attack === null ? 0 : attack.levels[B.level[b]! - 1]!.range + spec.burstReachM;
+    if (attack !== null && dist2(B.x[b]!, B.z[b]!, E.x[e]!, E.z[e]!) <= reach * reach) near.push([dist2(B.x[b]!, B.z[b]!, E.x[e]!, E.z[e]!), b]);
   }
   near.sort((p, q) => p[0] - q[0] || B.id(p[1]) - B.id(q[1]));
+  const words = Math.max(1, Math.min(spec.burstWords, Math.round(expectedE(w) / spec.burstPerE)));
+  const C = w.calls;
   for (const [, b] of near.slice(0, MODES[w.mode].open)) {
-    const c = makeCall(w, CALL_KIND.power, 1, -1, b, -1, -1, ticks(spec.burstLifeS));
+    const c = B.call[b]! >= 0 ? B.call[b]! : makeCall(w, CALL_KIND.power, words, -1, b, -1, -1, ticks(spec.burstLifeS));
     if (c < 0) continue;
-    [B.call[b], B.powerAt[b], w.calls.burst[c]] = [c, w.tick, 1];
+    [B.call[b], B.powerAt[b], C.burst[c], C.words[c], C.expire[c]] = [c, w.tick, 1, Math.max(C.words[c]!, words), w.tick + ticks(spec.burstLifeS)];
+    bump(w.stats, STAT.burstWords, C.words[c]! - C.done[c]!);
   }
   w.events.rare.push({ t: "bossPhase", tick: w.tick, phase: 2 });
 }

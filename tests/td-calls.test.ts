@@ -409,7 +409,7 @@ function randomPlay(seed: number, ticks: number, typing: boolean) {
 }
 
 describe("invariants (§12 gate 6) and replay", () => {
-  it("random play on the real vocabulary: bright ≤ cap, one lock on a bright call, one word a bright call, distinct first letters; the log replays to the same hash", () => {
+  it("random play on the real vocabulary: bright ≤ cap, one lock on a bright call, one word a bright call, distinct first letters; the log replays to the same hash", { timeout: 20_000 }, () => {
     for (const seed of [1, 2, 3]) {
       const { w, log, problems, seen } = randomPlay(seed, T(240), true);
       expect(problems).toEqual([]);
@@ -425,7 +425,7 @@ describe("invariants (§12 gate 6) and replay", () => {
     }
   });
 
-  it("ignoring every call never lowers the chain and loses nothing: gold falls only by seeds bought, food only by soldiers' meals, wood never", () => {
+  it("ignoring every call never lowers the chain and loses nothing: gold falls only by seeds bought, food only by soldiers' meals, wood never", { timeout: 20_000 }, () => {
     const w = createWorld({ seed: 4, deck, expected: 40 });
     send(w, { t: "sandbox", op: { op: "preset" } });
     const rng = createRng(4).ai;

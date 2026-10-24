@@ -2,10 +2,11 @@
 // panel, a sandbox command refused (noSandbox), the build menu's locked rows say "Mở ở Ngày n". Then in the sandbox,
 // by keyboard only: a Tháp Cung built (Insert, Enter) and undone in its 5 s (Tab to it, Delete; refunded in full),
 // built again and raised (63 gold, 27 wood), the Bastion raised (105 gold, 45 wood; Chấm comes out), the tower sold
-// by pressing Shift+Delete twice (60 % of 112 gold, 48 wood). Pictures: the locked menu, the raised village.
+// by pressing Shift+Delete twice (60 % of 112 gold, 48 wood); the Bastion's card sells 10 wood for 4 gold (review R1).
+// The page's log replays on Node to its hash. Pictures: the locked menu, the raised village.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720
 import { DEV_URL } from "./common.mjs";
-import { boot, consoleChecks, finish, key, out, sizeOf, state, td, until } from "./td-1a6-common.mjs";
+import { boot, consoleChecks, finish, key, out, replayOnNode, sizeOf, state, td, until } from "./td-1a6-common.mjs";
 
 const focus = (page) => page.eval(td("return t.ui().focus;"));
 
@@ -74,6 +75,15 @@ export default async function (page) {
   await key(page, "Delete", { shift: true });
   await page.sleep(300);
   const [g7, w7] = await money();
+  // Review R1: the Bastion's card sells wood, 10 for 4 gold.
+  await tabTo(page, keep.id);
+  await page.sleep(200);
+  const woodButton = await page.eval(`document.querySelector('.td-dock [data-act="sellWood"]')?.textContent ?? ""`);
+  const [g8, w8] = await money();
+  await page.eval(td(`t.send({ t: "sellWood" }); return true;`));
+  await page.sleep(300);
+  const [g9, w9] = await money();
+  const replay = await replayOnNode(page, "td-1b-build");
   const checks = {
     storyFromTitle: story?.flags?.sandbox === false && story.panel === false,
     sandboxRefused: refused.includes("noSandbox"),
@@ -83,7 +93,9 @@ export default async function (page) {
     keepPrice: g3 - g4 === 105 && w3 - w4 === 45 && helpers >= 2,
     sellAsksTwice: armed.includes("Bấm lần nữa") && g6 === g5 && w6 === w5,
     soldAt60: g7 - g5 === Math.floor(112 * 0.6) && w7 - w5 === Math.floor(48 * 0.6),
+    woodSells: woodButton.includes("Bán 10 Gỗ") && g9 - g8 === 4 && w8 - w9 === 10,
+    nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { story, refused, menu, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7], helpers, armed, shots });
+  return finish(page, checks, { story, refused, menu, money: [g0, w0, g1, w1, g2, w2, g3, w3, g4, w4, g5, w5, g6, w6, g7, w7, g8, w8, g9, w9], helpers, armed, woodButton, replay, shots });
 }

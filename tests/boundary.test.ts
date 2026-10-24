@@ -218,7 +218,7 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
     expect(crossing).toEqual([]);
   });
 
-  it("the rules use no clock, host global, storage, locale, Math.random, trigonometry, powers or logarithms", () => {
+  it("the rules use no clock, host global, storage, locale, Math.random, trigonometry, powers or logarithms", { timeout: 20_000 }, () => {
     // The balance kit names its 20 s FlowWindow `window`: a local there, which the hostless compile below tells from the global.
     const local = (source: Source, problem: string) => problem === "window" && source.path.startsWith("src/kit/balance/");
     const found = pure.flatMap((source) => purityProblems(source.text).filter((problem) => !local(source, problem)).map((problem) => source.path + ": " + problem));

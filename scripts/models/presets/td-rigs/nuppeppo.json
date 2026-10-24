@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "id": "nuppeppo",
+  "kind": "enemies",
+  "source": "enemies/nuppeppo.glb",
+  "note": "P11 Nuppeppō, khối bột tách đôi, cao 2,0 m (nuppeppo-con = model này ×0,8). Xương khối mềm tối giản: belly → body → head xếp chồng (scale bóp giãn truyền lên trên, body và head trễ nhịp = rung thạch), hai tay nhỏ trên body, hai chân trên root (đứng yên khi khối bóp). Toạ độ: mét, Z lên, mặt nhìn -Y, +X là tay trái nhân vật.",
+  "yaw": -90,
+  "height": 2.0,
+  "triangles": 6000,
+  "material": {"metallic": 0.0, "roughnessMin": 0.5},
+  "reviewed": false,
+  "bones": {
+    "root": {"head": [0, 0, 0], "tail": [0, 0.25, 0], "parent": null, "deform": false},
+    "base": {"head": [0, 0.05, 0.04], "tail": [0, 0.05, 0.2], "parent": "root", "part": "body", "radius": 0.5},
+    "belly": {"head": [0, 0.05, 0.2], "tail": [0, 0.05, 0.72], "parent": "root", "part": "body", "radius": 0.65},
+    "body": {"head": [0, 0.05, 0.72], "tail": [0, 0.05, 1.55], "parent": "belly", "part": "body", "radius": 0.6},
+    "head": {"head": [0, 0.05, 1.55], "tail": [0, 0.05, 2.0], "parent": "body", "part": "body", "radius": 0.45},
+    "arm_l": {"head": [0.64, -0.06, 0.92], "tail": [1.0, -0.16, 0.79], "parent": "body", "part": "arm_l", "radius": 0.17},
+    "foot_l": {"head": [0.4, -0.02, 0.2], "tail": [0.4, -0.02, 0.0], "parent": "root", "part": "foot_l", "radius": 0.25}
+  },
+  "parts": {
+    "body": {"bones": ["base", "belly", "body", "head"]},
+    "arm_l": {"bones": ["arm_l", "body"]},
+    "foot_l": {"bones": ["foot_l", "base", "belly"]}
+  },
+  "regions": [
+    {"part": "foot_l", "box": [[0.15, -0.4, -0.01], [0.75, 0.4, 0.2]]}
+  ],
+  "sockets": {
+    "FX_HAND_R": {"bone": "arm_r", "at": [-1.03, -0.17, 0.78]},
+    "FX_HEAD": {"bone": "head", "at": [0, 0.05, 2.02]},
+    "FX_CORE": {"bone": "body", "at": [0, 0.05, 1.0]},
+    "FX_FEET": {"bone": "root", "at": [0, 0, 0]}
+  },
+  "groundBones": ["base", "belly", "foot_l", "foot_r"],
+  "scaleBones": ["base", "belly", "body", "head", "foot_l", "foot_r"],
+  "rigidIslands": 64,
+  "smoothPasses": 6,
+  "clips": [
+    {"name": "Enemy_Idle", "script": "blob_idle", "loop": true, "frames": 48, "closeLoop": 0, "breath": 0.03},
+    {"name": "Enemy_Move", "script": "blob_hop", "loop": true, "frames": 14, "closeLoop": 0, "height": 0.3, "takeOff": 3.4, "airborne": true,
+     "note": "one hop per loop: ground frames 0-3 (land, squash, push off), then a ballistic arc; the game moves the body only inside airborne_s (speed / air share), so planted feet never slide"},
+    {"name": "Enemy_Attack", "script": "blob_bump", "frames": 22, "impact": 10, "faceLevel": 0.45, "note": "belly bump (the face stays up): impact event = contact"},
+    {"name": "Enemy_Hit", "script": "blob_hit", "frames": 12},
+    {"name": "Enemy_Death", "script": "blob_melt", "frames": 36, "blendOut": 0, "note": "killed by a blast (no split): slumps into a flat puddle; ends lying, not on Idle"},
+    {"name": "Enemy_Death.split", "script": "blob_split", "frames": 24, "split": 12, "blendOut": 0,
+     "note": "normal death (design 22.6): at the split event hide this mesh and spawn two nuppeppo-con at FX_CORE +-0.45 m along X"}
+  ],
+  "engine": {
+    "move": "Enemy_Move là nhảy: chỉ dời thân trong airborne_s (tốc độ ÷ tỉ lệ bay); xoay hướng lúc chạm đất, không xoay giữa không.",
+    "split": "Enemy_Death.split, sự kiện split: ẩn lưới, sinh 2 nuppeppo-con (×0,8) tại FX_CORE ±0,45 m theo trục X của thân, mỗi con một cú nhảy nhỏ ra ngoài rồi vào Enemy_Move.",
+    "crowd": "nuppeppo-con đi bầy: nướng VAT (scale xương nướng như xoay); lệch pha ngẫu nhiên và tốc độ ±8 % mỗi con.",
+    "procedural": [
+      "trúng đạn: nhịp bóp thêm ở instance (1,06; 0,9; 1,06) trong 0,12 s, cộng dồn nhiều phát",
+      "bóng dưới chân thu 1 → 0,8 theo độ cao nhảy",
+      "bụi đáp ở sự kiện land (khung 0 của Enemy_Move)",
+      "không quay đầu nhìn: quay cả thân"
+    ]
+  }
+}

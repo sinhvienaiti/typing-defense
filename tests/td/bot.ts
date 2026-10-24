@@ -74,8 +74,9 @@ export type BotRun = {
   hashes: string[];
   stats: Record<StatName, number>;
   ticks: number;
-  /** Ticks with a lock, and ticks, by phase: day, night (dawn in neither). */
+  /** Ticks with a lock, ticks with nothing to type (no live word, no lock: 1B R1 review), and ticks, by phase: day, night (dawn in neither). */
   typedTicks: [number, number];
+  emptyTicks: [number, number];
   phaseTicks: [number, number];
   /** The same by day number (index n: day n, night n). */
   byDay: { dayTyped: number; dayTicks: number; nightTyped: number; nightTicks: number }[];
@@ -237,7 +238,7 @@ export function runBot(spec: BotSpec): BotRun {
   const queue: CommandBody[] = [];
   const view = { w: world, send: (body: CommandBody) => void queue.push(body) };
   const run: BotRun = {
-    world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
+    world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], emptyTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
     atNightfall: [], atDawn: [], calls: tally(), callsByKind: [], stepMs: null, livesAtWaveEnd: [], rejected: [], problems: [], defeat: false,
     flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run,
   };
@@ -265,6 +266,7 @@ export function runBot(spec: BotSpec): BotRun {
       const k = phase === "day" ? 0 : 1;
       run.phaseTicks[k] += 1;
       run.typedTicks[k] += typed;
+      if (typed === 0 && world.words.count === 0) run.emptyTicks[k] += 1;
       if (k === 0) [day.dayTicks, day.dayTyped] = [day.dayTicks + 1, day.dayTyped + typed];
       else [day.nightTicks, day.nightTyped] = [day.nightTicks + 1, day.nightTyped + typed];
     }

@@ -115,13 +115,14 @@ export type WavesDef = {
 
 /**
  * The boss of a stage (BUILD_1B §5): its enemy (whose hit points are the base), retreat at retreatPct of them, hit
- * points ×(1 + kHp·max(0, k − 1)) up to kHpMax, Draconis' own fireballs ×heroMul ("Vỏ dày"), and its moves.
+ * points ×(1 + kHp·d + kHp2·max(0, d)²), d = k − 1 (both ways), up to kHpMax and ×modeHp of the run's mode, Draconis' own fireballs ×heroMul
+ * ("Vỏ dày"), and its moves; the stagger's Dồn lửa calls ask round(E / burstPerE) words, 1 to burstWords.
  */
 export type BossDef = {
-  enemy: string; retreatPct: number; kHp: number; kHpMax: number; retreatS: number; chestGold: number; heroMul: number;
+  enemy: string; retreatPct: number; kHp: number; kHp2: number; kHpMax: number; modeHp: Partial<Record<Mode, number>>; retreatS: number; chestGold: number; heroMul: number;
   roots: { everyS: number; firstS: number; warnS: number; radiusM: number; stunS: number };
   slam: { damage: Range; reachM: number; everyS: number; warnS: number; knockM: number };
-  stagger: { atPct: number; stunS: number; vulnerable: number; burstLifeS: number; burstReachM: number };
+  stagger: { atPct: number; stunS: number; vulnerable: number; burstLifeS: number; burstReachM: number; burstWords: number; burstPerE: number };
   summon: { enemy: string; count: number; everyS: number; firstS: number; warnS: number };
   keep: { lives: number; everyS: number; warnS: number; stopM: number };
 };

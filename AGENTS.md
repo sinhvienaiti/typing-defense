@@ -47,12 +47,19 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   tick 0 and travels in `flags().mode` and the replay files).
 - 1B (`docs/td/BUILD_1B.md`): the boss peak is `src/sim/systems/boss.ts` (state
   in `src/sim/stores/boss.ts`, hashed), stage data (`stage`, `boss`) in
-  `src/content/slice-1a.ts`; its 2D layers `src/view/boss-2d.ts`, the boss bar
+  `src/content/slice-1a.ts`; its 2D layers `src/view/boss-2d.ts` (particles from the
+  fixed pool in `src/view/fx-2d.ts`), the boss bar
   and banner `BossBanner` in `src/ui/hud.ts`, the tutorial rows `src/ui/tips.ts`,
   the results card with stars, hint and "Chơi lại Ngày n" in `src/ui/sheets.ts`
   (the page reloads and replays its log to that day, checking the hash kept by
-  `src/app/session.ts`). Bots play the story (`sandbox: false`); boss-peak
+  `src/app/session.ts`; `__td.retry()` gives the replay's end: day, tick, hash,
+  matched). Bots play the story (`sandbox: false`); boss-peak
   policies `tests/td/policies/boss.ts`, the probe `tests/td/boss-probe.ts`.
+- 1B R1 review: Dồn lửa calls light outside help rings, round(E / 20) words;
+  a power word typed soon after it showed brings the tower's next call sooner
+  (`POWER.quick`, `quickS`); wood sells 10 for 4 gold (`sellWood`, the Bastion's
+  card); the boss's hit points take a two-way k factor with a square term and a
+  factor per mode (`boss.kHp`, `kHp2`, `modeHp`).
 - Balance (parent `docs/games/BALANCE.md` §9.2; `docs/td/BUILD_NOTES.md` §6): the typing profile
   `src/app/skill.ts` (kit key `typing-defense.skill`, folded after each day and night) gives the run header
   (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
@@ -76,7 +83,8 @@ pnpm check               # kit sha256 check, tests, build
 pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B1–B9 per seed set, the boss table,
                          #   the split table, the pooled tight targets (BUILD_1B §6.4, §18.2), then the BUILD_1A6 §12 table
                          #   options: --stage-seeds=120 --stage-sets=2 --threads=6 --seeds=5 --nights=4 (§12 runs)
-node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable)
+node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable: --khp2, --modehp, --quick, --woodgold, --tl, …)
+node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json  # a long bot run kept as "Chơi lại Ngày n" keeps it (td-1b-night5 uses it)
 pnpm td:golden:check     # golden runs must match tests/golden/td-1a.json and td-1b-boss.json
 pnpm td:golden:update    # remake both goldens after an intended change
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720

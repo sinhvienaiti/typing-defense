@@ -16,6 +16,7 @@ import bpy
 from mathutils import Quaternion, Vector
 
 from td_rig_common import log
+import td_rig_creatures as K
 import td_rig_post as P
 import td_rig_tools as T
 
@@ -337,6 +338,8 @@ def keyed(rest, clip, idle):
                 add[thigh] = Q("z", -hip) @ add.get(thigh, Quaternion())
         basis = poser.pose(rot={bone: turn(rots) for bone, rots in key.get("rot", {}).items()}, aim=key.get("aim"),
                            pelvis=Vector(key.get("pelvis", (0, 0, 0))), base=base, add=add, twist=key.get("twist"))
+        for bone, direction in key.get("roll", {}).items():
+            P.roll_to(rest, basis, bone, direction)  # a held item's axis (td_rig_post.roll_to)
         if key.get("plant", clip.get("plant", True)):
             basis = poser.plant(basis, lift=float(key.get("lift", 0.0)))
         # feetLock: ankle offsets from the idle stance carry over until changed.
@@ -425,6 +428,7 @@ def make_clips(spec, rig, root, mesh=None):
     for clip in spec["clips"]:
         loop = bool(clip.get("loop"))
         notes = []
+        scales = None
         if "src" in clip:
             frames = []
             for part in clip["src"].split("+"):
@@ -436,7 +440,12 @@ def make_clips(spec, rig, root, mesh=None):
                 opts = dict(options, inplace=clip.get("inplace", options.get("inplace", "trend")))
                 if "scale" in clip:
                     opts["scale"] = clip["scale"]
-                frames += retarget_mixed(rest, src.rest, sampled, mapping, opts)
+                # Non-human skeletons (Mesh2Motion snake, bird) map bones by name;
+                # "reference": [clip, frame] measures deltas from a source pose
+                # that matches the target's rest (a serpent's raised neck).
+                src_map = {n: n for n in rest.names if n in src.rest and n != "root"} if options.get("map") == "byName" else mapping
+                src_rest = src.reference(*options["reference"]) if options.get("reference") else src.rest
+                frames += retarget_mixed(rest, src_rest, sampled, src_map, opts)
             yaw = 0.0
             if clip.get("face", True):
                 frames, yaw = T.face_forward(rest, frames)
@@ -445,9 +454,13 @@ def make_clips(spec, rig, root, mesh=None):
             clip.setdefault("aimWorld", spec.get("aimWorld", []))
             frames = keyed(rest, clip, idle_pose)
             origin = "script keys (%d key poses)" % len(clip["keys"])
+        elif clip["script"] in K.SCRIPTS:
+            frames = K.SCRIPTS[clip["script"]](rest, clip, spec)
+            origin = "script " + clip["script"]
         else:
             frames = SCRIPTS[clip["script"]](rest, clip)
             origin = "script " + clip["script"]
+        scales = clip.pop("_scale", None)  # squash and stretch keys (creature scripts)
         # Overlays named in the clip (e.g. the arm that holds a spear).
         for name in clip.get("layers", []):
             frames = P.layer(poser, frames, layers[name])
@@ -461,6 +474,13 @@ def make_clips(spec, rig, root, mesh=None):
         if clip.get("lockFeet") and idle_pose is not None:
             frames = P.lock_feet(rest, frames, idle_pose, float(clip.get("lockReach", 0.08)))
             notes.append("feet locked to the idle stance while near the ground")
+        if clip.get("plantFeet"):
+            frames = P.plant_feet(rest, frames)
+            notes.append("both feet pinned to the rest stance")
+        if clip.get("flatFeet", spec.get("flatFeet")):
+            frames = P.flat_feet(rest, frames, clip.get("flatFeet", spec.get("flatFeet")))
+        if spec.get("scaleBones") or clip.get("hide"):
+            scales = P.scale_frames(len(frames), spec.get("scaleBones"), clip.get("hide"), scales)
         frames = add_wag(rest, frames, spec.get("wag"), loop)
         frames = P.drive(rest, frames, spec.get("drive"))
         level = clip.get("headLevel", spec.get("headLevel"))
@@ -477,13 +497,14 @@ def make_clips(spec, rig, root, mesh=None):
         settle_frames = int(clip.get("settle", spec.get("settle", 0)))
         if not loop and idle_pose is not None and settle_frames:
             frames = P.settle(frames, idle_pose, chains, settle_frames)
-        lift = T.ground_clamp(rig, mesh, rest, frames, ignore=ground_ignore) if (mesh is not None and clip.get("ground", True)) else 0.0
+        lift = T.ground_clamp(rig, mesh, rest, frames, ignore=ground_ignore, bones=spec.get("groundBones"), scales=scales,
+                              scale_bones=spec.get("scaleBones")) if (mesh is not None and clip.get("ground", True)) else 0.0
         for i, placed in enumerate(clip.pop("_world", None) or []):
             for bone, (pos, rot) in placed.items():
                 P.world_bone(rest, frames[i], bone, pos, rot)
         if clip["name"] in IDLE_NAMES and idle_pose is None:
             idle_pose = frames[0]
-        T.write_action(rig, clip["name"], frames, loop)
+        T.write_action(rig, clip["name"], frames, loop, scales=scales, scale_bones=spec.get("scaleBones"))
         built[clip["name"]] = frames
         entry = {"frames": len(frames), "seconds": round((len(frames) - 1) / T.FPS, 3), "loop": loop, "from": origin,
                  "groundLift_m": round(lift, 3)}
@@ -499,6 +520,10 @@ def make_clips(spec, rig, root, mesh=None):
             entry["airborne_s"], entry["groundFrames"] = airborne(rest, frames[:-1] if loop else frames)
         if clip.get("locomotion"):
             entry["groundSpeed_mps"], entry["plantedSpread"] = P.ground_speed(rest, frames[:-1] if loop else frames)
+        events = dict(clip.get("events", {}), **clip.pop("_events", {}))
+        if events:
+            # Frames -> seconds: the game times hits, spawns and VFX on these.
+            entry["events"] = {k: round(float(v) / T.FPS, 3) for k, v in events.items()}
         if clip.get("note"):
             notes.append(clip["note"])
         if notes:

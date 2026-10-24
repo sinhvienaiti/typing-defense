@@ -32,7 +32,7 @@ export const WOOD = [[17, 38], [-18.5, -26], [-29, -29], [-18, -41], [6, -43], [
  * west archer, level 2 for the cannon, the Bastion to level 3 (Phẩy out, by the mine; the story opens it last, on
  * day 5: BUILD_1B §12), level 2 for the mine and the barracks. Marked
  * trees: the villagers' count and 2 more, cluster by cluster from the south-east trees; up to 4 villagers, 20 gold
- * kept back; food past 20 sold; the days run out (no early night).
+ * kept back; food past 20 and wood past 100 sold (1B R1 review); the days run out (no early night).
  */
 export const STANDARD: Layout = {
   name: "Chuẩn",
@@ -45,6 +45,7 @@ export const STANDARD: Layout = {
   villagers: 4,
   hireReserve: 20,
   foodKeep: 20,
+  woodKeep: 100,
 };
 
 /** "Tốt" (BALANCE.md §6 tactics good): the standard order, 3 villagers (a fourth eats gold the towers need: wood is plenty by night 3), 2 spare marked trees. */

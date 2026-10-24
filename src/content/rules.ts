@@ -64,8 +64,8 @@ export const CALL = {
 } as const;
 /** A power word's Word Shot (TK 6.11): D̄ × (0.8 + 1.2·Q) × lenF, lenF = clamp((len + 1)/6; 0.8; 1.2). */
 export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [1.6, 0.4] } as const;
-/** §4.5: power charges of a tower; a power word adds 2, a whole Perfect call 1 more. */
-export const POWER = { max: 5, perWord: 2, perfect: 1 } as const;
+/** §4.5: power charges of a tower; a power word adds 2, a whole Perfect call 1 more. quick (1B R1 review): a power word typed t s after it showed brings the next call to cd·(1 − quick·r) after it, r = max(0, 1 − t / quickS), if sooner. */
+export const POWER = { max: 5, perWord: 2, perfect: 1, quick: 0.6, quickS: 4 } as const;
 export const RICHNESS = [0.8, 1.0, 1.25] as const;
 
 /** §6: help rings (hero 10 m, helpers 6 m) and the helpers' passive on economy work; idle helpers stand in a row west of the Bastion (TK 23.7). */
@@ -74,11 +74,11 @@ export const AGENT = { heroRingM: 14, helperRingM: 6, passive: 1.5, socketGapM: 
 /** TK 10. Crits multiply by 1.75; armour and resist tiers are 0 / 30 / 60 / 80 %. */
 export const COMBAT = { critMul: 1.15, armorTiers: [0, 30, 60, 80], minDamage: 1, splashHits: ["ground", "low"] } as const;
 
-/** §3: the run's start; a building's old price G becomes round(0.3 G) wood and the rest gold; a food sale. */
+/** §3: the run's start; a building's old price G becomes round(0.3 G) wood and the rest gold; a food sale, a wood sale (1B R1 review). */
 export const ECONOMY = {
   start: { gold: 220, wood: 40, food: 0, seeds: 4 }, lives: 20,
   earlyCall: { goldPerS: 1, goldCap: 30 }, waveBonus: { base: 10, perWave: 2 },
-  undoWindowS: 5, woodShare: 0.3, sale: { food: 10, gold: 10 },
+  undoWindowS: 5, woodShare: 0.3, sale: { food: 10, gold: 10, wood: 10, woodGold: 4 },
 } as const;
 /** BUILD_1B §7: a finished building sells for 60 % of what it cost (rounded down); the HUD asks twice within 3 s. */
 export const SELL = { refund: 0.6, confirmS: 3 } as const;

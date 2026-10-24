@@ -25,7 +25,7 @@ export const starsFor = (lives: number): number => STARS.filter((least) => lives
 
 /**
  * The loss card's hint, read off the run (BALANCE §4.3): lost before the boss; it passed the merge with less than half
- * of what had to come off; the stagger let pass; buildings rooted again and again.
+ * of what had to come off; Dồn lửa words left untyped in the stagger; buildings rooted again and again.
  */
 export function lossHint(w: World): string {
   const S = w.boss;
@@ -33,7 +33,7 @@ export function lossHint(w: World): string {
   const need = (S.hpMax * w.c.content.boss!.retreatPct) / 100;
   if (S.stage < BOSS.fight) return "Gõ Bắn mạnh khi quái tới gần tháp; Phát Chữ của Tháp Pháo cạnh Draconis làm quái cháy.";
   if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Thêm tháp trên nhánh rễ sáng.";
-  if (S.phase === 2 && s[STAT.burstTyped]! < 2) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
+  if (S.phase === 2 && s[STAT.burstTyped]! < s[STAT.burstWords]!) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
   if (s[STAT.rootsHits]! >= 6) return "Đặt Tháp Cung xa đường hơn: rễ không với tới.";
   return "Dồn tháp và Draconis lên nhánh rễ sáng, gõ Bắn mạnh khi nó tới gần.";
 }
@@ -83,7 +83,7 @@ export class Sheet {
         ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ anh. Chữ trên thẻ vẫn ở đó.</p>`
         : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div><p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
           : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w)}</p>`) +
-          `<dl>` + row("Mạng còn", w.lives) + row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
+          `<dl>` + (won ? row("Rương", "+" + stats[STAT.goldChest]! / 1000 + " vàng") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
           (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);
