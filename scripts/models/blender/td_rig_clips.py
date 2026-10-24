@@ -16,6 +16,7 @@ import bpy
 from mathutils import Quaternion, Vector
 
 from td_rig_common import log
+import td_rig_post as P
 import td_rig_tools as T
 
 IDLE_NAMES = ("Hero_Idle", "Enemy_Idle", "Unit_Idle", "Helper_Idle", "Boss_Idle")
@@ -325,6 +326,7 @@ def keyed(rest, clip, idle):
         return q
 
     poses = []
+    feet_now = {}
     for key in clip["keys"]:
         base = idle if (key.get("base", "idle") == "idle" and idle is not None) else T.identity_pose(rest)
         add = {bone: turn(rots) for bone, rots in key.get("add", {}).items()}
@@ -337,20 +339,74 @@ def keyed(rest, clip, idle):
                            pelvis=Vector(key.get("pelvis", (0, 0, 0))), base=base, add=add, twist=key.get("twist"))
         if key.get("plant", clip.get("plant", True)):
             basis = poser.plant(basis, lift=float(key.get("lift", 0.0)))
-        poses.append((int(key["t"]), basis, key.get("ease", "smooth")))
+        # feetLock: ankle offsets from the idle stance carry over until changed.
+        for foot, off in key.get("feet", {}).items():
+            feet_now[foot] = Vector(off)
+        world = {b: (Vector(w["pos"]), turn(w.get("turn", [])) @ rest.rot[b]) for b, w in key.get("world", {}).items()}
+        poses.append({"t": int(key["t"]), "basis": basis, "ease": key.get("ease", "smooth"), "feet": dict(feet_now),
+                      "lift": float(key.get("lift", 0.0)) if key.get("plant", clip.get("plant", True)) else 0.0,
+                      "world": world, "air": bool(key.get("air", False)), "reach": key.get("reach", {})})
+    # aimWorld bones (a spear) turn along the shortest world arc between keys,
+    # not by slerping every joint of the arm under them.
+    aim_world = [b for b in clip.get("aimWorld", []) if b in rest.rot]
+    for pose in poses:
+        w = rest.fk(pose["basis"])
+        pose["aimWorld"] = {b: w[b].to_quaternion() for b in aim_world}
+    lock = bool(clip.get("feetLock")) and idle is not None
+    stance = P.ankles(rest, idle) if lock else {}
+    flat = P.foot_rots(rest, idle) if lock else None
+    step_lift = float(clip.get("stepLift", 0.1))
     frames = []
-    for f in range(poses[-1][0] + 1):
-        for (f0, a, _e0), (f1, b, e1) in zip(poses, poses[1:]):
-            if f0 <= f <= f1:
-                u = (f - f0) / max(f1 - f0, 1)
-                u = {"linear": u, "in": u * u, "out": 1 - (1 - u) * (1 - u)}.get(e1, smooth(u))
-                frames.append(T.slerp_pose(a, b, u))
-                break
+    world_frames = []
+    for f in range(poses[-1]["t"] + 1):
+        for ka, kb in zip(poses, poses[1:]):
+            f0, f1 = ka["t"], kb["t"]
+            if not f0 <= f <= f1:
+                continue
+            lin = (f - f0) / max(f1 - f0, 1)
+            u = {"linear": lin, "in": lin * lin, "out": 1 - (1 - lin) * (1 - lin)}.get(kb["ease"], smooth(lin))
+            basis = T.slerp_pose(ka["basis"], kb["basis"], u)
+            if lock and not (ka["air"] and kb["air"]):
+                goal = {}
+                for foot, home in stance.items():
+                    oa = ka["feet"].get(foot, Vector())
+                    ob = kb["feet"].get(foot, Vector())
+                    off = oa.lerp(ob, u)
+                    arc = 4 * lin * (1 - lin) * min(step_lift, 0.6 * (ob.xy - oa.xy).length) if (ob.xy - oa.xy).length > 0.01 else 0.0
+                    lift = ka["lift"] + (kb["lift"] - ka["lift"]) * u
+                    goal[foot] = home + off + Vector((0, 0, arc + lift))
+                basis = P.foot_ik(rest, [basis], [goal], flat)[0]
+            for bone in aim_world:
+                qa, qb = ka["aimWorld"][bone], kb["aimWorld"][bone]
+                if qa.dot(qb) < 0:
+                    qb = -qb
+                P.set_world_rot(rest, basis, rest.fk(basis), bone, qa.slerp(qb, u))
+            hands = set(ka["reach"]) | set(kb["reach"])
+            for hand in hands:
+                wa, wb = float(hand in ka["reach"]), float(hand in kb["reach"])
+                r = kb["reach"].get(hand) or ka["reach"][hand]
+                basis = P.apply_reach(rest, basis, {hand: r}, wa + (wb - wa) * u)
+            placed = {}
+            for bone in set(ka["world"]) | set(kb["world"]):
+                here = P.bone_world(rest, basis, bone)
+                pa = ka["world"].get(bone, here)
+                pb = kb["world"].get(bone, here)
+                qa, qb = pa[1], pb[1]
+                if qa.dot(qb) < 0:
+                    qb = -qb
+                placed[bone] = (pa[0].lerp(pb[0], u), qa.slerp(qb, u))
+                P.world_bone(rest, basis, bone, *placed[bone])
+            frames.append(basis)
+            world_frames.append(placed)
+            break
+    # Absolute placements survive the ground clamp (make_clips re-applies them).
+    clip["_world"] = world_frames if any(world_frames) else None
     return frames
 
 
 def make_clips(spec, rig, root, mesh=None):
     rest = T.Rest(rig)
+    poser = Poser(rest)
     sources = {}
 
     def source(tag):
@@ -360,17 +416,23 @@ def make_clips(spec, rig, root, mesh=None):
 
     options = dict(spec.get("retarget", {}))
     mapping = {n: n for n in T.HUMAN if n != "root" and n in rest.rot}
+    layers = spec.get("layers", {})
+    chains = P.chain_bones(spec.get("springs"))
+    ground_ignore = P.dominant_mask(mesh, spec.get("groundIgnore", [])) if mesh is not None else None
     report = {}
     built = {}
     idle_pose = None
     for clip in spec["clips"]:
         loop = bool(clip.get("loop"))
+        notes = []
         if "src" in clip:
             frames = []
             for part in clip["src"].split("+"):
                 tag, name = part.split(":", 1)
                 src = source(tag)
                 sampled = src.sample(name, rate=clip.get("speed", 1.0))
+                if clip.get("range"):
+                    sampled = sampled[int(clip["range"][0]):int(clip["range"][1]) + 1]
                 opts = dict(options, inplace=clip.get("inplace", options.get("inplace", "trend")))
                 if "scale" in clip:
                     opts["scale"] = clip["scale"]
@@ -380,29 +442,69 @@ def make_clips(spec, rig, root, mesh=None):
                 frames, yaw = T.face_forward(rest, frames)
             origin = "CC0 " + clip["src"] + (" (turned %+.0f deg to face front)" % -yaw if abs(yaw) > 1 else "")
         elif clip.get("script") == "keys":
+            clip.setdefault("aimWorld", spec.get("aimWorld", []))
             frames = keyed(rest, clip, idle_pose)
             origin = "script keys (%d key poses)" % len(clip["keys"])
         else:
             frames = SCRIPTS[clip["script"]](rest, clip)
             origin = "script " + clip["script"]
+        # Overlays named in the clip (e.g. the arm that holds a spear).
+        for name in clip.get("layers", []):
+            frames = P.layer(poser, frames, layers[name])
+        if clip.get("layer"):
+            frames = P.layer(poser, frames, clip["layer"])
+        if clip.get("oscillate"):
+            frames = P.oscillate(rest, frames, clip["oscillate"], loop)
+        if clip.get("lean"):
+            frames = P.steady_lean(rest, frames, clip["lean"])
+            notes.append("steady lean %s deg" % clip["lean"].get("deg", 15))
+        if clip.get("lockFeet") and idle_pose is not None:
+            frames = P.lock_feet(rest, frames, idle_pose, float(clip.get("lockReach", 0.08)))
+            notes.append("feet locked to the idle stance while near the ground")
         frames = add_wag(rest, frames, spec.get("wag"), loop)
+        frames = P.drive(rest, frames, spec.get("drive"))
+        level = clip.get("headLevel", spec.get("headLevel"))
+        if level:
+            frames, lifted = P.head_level(rest, frames, level)
+            if lifted > 0.5:
+                notes.append("head counter-turned up to %.0f deg (face stays visible)" % lifted)
         if loop:
             frames = T.close_loop(frames, int(clip.get("closeLoop", 3)))
         elif idle_pose is not None:
             frames = T.blend_ends(frames, idle_pose, int(clip.get("blendIn", 0)), int(clip.get("blendOut", 0)))
         springs = {k: v for k, v in spec.get("springs", {}).items()}
         frames = T.bake_springs(rest, frames, springs, loop)
-        if loop:
-            # Loop closes on frame 0: drop the duplicate last frame if it equals the first.
-            pass
-        lift = T.ground_clamp(rig, mesh, rest, frames) if (mesh is not None and clip.get("ground", True)) else 0.0
+        settle_frames = int(clip.get("settle", spec.get("settle", 0)))
+        if not loop and idle_pose is not None and settle_frames:
+            frames = P.settle(frames, idle_pose, chains, settle_frames)
+        lift = T.ground_clamp(rig, mesh, rest, frames, ignore=ground_ignore) if (mesh is not None and clip.get("ground", True)) else 0.0
+        for i, placed in enumerate(clip.pop("_world", None) or []):
+            for bone, (pos, rot) in placed.items():
+                P.world_bone(rest, frames[i], bone, pos, rot)
         if clip["name"] in IDLE_NAMES and idle_pose is None:
             idle_pose = frames[0]
         T.write_action(rig, clip["name"], frames, loop)
         built[clip["name"]] = frames
-        report[clip["name"]] = {"frames": len(frames), "seconds": round((len(frames) - 1) / T.FPS, 3), "loop": loop, "from": origin,
-                                "groundLift_m": round(lift, 3)}
-        log("clip", clip["name"], len(frames), "frames", origin)
+        entry = {"frames": len(frames), "seconds": round((len(frames) - 1) / T.FPS, 3), "loop": loop, "from": origin,
+                 "groundLift_m": round(lift, 3)}
+        if not loop and idle_pose is not None and chains:
+            residual = P.residual_deg(rest, frames[-1], idle_pose, chains)
+            entry["chainEndDeg"] = round(residual, 1)
+            # Tails, ears, flaps: a one-shot whose chains end off the idle pose
+            # needs a crossfade of at least 0.15 s into the next clip.
+            entry["crossfade_s"] = 0.15 if residual > 3.0 else 0.1
+        elif loop and chains:
+            entry["crossfade_s"] = 0.15  # a loop's tails and ears are mid-swing at any phase
+        if clip.get("airborne"):
+            entry["airborne_s"], entry["groundFrames"] = airborne(rest, frames[:-1] if loop else frames)
+        if clip.get("locomotion"):
+            entry["groundSpeed_mps"], entry["plantedSpread"] = P.ground_speed(rest, frames[:-1] if loop else frames)
+        if clip.get("note"):
+            notes.append(clip["note"])
+        if notes:
+            entry["notes"] = notes
+        report[clip["name"]] = entry
+        log("clip", clip["name"], len(frames), "frames", origin, "; ".join(notes))
     for src in sources.values():
         src.arm.hide_render = True
     return report

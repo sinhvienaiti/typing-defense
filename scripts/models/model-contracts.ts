@@ -7,15 +7,16 @@
 // docs/art-requests/td/02-tripo-buildings-props.md (buildings, props, loot,
 // projectiles) plus "attachments": worn or held items hung on a character's
 // socket (Thư Đồng gear, the lead hat, the spear). Rigged kinds: "heroes" and
-// "enemies" (rig trial 24/10: lam, cuong-thi; td_rig_tools.py); helpers,
-// units and bosses follow when their rigs are made.
+// "enemies" (rig trial 24/10: lam, cuong-thi; td_rig_tools.py), "units"
+// (soldiers: linh-giao with its spear as a second skinned mesh); helpers and
+// bosses follow when their rigs are made.
 //
 // Authoring (Blender, TK 23.9 and file 02 §8): metres, +Y up, the front (door,
 // FX_core medallion) faces -Z. Buildings: origin at the centre of their
 // occupation ring, on the ground. Sockets are Empties named exactly as below
 // (building sockets are lower-case after FX_, as in TK 23.9).
 
-export type ModelKind = "buildings" | "props" | "projectiles" | "loot" | "attachments" | "heroes" | "enemies";
+export type ModelKind = "buildings" | "props" | "projectiles" | "loot" | "attachments" | "heroes" | "enemies" | "units";
 export type ModelTier = "high" | "medium";
 
 export type ModelContract = {
@@ -95,6 +96,18 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     optionalSockets: ["FX_TOOL"],
     requiredClips: ["Enemy_Move", "Enemy_Idle", "Enemy_Attack", "Enemy_Hit", "Enemy_Death"],
     optionalClips: ["Enemy_Skill"],
+    triangles: { min: 500, max: 9_000 },
+    textureMax: { high: 1024, medium: 512 },
+  },
+  // Soldiers (TK 23.9 "Lính"). Variants use a dot suffix (Unit_Idle.guard, the
+  // brace while holding an enemy) and fall back to the base clip. The held
+  // weapon is part of the GLB on its own bone; FX_TOOL is its tip.
+  units: {
+    kind: "units",
+    requiredSockets: [...CHARACTER_SOCKETS, "FX_TOOL"],
+    optionalSockets: [],
+    requiredClips: ["Unit_Idle", "Unit_Walk", "Unit_Attack", "Unit_Hit", "Unit_Death", "Unit_Cheer"],
+    optionalClips: ["Unit_Skill", "Unit_Charge"],
     triangles: { min: 500, max: 9_000 },
     textureMax: { high: 1024, medium: 512 },
   },

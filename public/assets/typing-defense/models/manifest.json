@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-24T01:01:17.402Z",
+  "generatedAt": "2026-10-24T01:17:49.733Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
@@ -488,6 +488,77 @@
         0.7751
       ]
     },
+    "enemies/tanuki": {
+      "kind": "enemies",
+      "id": "tanuki",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/enemies/tanuki/tanuki.high.glb?v=b9ad3e56c2",
+          "bytes": 365024
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/enemies/tanuki/tanuki.medium.glb?v=4457a7bef0",
+          "bytes": 268248
+        }
+      },
+      "triangles": 5696,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_HAND_R",
+        "FX_HEAD",
+        "FX_CORE",
+        "FX_FEET"
+      ],
+      "clips": [
+        "Enemy_Idle",
+        "Enemy_Move",
+        "Enemy_Attack",
+        "Enemy_Hit",
+        "Enemy_Death",
+        "Enemy_Skill"
+      ],
+      "size": [
+        1.6255,
+        1.8,
+        1.4325
+      ]
+    },
+    "enemies/troll": {
+      "kind": "enemies",
+      "id": "troll",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/enemies/troll/troll.high.glb?v=0539c294b6",
+          "bytes": 590128
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/enemies/troll/troll.medium.glb?v=8e038aec6e",
+          "bytes": 358480
+        }
+      },
+      "triangles": 9000,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_HAND_R",
+        "FX_HEAD",
+        "FX_TOOL",
+        "FX_CORE",
+        "FX_FEET"
+      ],
+      "clips": [
+        "Enemy_Idle",
+        "Enemy_Move",
+        "Enemy_Attack",
+        "Enemy_Hit",
+        "Enemy_Death",
+        "Enemy_Skill"
+      ],
+      "size": [
+        3.6202,
+        4,
+        2.3713
+      ]
+    },
     "heroes/lam": {
       "kind": "heroes",
       "id": "lam",
@@ -819,6 +890,44 @@
         0.673,
         2.1984,
         0.3799
+      ]
+    },
+    "units/linh-giao": {
+      "kind": "units",
+      "id": "linh-giao",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/units/linh-giao/linh-giao.high.glb?v=e3df2ffa83",
+          "bytes": 660536
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/units/linh-giao/linh-giao.medium.glb?v=7396084ce4",
+          "bytes": 380304
+        }
+      },
+      "triangles": 6772,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_TOOL",
+        "FX_HAND_R",
+        "FX_HEAD",
+        "FX_CORE",
+        "FX_FEET"
+      ],
+      "clips": [
+        "Unit_Idle",
+        "Unit_Walk",
+        "Unit_Attack",
+        "Unit_Idle.guard",
+        "Unit_Hit",
+        "Unit_Death",
+        "Unit_Cheer",
+        "Unit_Charge"
+      ],
+      "size": [
+        1.1056,
+        2.2001,
+        0.7084
       ]
     }
   }

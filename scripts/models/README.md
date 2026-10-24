@@ -108,3 +108,38 @@ Metadata clip trong GLB (extras của nút xương, `td_rig_attach.extras`): `td
 Kiểm thêm trong `td_rig_review.py`: `facePitchMinDeg`, `faceToGameCamMaxDeg` (0 = mặt nhìn thẳng camera game; lúc đứng khoảng 60–65), `torsoLeanDeg`, `handArcTop` (`sweepDeg`, `wideSweepDeg`, `reachMax_m`), `chainStartOffsetDeg` / `chainEndOffsetDeg` (so với khung đầu Idle), `_sockets` (xương cha và xương gần nhất của từng `FX_`), và `contact.png` (mỗi clip một hàng ảnh camera game). Không đổi `pose_position` sang REST trong lúc kiểm: Blender 5.2 ngừng tính lại khung sau đó.
 
 Ảnh: `/Users/toandx/AudioLab/work/_td-models/rig/<id>/<clip>/sheet.png`, `/Users/toandx/AudioLab/work/_td-models/rig/<id>/contact.png`, trước/sau ở `/Users/toandx/AudioLab/work/_td-models/rig/lam/_evidence/` và `/Users/toandx/AudioLab/work/_td-models/rig/<id>/_before-fix/`; số đo `checks-after-review-fixes.json`.
+
+# Rig người lô 1: Lính Giáo, Tanuki, Troll (24/10/2026)
+
+Cùng đường ống với Lam và Cương Thi (nhập gộp đỉnh, xoay, phóng, giảm mặt, vật liệu mờ, xương Mesh2Motion không ngón, trọng lượng bone heat trong vùng, clip CC0 + clip khoá, lò xo, socket). Không nặn, không xoá mặt.
+
+## Tệp mới
+
+| Tệp | Là gì |
+|---|---|
+| `presets/td-rigs/linh-giao.json`, `tanuki.json`, `troll.json` | Preset rig của ba model. `reviewed: false`. |
+| `blender/td_rig_post.py` | Các bước sau clip: lớp phủ (`layers`), IK chân (`feetLock`, `lockFeet`; chân trụ giữ phẳng như Idle), IK tay (`reach`), đặt xương theo thế giới (`world`: giáo rơi xuống đất), xoay bù đầu (`headLevel`), độ chúi đều (`lean`), lắc cộng thêm (`oscillate`: dáng lạch bạch), xương bị đùi đẩy (`drive`: váy da), xích về Idle (`settle`), tốc độ mặt đất (`groundSpeed_mps`). |
+| `blender/td_rig_attach.py` | Đồ cầm thành lưới skinned thứ hai trên một xương (`attachments`: giáo của Lính Giáo), socket của đồ (`FX_TOOL` ở mũi giáo); metadata GLB (`td_clips`, `td_lookAt`, `td_attachments`). |
+| `model-contracts.ts` | Thêm loại `units` (Lính, TK 23.9): socket nhân vật + `FX_TOOL`, clip `Unit_Idle/Walk/Attack/Hit/Death/Cheer`, nên có `Unit_Skill`, `Unit_Charge`. |
+
+Khoá preset mới: `attachments`, `layers` / `layer` (aim, rot, add, `reach`, `worldAim`), `aimWorld` (giáo quay theo cung ngắn nhất giữa hai khoá), khoá `world` / `reach` / `feet` / `air`, `oscillate`, `drive` (`mode`: `set` mặc định, `add`), `groundIgnore` (nắm đấm được chạm đất mà không nhấc chân), vùng theo màu texture (`"colour": {"hue", "satMin", "valMin"}`: lá dính liền đầu Tanuki), `ground_clamp(ignore=…)`.
+
+## Kết quả
+
+| Model | Xương | Clip (giây) | Ghi chú |
+|---|---|---|---|
+| `units/linh-giao` (1,85 m, 4.772 + giáo 2.000 tam giác) | 24: người không ngón 23 + `spear` (con của `hand_r`) | `Unit_Idle` 3,13 lặp, `Unit_Walk` 1,67 lặp, `Unit_Attack` 1,08 (đâm giáo, bước lao chân trái), `Unit_Idle.guard` 2,0 lặp (thủ giáo khi chặn quái; thiếu thì dùng `Unit_Idle`), `Unit_Hit` 0,5, `Unit_Death` 1,25 (ngã ngồi, giáo rơi cạnh người), `Unit_Cheer` 1,5 (giơ giáo hai lần), `Unit_Charge` 1,17 lặp (giáo ngang, chúi đều 15°) | Đầu + nón cứng, ngửa 18° để camera 55° thấy mũi, miệng dưới vành nón. Giáo nằm trong GLB (lưới thứ hai, cùng khung xương), `FX_TOOL` ở mũi giáo, `FX_HAND_R` ở nắm tay. Tốc độ mặt đất ở ×1: Walk 0,45 m/s, Charge 2,56 m/s. |
+| `enemies/tanuki` (1,8 m, 5.696 tam giác) | 28: người không ngón + đuôi 4 + lá 1 | `Enemy_Idle` 3,13 lặp, `Enemy_Move` 0,71 lặp (lạch bạch: lắc hông 9°, lưng lắc ngược), `Enemy_Attack` 1,25 (nhảy húc bụng, hai tay dang ngang), `Enemy_Hit` 0,5, `Enemy_Death` 1,5 (ngã ngửa, bụng lên trời, chân giơ, đuôi nằm ngang), `Enemy_Skill` 1,96 (vỗ bụng 4 nhịp) | Lá chọn theo màu xanh của texture. Đuôi, lá về Idle cuối clip (`settle`). Move ở ×1: 1,84 m/s (2,4 m/s → phát ×1,3). |
+| `enemies/troll` (4,0 m, 9.000 tam giác) | 25: người không ngón + váy trước, sau | `Enemy_Idle` 3,88 lặp, `Enemy_Move` 1,17 lặp (Walk_Large nặng), `Enemy_Attack` 1,42 (nắm tay phải giơ cao rồi nện xuống đất trước mặt, cung ~200°), `Enemy_Hit` 0,63, `Enemy_Death` 1,25 (quỳ, gục trên hai nắm tay, đứng im như tượng), `Enemy_Skill` 2,0 (giơ hai tay, nện đất hai lần) | Khiên đá cứng theo `spine_03` (ngực), mép dưới hòa vào lưng 1,88–2,45 m. Váy da: đùi đẩy (`drive`) + lò xo. Thân cúi qua hông (IK giữ chân), không gập phần lưng dưới khiên. Move ở ×1: 1,16 m/s (2,0 m/s → ×1,7). `FX_TOOL` ở tâm mặt ngoài khiên. |
+
+Kiểm (`checks-final.json`): đầu cứng 0 ở mọi clip; mối nối vòng lặp ≤ 1 cm; chân trụ trượt 0–0,17 m/s ở mọi clip một lần (trừ Death); cạnh giãn > 1,6 lớn nhất: Lính 2–56 (Death 26), Tanuki 38–273 (Move), Troll 109–421 (Move). Nhìn ảnh có texture thì không thấy rách ở cỡ trong game.
+
+## Cần chủ dự án quyết
+
+| Việc | Chi tiết |
+|---|---|
+| Lá Tanuki | Lá dính vào đầu bằng 8 mặt. Không cắt lưới nên khi chết lá chỉ bật lên, xoay trên cuống; chiếc lá xoay rơi và khói be làm bằng VFX ở `FX_HEAD`. Muốn lá rơi thật: cho phép tách 8 mặt đó. |
+| Troll hóa đá, vỡ 3 tảng | Lưới liền một khối: clip dừng ở tư thế tượng quỳ; hóa đá là shader, vỡ 3 tảng là VFX (hoặc cho phép cắt lưới thành 3 phần). |
+| Lính Giáo ngửa đầu 18° | Nón rộng che mặt từ camera 55°. Ngửa 18° thấy mũi, miệng; muốn thấy mắt phải ngửa khoảng 22–25° (nhìn ngang hơi ngước). |
+| Tư thế nghỉ của giáo | Lúc chưa phát clip (bind pose) chuôi giáo thấp hơn đất 0,2 m. Nướng VAT hay đứng tĩnh thì dùng khung 0 của `Unit_Idle`. |
+| Duyệt | `/Users/toandx/AudioLab/work/_td-models/rig/<id>/contact.png` (mỗi clip: hàng nhìn trước + hàng camera game), `/Users/toandx/AudioLab/work/_td-models/rig/<id>/<clip>/sheet.png`. Duyệt xong đổi `reviewed` thành `true`. |

@@ -285,6 +285,8 @@ def classify(spec, co):
             mask &= np.isin(part.astype(str), rule["from"])
         if "notFrom" in rule:
             mask &= ~np.isin(part.astype(str), rule["notFrom"])
+        if "colour" in rule and spec.get("_rgb") is not None:
+            mask &= C.colour_mask(spec["_rgb"], rule["colour"])
         side = rule.get("side")
         if side == "l":
             mask &= co[:, 0] > 0
@@ -326,6 +328,8 @@ def skin(spec, mesh, rig):
     co = C.vertex_array(mesh)
     names = [b.name for b in rig.data.bones if b.use_deform]
     column = {n: i for i, n in enumerate(names)}
+    if any("colour" in rule for rule in spec.get("regions", [])):
+        spec["_rgb"] = C.vertex_rgb(mesh)
     part = classify(spec, co)
     heat, ok = heat_weights(mesh, rig, names)
     parts = spec["parts"]
@@ -522,14 +526,16 @@ def write_action(rig, name, frames, loop=False, track=True):
     return action
 
 
-def ground_clamp(rig, mesh, rest, frames, floor=0.0):
+def ground_clamp(rig, mesh, rest, frames, floor=0.0, ignore=None):
     """Raise the pelvis on frames where the skinned mesh goes below the floor
-    (a big chibi head lying down, a deep crouch). Returns the largest lift."""
+    (a big chibi head lying down, a deep crouch). Returns the largest lift.
+    ignore: vertex mask left out of the test (fists meant to pound the ground)."""
     action = write_action(rig, "_ground_probe", frames, track=False)
     lifts = []
     for f in range(len(frames)):
         bpy.context.scene.frame_set(f)
-        lifts.append(floor - float(C.evaluated_vertices(mesh)[:, 2].min()))
+        z = C.evaluated_vertices(mesh)[:, 2]
+        lifts.append(floor - float((z if ignore is None else z[~ignore]).min()))
     rig.animation_data.action = None
     bpy.data.actions.remove(action)
     # A clip that never touches the floor (a retargeted idle whose legs splay a
@@ -885,11 +891,15 @@ def build(args, spec):
     rig = build_armature(spec)
     skin_report, part, weights, names = skin(spec, mesh, rig)
     report["skin"] = skin_report
+    import td_rig_attach
+    if spec.get("attachments"):
+        report["attachments"] = td_rig_attach.attach(spec, rig, root)
     report["sockets"] = add_sockets(spec, rig)
     if args.mode == "bones":
         return rig, mesh, report, part, weights, names
     import td_rig_clips
     report["clips"] = td_rig_clips.make_clips(spec, rig, root, mesh)
+    td_rig_attach.extras(spec, rig, report)
     return rig, mesh, report, part, weights, names
 
 
@@ -903,13 +913,15 @@ def export(spec, rig, mesh, root):
     # Front -Y (authoring) -> +Y (Blender) = glTF -Z: turn the rig object.
     rig.rotation_mode = "XYZ"
     rig.rotation_euler = (0, 0, math.pi)
-    keep = [rig, mesh] + [o for o in bpy.context.scene.objects if o.type == "EMPTY" and o.name.startswith("FX_")]
+    import td_rig_attach
+    held = td_rig_attach.attachment_meshes(rig)
+    keep = [rig, mesh] + held + [o for o in bpy.context.scene.objects if o.type == "EMPTY" and o.name.startswith("FX_")]
     select_only(keep)
     bpy.ops.export_scene.gltf(
         filepath=path, export_format="GLB", use_selection=True, export_yup=True, export_apply=False,
         export_texcoords=True, export_normals=True, export_materials="EXPORT", export_animations=True,
         export_skins=True, export_morph=False, export_animation_mode="NLA_TRACKS", export_def_bones=False,
-        export_force_sampling=True, export_frame_step=1)
+        export_force_sampling=True, export_frame_step=1, export_extras="td_clips" in rig.keys())
     rig.rotation_euler = (0, 0, 0)
     log("exported", path)
     return path

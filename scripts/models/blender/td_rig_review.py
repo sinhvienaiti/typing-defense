@@ -38,11 +38,16 @@ PALETTE = [(0.90, 0.10, 0.10), (0.10, 0.60, 0.95), (0.20, 0.80, 0.20), (0.95, 0.
 
 def scene_parts():
     rig = next(o for o in bpy.context.scene.objects if o.type == "ARMATURE" and not o.name.startswith("SRC_"))
-    mesh = next(o for o in bpy.context.scene.objects if o.type == "MESH" and o.parent == rig)
+    # The body mesh (checks run on it); held items (td_attachment) stay visible.
+    skinned = [o for o in bpy.context.scene.objects if o.type == "MESH" and o.parent == rig]
+    mesh = next((o for o in skinned if not o.get("td_attachment")), skinned[0])
     for o in bpy.context.scene.objects:
-        if o not in (rig, mesh) and o.type in ("MESH", "ARMATURE"):
+        if o not in (rig, mesh) and o.type in ("MESH", "ARMATURE") and not (o.parent == rig and o.get("td_attachment")):
             o.hide_render = True
             o.hide_viewport = True
+        elif o.parent == rig and o.get("td_attachment"):
+            o.hide_render = False
+            o.hide_viewport = False
     return rig, mesh
 
 
@@ -140,7 +145,7 @@ class Checker:
         self.dominant = np.array(names)[w.argmax(1)]
         self.head_rows = (w[:, names.index("head")] > 0.999) if "head" in names else np.zeros(len(w), bool)
         self.names = names
-        chains = ("tail_", "ear_", "bag_", "robe_", "talisman")
+        chains = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf")
         self.chain_rows = np.array([str(d).startswith(chains) for d in self.dominant])
 
     def area(self, co):

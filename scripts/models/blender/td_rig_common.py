@@ -231,3 +231,55 @@ def ground_plane(size=12.0, z=0.0, colour=(0.55, 0.57, 0.6, 1)):
 
 def quat_world_axes(axis, degrees):
     return Quaternion(Vector(axis), math.radians(degrees))
+
+
+def vertex_rgb(obj):
+    """Mean base-colour texture RGB (0..1) per vertex, sampled at the loops' UVs
+    (part rules by colour: a leaf fused to a head). None without a texture."""
+    image = None
+    mat = obj.active_material
+    if mat and mat.use_nodes:
+        for node in mat.node_tree.nodes:
+            if node.type == "BSDF_PRINCIPLED" and node.inputs["Base Color"].is_linked:
+                src = node.inputs["Base Color"].links[0].from_node
+                if src.type == "TEX_IMAGE":
+                    image = src.image
+        if image is None:
+            image = next((n.image for n in mat.node_tree.nodes if n.type == "TEX_IMAGE" and n.image), None)
+    if image is None or not obj.data.uv_layers:
+        return None
+    w, h = image.size
+    px = np.empty(w * h * 4, dtype=np.float32)
+    image.pixels.foreach_get(px)
+    px = px.reshape(h, w, 4)
+    loops = obj.data.loops
+    uv = np.empty(len(loops) * 2)
+    obj.data.uv_layers.active.data.foreach_get("uv", uv)
+    uv = uv.reshape(-1, 2)
+    vi = np.empty(len(loops), dtype=np.int64)
+    loops.foreach_get("vertex_index", vi)
+    x = np.clip((uv[:, 0] % 1.0) * (w - 1), 0, w - 1).astype(int)
+    y = np.clip((uv[:, 1] % 1.0) * (h - 1), 0, h - 1).astype(int)
+    rgb = px[y, x, :3].astype(np.float64)
+    out = np.zeros((len(obj.data.vertices), 3))
+    count = np.bincount(vi, minlength=len(out)).astype(float)
+    for k in range(3):
+        out[:, k] = np.bincount(vi, weights=rgb[:, k], minlength=len(out))
+    return out / np.maximum(count, 1)[:, None]
+
+
+def colour_mask(rgb, rule):
+    """rule {"hue": [deg0, deg1], "satMin": s, "valMin": v, "valMax": v}: HSV test per vertex."""
+    r, g, b = rgb[:, 0], rgb[:, 1], rgb[:, 2]
+    mx, mn = rgb.max(1), rgb.min(1)
+    d = np.maximum(mx - mn, 1e-9)
+    hue = np.where(mx == r, (g - b) / d % 6, np.where(mx == g, (b - r) / d + 2, (r - g) / d + 4)) * 60.0
+    sat = np.where(mx > 1e-9, (mx - mn) / np.maximum(mx, 1e-9), 0)
+    mask = np.ones(len(rgb), dtype=bool)
+    if "hue" in rule:
+        h0, h1 = rule["hue"]
+        mask &= (hue >= h0) & (hue <= h1) if h0 <= h1 else (hue >= h0) | (hue <= h1)
+    mask &= sat >= rule.get("satMin", 0.0)
+    mask &= mx >= rule.get("valMin", 0.0)
+    mask &= mx <= rule.get("valMax", 1.0)
+    return mask
