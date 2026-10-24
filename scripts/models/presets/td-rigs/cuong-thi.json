@@ -1,0 +1,552 @@
+{
+ "version": 1,
+ "id": "cuong-thi",
+ "kind": "enemies",
+ "source": "enemies/cuong-thi.glb",
+ "note": "P9 Cương Thi, quái bầy, cao 1,7 m (Đầu Đàn = model này ×1,5 + mũ ở FX_HEAD). Toạ độ: mét, Z lên, mặt nhìn -Y, +X là tay trái nhân vật.",
+ "yaw": -90,
+ "height": 1.7,
+ "triangles": 6000,
+ "material": {
+  "metallic": 0.0,
+  "roughnessMin": 0.5
+ },
+ "reviewed": false,
+ "bones": {
+  "root": {
+   "head": [
+    0,
+    0,
+    0
+   ],
+   "tail": [
+    0,
+    0.2,
+    0
+   ],
+   "parent": null,
+   "deform": false
+  },
+  "pelvis": {
+   "head": [
+    0,
+    0.04,
+    0.4
+   ],
+   "tail": [
+    0,
+    0.04,
+    0.52
+   ],
+   "parent": "root",
+   "part": "torso",
+   "radius": 0.25
+  },
+  "spine_01": {
+   "head": [
+    0,
+    0.04,
+    0.52
+   ],
+   "tail": [
+    0,
+    0.04,
+    0.66
+   ],
+   "parent": "pelvis",
+   "part": "torso",
+   "radius": 0.25
+  },
+  "spine_02": {
+   "head": [
+    0,
+    0.04,
+    0.66
+   ],
+   "tail": [
+    0,
+    0.04,
+    0.8
+   ],
+   "parent": "spine_01",
+   "part": "torso",
+   "radius": 0.25
+  },
+  "spine_03": {
+   "head": [
+    0,
+    0.04,
+    0.8
+   ],
+   "tail": [
+    0,
+    0.05,
+    0.93
+   ],
+   "parent": "spine_02",
+   "part": "torso",
+   "radius": 0.22
+  },
+  "neck_01": {
+   "head": [
+    0,
+    0.05,
+    0.93
+   ],
+   "tail": [
+    0,
+    0.05,
+    1.0
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.1
+  },
+  "head": {
+   "head": [
+    0,
+    0.05,
+    1.0
+   ],
+   "tail": [
+    0,
+    0.05,
+    1.4
+   ],
+   "parent": "neck_01",
+   "part": "head",
+   "radius": 0.4
+  },
+  "clavicle_l": {
+   "head": [
+    0.03,
+    0.04,
+    0.9
+   ],
+   "tail": [
+    0.16,
+    0.05,
+    0.88
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.1
+  },
+  "upperarm_l": {
+   "head": [
+    0.16,
+    0.05,
+    0.88
+   ],
+   "tail": [
+    0.3,
+    0.05,
+    0.7
+   ],
+   "parent": "clavicle_l",
+   "part": "arm_l",
+   "radius": 0.09
+  },
+  "lowerarm_l": {
+   "head": [
+    0.3,
+    0.05,
+    0.7
+   ],
+   "tail": [
+    0.39,
+    0.03,
+    0.54
+   ],
+   "parent": "upperarm_l",
+   "part": "arm_l",
+   "radius": 0.09
+  },
+  "hand_l": {
+   "head": [
+    0.39,
+    0.03,
+    0.54
+   ],
+   "tail": [
+    0.43,
+    0.01,
+    0.46
+   ],
+   "parent": "lowerarm_l",
+   "part": "arm_l",
+   "radius": 0.06
+  },
+  "thigh_l": {
+   "head": [
+    0.09,
+    0.04,
+    0.4
+   ],
+   "tail": [
+    0.1,
+    0.04,
+    0.24
+   ],
+   "parent": "pelvis",
+   "part": "leg_l",
+   "radius": 0.1
+  },
+  "calf_l": {
+   "head": [
+    0.1,
+    0.04,
+    0.24
+   ],
+   "tail": [
+    0.12,
+    0.06,
+    0.09
+   ],
+   "parent": "thigh_l",
+   "part": "leg_l",
+   "radius": 0.09
+  },
+  "foot_l": {
+   "head": [
+    0.12,
+    0.06,
+    0.09
+   ],
+   "tail": [
+    0.13,
+    -0.06,
+    0.03
+   ],
+   "parent": "calf_l",
+   "part": "leg_l",
+   "radius": 0.08
+  },
+  "ball_l": {
+   "head": [
+    0.13,
+    -0.06,
+    0.03
+   ],
+   "tail": [
+    0.13,
+    -0.15,
+    0.02
+   ],
+   "parent": "foot_l",
+   "part": "leg_l",
+   "radius": 0.06
+  },
+  "robe_f": {
+   "head": [
+    0,
+    -0.08,
+    0.52
+   ],
+   "tail": [
+    0,
+    -0.16,
+    0.18
+   ],
+   "parent": "pelvis",
+   "part": "robe",
+   "radius": 0.12
+  },
+  "robe_b": {
+   "head": [
+    0,
+    0.16,
+    0.52
+   ],
+   "tail": [
+    0,
+    0.24,
+    0.18
+   ],
+   "parent": "pelvis",
+   "part": "robe",
+   "radius": 0.12
+  },
+  "robe_l": {
+   "head": [
+    0.16,
+    0.04,
+    0.52
+   ],
+   "tail": [
+    0.25,
+    0.04,
+    0.18
+   ],
+   "parent": "pelvis",
+   "part": "robe",
+   "radius": 0.12
+  },
+  "talisman": {
+   "head": [
+    0,
+    -0.32,
+    1.5
+   ],
+   "tail": [
+    0,
+    -0.32,
+    1.22
+   ],
+   "parent": "head",
+   "part": "talisman",
+   "radius": 0.05
+  }
+ },
+ "parts": {
+  "torso": {
+   "bones": [
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "neck_01",
+    "head",
+    "clavicle_l",
+    "clavicle_r",
+    "upperarm_l",
+    "upperarm_r"
+   ]
+  },
+  "head": {
+   "bones": [
+    "head",
+    "neck_01",
+    "spine_03"
+   ],
+   "rigid": "head",
+   "band": [
+    0.95,
+    1.03
+   ]
+  },
+  "talisman": {
+   "bones": [
+    "talisman"
+   ],
+   "rigid": "talisman"
+  },
+  "arm_l": {
+   "bones": [
+    "clavicle_l",
+    "upperarm_l",
+    "lowerarm_l",
+    "hand_l",
+    "spine_03"
+   ]
+  },
+  "robe": {
+   "bones": [
+    "pelvis",
+    "spine_01",
+    "robe_f",
+    "robe_b",
+    "robe_l",
+    "robe_r"
+   ]
+  },
+  "leg_l": {
+   "bones": [
+    "thigh_l",
+    "calf_l",
+    "foot_l",
+    "ball_l"
+   ]
+  }
+ },
+ "regions": [
+  {
+   "part": "robe",
+   "zMin": 0.1,
+   "zMax": 0.58,
+   "notFrom": [
+    "arm_l",
+    "arm_r"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "arm_l",
+   "box": [
+    [
+     0.245,
+     -0.2,
+     0.42
+    ],
+    [
+     0.6,
+     0.25,
+     0.8
+    ]
+   ]
+  },
+  {
+   "part": "arm_l",
+   "box": [
+    [
+     0.212,
+     -0.2,
+     0.55
+    ],
+    [
+     0.6,
+     0.25,
+     0.84
+    ]
+   ]
+  },
+  {
+   "part": "leg_l",
+   "zMax": 0.115,
+   "side": "l"
+  },
+  {
+   "part": "head",
+   "zMin": 0.96,
+   "notFrom": [
+    "arm_l",
+    "arm_r"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "talisman",
+   "box": [
+    [
+     -0.075,
+     -0.42,
+     1.16
+    ],
+    [
+     0.075,
+     -0.265,
+     1.53
+    ]
+   ],
+   "mirror": false
+  },
+  {
+   "part": "torso",
+   "zMax": 0.94,
+   "from": [
+    "head"
+   ],
+   "mirror": false
+  }
+ ],
+ "springs": {
+  "talisman": {
+   "bones": [
+    "talisman"
+   ],
+   "freq": 3.0,
+   "damping": 0.22,
+   "maxAngle": 40,
+   "only": [
+    0,
+    -1,
+    0
+   ]
+  },
+  "robe_f": {
+   "bones": [
+    "robe_f"
+   ],
+   "freq": 3.5,
+   "damping": 0.4,
+   "maxAngle": 16
+  },
+  "robe_b": {
+   "bones": [
+    "robe_b"
+   ],
+   "freq": 3.5,
+   "damping": 0.4,
+   "maxAngle": 16
+  },
+  "robe_l": {
+   "bones": [
+    "robe_l"
+   ],
+   "freq": 3.5,
+   "damping": 0.4,
+   "maxAngle": 16
+  }
+ },
+ "sockets": {
+  "FX_HAND_R": {
+   "bone": "hand_r",
+   "at": [
+    -0.43,
+    0.0,
+    0.47
+   ]
+  },
+  "FX_HEAD": {
+   "bone": "head",
+   "at": [
+    0,
+    0.06,
+    1.35
+   ]
+  },
+  "FX_CORE": {
+   "bone": "spine_02",
+   "at": [
+    0,
+    0.0,
+    0.72
+   ]
+  },
+  "FX_FEET": {
+   "bone": "root",
+   "at": [
+    0,
+    0.02,
+    0.0
+   ]
+  }
+ },
+ "rigidIslands": 64,
+ "clips": [
+  {
+   "name": "Enemy_Idle",
+   "script": "jiangshi_idle",
+   "loop": true,
+   "frames": 48
+  },
+  {
+   "name": "Enemy_Move",
+   "script": "jiangshi_hop",
+   "loop": true,
+   "frames": 14,
+   "height": 0.22
+  },
+  {
+   "name": "Enemy_Attack",
+   "script": "jiangshi_attack",
+   "frames": 22,
+   "blendIn": 2,
+   "blendOut": 3
+  },
+  {
+   "name": "Enemy_Hit",
+   "script": "jiangshi_hit",
+   "frames": 12,
+   "blendIn": 1,
+   "blendOut": 3
+  },
+  {
+   "name": "Enemy_Death",
+   "script": "jiangshi_death",
+   "frames": 30,
+   "blendIn": 2
+  }
+ ],
+ "smoothPasses": 6
+}

@@ -54,3 +54,6 @@ art-src/
 .env.*
 rclone.conf
 *.rclone.conf
+
+# Python bytecode from the Blender tooling
+__pycache__/

@@ -1,0 +1,2372 @@
+{
+ "version": 1,
+ "id": "lam",
+ "kind": "heroes",
+ "source": "heroes/lam.glb",
+ "note": "P7 Lam Hỏa Miêu, cao 2,7 m (TK 23.2). Toạ độ: mét, Z lên, mặt nhìn -Y, +X là tay trái nhân vật, gốc ở giữa hai chân trên mặt đất.",
+ "yaw": -90,
+ "height": 2.7,
+ "triangles": 20000,
+ "material": {
+  "metallic": 0.0,
+  "roughnessMin": 0.5
+ },
+ "reviewed": false,
+ "bones": {
+  "root": {
+   "head": [
+    0,
+    0,
+    0
+   ],
+   "tail": [
+    0,
+    0.25,
+    0
+   ],
+   "parent": null,
+   "deform": false
+  },
+  "pelvis": {
+   "head": [
+    0,
+    0.1,
+    0.86
+   ],
+   "tail": [
+    0,
+    0.1,
+    1.02
+   ],
+   "parent": "root",
+   "part": "torso",
+   "radius": 0.3
+  },
+  "spine_01": {
+   "head": [
+    0,
+    0.1,
+    1.02
+   ],
+   "tail": [
+    0,
+    0.08,
+    1.18
+   ],
+   "parent": "pelvis",
+   "part": "torso",
+   "radius": 0.3
+  },
+  "spine_02": {
+   "head": [
+    0,
+    0.08,
+    1.18
+   ],
+   "tail": [
+    0,
+    0.08,
+    1.34
+   ],
+   "parent": "spine_01",
+   "part": "torso",
+   "radius": 0.3
+  },
+  "spine_03": {
+   "head": [
+    0,
+    0.08,
+    1.34
+   ],
+   "tail": [
+    0,
+    0.09,
+    1.52
+   ],
+   "parent": "spine_02",
+   "part": "torso",
+   "radius": 0.3
+  },
+  "neck_01": {
+   "head": [
+    0,
+    0.09,
+    1.52
+   ],
+   "tail": [
+    0,
+    0.1,
+    1.66
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.15
+  },
+  "head": {
+   "head": [
+    0,
+    0.1,
+    1.66
+   ],
+   "tail": [
+    0,
+    0.1,
+    2.2
+   ],
+   "parent": "neck_01",
+   "part": "head",
+   "radius": 0.4
+  },
+  "clavicle_l": {
+   "head": [
+    0.06,
+    0.08,
+    1.48
+   ],
+   "tail": [
+    0.36,
+    0.14,
+    1.44
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.15
+  },
+  "upperarm_l": {
+   "head": [
+    0.36,
+    0.14,
+    1.44
+   ],
+   "tail": [
+    0.53,
+    0.2,
+    1.21
+   ],
+   "parent": "clavicle_l",
+   "part": "arm_l",
+   "radius": 0.13
+  },
+  "lowerarm_l": {
+   "head": [
+    0.53,
+    0.2,
+    1.21
+   ],
+   "tail": [
+    0.61,
+    0.18,
+    0.99
+   ],
+   "parent": "upperarm_l",
+   "part": "arm_l",
+   "radius": 0.11
+  },
+  "hand_l": {
+   "head": [
+    0.61,
+    0.18,
+    0.99
+   ],
+   "tail": [
+    0.65,
+    0.15,
+    0.82
+   ],
+   "parent": "lowerarm_l",
+   "part": "arm_l",
+   "radius": 0.1
+  },
+  "thigh_l": {
+   "head": [
+    0.18,
+    0.1,
+    0.86
+   ],
+   "tail": [
+    0.24,
+    0.08,
+    0.57
+   ],
+   "parent": "pelvis",
+   "part": "leg_l",
+   "radius": 0.17
+  },
+  "calf_l": {
+   "head": [
+    0.24,
+    0.08,
+    0.57
+   ],
+   "tail": [
+    0.29,
+    0.12,
+    0.3
+   ],
+   "parent": "thigh_l",
+   "part": "leg_l",
+   "radius": 0.15
+  },
+  "foot_l": {
+   "head": [
+    0.29,
+    0.12,
+    0.3
+   ],
+   "tail": [
+    0.31,
+    -0.1,
+    0.08
+   ],
+   "parent": "calf_l",
+   "part": "leg_l",
+   "radius": 0.14
+  },
+  "ball_l": {
+   "head": [
+    0.31,
+    -0.1,
+    0.08
+   ],
+   "tail": [
+    0.32,
+    -0.3,
+    0.06
+   ],
+   "parent": "foot_l",
+   "part": "leg_l",
+   "radius": 0.1
+  },
+  "tail_01": {
+   "head": [
+    0.05,
+    0.3,
+    0.8
+   ],
+   "tail": [
+    0.25,
+    0.45,
+    0.62
+   ],
+   "parent": "pelvis",
+   "part": "tail",
+   "radius": 0.1
+  },
+  "tail_02": {
+   "head": [
+    0.25,
+    0.45,
+    0.62
+   ],
+   "tail": [
+    0.5,
+    0.58,
+    0.48
+   ],
+   "parent": "tail_01",
+   "part": "tail",
+   "radius": 0.1
+  },
+  "tail_03": {
+   "head": [
+    0.5,
+    0.58,
+    0.48
+   ],
+   "tail": [
+    0.78,
+    0.66,
+    0.5
+   ],
+   "parent": "tail_02",
+   "part": "tail",
+   "radius": 0.1
+  },
+  "tail_04": {
+   "head": [
+    0.78,
+    0.66,
+    0.5
+   ],
+   "tail": [
+    0.97,
+    0.7,
+    0.68
+   ],
+   "parent": "tail_03",
+   "part": "tail",
+   "radius": 0.11
+  },
+  "tail_05": {
+   "head": [
+    0.97,
+    0.7,
+    0.68
+   ],
+   "tail": [
+    0.97,
+    0.72,
+    0.95
+   ],
+   "parent": "tail_04",
+   "part": "tail",
+   "radius": 0.12
+  },
+  "ear_l": {
+   "head": [
+    0.27,
+    0.15,
+    2.3
+   ],
+   "tail": [
+    0.37,
+    0.17,
+    2.66
+   ],
+   "parent": "head",
+   "part": "ear_l",
+   "radius": 0.1
+  },
+  "bag_r": {
+   "head": [
+    -0.33,
+    -0.22,
+    1.13
+   ],
+   "tail": [
+    -0.33,
+    -0.25,
+    0.85
+   ],
+   "parent": "pelvis",
+   "part": "bag",
+   "radius": 0.12
+  }
+ },
+ "snap": {
+  "tail_01": 0.1,
+  "tail_02": 0.12,
+  "tail_03": 0.13,
+  "tail_04": 0.14,
+  "tail_05": 0.14
+ },
+ "parts": {
+  "torso": {
+   "bones": [
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "neck_01",
+    "head",
+    "clavicle_l",
+    "clavicle_r",
+    "upperarm_l",
+    "upperarm_r",
+    "thigh_l",
+    "thigh_r",
+    "tail_01",
+    "bag_r"
+   ]
+  },
+  "head": {
+   "bones": [
+    "head",
+    "neck_01",
+    "spine_03"
+   ],
+   "rigid": "head",
+   "band": [
+    1.57,
+    1.82
+   ]
+  },
+  "ear_l": {
+   "bones": [
+    "ear_l",
+    "head"
+   ]
+  },
+  "arm_l": {
+   "bones": [
+    "clavicle_l",
+    "upperarm_l",
+    "lowerarm_l",
+    "hand_l",
+    "spine_03"
+   ]
+  },
+  "leg_l": {
+   "bones": [
+    "pelvis",
+    "thigh_l",
+    "calf_l",
+    "foot_l",
+    "ball_l",
+    "spine_01"
+   ]
+  },
+  "tail": {
+   "bones": [
+    "pelvis",
+    "tail_*"
+   ]
+  },
+  "bag": {
+   "bones": [
+    "bag_r",
+    "pelvis",
+    "spine_01"
+   ]
+  },
+  "tube": {
+   "bones": [
+    "spine_02"
+   ],
+   "rigid": "spine_02"
+  }
+ },
+ "regions": [
+  {
+   "part": "head",
+   "zMin": 1.56,
+   "notFrom": [
+    "arm_l",
+    "arm_r"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "torso",
+   "zMax": 1.54,
+   "from": [
+    "head"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "ear_l",
+   "capsule": [
+    "ear_l"
+   ],
+   "radius": 0.13,
+   "zMin": 2.24
+  },
+  {
+   "part": "tube",
+   "segment": [
+    [
+     0.47,
+     0.47,
+     1.8
+    ],
+    [
+     -0.04,
+     0.4,
+     1.06
+    ]
+   ],
+   "radius": 0.12,
+   "notFrom": [
+    "arm_l",
+    "arm_r"
+   ],
+   "mirror": false
+  }
+ ],
+ "springs": {
+  "tail": {
+   "bones": [
+    "tail_*"
+   ],
+   "freq": 2.2,
+   "damping": 0.45,
+   "maxAngle": 18
+  },
+  "ear_l": {
+   "bones": [
+    "ear_l"
+   ],
+   "freq": 4.0,
+   "damping": 0.45,
+   "maxAngle": 14
+  },
+  "bag": {
+   "bones": [
+    "bag_r"
+   ],
+   "freq": 2.6,
+   "damping": 0.35,
+   "maxAngle": 18
+  }
+ },
+ "wag": {
+  "bones": [
+   "tail_02",
+   "tail_03",
+   "tail_04",
+   "tail_05"
+  ],
+  "axis": [
+   0,
+   0,
+   1
+  ],
+  "deg": 5,
+  "period": 2.4
+ },
+ "sockets": {
+  "FX_HAND_R": {
+   "bone": "hand_r",
+   "at": [
+    -0.65,
+    0.15,
+    0.84
+   ]
+  },
+  "FX_HEAD": {
+   "bone": "head",
+   "at": [
+    0,
+    0.12,
+    2.48
+   ]
+  },
+  "FX_CORE": {
+   "bone": "spine_02",
+   "at": [
+    0,
+    0.06,
+    1.28
+   ]
+  },
+  "FX_FEET": {
+   "bone": "root",
+   "at": [
+    0,
+    0.05,
+    0.0
+   ]
+  },
+  "FX_TOOL": {
+   "bone": "bag_r",
+   "at": [
+    -0.33,
+    -0.24,
+    1.12
+   ]
+  }
+ },
+ "retarget": {
+  "direction": [
+   "clavicle_l",
+   "clavicle_r",
+   "upperarm_l",
+   "upperarm_r",
+   "lowerarm_l",
+   "lowerarm_r",
+   "hand_l",
+   "hand_r"
+  ],
+  "abduct": {
+   "upperarm_l": [
+    [
+     0,
+     1,
+     0
+    ],
+    -25
+   ],
+   "upperarm_r": [
+    [
+     0,
+     1,
+     0
+    ],
+    25
+   ]
+  },
+  "inplace": "trend",
+  "bodyScale": {
+   "pelvis": 0.85,
+   "spine_01": 0.6,
+   "spine_02": 0.6,
+   "spine_03": 0.6,
+   "neck_01": 0.7,
+   "head": 0.6
+  }
+ },
+ "cc0": {
+  "base": "anim/mesh2motion/human-base-animations.glb",
+  "addon": "anim/mesh2motion/human-addon-animations.glb"
+ },
+ "clips": [
+  {
+   "name": "Hero_Idle",
+   "src": "base:Idle_A",
+   "loop": true
+  },
+  {
+   "name": "Hero_Run",
+   "src": "base:Sprint",
+   "loop": true,
+   "scale": {
+    "pelvis": 0.6,
+    "spine_01": 0.45,
+    "spine_02": 0.45,
+    "spine_03": 0.45
+   }
+  },
+  {
+   "name": "Hero_Attack",
+   "script": "keys",
+   "keys": [
+    {
+     "t": 0
+    },
+    {
+     "t": 5,
+     "aim": {
+      "upperarm_r": [
+       -0.75,
+       0.25,
+       0.6
+      ],
+      "lowerarm_r": [
+       -0.35,
+       0.15,
+       0.92
+      ],
+      "upperarm_l": [
+       0.55,
+       -0.55,
+       -0.6
+      ],
+      "lowerarm_l": [
+       0.25,
+       -0.95,
+       0.1
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        -6
+       ]
+      ],
+      "hand_r": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -12
+       ]
+      ]
+     },
+     "ease": "out"
+    },
+    {
+     "t": 8,
+     "aim": {
+      "upperarm_r": [
+       0.35,
+       -0.9,
+       -0.1
+      ],
+      "lowerarm_r": [
+       0.75,
+       -0.6,
+       -0.25
+      ],
+      "upperarm_l": [
+       0.6,
+       0.15,
+       -0.75
+      ],
+      "lowerarm_l": [
+       0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        10
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        11
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -5
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        12
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        14
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "in"
+    },
+    {
+     "t": 11,
+     "aim": {
+      "upperarm_r": [
+       0.6,
+       -0.6,
+       -0.5
+      ],
+      "lowerarm_r": [
+       0.85,
+       -0.2,
+       -0.5
+      ],
+      "upperarm_l": [
+       0.6,
+       0.15,
+       -0.75
+      ],
+      "lowerarm_l": [
+       0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        13
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        11
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        6
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -6
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        26
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        12
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "out"
+    },
+    {
+     "t": 19
+    }
+   ]
+  },
+  {
+   "name": "Hero_Skill1",
+   "script": "keys",
+   "keys": [
+    {
+     "t": 0
+    },
+    {
+     "t": 4,
+     "aim": {
+      "upperarm_r": [
+       -0.75,
+       0.25,
+       0.6
+      ],
+      "lowerarm_r": [
+       -0.35,
+       0.15,
+       0.92
+      ],
+      "upperarm_l": [
+       0.55,
+       -0.55,
+       -0.6
+      ],
+      "lowerarm_l": [
+       0.25,
+       -0.95,
+       0.1
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        -6
+       ]
+      ],
+      "hand_r": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -12
+       ]
+      ]
+     },
+     "ease": "out"
+    },
+    {
+     "t": 7,
+     "aim": {
+      "upperarm_r": [
+       0.35,
+       -0.9,
+       -0.1
+      ],
+      "lowerarm_r": [
+       0.75,
+       -0.6,
+       -0.25
+      ],
+      "upperarm_l": [
+       0.6,
+       0.15,
+       -0.75
+      ],
+      "lowerarm_l": [
+       0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        10
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        11
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -5
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        12
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        14
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "in"
+    },
+    {
+     "t": 10,
+     "aim": {
+      "upperarm_l": [
+       0.75,
+       0.25,
+       0.6
+      ],
+      "lowerarm_l": [
+       0.35,
+       0.15,
+       0.92
+      ],
+      "upperarm_r": [
+       -0.55,
+       -0.55,
+       -0.6
+      ],
+      "lowerarm_r": [
+       -0.25,
+       -0.95,
+       0.1
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        6
+       ]
+      ],
+      "hand_l": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        24
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -12
+       ]
+      ]
+     },
+     "ease": "out"
+    },
+    {
+     "t": 13,
+     "aim": {
+      "upperarm_l": [
+       -0.35,
+       -0.9,
+       -0.1
+      ],
+      "lowerarm_l": [
+       -0.75,
+       -0.6,
+       -0.25
+      ],
+      "upperarm_r": [
+       -0.6,
+       0.15,
+       -0.75
+      ],
+      "lowerarm_r": [
+       -0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        -10
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        -11
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -5
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        12
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        14
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "in"
+    },
+    {
+     "t": 15,
+     "aim": {
+      "upperarm_l": [
+       -0.6,
+       -0.6,
+       -0.5
+      ],
+      "lowerarm_l": [
+       -0.85,
+       -0.2,
+       -0.5
+      ],
+      "upperarm_r": [
+       -0.6,
+       0.15,
+       -0.75
+      ],
+      "lowerarm_r": [
+       -0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        -13
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        -11
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        -6
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -6
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        26
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        12
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "out"
+    },
+    {
+     "t": 20,
+     "aim": {
+      "upperarm_r": [
+       -0.35,
+       0.1,
+       0.93
+      ],
+      "lowerarm_r": [
+       -0.1,
+       0.25,
+       0.96
+      ],
+      "upperarm_l": [
+       0.35,
+       0.1,
+       0.93
+      ],
+      "lowerarm_l": [
+       0.1,
+       0.25,
+       0.96
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        8
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        6
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        40
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        40
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -20
+       ]
+      ]
+     },
+     "ease": "smooth"
+    },
+    {
+     "t": 24,
+     "aim": {
+      "upperarm_r": [
+       -0.3,
+       0.0,
+       0.95
+      ],
+      "lowerarm_r": [
+       -0.1,
+       -0.3,
+       0.95
+      ],
+      "upperarm_l": [
+       0.3,
+       0.0,
+       0.95
+      ],
+      "lowerarm_l": [
+       0.1,
+       -0.3,
+       0.95
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        4
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        16
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        16
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -8
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -8
+       ]
+      ]
+     },
+     "lift": 0.22,
+     "ease": "out"
+    },
+    {
+     "t": 27,
+     "aim": {
+      "upperarm_r": [
+       -0.2,
+       -0.85,
+       -0.5
+      ],
+      "lowerarm_r": [
+       0.05,
+       -0.6,
+       -0.8
+      ],
+      "upperarm_l": [
+       0.2,
+       -0.85,
+       -0.5
+      ],
+      "lowerarm_l": [
+       -0.05,
+       -0.6,
+       -0.8
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -14
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        8
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        48
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        48
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -24
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.08,
+      0
+     ],
+     "ease": "in"
+    },
+    {
+     "t": 31,
+     "aim": {
+      "upperarm_r": [
+       -0.2,
+       -0.85,
+       -0.5
+      ],
+      "lowerarm_r": [
+       0.05,
+       -0.6,
+       -0.8
+      ],
+      "upperarm_l": [
+       0.2,
+       -0.85,
+       -0.5
+      ],
+      "lowerarm_l": [
+       -0.05,
+       -0.6,
+       -0.8
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -14
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        8
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        48
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        48
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -24
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.08,
+      0
+     ]
+    },
+    {
+     "t": 40
+    }
+   ]
+  },
+  {
+   "name": "Hero_Skill2",
+   "src": "base:Spell_Simple_Enter+base:Spell_Simple_Shoot+base:Spell_Simple_Exit",
+   "blendIn": 3,
+   "blendOut": 6
+  },
+  {
+   "name": "Hero_Ult",
+   "script": "keys",
+   "keys": [
+    {
+     "t": 0
+    },
+    {
+     "t": 8,
+     "aim": {
+      "upperarm_r": [
+       -0.5,
+       0.6,
+       -0.6
+      ],
+      "lowerarm_r": [
+       -0.3,
+       0.7,
+       -0.6
+      ],
+      "upperarm_l": [
+       0.5,
+       0.6,
+       -0.6
+      ],
+      "lowerarm_l": [
+       0.3,
+       0.7,
+       -0.6
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -12
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        56
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        56
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -28
+       ]
+      ]
+     },
+     "ease": "out"
+    },
+    {
+     "t": 11,
+     "aim": {
+      "upperarm_r": [
+       -0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_r": [
+       -0.2,
+       0.9,
+       -0.35
+      ],
+      "upperarm_l": [
+       0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_l": [
+       0.2,
+       0.9,
+       -0.35
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -18
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        18
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -55
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        70
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        25
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        35
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        20
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      0,
+      -0.04
+     ],
+     "ease": "in"
+    },
+    {
+     "t": 18,
+     "aim": {
+      "upperarm_r": [
+       -0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_r": [
+       -0.2,
+       0.9,
+       -0.35
+      ],
+      "upperarm_l": [
+       0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_l": [
+       0.2,
+       0.9,
+       -0.35
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        18
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -55
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        70
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        25
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        35
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        20
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      0,
+      -0.02
+     ]
+    },
+    {
+     "t": 25,
+     "aim": {
+      "upperarm_r": [
+       -0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_r": [
+       -0.2,
+       0.9,
+       -0.35
+      ],
+      "upperarm_l": [
+       0.35,
+       0.75,
+       -0.55
+      ],
+      "lowerarm_l": [
+       0.2,
+       0.9,
+       -0.35
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        -18
+       ]
+      ],
+      "spine_02": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        18
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -55
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        70
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        25
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        35
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        20
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      0,
+      -0.04
+     ]
+    },
+    {
+     "t": 30,
+     "aim": {
+      "upperarm_r": [
+       -0.8,
+       -0.2,
+       -0.3
+      ],
+      "lowerarm_r": [
+       -0.7,
+       -0.5,
+       -0.2
+      ],
+      "upperarm_l": [
+       0.8,
+       -0.2,
+       -0.3
+      ],
+      "lowerarm_l": [
+       0.7,
+       -0.5,
+       -0.2
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -35
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        5
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        35
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -15
+       ]
+      ]
+     },
+     "ease": "out"
+    },
+    {
+     "t": 40
+    }
+   ]
+  },
+  {
+   "name": "Hero_Assist",
+   "src": "base:Spell_Simple_Idle",
+   "loop": true
+  },
+  {
+   "name": "Hero_Hit",
+   "src": "base:Hit_Chest",
+   "blendIn": 1,
+   "blendOut": 4
+  },
+  {
+   "name": "Hero_Death",
+   "src": "base:Death_D",
+   "blendIn": 3
+  },
+  {
+   "name": "Hero_Respawn",
+   "script": "keys",
+   "keys": [
+    {
+     "t": 0,
+     "aim": {
+      "upperarm_r": [
+       -0.3,
+       -0.6,
+       -0.75
+      ],
+      "lowerarm_r": [
+       0.45,
+       -0.8,
+       0.15
+      ],
+      "upperarm_l": [
+       0.3,
+       -0.6,
+       -0.75
+      ],
+      "lowerarm_l": [
+       -0.45,
+       -0.8,
+       0.15
+      ]
+     },
+     "add": {
+      "thigh_l": [
+       [
+        "x",
+        -45
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        90
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -45
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -45
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        90
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -45
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -20
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        15
+       ]
+      ]
+     }
+    },
+    {
+     "t": 10,
+     "aim": {
+      "upperarm_r": [
+       -0.3,
+       -0.6,
+       -0.75
+      ],
+      "lowerarm_r": [
+       0.45,
+       -0.8,
+       0.15
+      ],
+      "upperarm_l": [
+       0.3,
+       -0.6,
+       -0.75
+      ],
+      "lowerarm_l": [
+       -0.45,
+       -0.8,
+       0.15
+      ]
+     },
+     "add": {
+      "thigh_l": [
+       [
+        "x",
+        -50
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        100
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -50
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -50
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        100
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -50
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        18
+       ]
+      ]
+     }
+    },
+    {
+     "t": 17,
+     "aim": {
+      "upperarm_r": [
+       -0.8,
+       0.0,
+       0.6
+      ],
+      "lowerarm_r": [
+       -0.6,
+       0.0,
+       0.8
+      ],
+      "upperarm_l": [
+       0.8,
+       0.0,
+       0.6
+      ],
+      "lowerarm_l": [
+       0.6,
+       0.0,
+       0.8
+      ]
+     },
+     "add": {
+      "spine_01": [
+       [
+        "x",
+        8
+       ]
+      ],
+      "head": [
+       [
+        "x",
+        -10
+       ]
+      ]
+     },
+     "lift": 0.14,
+     "ease": "out"
+    },
+    {
+     "t": 23,
+     "aim": {
+      "upperarm_r": [
+       -0.9,
+       -0.1,
+       -0.3
+      ],
+      "lowerarm_r": [
+       -0.85,
+       -0.4,
+       -0.2
+      ],
+      "upperarm_l": [
+       0.9,
+       -0.1,
+       -0.3
+      ],
+      "lowerarm_l": [
+       0.85,
+       -0.4,
+       -0.2
+      ]
+     },
+     "add": {
+      "thigh_l": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -15
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -15
+       ]
+      ]
+     },
+     "ease": "in"
+    },
+    {
+     "t": 34
+    }
+   ]
+  },
+  {
+   "name": "Hero_Victory",
+   "src": "addon:Victory Fist Pump",
+   "blendIn": 4,
+   "blendOut": 6
+  },
+  {
+   "name": "Hero_Idle_Fidget",
+   "src": "base:Idle_ShakeOff",
+   "blendIn": 4,
+   "blendOut": 6
+  },
+  {
+   "name": "Hero_Dash",
+   "src": "addon:Run_Anime",
+   "loop": true
+  }
+ ]
+}
