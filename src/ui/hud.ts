@@ -3,13 +3,13 @@
  * when its HTML changes. A button runs its action on press, so a re-render
  * cannot swallow the click, and never takes focus: Enter and Space stay the game's.
  */
-import { MODES, TICK_HZ } from "../content/rules";
+import { MODES, TICK_HZ, ULT } from "../content/rules";
 import type { RareEvent } from "../sim/events";
 import { BOSS } from "../sim/stores/boss";
 import { CALL_KIND } from "../sim/stores/calls";
 import { bossSlot } from "../sim/systems/boss";
 import { chainTier } from "../sim/systems/chain";
-import { earlyCallBonus } from "../sim/systems/waves";
+import { earlyCallBonus, locked, opensOn } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { Rect } from "../view/words/lanes";
@@ -26,6 +26,7 @@ export const REASON: Readonly<Record<string, string>> = {
   noBuilding: "Không có nhà đó", noBarracks: "Không phải Trại Lính", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
   noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ dân rồi", notRipe: "Ô này chưa chín",
   locked: "Chưa mở tới ngày này", keepMax: "Lũy đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",
+  ultEmpty: "Tối Thượng chưa đầy", ultBusy: "Mưa lông đang rơi", ultFar: "Xa Draconis quá (20 m)",
 };
 
 export const button = (act: string, label: string, key = "", attrs = ""): string => `<button data-act="${act}"${attrs}>${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`;
@@ -80,9 +81,14 @@ export function stripHtml(w: World, note: string, tactical = false): string {
   return main + `<span class="td-chain" title="Bậc Chuỗi ${chainTier(chain)}">Chuỗi <b>${chain}</b>${pips}</span>`;
 }
 
-/** Build and hire; the tactical pause where the mode has it (§8). */
-export const actionsHtml = (w: World, tactical: boolean): string =>
-  button("build", "Xây", "Insert / \\") + button("hire", "Thuê dân", "⇧ \\") + (MODES[w.mode].pause ? button("space", tactical ? "Chạy tiếp" : "Tạm dừng", "Space") : "");
+/** Build and hire; Tối Thượng with its charge (BUILD_1B §8.2, R2); the tactical pause where the mode has it (§8). */
+export function actionsHtml(w: World, tactical: boolean): string {
+  const shut = locked(w, "ult");
+  const charge = Math.floor(w.ult.charge);
+  const ult = shut ? "Tối Thượng · Mở ở Ngày " + opensOn(w, "ult") : w.ult.on === 1 ? "Mưa lông lửa" : charge >= ULT.max ? "Tối Thượng" : "Tối Thượng " + Math.floor(charge / 5) * 5 + " %";
+  return button("build", "Xây", "Insert / \\") + button("hire", "Thuê dân", "⇧ \\") + button("ult", ult, "=", shut || charge < ULT.max || w.ult.on === 1 ? " disabled" : "") +
+    (MODES[w.mode].pause ? button("space", tactical ? "Chạy tiếp" : "Tạm dừng", "Space") : "");
+}
 
 /**
  * The boss bar's one line under it (BUILD_1B §13.1: never in the middle of the screen, one at a time): Bà Cú Mực's
@@ -100,6 +106,7 @@ export class BossBanner {
   private ghost = 1;
   private hp = 1;
   private hpAt = 0;
+  private bigAt = -1e9;
 
   private say(now: number, ...lines: [string, number][]): void {
     this.lines = lines;
@@ -142,7 +149,7 @@ export class BossBanner {
 
   /** The ghost health (0–1): it waits 0.4 s after a hit, then follows the health down. */
   private ghostOf(hp: number, now: number): number {
-    if (hp < this.hp) [this.hp, this.hpAt] = [hp, now];
+    if (hp < this.hp) [this.hp, this.hpAt, this.bigAt] = [hp, now, this.hp - hp >= 0.01 ? now : this.bigAt]; // R2: a big hit jolts the bar
     if (hp > this.hp || this.ghost < hp) [this.hp, this.ghost] = [hp, hp];
     if (now - this.hpAt > 400) this.ghost = Math.max(hp, this.ghost - 0.004);
     return this.ghost;
@@ -165,8 +172,9 @@ export class BossBanner {
       const left = Math.max(0, Math.round(w.lanes[w.enemies.route[e]!]!.length - w.enemies.dist[e]!));
       const phase = S.stage === BOSS.retreat ? "rút lui" : w.tick < S.staggerUntil ? `choáng · Dễ Tổn Thương ${Math.ceil((S.staggerUntil - w.tick) / TICK_HZ)} s` : "pha " + S.phase;
       const pct = (share: number): string => (100 * share).toFixed(1) + "%";
+      const ghost = this.ghostOf(hp, now);
       main = `<div class="td-row"><b>Mộc Tinh</b><small>${phase} · còn ${left} m tới Lũy</small></div>` +
-        `<div class="td-bar"><i class="td-ghost" style="width:${pct(this.ghostOf(hp, now))}"></i><i class="td-hp" style="width:${pct(hp)}"></i>` +
+        `<div class="td-bar${now - this.bigAt < 160 ? " is-hit" : ""}"><i class="td-ghost" style="width:${pct(ghost)}"></i><i class="td-hp" style="width:${pct(hp)}"></i>` +
         `<s style="left:${w.c.content.boss!.stagger.atPct}%"></s><s class="td-retreat" style="left:${w.c.content.boss!.retreatPct}%"><small>rút lui</small></s></div>`;
     }
     return `<div class="td-boss-main${S.stage === BOSS.warned && w.phase === "night" ? " is-dim" : ""}">${main}</div>` + say;

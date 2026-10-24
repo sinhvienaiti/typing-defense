@@ -28,6 +28,7 @@ import { plotAt } from "../sim/systems/economy";
 import type { World } from "../sim/world";
 import { wordText } from "../typing/decks";
 import { BossView, type Pen } from "./boss-2d";
+import { FxView } from "./fx-2d";
 import { CALL_COLOR, CALL_ICON, pips, ROOF_M } from "./words/cards";
 
 /** The Văn Điền palette (theme.css --vd-*): paddies, bamboo, silver water, earth paths; the meaning colours as TK 23.3. */
@@ -35,7 +36,7 @@ const COLOR = {
   paddy: ["#93c45a", "#86b84f", "#9dcb66", "#8abd54", "#a5d39c"], dike: "#5c8a36", ripe: ["#d6ae4c", "#c9a043", "#ddb95e", "#c39a40"], ripeDike: "#8a6a2a",
   hedge: "#2b4a22", hedgeLeaf: "#3f6b2e", hedgeTop: "#5f8f3e", roof: ["#d4b06a", "#9a7440", "#b8914f"], roofRidge: "#5b3a1c",
   road: "#c8a06a", roadEdge: "#7d5a33", water: "#8fc3cf", waterEdge: "#4f8796", ripple: "rgba(255, 255, 255, 0.55)", bridge: "#8a5a2b",
-  ink: "#2b2118", paper: "#fff4d6", ore: "#c98a2e", soldier: "#3b7ddd", enemyHp: "#ff4a4a", buildingHp: "#ffb020", jade: "#0b8a78", lamp: "#ffb84d",
+  ink: "#2b2118", paper: "#fff4d6", ore: "#c98a2e", soldier: "#3b7ddd", enemyHp: "#ff4a4a", buildingHp: "#ffb020", jade: "#0b8a78", lamp: "#ffb84d", seal: "#c23b22",
   bamboo: "#2f5a26", culm: "#7fae4a", stump: "#8a6a3a", plots: ["#8b5a2b", "#b5e48c", "#4f9a2f", "#e9c46a"], rift: "#2a1840",
 } as const;
 /** Ground darkness by phase (night at full, dawn halfway) and the ms it takes to get there. */
@@ -80,8 +81,9 @@ export class DebugView {
   private readonly marks: Mark[] = [];
   /** The dim bubbles drawn last frame, CSS px: what a click hits. */
   private readonly bubbles: Bubble[] = [];
-  /** Mộc Tinh's layers (BUILD_1B §13.1); main.ts hands it each frame's events. */
+  /** Mộc Tinh's layers (BUILD_1B §13.1) and R2's Tối Thượng and direct calls (§13.3); main.ts hands them each frame's events. */
   readonly boss = new BossView();
+  readonly fx = new FxView(this.boss.fx);
   private readonly pen: Pen = { ctx: null as unknown as CanvasRenderingContext2D, px: (pixels) => this.px(pixels), text: (label, x, z, size, color, weight, edge) => this.text(label, x, z, size, color, weight, edge) };
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -145,11 +147,13 @@ export class DebugView {
     this.nodes(w);
     this.trees(w);
     this.boss.under(this.pen, w, now);
+    this.fx.under(this.pen, w, now);
     this.buildings(w, hand, now);
     this.ghost(w, hand);
     this.soldiers(w);
-    this.enemies(w);
+    this.enemies(w, now);
     this.boss.over(this.pen, w, now);
+    this.fx.over(this.pen, now);
     this.boss.marks(this.pen, w);
     this.npcs(w);
     this.agents(w, hand);
@@ -160,6 +164,8 @@ export class DebugView {
     this.boss.sky(ctx, w, this.canvas.width, this.canvas.height);
     ctx.setTransform(this.scale, 0, 0, this.scale, this.ox, this.oy);
     this.calls(w, hand);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    this.fx.portrait(ctx, this.canvas.height, this.ratio, now);
     [this.ox, this.oy] = [this.ox - qx, this.oy - qy];
   }
 
@@ -618,7 +624,7 @@ export class DebugView {
     }
   }
 
-  private enemies(w: World): void {
+  private enemies(w: World, now: number): void {
     const E = w.enemies;
     // At night the ink folk get a pale rim, so dark bodies stay clear on the darkened road (one path for all).
     if (this.dark > 0.2) {
@@ -645,7 +651,11 @@ export class DebugView {
         this.disc(x, z, def.radius + 0.45, "rgba(186, 160, 255, 0.35)", null);
       }
       if (E.elite[e] === 1) this.disc(x, z, def.radius + 0.35, null, COLOR.buildingHp, 2.5); // an elite (the pace director, BALANCE.md §4.2)
+      // R2 (BUILD_1B §13.3): a drumming Tanuki beats a red ring out; one whose drum was broken sees stars.
+      if (E.castEnd[e]! > w.tick) this.disc(x, z, def.radius + 0.5 + 0.35 * Math.abs(Math.sin(now * 0.012)), "rgba(194, 59, 34, 0.18)", COLOR.seal, 2.5);
+      else if (def.ability !== null && E.stunUntil[e]! > w.tick) this.text("★ ★", x, z - def.radius - 1.4, 13, "#ffb020", 900);
       this.disc(x, z, def.radius, def.def.view.color, COLOR.ink, def.armor > 0 ? 3 : 1.2);
+      if (def.def.split !== undefined) this.disc(x, z, def.radius * 0.45, "rgba(255, 244, 214, 0.7)", null); // Nuppeppō: two in one
       if (E.hp[e]! < def.hp) this.bar(x, z - def.radius - 0.7, Math.max(1.4, def.radius * 2), E.hp[e]! / def.hp, COLOR.enemyHp);
     }
   }
@@ -686,8 +696,11 @@ export class DebugView {
       if (a === hand.agent) this.disc(A.x[a]!, A.z[a]!, a === 0 ? AGENT.heroRingM : AGENT.helperRingM, "rgba(11, 138, 120, 0.06)", COLOR.jade, 1); // the help ring (§6)
       if (A.mode[a] === MODE.walk) this.polyline([x, z, ...A.path.subarray((a * PATH_MAX + A.next[a]!) * 2, (a * PATH_MAX + A.pathN[a]!) * 2)], view.color, 7);
       if (a > 0) {
-        this.disc(x, z, 0.85, view.color, COLOR.ink, 1.5);
-        this.text(view.short, x, z, 10, COLOR.ink);
+        // A panicked helper (R2) waddles home under a red "!".
+        const waddle = A.panic[a] !== 0 && A.mode[a] === MODE.walk ? Math.sin(performance.now() * 0.03) * 0.25 : 0;
+        this.disc(x + waddle, z, 0.85, view.color, COLOR.ink, 1.5);
+        this.text(view.short, x + waddle, z, 10, COLOR.ink);
+        if (A.panic[a] !== 0) this.text("!", x, z - 1.6, 18, COLOR.seal, 900, COLOR.seal);
         continue;
       }
       if (up > 0) this.disc(x + 0.9 * up, z + 1.4 * up, 0.9, "rgba(43, 33, 24, 0.25)", null);
@@ -704,6 +717,13 @@ export class DebugView {
       const kind = P.kind[p]!;
       if (kind === PROJECTILE.wordShot) {
         this.wordShot(w, x, z, P.tx[p]! - x, P.tz[p]! - z, P.word[p]!);
+        continue;
+      }
+      if (kind === PROJECTILE.feather) {
+        // A fire feather falling slantwise, its flame trail behind it (its shadow: fx-2d.ts).
+        const back = 1.6 / (Math.hypot(P.tx[p]! - x, P.tz[p]! - z) || 1);
+        this.polyline([x - (P.tx[p]! - x) * back, z - (P.tz[p]! - z) * back, x, z], "rgba(242, 99, 34, 0.85)", 0, 5);
+        this.disc(x, z, 0.32, "#ffd36b", COLOR.seal, 1.5);
         continue;
       }
       if (kind === PROJECTILE.shell) {

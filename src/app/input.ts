@@ -14,6 +14,7 @@ export const KEY_ACTIONS: Readonly<Record<string, string>> = {
   Digit1: "pick:1", Digit2: "pick:2", Digit3: "pick:3", Digit4: "pick:4", Digit5: "pick:5", Digit0: "recall", Backquote: "cycle",
   Tab: "next", ShiftTab: "prev", Enter: "send", NumpadEnter: "send", ShiftEnter: "night",
   Insert: "build", Backslash: "build", ShiftInsert: "hire", ShiftBackslash: "hire", Delete: "undo", ShiftDelete: "sell", Escape: "escape", Pause: "pause", F9: "sandbox", Space: "space",
+  Equal: "ult", // BUILD_1B §8.2: Tối Thượng (no IME uses it)
   ArrowLeft: "pan:1:0", ArrowRight: "pan:-1:0", ArrowUp: "pan:0:1", ArrowDown: "pan:0:-1",
 };
 
@@ -51,14 +52,15 @@ export function installKeys(target: Window, keys: { send(command: CommandBody): 
 type Spot = { x: number; z: number };
 type Camera = { panBy(dx: number, dy: number): void; zoomAt(x: number, y: number, factor: number): void; unproject(x: number, y: number): Spot };
 
-/** On the map a press that moves under 6 px is a click (at a field point and a screen point); a left or middle drag pans, the wheel zooms. */
-export function installPointer(canvas: HTMLCanvasElement, camera: Camera, hand: { pointer(p: Spot): void; click(p: Spot, right: boolean, screen: { x: number; y: number }): void }): void {
+/** On the map a press that moves under 6 px is a click (at a field point and a screen point); a left or middle drag pans, the wheel zooms; off the map the pointer is null. */
+export function installPointer(canvas: HTMLCanvasElement, camera: Camera, hand: { pointer(p: Spot | null): void; click(p: Spot, right: boolean, screen: { x: number; y: number }): void }): void {
   let down: { x: number; y: number; button: number; drag: boolean } | null = null;
   canvas.addEventListener("contextmenu", (event) => event.preventDefault());
   canvas.addEventListener("pointerdown", (event) => {
     down = { x: event.clientX, y: event.clientY, button: event.button, drag: false };
     canvas.setPointerCapture(event.pointerId);
   });
+  canvas.addEventListener("pointerleave", () => hand.pointer(null));
   canvas.addEventListener("pointermove", (event) => {
     hand.pointer(camera.unproject(event.clientX, event.clientY));
     if (down === null) return;

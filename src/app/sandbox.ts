@@ -12,6 +12,8 @@ export function sandboxOp(op: string, value: string, w: World, focus: number): S
   if (op === "level") return { op, building: focus, value: Number(value) };
   if (op === "gold") return { op, value: Math.floor(w.gold / 1000) + Number(value) };
   if (op === "wood") return { op, value: w.wood + Number(value) };
+  if (op === "spawn") return { op, enemy: value, value: value === "tanuki" ? 1 : 3 };
+  if (op === "ult") return { op };
   return { op, value: op === "mode" ? value : Number(value) } as SandboxOp;
 }
 
@@ -25,6 +27,7 @@ export function sandboxHtml(w: World): string {
     seg("Từ vựng", "sb:vocab", ["1", "3", "5"], ["Cấp 1", "1–3", "1–5"], String(w.vocab)) +
     seg("Tốc game", "sb:speed", ["0.75", "1", "2"], ["0,75×", "1×", "2×"], String(w.speed)) +
     `<div class="td-row">${button("sb:preset", "Đặt sẵn")}${button("sb:night", "Sinh đêm")}</div>` +
+    `<div class="td-row"><small>Gọi</small>${button("sb:spawn:tanuki", "Tanuki", "", ' title="+1 Lửng Tanuki"')}${button("sb:spawn:nuppeppo", "3 Nupp.", "", ' title="+3 Nuppeppō"')}${button("sb:ult", "Nạp =", "", ' title="Tối Thượng đầy"')}</div>` +
     `<div class="td-row"><small>Nhịp</small><span>k ×${w.pace.k.toFixed(2).replace(".", ",")} · tự điều ${w.pace.director ? "Bật" : "Tắt"}</span></div>`
   );
 }

@@ -58,6 +58,10 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 /* Two long labels (the Bastion's food and wood sales) stack, each the panel's width: never cut, never over the edge. */
 .td-row.td-stack { flex-direction: column; align-items: stretch; gap: 4px; }
 .td-row.td-stack > button { flex: none; padding: 3px 6px; }
+/* A card's actions share a row while their labels fit; one that does not starts a line of its own and fills it (one too
+   long for the card wraps inside its button): no label is cut or runs past the card, at any size (R2 review leftover). */
+.td-dock .td-row { flex-wrap: wrap; row-gap: 4px; }
+.td-dock .td-row > button:not(.td-x) { flex: 1 1 auto; max-width: 100%; padding: 3px 6px; white-space: normal; }
 .td-actions { padding: 6px; }
 .td-stat { display: flex; flex: 1; flex-direction: column; }
 .td-stat b { font-size: 1.5em; font-weight: 800; font-variant-numeric: tabular-nums; }
@@ -76,6 +80,11 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-agent em { right: -8px; bottom: -6px; background: var(--fam); }
 .td-agent .is-going { border-style: dashed; }
 .td-agent.is-on { outline: 3px solid var(--vd-jade); outline-offset: 3px; }
+/* Tối Thượng's charge (R2, §13.3): a ring round Draconis' lantern that fills, glowing once full. */
+.td-agent .td-ult { position: absolute; inset: -7px; border-radius: 50%; background: conic-gradient(var(--vd-amber-bright) var(--ult), rgba(43, 33, 24, 0.15) 0); -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); mask: radial-gradient(farthest-side, transparent calc(100% - 5px), #000 calc(100% - 4px)); pointer-events: none; }
+.td-agent .td-ult.is-full { background: var(--vd-amber-bright); animation: td-full 0.8s ease-in-out infinite alternate; }
+@keyframes td-full { from { opacity: 0.55; } to { opacity: 1; } }
+.td-actions [data-act="ult"]:not(:disabled) { border-color: var(--vd-amber); background: linear-gradient(#ffe2a8, #f6b85a); }
 .td-agent.is-locked { display: grid; align-content: center; background: repeating-linear-gradient(90deg, #ddd2bb 0 5px, #d2c6ad 5px 7px); color: #75603f; box-shadow: none; font-size: 1.2em; }
 .td-word { font-size: clamp(28px, 2.2em, 34px); font-weight: 800; }
 .td-word span, .td-hint { color: var(--vd-jade); }
@@ -98,6 +107,10 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-bar { position: relative; height: 12px; margin: 4px 0 15px; border: 1.5px solid var(--vd-ink); border-radius: 4px; background: #e6d4ab; overflow: visible; }
 .td-bar i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 3px; }
 .td-bar .td-ghost { background: #fff4d6; }
+/* R2 (§13.1): a big hit jolts the bar 2 px; never with reduced motion. */
+.td-bar.is-hit { animation: td-jolt 0.16s linear; }
+@keyframes td-jolt { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
+@media (prefers-reduced-motion: reduce) { .td-bar.is-hit { animation: none; } }
 .td-bar .td-hp { background: linear-gradient(#8a5a2b, #6b4a2a); }
 .td-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--vd-ink); }
 .td-bar .td-retreat { background: var(--vd-seal); }
@@ -131,6 +144,10 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-card.is-late .td-card-bar { background: var(--vd-amber-bright); }
 .td-card.is-ash { background: #d8d2c4; color: #8a8172; }
 .td-card.is-burst { border-left-color: var(--vd-amber-bright); border-right-color: var(--vd-amber-bright); box-shadow: 0 2px 0 var(--vd-amber), 0 0 14px rgba(255, 176, 32, 0.8); }
+/* R2 (BUILD_1B §13.3): Chữ Chiêu glows Draconis' orange; a direct call is a scroll, rolled at both ends, its window a clock ring. */
+.td-card.is-ult { border-left-color: var(--fam); border-right-color: var(--fam); box-shadow: 0 2px 0 rgba(43, 33, 24, 0.85), 0 0 14px rgba(242, 153, 74, 0.85); }
+.td-card.is-direct { border-radius: 3px; border-left: 7px double var(--vd-ink); border-right: 7px double var(--vd-ink); background: linear-gradient(180deg, #fbf0d0, #f0d9a2); }
+.td-card.is-direct .td-card-dot { top: -9px; right: -11px; width: 18px; height: 18px; background: conic-gradient(var(--vd-seal) var(--t, 100%), var(--vd-paper-light) 0); }
 /* A grade is a round seal pressed over the card: jade for typing at its best, vermilion for good, amber for sloppy. */
 .td-stamp { padding: 1px 9px; border: 2px solid currentColor; border-radius: 999px; background: rgba(255, 244, 214, 0.94); box-shadow: inset 0 0 0 1.5px rgba(255, 244, 214, 0.94), inset 0 0 0 3px currentColor; color: var(--vd-seal); font: 800 14px/1.35 var(--vd-title); letter-spacing: 0.02em; }
 .td-stamp.is-flash, .td-stamp.is-perfect { color: var(--vd-jade); }

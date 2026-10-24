@@ -4,7 +4,7 @@
  * sent to, a closed slot's Bastion level, and the "Đang gọi n/N" chip: bright
  * calls against the mode's cap (BUILD_1A6 §5.3).
  */
-import { MODES } from "../content/rules";
+import { MODES, ULT } from "../content/rules";
 import type { ViewBlock } from "../content/types";
 import { slotsOpen } from "../sim/systems/agents";
 import type { World } from "../sim/world";
@@ -21,7 +21,10 @@ export function teamHtml(w: World, selected: number): string {
     if (a >= slotsOpen(w)) return `<button class="td-agent is-locked" disabled title="Mở ở Lũy cấp ${opensAt}">${view.short}<small>Lũy ${opensAt}</small></button>`;
     const goal = A.goal[a]!;
     const badge = goal < 0 ? "" : `<em style="--fam:${buildingView(w, goal).color}" title="${buildingView(w, goal).name}">${buildingView(w, goal).short}</em>`;
-    return `<button class="td-agent${a === selected ? " is-on" : ""}" data-act="agent:${a}" style="--c:${view.color}" title="${view.name}"><i>${a + 1}</i>${view.short}${badge}</button>`;
+    // Draconis' lantern carries Tối Thượng's charge in a ring (BUILD_1B §13.3), in steps of 5 % so the HTML changes seldom.
+    const charge = Math.floor(w.ult.charge / 5) * 5;
+    const ring = a === 0 ? `<b class="td-ult${charge >= ULT.max ? " is-full" : ""}" style="--ult:${charge}%" title="Tối Thượng ${charge} %"></b>` : "";
+    return `<button class="td-agent${a === selected ? " is-on" : ""}" data-act="agent:${a}" style="--c:${view.color}" title="${view.name}">${ring}<i>${a + 1}</i>${view.short}${badge}</button>`;
   });
   return (
     `<div class="td-row"><span><b>${selected + 1} · ${agentView(w, selected).name}</b></span><span class="td-load" title="Lời gọi đang sáng / tối đa">Đang gọi ${bright}/${MODES[w.mode].open}</span></div>` +

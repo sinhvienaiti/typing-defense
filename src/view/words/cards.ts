@@ -22,10 +22,10 @@ import { KEY } from "../../typing/router";
 import { besidePanels, COLUMN, columnHeights, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
 export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", perfect: "Hoàn hảo", good: "Tốt", ok: "Vừa", sloppy: "Ẩu" };
-/** By call kind (CALL_KIND): power, build, harvest, chop, mine, quiz. */
-export const CALL_COLOR = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD"] as const;
-export const CALL_ICON = ["🏹", "🔨", "🌾", "🪓", "⛏️", "📖"] as const;
-export const CALL_NAME = ["Bắn mạnh", "Xây", "Gặt", "Chặt", "Đào", "Hỏi bài"] as const;
+/** By call kind (CALL_KIND): power, build, harvest, chop, mine, quiz; R2: Chữ Chiêu, a direct call (Ngắt). */
+export const CALL_COLOR = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD", "#F2994A", "#C23B22"] as const;
+export const CALL_ICON = ["🏹", "🔨", "🌾", "🪓", "⛏️", "📖", "🔥", "✋"] as const;
+export const CALL_NAME = ["Bắn mạnh", "Xây", "Gặt", "Chặt", "Đào", "Hỏi bài", "Chữ Chiêu", "Ngắt"] as const;
 /** Cards hang 1.6 m over the one who calls (a building's call over its middle). */
 export const ROOF_M = 1.6;
 
@@ -115,7 +115,8 @@ export class WordCards {
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     card.el.style.setProperty("--agent", "transparent");
     card.el.dataset.icon = CALL_ICON[kind];
-    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (w.calls.burst[c] === 1 ? " is-burst" : ""); // a "Dồn lửa" call: amber (BUILD_1B §13.1)
+    // A "Dồn lửa" call: amber (BUILD_1B §13.1); R2 (§13.3): Chữ Chiêu glows orange, a direct call is a scroll with its window's clock.
+    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (w.calls.burst[c] === 1 ? " is-burst" : "") + (kind === CALL_KIND.ult ? " is-ult" : kind === CALL_KIND.direct ? " is-direct" : "");
     card.sub.textContent = card.learn && !card.quiz ? card.mean : "";
     this.byId.set(id, card);
   }
@@ -232,7 +233,9 @@ export class WordCards {
         const expire = column.b >= 0 ? C.expire[column.b]! : -1;
         card.y = column.roofY - column.heights[k]! - card.height;
         card.x = boxes[index]!.x + offset + (typing ? 18 : 0) + (now < card.shakeUntil ? Math.sin(now * 0.25) * 3 : 0);
-        card.bar.style.transform = "scaleX(" + (expire < 0 || s < 0 ? 0 : Math.max(0, (expire - w.tick) / Math.max(1, expire - C.born[column.b]!))).toFixed(3) + ")";
+        const left = expire < 0 || s < 0 ? 0 : Math.max(0, (expire - w.tick) / Math.max(1, expire - C.born[column.b]!));
+        card.bar.style.transform = "scaleX(" + left.toFixed(3) + ")";
+        if (C.kind[column.b] === CALL_KIND.direct) card.el.style.setProperty("--t", (100 * left).toFixed(0) + "%"); // the window's clock ring
         place(card.el, card.x - card.half, card.y, typing ? "1.2" : locked ? "1.1" : "1", lock >= 0 && !locked ? 0.7 : 1);
       });
     });

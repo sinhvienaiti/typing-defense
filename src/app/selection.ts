@@ -16,6 +16,7 @@ import { PLOT } from "../sim/stores/buildings";
 import { CALL_STATE } from "../sim/stores/calls";
 import { slotsOpen } from "../sim/systems/agents";
 import { plotAt } from "../sim/systems/economy";
+import { ultSpot } from "../sim/systems/ult";
 import type { World } from "../sim/world";
 import { REASON } from "../ui/hud";
 import { sandboxOp } from "./sandbox";
@@ -40,6 +41,8 @@ export class Selection {
   panel = true;
   /** A sale asks twice within 3 s (BUILD_1B §7): the building's id and when the first press lapses. */
   sellArm = { id: -1, until: 0 };
+  /** The field point under the pointer (null: off the map): where `=` casts Tối Thượng when within reach (BUILD_1B §8.2). */
+  hover: Point | null = null;
 
   constructor(private readonly w: World, private readonly send: (command: CommandBody) => void) {}
 
@@ -66,6 +69,10 @@ export class Selection {
     pause: () => (this.tactical ? (this.tactical = false) : (this.paused = !this.paused)), // the HUD's ▶ ends either pause
     space: () => MODES[this.w.mode].pause && (this.tactical = !this.tactical),
     sandbox: () => (this.panel = !this.panel),
+    ult: () => {
+      const at = ultSpot(this.w, this.hover);
+      this.send({ t: "ult", qx: q(at.x), qz: q(at.z) });
+    },
   };
 
   /** `name`, `name:value`, or `sb:<op>:<value>` for the sandbox. */
@@ -163,8 +170,9 @@ export class Selection {
     this.close();
   }
 
-  pointer(p: Point): void {
-    if (this.building) this.mouse = p;
+  pointer(p: Point | null): void {
+    this.hover = p;
+    if (this.building && p !== null) this.mouse = p;
   }
 
   /** The ripe plot of farm b under p, −1 none. */

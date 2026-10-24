@@ -243,6 +243,7 @@ runFrameLoop({
       cards.read(fresh, world, now);
       if ((world.boss.stage > 0) !== bossTop > 0) resize();
       view.boss.read(fresh, world, now);
+      view.fx.read(fresh, world, now);
       banner.read(fresh, world, now);
       audio.read(fresh, world, now);
       audio.frame(title?.open === true ? null : world, now);
@@ -340,12 +341,17 @@ installDevHandle({
         return { ...S, targets: Array.from(S.targets.subarray(0, S.targetN)), hp: e < 0 ? 0 : world.enemies.hp[e]!, dist: e < 0 ? -1 : world.enemies.dist[e]!, x: e < 0 ? 0 : world.enemies.x[e]!, z: e < 0 ? 0 : world.enemies.z[e]! };
       })(),
       soldiers: U.live().map((s) => ({ alive: U.hp[s]! > 0, contact: U.contact[s] === 1, x: U.x[s]!, z: U.z[s]! })),
+      // R2: Tối Thượng; the enemies with a mechanic (drumming until castEnd, stunned until stunUntil).
+      ult: { ...world.ult, aimed: undefined },
+      foes: world.enemies.live().filter((e) => world.c.enemies[world.enemies.def[e]!]!.ability !== null || world.c.enemies[world.enemies.def[e]!]!.def.split !== undefined).map((e) => ({
+        id: world.enemies.id(e), def: world.c.enemies[world.enemies.def[e]!]!.id, x: world.enemies.x[e]!, z: world.enemies.z[e]!, hp: world.enemies.hp[e]!, castEnd: world.enemies.castEnd[e]!, stunUntil: world.enemies.stunUntil[e]!,
+      })),
       agents: A.live().map((a) => ({
-        x: A.x[a]!, z: A.z[a]!, mode: A.mode[a]!, goal: A.goal[a]! < 0 ? -1 : B.id(A.goal[a]!),
+        x: A.x[a]!, z: A.z[a]!, mode: A.mode[a]!, goal: A.goal[a]! < 0 ? -1 : B.id(A.goal[a]!), panic: A.panic[a]!,
         path: Array.from(A.path.subarray((a * PATH_MAX + A.next[a]!) * 2, (a * PATH_MAX + A.pathN[a]!) * 2)),
       })),
       npcs: N.live().map((n) => ({ kind: N.kind[n]!, task: N.task[n]!, job: N.job[n]!, x: N.x[n]!, z: N.z[n]! })),
-      calls: C.live().map((c) => ({ id: C.id(c), kind: C.kind[c]!, open: C.state[c] === 1, bright: C.bright[c] === 1, words: C.words[c]!, done: C.done[c]!, x: C.x[c]!, z: C.z[c]!, agent: C.agent[c]!, burst: C.burst[c] === 1 })),
+      calls: C.live().map((c) => ({ id: C.id(c), kind: C.kind[c]!, open: C.state[c] === 1, bright: C.bright[c] === 1, words: C.words[c]!, done: C.done[c]!, x: C.x[c]!, z: C.z[c]!, agent: C.agent[c]!, burst: C.burst[c] === 1, foe: C.foe[c]!, expire: C.expire[c]! })),
       review: Array.from(world.typing.review.subarray(0, world.typing.reviewN), (word) => wordText(deck, word)),
       trees: world.map.trees.map(([x, z], t) => ({ x, z, standing: world.trees.standing[t] === 1, marked: world.trees.marked[t] === 1 })),
     };

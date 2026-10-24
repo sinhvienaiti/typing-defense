@@ -7,8 +7,10 @@
  * cành and overshooting after; sinking 5 % while it roots; tilting with stars in the stagger), the red arcs of Quật
  * cành and of the blow on the Bastion, Mầm Gỗ (a leafy dot that wobbles, wilting when it dies), the numbers its hits
  * leave; stunned buildings' marks over all of it (1B R1 review). At the Bastion the body fades so the Bastion and the
- * blow's arc under it read. Particles come from the fixed pool of fx-2d.ts; nothing is allocated a frame. With reduced
- * motion nothing shakes; every warning stays.
+ * blow's arc under it read. R2's polish: the vein swells with each drum of the lull, leaves fall as it walks, wood chips
+ * fly off a rooted building, soil at the sprouts, bark at the stagger, stone at the Bastion's blow, a big hit shakes it.
+ * Particles come from the fixed pool of fx-2d.ts; nothing is allocated a frame. With reduced motion nothing shakes;
+ * every warning stays.
  */
 import { MODES, TICK_HZ } from "../content/rules";
 import { FX, type RareEvent } from "../sim/events";
@@ -35,7 +37,10 @@ const clamp01 = (t: number): number => Math.max(0, Math.min(1, t));
 const span = (tick: number, from: number, to: number): number => clamp01((tick - from) / Math.max(1, to - from));
 
 export class BossView {
-  private readonly fx = new Particles();
+  /** The map's one particle pool (fx-2d.ts's FxView emits into it too); drawn under the buildings. */
+  readonly fx = new Particles();
+  private leafAt2 = 0; // the last leaf it shed (ms)
+  private bigHitAt = -1e9;
   private cursor = 0;
   private readonly numbers = floaters(24);
   private readonly wilts = floaters(16);
@@ -71,10 +76,19 @@ export class BossView {
         if (b >= 0) {
           for (let k = 0; k < 6; k += 1) fx.emit(2, w.buildings.x[b]! + Math.cos(k * 1.05) * 2.4, w.buildings.z[b]! + Math.sin(k * 1.05) * 2.4, 0, 0, 520, now);
           fx.burst(0, w.buildings.x[b]!, w.buildings.z[b]!, 6, 2.2, 500, now);
+          fx.burst(1, w.buildings.x[b]!, w.buildings.z[b]! - 1, 5, 3.5, 420, now); // R2: wood chips
         }
       } else if (event.t === "bossStrike" && event.hit && event.move === "slam") this.slamAt = now;
-      else if (event.t === "bossPhase") this.staggerAt = now;
-      else if (event.t === "bossRetreat") {
+      else if (event.t === "bossEmerge") {
+        const p = w.lanes[event.route]!.point(w.c.content.stage!.boss.emergeM, 0, P); // R2: stones fly, rootlets whip out
+        fx.burst(0, p.x, p.z, 12, 5, 700, now);
+        for (let k = 0; k < 7; k += 1) fx.emit(2, p.x + Math.cos(k * 0.9) * 3.4, p.z + Math.sin(k * 0.9) * 3.4, 0, 0, 600, now);
+      } else if (event.t === "bossStrike" && event.hit && event.move === "summon" && bossSlot(w) >= 0) fx.burst(0, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 10, 3, 600, now); // R2: soil
+      else if (event.t === "bossStrike" && event.hit && event.move === "keep") fx.burst(0, w.map.keep[0], w.map.keep[1] - 2, 10, 4.5, 650, now); // R2: stone chips
+      else if (event.t === "bossPhase") {
+        this.staggerAt = now;
+        if (bossSlot(w) >= 0) fx.burst(1, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 14, 6, 700, now); // R2: bark bursts off
+      } else if (event.t === "bossRetreat") {
         const e = bossSlot(w);
         if (e >= 0) {
           fx.burst(0, w.enemies.x[e]!, w.enemies.z[e]!, 16, 4, 1400, now);
@@ -96,6 +110,7 @@ export class BossView {
         continue;
       }
       this.flashAt = now;
+      if (dmg >= 40) this.bigHitAt = now; // R2: a big hit shakes it 1–2 px
       const [x, z] = [ring.x[slot]!, ring.z[slot]!];
       if (dmg >= 12) fx.burst(1, x, z - 1, 4 + (dmg % 3), 4, 450, now);
       if (source === SOURCE.wordShot) this.float(0, x, z - 3, String(dmg), C.jade, 22, now);
@@ -113,8 +128,9 @@ export class BossView {
     const lane = w.lanes[S.route]!;
     const [from, to] = [stage.boss.emergeM, S.mergeM];
     const p = P;
-    // The vein: brown, dashed, flowing slowly toward the Bastion.
-    Object.assign(ctx, { strokeStyle: "rgba(107, 74, 42, 0.35)", lineWidth: pen.px(5), lineCap: "round" });
+    // The vein: brown, dashed, flowing slowly toward the Bastion; in the lull it swells with each drum (R2).
+    const beat = S.stage === BOSS.lull ? (w.tick - S.lullEnd + stage.boss.lullS * TICK_HZ) % (3 * TICK_HZ) : 99;
+    Object.assign(ctx, { strokeStyle: "rgba(107, 74, 42, " + (beat < 20 ? 0.6 : 0.35) + ")", lineWidth: pen.px(beat < 20 ? 8 : 5), lineCap: "round" });
     ctx.setLineDash([pen.px(10), pen.px(7)]);
     ctx.lineDashOffset = -now * 0.012;
     ctx.beginPath();
@@ -187,6 +203,11 @@ export class BossView {
     const e = bossSlot(w);
     const spec = w.c.content.boss;
     if (e >= 0 && spec !== undefined) this.body(pen, w, e, now);
+    // R2: Quật cành's blow flashes the soldiers it threw white for 60 ms.
+    if (e >= 0 && spec !== undefined && now - this.slamAt < 60) {
+      const reach = w.c.enemies[E.def[e]!]!.radius + spec.slam.reachM + spec.slam.knockM + 0.5;
+      for (const u of w.units.live()) if ((w.units.x[u]! - E.x[e]!) ** 2 + (w.units.z[u]! - E.z[e]!) ** 2 <= reach * reach) this.dot(pen, w.units.x[u]!, w.units.z[u]!, 0.75, "#ffffff");
+    }
     if (spec !== undefined && S.stage >= BOSS.lull) this.warnings(pen, w, e, now);
     for (const n of this.numbers) {
       const age = (now - n.at) / 900;
@@ -284,13 +305,18 @@ export class BossView {
     }
     if (S.rootsEnd >= 0) squash *= 0.95;
     if (w.tick < S.staggerUntil) tilt = 0.22 * Math.sin(Math.min(1, (now - this.staggerAt) / 250) * Math.PI * 0.5);
-    const x = x0 + dx;
+    // R2: leaves fall as it walks; a big hit shakes it 1–2 px.
+    if (walking && now - this.leafAt2 > 380) {
+      this.leafAt2 = now;
+      this.fx.emit(3, x0 + Math.sin(now) * r, z0 - r * 0.4, Math.sin(now * 1.7) * 0.8, 0.5, 1500, now);
+    }
+    const x = x0 + dx + (!this.still && now - this.bigHitAt < 160 ? Math.sin(now * 0.9) * 0.3 : 0);
     const z = z0 + dz + (1 - up) * 1.2;
     ctx.save();
     const atKeep = E.dist[e]! >= w.lanes[E.route[e]!]!.length - w.c.content.boss!.keep.stopM - 1;
     ctx.globalAlpha = Math.max(0, Math.min(atKeep ? 0.55 : 1, up * 1.4));
-    // The amber ring at its feet, its root legs swaying with the step.
-    this.circle(pen, x0, z0, r + 0.6, "rgba(242, 163, 58, 0.45)", 3);
+    // The amber ring at its feet (R2: as it retreats the light goes out from the rim in), its root legs swaying with the step.
+    this.circle(pen, x0, z0, (r + 0.6) * (S.stage === BOSS.retreat ? up : 1), "rgba(242, 163, 58, 0.45)", 3);
     Object.assign(ctx, { strokeStyle: C.root, lineWidth: pen.px(4), lineCap: "round" });
     for (let k = 0; k < 6; k += 1) {
       const a = (k / 6) * Math.PI * 2 + 0.3;
