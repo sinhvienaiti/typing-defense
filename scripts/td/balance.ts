@@ -53,7 +53,7 @@ if (sets > 1) {
   const pooled = poolCells(played);
   console.log(`## Gộp ${sets} bộ seed (${sets * seeds} ván mỗi ô): đích chặt 1B (BUILD_1B §6.4)\n`);
   console.log(tightTable(played, pooled).join("\n"));
-  console.log("\n### Cổng B1–B9 trên các bộ gộp (B1 và hàng tắt nhịp của B7 chấm theo đích chặt 1B: thắng 78–88 %, Biên S 40–60 %, BUILD_1B §18.3)\n");
+  console.log("\n### Cổng B1–B9 trên các bộ gộp (B1 và hàng tắt nhịp của B7 chấm theo đích chặt 1B: thắng 78–88 % mọi bot, Biên S 40–60 % bot Chuẩn, bot khác 35–65 % như BALANCE §3; BUILD_1B §18.3)\n");
   console.log(formatGates(stageGates(pooled, TIGHT_BANDS)));
   const wide = stageGates(pooled).filter((gate) => gate.id === "B1" || gate.id === "B7");
   console.log(`\nĐể so, B1 và B7 gộp theo dải BALANCE §3 (75–90 %, 35–65 %): ${wide.map((gate) => gate.id + " " + (gate.status === "pass" ? "đạt" : gate.status === "fail" ? "trượt" : "thiếu số")).join(", ")}.`);

@@ -73,4 +73,16 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(status()).toEqual(["pass", "pass"]); // BALANCE §3: 75–90 %
     expect(status(TIGHT_BANDS)).toEqual(["fail", "fail"]); // 1B: 78–88 %
   });
+
+  it("reads the tight Biên S (40–60 %) on the standard bot only; the other bots keep BALANCE §3's 35–65 % (R2 review fix)", () => {
+    const summary = (bot: string, s: number, director = true): BotModeSummary => ({
+      bot, mode: "balanced", director, runs: 240, win: 830, s, p: 250, i: 30, o: 0, n: 0.2, q: 600, support: null, killSeconds: null, stepsPerWave: 1.5, maxWaveSteps: 3, spawnMin: 900, spawnMax: 1100, learnOk: true,
+    });
+    const cells = (standardS: number): Cell[] =>
+      [...["novice", "steady", "standard", "skilled", "sloppy", "fast"].map((bot) => summary(bot, bot === "standard" ? standardS : bot === "novice" ? 350 : 650)), summary("standard", standardS, false)]
+        .map((s) => ({ bot: s.bot, mode: s.mode, director: s.director, k: 1, summary: s, records: [], boss: [], extra: [] }));
+    const status = (standardS: number) => ["B1", "B7"].map((id) => stageGates(cells(standardS), TIGHT_BANDS).find((gate) => gate.id === id)!.status);
+    expect(status(550)).toEqual(["pass", "pass"]); // others at 35 % and 65 %: inside §3
+    expect(status(650)).toEqual(["fail", "fail"]); // the standard bot past 60 %
+  });
 });

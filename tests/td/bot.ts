@@ -103,8 +103,9 @@ export type BotRun = {
   killSeconds: number | null;
   /** The boss peak (BUILD_1B §18.2). */
   boss: BossRun;
-  /** The most direct calls open at once (G6, R2). */
+  /** The most direct calls open at once (G6, R2): without the boss up (≤ 2) and with it (≤ 3). */
   directMax: number;
+  directMaxBoss: number;
 };
 
 /** Eyes and hands: one key a tick at most, when the hands are free and there is something seen to type. */
@@ -245,7 +246,7 @@ export function runBot(spec: BotSpec): BotRun {
   const run: BotRun = {
     world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], emptyTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
     atNightfall: [], atDawn: [], calls: tally(), callsByKind: [], stepMs: null, livesAtWaveEnd: [], rejected: [], problems: [], defeat: false,
-    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run, directMax: 0,
+    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run, directMax: 0, directMaxBoss: 0,
   };
   const probe = new BossProbe();
   run.atDawn[1] = earned(world);
@@ -278,7 +279,8 @@ export function runBot(spec: BotSpec): BotRun {
     if (world.typing.typedSum > run.windowMax) [run.windowMax, run.windowAt] = [world.typing.typedSum, world.tick];
     let direct = 0;
     for (let c = 0; c < world.calls.top; c += 1) if (world.calls.used[c] === 1 && world.calls.kind[c] === CALL_KIND.direct) direct += 1;
-    run.directMax = Math.max(run.directMax, direct);
+    if (bossSlot(world) >= 0) run.directMaxBoss = Math.max(run.directMaxBoss, direct);
+    else run.directMax = Math.max(run.directMax, direct);
     spec.onTick?.(world);
     probe.tick(world);
     meter.read(world);

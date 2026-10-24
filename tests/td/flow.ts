@@ -12,6 +12,7 @@
 import { BANDS, MODE_LABELS, blendSkill, botParams, formatGates, newSkillProfile, pct, runGates, skillAdvice, STANDARD_BOTS, summarizeRuns, updateSkill, type BandMode, type BotModeSummary, type BotSpec as KitBot, type GateResult, type RunRecord, type SkillProfile, type Tactics } from "../../src/kit/balance";
 import { paceHeader, SkillTally } from "../../src/app/skill";
 import { CALL, MODES } from "../../src/content/rules";
+import { CALL_KIND } from "../../src/sim/stores/calls";
 import type { Deck } from "../../src/typing/decks";
 import type { World } from "../../src/sim/world";
 import { bossDps, type BossRun } from "./boss-probe";
@@ -92,11 +93,12 @@ export type CellSpec = { bot: string; mode: BandMode; director: boolean };
 /**
  * A run's night share with nothing to type and its fullest 20 s window in seconds (1B R1 review); R2 (§18.2): Tối Thượng's
  * casts and damage (on the boss, in all), all damage and the boss's, direct words typed and mechanics let run, words typed,
- * the most direct calls open at once, typing ticks and ticks of nights 1–4, of night 4 (the Tanuki's) and of night 5.
+ * direct calls made (a drum with 2 calls open gets none), the most direct calls open at once without the boss and with it,
+ * typing ticks and ticks of nights 1–4, of night 4 (the Tanuki's) and of night 5.
  */
 export type RunExtra = {
-  empty: number; window: number; casts: number; ultBoss: number; ultAll: number; boss: number; all: number; direct: number; missed: number; words: number; directMax: number;
-  n14: [number, number]; n4: [number, number]; n5: [number, number];
+  empty: number; window: number; casts: number; ultBoss: number; ultAll: number; boss: number; all: number; direct: number; missed: number; words: number;
+  calls: number; directMax: number; directMaxBoss: number; n14: [number, number]; n4: [number, number]; n5: [number, number];
 };
 
 /** The R2 part of a run's extra. */
@@ -105,7 +107,8 @@ function r2Extra(run: BotRun): Omit<RunExtra, "empty" | "window"> {
   const nights = (from: number, to: number): [number, number] => [sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTyped ?? 0)), sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTicks ?? 0))];
   return {
     casts: s.ultCasts, ultBoss: s.bossUlt, ultAll: s.damageUlt, boss: s.bossDamage, all: s.damageTower + s.damageCrossbow + s.damageSoldier + s.damageWordShot + s.damageHero + s.damageUlt,
-    direct: s.directOk, missed: s.directMissed, words: s.callWords, directMax: run.directMax, n14: nights(1, 4), n4: nights(4, 4), n5: nights(5, 5),
+    direct: s.directOk, missed: s.directMissed, words: s.callWords, calls: run.callsByKind[CALL_KIND.direct]?.made ?? 0, directMax: run.directMax, directMaxBoss: run.directMaxBoss,
+    n14: nights(1, 4), n4: nights(4, 4), n5: nights(5, 5),
   };
 }
 /** Its runs (to pool two seed sets, BUILD_1B §6.4), their boss peaks and extras. */
@@ -141,28 +144,42 @@ export function poolCells(sets: readonly (readonly Cell[])[]): Cell[] {
 }
 
 /**
- * BUILD_1B §6.4, §18.3: the 1B tight band of Cân bằng (win 78–88 %, Biên S 40–60 %; P, I, O as BALANCE §3), read
- * on the pooled seed sets for B1 and for B7's director-off row; each set alone keeps BALANCE §3's bands.
+ * BUILD_1B §6.4, §18.3: the 1B tight targets of Cân bằng, read on the pooled seed sets for B1 and for B7's director-off
+ * row; each set alone keeps BALANCE §3's bands. Win 78–88 % for every bot (P, I, O as §3). Biên S (R2 review fix, chosen
+ * as proposed in BUILD_NOTES §7.3): 40–60 % for the standard bot (TIGHT_S, B1 and B7's row), BALANCE §3's 35–65 % for
+ * the others, so a skill that shows in the lives left is allowed within the shared band, never past it.
  */
-export const TIGHT_BANDS: typeof BANDS = { ...BANDS, balanced: { ...BANDS.balanced, win: { min: 780, max: 880 }, s: { min: 400, max: 600 } } };
+export const TIGHT_BANDS: typeof BANDS = { ...BANDS, balanced: { ...BANDS.balanced, win: { min: 780, max: 880 } } };
+export const TIGHT_S = { min: 400, max: 600 } as const;
+
+/** The tight Biên S check of the standard bot (director on for B1, off for B7). */
+function tightS(cells: readonly Cell[], director: boolean): { label: string; measured: string; threshold: string; pass: boolean }[] {
+  const c = cells.find((x) => x.bot === "standard" && x.mode === "balanced" && x.director === director);
+  if (c === undefined) return [];
+  const s = c.summary.s;
+  return [{ label: "standard" + (director ? "" : " · tắt nhịp") + " · Biên S chặt (gộp)", measured: pct(s), threshold: "40–60 %", pass: s >= TIGHT_S.min && s <= TIGHT_S.max }];
+}
 
 /**
  * B1–B9 for Lời Gọi: the no-type bot may hold Thư giãn (BUILD_1A6's own design, BALANCE.md §7 B5); B5 also asks the
  * no-type bot kiting the boss with Draconis never to win, nor to make it retreat (BUILD_1B §18.3). `bands` grades B1
- * and B7 (TIGHT_BANDS on the pooled sets).
+ * and B7 (TIGHT_BANDS on the pooled sets, with the standard bot's tight Biên S added).
  */
 export function stageGates(cells: readonly Cell[], bands: typeof BANDS = BANDS): GateResult[] {
   const gates = runGates({ summaries: cells.map((c) => c.summary), options: { noTypeExempt: ["relax"], bands } });
   const kites = cells.filter((c) => c.bot === KITE);
+  const tight = bands === TIGHT_BANDS;
   // B4's other half (BUILD_1B §18.3, 1B R1 review): the standard bot brings the boss down faster than the sloppy one (its damage a second, p50).
   const dps = (bot: string) => median(cells.find((c) => c.bot === bot && c.mode === "balanced" && c.director)?.boss.filter((b) => b.reached).map(bossDps) ?? []);
   const [standard, sloppy] = [dps("standard"), dps("sloppy")];
   const extra: Record<string, { label: string; measured: string; threshold: string; pass: boolean }[]> = {
+    B1: tight ? tightS(cells, true) : [],
     B4: standard === null || sloppy === null ? [] : [{ label: "Hạ boss: sát thương/s lên boss p50, Chuẩn vs Ẩu (Cân bằng)", measured: standard.toFixed(1) + " vs " + sloppy.toFixed(1), threshold: "Chuẩn > Ẩu", pass: standard > sloppy }],
     B5: kites.map((c) => {
       const retreats = c.boss.filter((b) => b.retreated).length;
       return { label: KITE + " · " + MODE_LABELS[c.mode], measured: "thắng " + pct(c.summary.win) + ", boss rút " + retreats + "/" + c.boss.length, threshold: "0 %, không lần rút nào", pass: c.summary.win === 0 && retreats === 0 };
     }),
+    B7: tight ? tightS(cells, false) : [],
   };
   return gates.map((gate) => {
     if ((extra[gate.id] ?? []).length === 0) return gate;
@@ -260,9 +277,10 @@ export function tightTable(sets: readonly (readonly Cell[])[], pooled: readonly 
     if (!c.director) continue;
     const rows = [...sets.map((cells) => cells.find((x) => x.bot === c.bot && x.mode === c.mode && x.director)!.summary), c.summary];
     const tight = c.mode === "balanced" && !c.bot.startsWith("no-type") && c.bot !== "child" && c.bot !== "type-only" && !c.bot.includes("@");
-    const { win, s } = TIGHT_BANDS.balanced;
+    const { win } = TIGHT_BANDS.balanced;
+    const s = c.bot === "standard" ? TIGHT_S : TIGHT_BANDS.balanced.s;
     const ok = c.summary.win >= win.min! && c.summary.win <= win.max! && c.summary.s >= s.min! && c.summary.s <= s.max!;
-    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${rows.map((r) => pct(r.win)).join(" / ")} | ${rows.map((r) => pct(r.s)).join(" / ")} | ${num(c.summary.n, 2)} | ${tight ? (ok ? "đạt" : "**trượt**") + " (78–88 %, 40–60 %)" : "—"} |`);
+    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${rows.map((r) => pct(r.win)).join(" / ")} | ${rows.map((r) => pct(r.s)).join(" / ")} | ${num(c.summary.n, 2)} | ${tight ? (ok ? "đạt" : "**trượt**") + ` (78–88 %, ${pct(s.min!)}–${pct(s.max!)})` : "—"} |`);
   }
   return lines;
 }
@@ -284,44 +302,76 @@ const share1 = (part: number, whole: number): string => (whole > 0 ? ((100 * par
 
 /**
  * R2 (BUILD_1B §18.2): Tối Thượng's casts a run, its share of the damage on the boss and of all damage; direct words as a
- * share of the words typed, Ngắt broken / let run and the seconds of night 4 (the Tanuki's) a drum; the typing share of
- * nights 1–4 and of night 5; the most direct calls open at once.
+ * share of the words typed, Ngắt broken / let run, direct calls made against drums, the seconds of night 4 (the Tanuki's)
+ * a direct call; the typing share of nights 1–4 and of night 5; the most direct calls open at once, without the boss and with it.
  */
 export function r2Table(cells: readonly Cell[]): string[] {
   const lines = [
-    "| Chế độ | Bot | Tối Thượng / ván | Tối Thượng % lên boss | Tối Thượng % cả ải | Từ trực tiếp % số từ | Ngắt được / để chạy | Một trống mỗi (s Đêm 4) | Gõ Đêm 1–4 | Gõ Đêm 5 | Trực tiếp mở cùng lúc (tối đa) |",
-    "|---|---|---|---|---|---|---|---|---|---|---|",
+    "| Chế độ | Bot | Tối Thượng / ván | Tối Thượng % lên boss | Tối Thượng % cả ải | Từ trực tiếp % số từ | Ngắt được / để chạy | Lời gọi trực tiếp / trống | Một lời gọi trực tiếp mỗi (s Đêm 4) | Gõ Đêm 1–4 | Gõ Đêm 5 | Trực tiếp mở cùng lúc (tối đa: không boss / có boss) |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|",
   ];
   for (const c of cells) {
     if (!c.director) continue;
     const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
-    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${(t((x) => x.casts) / Math.max(1, c.extra.length)).toFixed(2)} | ${share1(t((x) => x.ultBoss), t((x) => x.boss))} | ${share1(t((x) => x.ultAll), t((x) => x.all))} | ${share1(t((x) => x.direct), t((x) => x.words))} | ${t((x) => x.direct)} / ${t((x) => x.missed)} | ${drumEvery(c)} | ${share1(t((x) => x.n14[0]), t((x) => x.n14[1]))} | ${share1(t((x) => x.n5[0]), t((x) => x.n5[1]))} | ${Math.max(0, ...c.extra.map((x) => x.directMax))} |`);
+    const every = directEvery(c);
+    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${(t((x) => x.casts) / Math.max(1, c.extra.length)).toFixed(2)} | ${share1(t((x) => x.ultBoss), t((x) => x.boss))} | ${share1(t((x) => x.ultAll), t((x) => x.all))} | ${share1(t((x) => x.direct), t((x) => x.words))} | ${t((x) => x.direct)} / ${t((x) => x.missed)} | ${t((x) => x.calls)} / ${t((x) => x.direct + x.missed)} | ${every === null ? "—" : every.toFixed(1)} | ${share1(t((x) => x.n14[0]), t((x) => x.n14[1]))} | ${share1(t((x) => x.n5[0]), t((x) => x.n5[1]))} | ${Math.max(0, ...c.extra.map((x) => x.directMax))} / ${Math.max(0, ...c.extra.map((x) => x.directMaxBoss))} |`);
   }
   return lines;
 }
 
-/** Seconds of night 4 a drum (§9.1: a direct call each 25–40 s in a night with the enemy), as text. */
-function drumEvery(c: Cell): string {
-  const drums = sum(c.extra.map((x) => x.direct + x.missed));
-  return drums > 0 ? (sum(c.extra.map((x) => x.n4[1])) / 60 / drums).toFixed(1) : "—";
+/** Seconds of night 4 a direct call made (§9.1: one each 25–40 s in a night with the enemy; a drum with 2 open makes none); null: none made. */
+function directEvery(c: Cell): number | null {
+  const calls = sum(c.extra.map((x) => x.calls));
+  return calls > 0 ? sum(c.extra.map((x) => x.n4[1])) / 60 / calls : null;
 }
 
-/** G2, G5, G6 of BUILD_1B §18.3 for the standard bot in Cân bằng: typing shares by night, Tối Thượng's damage shares, direct words. */
+/** The typing bots B1 reads (BALANCE §7), for the gates that hold for every bot. */
+const TYPING_BOTS = ["novice", "steady", "standard", "skilled", "sloppy", "fast"] as const;
+
+/** Tối Thượng's share of a cell's damage on the boss and of all its damage (G5). */
+function ultShares(c: Cell): [number, number] {
+  const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
+  return [t((x) => x.ultBoss) / Math.max(1, t((x) => x.boss)), t((x) => x.ultAll) / Math.max(1, t((x) => x.all))];
+}
+
+/** G5 per bot of a mode: [bot, share on the boss, share of all damage, pass]; empty when the mode was not played. */
+export function ultGate(cells: readonly Cell[], mode: BandMode): { bot: string; boss: number; all: number; pass: boolean }[] {
+  return TYPING_BOTS.flatMap((bot) => {
+    const c = cells.find((x) => x.bot === bot && x.mode === mode && x.director);
+    if (c === undefined) return [];
+    const [boss, all] = ultShares(c);
+    return [{ bot, boss, all, pass: boss <= 0.15 && all <= 0.15 }];
+  });
+}
+
+/**
+ * G2, G5, G6 of BUILD_1B §18.3. G2 and G6 read the standard bot, as their rows say. G5 names no bot (§8.2, BALANCE §9.1: an
+ * area skill deals ≤ 15 % of the stage's damage), so it is graded for every typing bot in Cân bằng, with Thử thách printed
+ * beside it (R2 review). G6 is read as §9.1's frequency (BUILD_NOTES §7.3): a direct call made every 25–40 s of night 4, at
+ * most 2 open without the boss and 3 with it; every bot's frequency and the stage share are printed to compare.
+ */
 export function r2Gates(cells: readonly Cell[]): string {
   const c = cells.find((x) => x.bot === "standard" && x.mode === "balanced" && x.director);
   if (c === undefined) return "";
   const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
   const [n14, n5] = [t((x) => x.n14[0]) / Math.max(1, t((x) => x.n14[1])), t((x) => x.n5[0]) / Math.max(1, t((x) => x.n5[1]))];
-  const [boss, all] = [t((x) => x.ultBoss) / Math.max(1, t((x) => x.boss)), t((x) => x.ultAll) / Math.max(1, t((x) => x.all))];
   const direct = t((x) => x.direct) / Math.max(1, t((x) => x.words));
-  const most = Math.max(0, ...c.extra.map((x) => x.directMax));
-  const every = Number(drumEvery(c));
+  const [most, mostBoss] = [Math.max(0, ...c.extra.map((x) => x.directMax)), Math.max(0, ...c.extra.map((x) => x.directMaxBoss))];
+  const every = directEvery(c);
   const mark = (pass: boolean): string => (pass ? "đạt" : "**trượt**");
+  const g5 = (rows: ReturnType<typeof ultGate>): string => rows.map((r) => `${LABEL[r.bot] ?? r.bot} ${share1(r.boss * 1000, 1000)} / ${share1(r.all * 1000, 1000)}${r.pass ? "" : " ✗"}`).join("; ");
+  const [balanced, challenge] = [ultGate(cells, "balanced"), ultGate(cells, "challenge")];
+  const others = TYPING_BOTS.flatMap((bot) => {
+    const x = cells.find((y) => y.bot === bot && y.mode === "balanced" && y.director);
+    const s = x === undefined ? null : directEvery(x);
+    return x === undefined ? [] : [`${LABEL[bot] ?? bot} ${s === null ? "—" : s.toFixed(1)}`];
+  });
   return [
     `G2 (bot Chuẩn, Cân bằng): gõ Đêm 1–4 ${share1(n14 * 1000, 1000)} (15–25 %), Đêm 5 ${share1(n5 * 1000, 1000)} (≤ 35 %): ${mark(n14 >= 0.15 && n14 <= 0.25 && n5 <= 0.35)}.`,
-    `G5: Tối Thượng ${share1(boss * 1000, 1000)} sát thương lên boss, ${share1(all * 1000, 1000)} cả ải (≤ 15 %, ≤ 15 %): ${mark(boss <= 0.15 && all <= 0.15)}.`,
+    `G5 (mọi bot gõ, Cân bằng; lên boss / cả ải, ≤ 15 %, ≤ 15 %): ${g5(balanced)}: ${mark(balanced.length > 0 && balanced.every((r) => r.pass))}.` +
+      (challenge.length > 0 ? ` Thử thách (báo cáo): ${g5(challenge)}.` : ""),
     // BUILD_NOTES §7.3: map 1 has one verb on one night, so G6 is read as §9.1's frequency; the stage share is printed to compare.
-    `G6 (theo §9.1, BUILD_NOTES §7.3): một trống mỗi ${Number.isFinite(every) ? every.toFixed(1) : "—"} s ở Đêm 4 (25–40 s), mở cùng lúc tối đa ${most} (≤ 2, ≤ 3 khi có boss): ${mark(every >= 25 && every <= 40 && most <= 3)}; từ trực tiếp ${share1(direct * 1000, 1000)} số từ cả ải (5–10 % của TK 9.1 cần đủ ba động từ: ${mark(direct >= 0.05 && direct <= 0.1)}).`,
+    `G6 (bot Chuẩn, theo §9.1, BUILD_NOTES §7.3): một lời gọi trực tiếp mỗi ${every === null ? "—" : every.toFixed(1)} s ở Đêm 4 (25–40 s), mở cùng lúc tối đa ${most} không boss (≤ 2), ${mostBoss} có boss (≤ 3): ${mark(every !== null && every >= 25 && every <= 40 && most <= 2 && mostBoss <= 3)}; mọi bot (s mỗi lời gọi): ${others.join(", ")}; từ trực tiếp ${share1(direct * 1000, 1000)} số từ cả ải (5–10 % của TK 9.1 cần đủ ba động từ: ${mark(direct >= 0.05 && direct <= 0.1)}).`,
   ].join(" ");
 }
 
