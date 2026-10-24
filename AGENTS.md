@@ -22,10 +22,13 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
   ceiling 10,500, balance targets and gates.
 - **State (24/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
-  §7.2). R1's done-line (`BUILD_1B.md` §17) is not met yet: B1 set 1 (Chậm chắc
-  92 %, Ẩu 73 %), B7 set 1 (91 %) and the pooled tight targets for Chậm chắc and
-  Ẩu miss; §7.2 says why and which design call is needed. Next: the owner plays
-  map 1 at 1280 × 720 (`BUILD_1B.md` §17 done-line, §22, B9 numbers), then R2.
+  §7.2, with the fix's own minor review at its end). R1's done-line (`BUILD_1B.md`
+  §17) is not met yet: B1 set 1 (Chậm chắc 92 %, Ẩu 73 %), B7 set 1 (91 %), and
+  on the pooled sets the tight band of §18.3 for B1 (Chậm chắc 90 %, S 65 %;
+  Ẩu 76 %) and B7 (89 %) miss; §7.2 says why. Design call: đã chọn theo đề xuất
+  (b), làm ở R2 (raise Bắn mạnh nối while making Nights 1–4 harder, then measure
+  again). Next: the owner plays map 1 at 1280 × 720 (`BUILD_1B.md` §17
+  done-line, §22, B9 numbers), then R2 starting with (b).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
@@ -87,7 +90,8 @@ pnpm test                # vitest run
 pnpm build               # tsc --noEmit && vite build
 pnpm check               # kit sha256 check, tests, build
 pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B1–B9 per seed set, the boss table,
-                         #   the split table, the pooled tight targets (BUILD_1B §6.4, §18.2), then the BUILD_1A6 §12 table
+                         #   the split table, the pooled tight targets (BUILD_1B §6.4, §18.2) with B1–B9 pooled
+                         #   (B1, B7 on the tight band of §18.3, the BALANCE §3 verdict after), then the BUILD_1A6 §12 table
                          #   options: --stage-seeds=120 --stage-sets=2 --threads=6 --seeds=5 --nights=4 (§12 runs)
 node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable: --khp2, --modehp, --quick, --woodgold, --tl, …)
 node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json  # a long bot run kept as "Chơi lại Ngày n" keeps it (td-1b-night5 uses it)
@@ -101,6 +105,8 @@ URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scr
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-night5.mjs --width=1280 --height=720  # day 5 warning, blows, Chơi lại Ngày 5
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720   # story locks, sell, Bastion
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-perf.mjs --width=1280 --height=720    # boss + flood(300)
+# Perf numbers need a Chrome with a GPU (Chrome in WSL draws in software): on the Dell, Windows node + Windows Chrome,
+# then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2.
 ```
 
 The dev server serves `/vocabulary/` and `/typing-texts/` read-only from the
