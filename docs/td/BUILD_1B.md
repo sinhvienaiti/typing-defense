@@ -160,7 +160,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 | Máu | **4.200** × máu chế độ × hệ số riêng của chế độ × hệ số k (§5.6) | TK 22.7 ghi 4.000; số đo §6.3 cho thấy khoảng 3.000–3.400 mới cho bot Chuẩn thắng ~85 %. R1 chỉnh theo §6.5: 3.200 → 3.400 (vòng 1) → 3.800 (sửa review R1, sau khi bán gỗ, Bắn mạnh nối và Dồn lửa làm mọi bot mạnh lên) → 4.200 (R2, sau Tối Thượng và quyết định (b), BUILD_NOTES §7.3). Hệ số riêng: Thư giãn, Học và Thử thách ×0,78 (R2; sửa review R1: Thư giãn, Học ×0,85) |
 | Rút lui | Ở 50 % máu | Lượng máu phải gỡ: 2.100 ở Cân bằng, k = 1 (khởi điểm 3.200: 1.600) |
 | Giáp / KP | 30 % / 0 % | |
-| Tốc | 0,9 m/s × tốc quái của ải (`foeSpeed` = 1 + `PACE.speedK` × (k − 1); sửa phản biện R2: `speedK` 0,2 → 0,3, BUILD_NOTES §7.4) | Trồi ở ngã ba (mét 20): còn 93–96 m, đi hết ~105 s; tới khúc nhập (mét 79, ≈ 68 % đường) sau ~63 s. R1 vòng 1 (G3, G8): 0,8 m/s, trồi ở mét 25 (BUILD_NOTES §7.1) |
+| Tốc | **0,8 m/s** × tốc quái của ải (`foeSpeed` = 1 + `PACE.speedK` × (k − 1); sửa phản biện R2: `speedK` 0,2 → 0,3, BUILD_NOTES §7.4) | Khởi điểm 0,9 m/s, trồi ở mét 20; R1 vòng 1 (G3, G8): 0,8 m/s, trồi ở mét 25 (`emergeM`, BUILD_NOTES §7.1): còn ~88–91 m, đi hết ~110–115 s. Sửa phản biện R2 lần 2 đo 0,78 m/s (§6.5 bước 1, BUILD_NOTES §7.5), không giữ |
 | Chặn | **Không bị chặn.** Lính vẫn đánh được, bị Quật cành đẩy lùi | Lệch luật chặn chung: cờ `unblockable` |
 | Bán kính | 2,5 m | Vẽ ~5 m bề ngang ở bản 2D |
 | Điểm yếu | Cháy gây ×1,25 | Phát Chữ của Pháo khi Draconis trong vòng: gõ là cách trị chính |
@@ -298,9 +298,10 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 2. **Phần đầu Đêm 5** (số Thuồng Luồng 4–6, cỡ toán): tới khi S trung vị bot Chuẩn ≈ 50 %.
 3. **Đỉnh boss** (toán đi trước 0–2 × 4, Mầm Gỗ 3–5 mỗi lần, khoảng 12–18 s): kéo đuôi S của ván yếu xuống, không chạm trung vị.
 4. **Nhịp k của boss** (`BOSS.kHp` 0–0,6): chỉ khi Khá, Nhanh lệch dải thắng.
-5. **Máu Thuồng Luồng** (325–385) hoặc Cháy của Draconis (45–65/s): khi Mới, Ẩu (S thấp) và Chậm chắc (S cao) cách nhau quá dải, vì Thuồng Luồng giáp 60 % là chỗ độ chính xác và Phát Chữ quyết.
+5. **Máu Thuồng Luồng** (325–385) hoặc Cháy của Draconis (45–65/s): khi Mới, Ẩu (S thấp) và Chậm chắc (S cao) cách nhau quá dải, vì Thuồng Luồng giáp 60 % là chỗ độ chính xác và Phát Chữ quyết. R2 ra ngoài khoảng này: 420 máu × 6 con (BUILD_NOTES §7.3); sửa phản biện R2 lần 2 đo lại cả hai núm (385 máu; Cháy 62/s) và số con 6 → 5 (bước 2): không núm nào kéo Ẩu về số R1 mà không đẩy Biên S của bot mạnh ra khỏi dải (BUILD_NOTES §7.5).
 6. Sau mỗi lần đổi: `pnpm td:balance` đủ hai bộ seed × 120. Không đạt sau 6 vòng chỉnh thì ghi lại bảng và quyết định thiết kế cần có vào `BUILD_NOTES.md` §7, không ép bằng một số toàn cục.
-7. **Sửa phản biện R2** (BUILD_NOTES §7.4): Biên S tách theo tốc gõ (bot E 25 mất Thuồng Luồng ở đầu đỉnh boss, bot E ≥ 35 không). Núm là phần của nhịp k trong tốc quái (`PACE.speedK` 0,2 → 0,3: quái của bot k 0,75 đi ×0,925, của bot k 1,3 ×1,09), rồi trần hệ số máu boss (`kHpMax`) cho bot Nhanh. Núm độ chính xác (`CALL.sloppy`, `SCORE.qA`) đã đo, không nâng được bot Ẩu. Tanuki cần ≥ 4 quái quanh nó (G6) cũng hạ Biên S của bot Chuẩn (ít trống được Ngắt hơn: ít vàng, ít nạp Tối Thượng).
+7. **Sửa phản biện R2** (BUILD_NOTES §7.4): Biên S tách theo sức gõ, không theo E riêng: Thuồng Luồng lọt sau khi lặng bắt đầu (trung bình mỗi ván, 60 seed, số R2 sửa, BUILD_NOTES §7.5) là Mới 4,8, Ẩu 4,3, Chậm chắc 3,5, Chuẩn 3,0 mạng, còn Nhanh 1,7, Khá 1,2 (sửa phản biện R2 lần 2: câu cũ "bot E ≥ 35 không" sai với Ẩu E 50). Núm là phần của nhịp k trong tốc quái (`PACE.speedK` 0,2 → 0,3: quái của bot k 0,75 đi ×0,925, của bot k 1,3 ×1,09), rồi trần hệ số máu boss (`kHpMax`) cho bot Nhanh. Núm độ chính xác (`CALL.sloppy`, `SCORE.qA`) đã đo, không nâng được bot Ẩu. Tanuki cần ≥ 4 quái quanh nó (G6) cũng hạ Biên S của bot Chuẩn (ít trống được Ngắt hơn: ít vàng, ít nạp Tối Thượng).
+8. **Sửa phản biện R2 lần 2** (BUILD_NOTES §7.5): đã đo bước 1 (tốc boss 0,78 m/s), bước 2 (phần đầu Đêm 5 có 5 Thuồng Luồng), bước 3 cùng bước 4 (5 Mầm Gỗ mỗi 12 s, `kHp` 0,15), bước 5 (Thuồng Luồng 385 máu; Cháy 62/s), mỗi lượt hai bộ × 120. Không lượt nào giữ B1 và đích chặt gộp bằng hay tốt hơn số hiện tại, nên số không đổi. Lý do đo được: từ R2 bot mạnh mất 0–3 mạng ở đỉnh boss (R1: 6–8 cho mọi bot; Thuồng Luồng lọt ở bot mạnh 1–3 mạng, ở Mới, Ẩu 4–5), bot yếu mất 6–9; Mầm Gỗ thêm rơi vào ván dài của bot yếu. Núm nào nâng Ẩu cũng nâng Biên S của Chuẩn, Chậm chắc, Nhanh quá 60–65 %. Núm kế cho lượt cân bằng của R3: một khoản mạng ở đỉnh boss mà bot mạnh không dọn được (thiết kế), và bảng độ dài từ theo E (`LENGTH_BY_E`, núm theo tốc gõ mạnh nhất đã đo); trọng số độ chính xác của kit (BALANCE §4.1) chỉ sau hai núm đó.
 
 ---
 
@@ -617,7 +618,7 @@ Cách đếm như BUILD_1A6 §0: `.ts` trong `src`, trừ `src/kit`; test, bot, 
 
 ## 17. Thứ tự làm
 
-Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số thật vào `BUILD_NOTES.md` mục mới **§7 "1B"** (§7.1 R1, §7.2 sửa review R1, §7.3 R2, §7.4 R3) và một changelog mỗi đợt.
+Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số thật vào `BUILD_NOTES.md` mục mới **§7 "1B"** (§7.1 R1, §7.2 sửa review R1, §7.3 R2, §7.4 sửa phản biện R2, §7.5 sửa phản biện R2 lần 2, §7.6 R3) và một changelog mỗi đợt.
 
 ### R1 "Mộc Tinh tới" (chơi được một mình)
 
@@ -672,6 +673,7 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 - **Bảng boss** mỗi ô: ván tới boss; hạ boss (rút) %; trồi → trúng đầu p50; giao chiến (trúng đầu → rút) p50; % đường lúc rút p50; mạng mất ở đỉnh boss p50 (toán đi trước, Mầm Gỗ, Quật Lũy); phần sát thương do gõ lên boss; phần của Draconis tự đánh; số lần nhà tê, phần tháp bị tê lúc boss trong tầm; Nhàn I ở đỉnh boss; Tối Thượng % lên boss (R2). Thêm một dòng `heroKite` (Cân bằng, Thử thách).
 - Thắng và Biên S in ba cột: bộ 1, bộ 2, gộp 240 (§6.4).
 - **Tách hai số:** mạng trước đỉnh boss p50, S của ván thắng p50, phần ván thua do boss / do các đêm trước.
+- **Cổng G3, G8** (sửa phản biện R2 lần 2): báo cáo chấm hai cổng này cho bot Chuẩn ở Cân bằng, ở từng bộ seed và trên hai bộ gộp (mỗi bộ và phần gộp đều phải đạt), và in bảng boss của hai bộ gộp.
 - Cột R2: số lần dùng Tối Thượng, từ trực tiếp % số từ, tỉ lệ gõ Đêm 1–4 và Đêm 5.
 - Bảng cổng của BUILD_1A6 §12 (5 seed, 4 đêm) giữ ở cuối báo cáo, chạy trên ải truyện.
 
@@ -705,12 +707,12 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 |---|---|---|
 | G1 | Cổng 4–7 của BUILD_1A6 §12 trên ải truyện | Như cũ (Không gõ qua Đêm 1–4; cửa sổ ≤ 8 s; Ngày ≥ 30 %; gõ +25 % so với không gõ) |
 | G2 | Tỉ lệ gõ Đêm | Đêm 1–4: 15–25 %; Đêm 5: ≤ 35 % (bot Chuẩn) |
-| G3 | Giao chiến boss | Bot Chuẩn p50 45–75 s (TK 18.8); núm là tốc boss (§6.5 bước 1) |
+| G3 | Giao chiến boss | Bot Chuẩn p50 45–75 s (TK 18.8), ở mỗi bộ seed và gộp (báo cáo chấm từ sửa phản biện R2 lần 2); núm là tốc boss (§6.5 bước 1) |
 | G4 | Báo trước | Mọi đòn boss có sự kiện báo ≥ thời gian báo của chế độ trước đòn; mọi ván thua do boss có báo Ngày 5 và đếm ngược Đêm 5 |
 | G5 | Tối Thượng | ≤ 15 % sát thương lên boss, ≤ 15 % cả ải, **mọi bot gõ** ở Cân bằng trên hai bộ gộp; Thử thách in báo cáo (R2; BALANCE §9.1 qua §8.2; sửa phản biện R2: trước chỉ chấm bot Chuẩn) |
 | G6 | Gõ trực tiếp | Bot Chuẩn: một lời gọi `direct` được tạo mỗi 25–40 s ở đêm có quái đó (Đêm 4); ≤ 2 mở cùng lúc khi không có boss, ≤ 3 khi có boss (R2). Đọc theo tần suất của §9.1 vì bản đồ 1 chỉ có một động từ ở một đêm (đã chọn theo đề xuất, BUILD_NOTES §7.3); "5–10 % số từ của ải" (TK 9.1) in báo cáo, thành cổng khi đủ ba động từ. Báo cáo in tần suất của mọi bot |
 | G7 | Tiền | Không chuỗi xây, nâng, bán, hoàn tác nào sinh Vàng hay Gỗ; rương boss ghi đúng một lần |
-| G8 | Không chờ không ở đỉnh boss | Bot Chuẩn: boss trồi → trúng đầu p50 ≤ 35 s; Nhàn I từ lúc hết lặng tới kết ải trong dải I của chế độ (Cân bằng ≤ 10 %). Núm: chỗ trồi `emergeM` 20–35 m (luôn cách khúc nhập ≥ 40 m) |
+| G8 | Không chờ không ở đỉnh boss | Bot Chuẩn: boss trồi → trúng đầu p50 ≤ 35 s; Nhàn I từ lúc hết lặng tới kết ải trong dải I của chế độ (Cân bằng ≤ 10 %); ở mỗi bộ seed và gộp như G3. Núm: chỗ trồi `emergeM` 20–35 m (luôn cách khúc nhập ≥ 40 m) |
 
 ---
 
@@ -743,8 +745,8 @@ Chạy với máy chủ dev cổng 3046: `pnpm exec vite --host 127.0.0.1 --port
 | Vẽ 2D + thẻ chữ | p95 ≤ 8 ms ở 1280 × 720 và 1920 × 1080 (hiện ~1,0 ms) |
 | Lớp boss (`boss-2d.ts`) | p95 ≤ 0,6 ms |
 | Hạt 2D | ≤ 300 sống, ≤ 40 mới mỗi khung, pool (không cấp phát mỗi khung); gai rễ ≤ 7 mỗi nhà |
-| Luồng chính Chrome | ≤ 4 ms mỗi khung trung bình; không khung > 16,7 ms lúc boss vào, chuyển pha, rút |
-| Gói JS | Phần khởi động (chunk vào, cái trang cần để vẽ khung đầu và chạy vòng chơi) gzip ≤ 85 kB, kiểm trong `pnpm build` (`scripts/bundle-budget.mjs`). Màn đầu, thẻ Cài đặt, Hồ sơ gõ, thẻ tạm dừng và kết, bảng hộp cát, tiếng là chunk nạp sau, in riêng cùng tổng (sửa phản biện R2: một chunk 87,2 kB → khởi động 77,2 kB, nạp sau 13,5 kB; trước 1B 68,9 kB) |
+| Luồng chính Chrome | ≤ 4 ms mỗi khung trung bình **ở 60 khung/s** (sửa phản biện R2 lần 2: `td-1b-perf` giữ nhịp khung 60 Hz, vì Chrome không đầu chạy 50–156 khung/s tùy máy và số mỗi khung đổi theo; kết quả in thêm phần thời gian bận và khung/s); không khung > 16,7 ms lúc boss vào, chuyển pha, rút (chỉ đọc các khung của lúc đó) |
+| Gói JS | **Phần khởi động của mỗi trang** gzip ≤ 85 kB: những gì trang phải tải xong mới dùng được (vẽ khung đầu, nhận phím, chạy vòng chơi). Ở "/" là chunk vào và màn đầu; link `?title=0`, `?sandbox=` chỉ chunk vào. `pnpm build` kiểm từ manifest của Vite (`scripts/bundle-budget.mjs`), in phần còn trống, các chunk nạp sau và tổng. Thẻ Cài đặt và Hồ sơ gõ của màn đầu tải khi được chọn; tiếng, thẻ tạm dừng và kết, bảng hộp cát tải khi trang đã dùng được. Mỗi chunk thử 3 lần rồi có đường dự phòng (`app/chunks.ts`). Số: trước 1B 68,9 kB cả gói; R2 một chunk 87,2 kB; sửa phản biện R2: chunk vào 77,2 kB, nhưng "/" thật cần 83,7 kB; sửa phản biện R2 lần 2: "/" 82,6 kB (chừa 2,4 kB), `?title=0` 78,0 kB, cả gói 91,6 kB. Đổi nghĩa từ "cả gói" sang "phần khởi động": **đề xuất của vòng này, chờ chủ dự án xác nhận** (BUILD_NOTES §7.5) |
 | Âm | ≤ 12 nốt tổng hợp cùng lúc; tiếng báo đòn không bị tiếng khác nuốt (ưu tiên cao nhất) |
 
 ---

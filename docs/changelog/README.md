@@ -4,6 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 25/10/2026 | 1B R2: sửa sau phản biện lần 2 (đo mọi núm §6.5, G3 và G8 trong báo cáo, chunk có đường lỗi, phần khởi động của "/", luồng chính ở 60 Hz) | [2026-10-25-td-1b-r2-fix2](./2026-10-25-td-1b-r2-fix2.md) |
 | 25/10/2026 | 1B R2: sửa sau phản biện (G5 mọi bot, cân bằng lại, gói JS dưới 85 kB) | [2026-10-25-td-1b-r2-fix](./2026-10-25-td-1b-r2-fix.md) |
 | 25/10/2026 | Âm hành động Q6: sửa sau review lần 2 (gói prompt) | [2026-10-25-audio-q6-fix2](./2026-10-25-audio-q6-fix2.md) |
 | 24/10/2026 | 1B R2 "Gõ giúp trận" | [2026-10-24-td-1b-r2](./2026-10-24-td-1b-r2.md) |
