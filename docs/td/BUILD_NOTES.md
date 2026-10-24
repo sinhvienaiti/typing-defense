@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1B.R1**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16, 10.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1B.R2**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16, 10.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -44,6 +44,7 @@ Mốc đang làm: **1B.R1**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.6 Lời Gọi (R1, R2, R3 xong; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4); R3 6.012 (mục 5); tách repo và chủ đề Văn Điền: 7.064 | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
 | 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
+| 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -938,4 +939,92 @@ Các đầu dò khác (bộ 1): 3 Mầm Gỗ mỗi lần gọi, 1 toán đi trư
 **Bảy kịch bản cũ ở 1920 × 1080 (Chrome Windows):** `td-1a-boot`, `td-1a-ime`, `td-1a6-attention`, `td-1a6-tour` đạt; `td-1a6-keyboard`, `td-1a6-learn`, `td-1a6-night` đạt mọi kiểm trong trình duyệt, nhật ký chạy lại trong WSL khớp. Thêm (kịch bản đổi ở đợt này): `td-1a6-tour` ở 1280 × 720 và `td-1b-build` ở hai cỡ đạt (nhật ký chạy lại trong WSL khớp). Mọi lần chạy 0 lỗi console, 0 ngoại lệ. Trên Chrome Windows thẻ chữ hiện đúng biểu tượng loại lời gọi (ô vuông ở trên là do WSL thiếu phông emoji).
 
 **Kiểm (WSL):** `pnpm check` đạt: kit sha256 (31 file), 272 test (24 file; thêm test chấm dải chặt), `tsc`, `vite build` (JS gzip 81,87 kB, ngân sách 85 kB). `pnpm td:golden:check` khớp cả hai file vàng (nội dung `87f80da6`; `td-1a.json` 18.993 tick, `td-1b-boss.json` 4.811 tick).
+
+### 7.3 R2 "Gõ giúp trận" (24/10/2026)
+
+Changelog: `docs/changelog/2026-10-24-td-1b-r2.md`. Làm trên máy Dell (WSL Ubuntu 24.04, Node 24.11). Lượt đầu bị cắt giữa chừng vì hết hạn mức (mã R2 gần đủ, chưa commit; ảnh chụp cây làm việc ở nhánh cục bộ `wip/r2-partial-2026-10-24`, không đẩy); lượt sau đọc lại mã và làm tiếp. Bằng chứng (ngoài Git): lượt bị cắt `tmp/dell-2026-10-24/b/` (đầu dò `p0`–`p4`, `full1.md`), lượt này `tmp/dell-2026-10-24/c/` (đầu dò `p5`–`p12`, báo cáo `full.md`, `final.md`, kịch bản `final/`, `r2/`, `ui/`, đo GPU `gpu/`, đầu dò Tanuki `direct-probe.ts`).
+
+**Đã làm (theo §17 R2):**
+
+1. **Tối Thượng, Mảnh Chữ, Chữ Chiêu** (§8; `src/sim/systems/ult.ts`, kho `src/sim/stores/ult.ts`, vào mã băm; số `ULT`, `SHARDS` trong `rules.ts`): nạp từ mọi từ của lời gọi (1,2 × (0,5 + 0,5 Q)), gõ trực tiếp (+3), Mảnh Chữ của quái chết trong 12 m quanh Draconis (0,6 mỗi mảnh; boss choáng 6 mảnh), +0,3/s ban Đêm; không nạp khi đầy; hồi 45 s; mở từ Ngày 3 (`stage.unlock.ult`). Lệnh `ult` mang điểm đặt (app chọn `ultSpot`: chuột trong 20 m, không thì chỗ đông máu quái nhất trong 6 m trong vòng 14 m), từ chối `ultEmpty`, `ultBusy`, `ultFar`, `locked`. Mưa Lông Lửa 12 lông mỗi 10 tick, mỗi lông nhắm quái nhiều máu nhất chưa bị nhắm (xoay vòng), rơi 0,8 s, nổ 1,5 m, 25 phép; boss ×0,25, không bị Cháy; hết mưa quái còn trong vùng Cháy 3 s (Cháy giờ ghi nguồn gây, `burnBy`). Chữ Chiêu là lời gọi `ult` (bậc 0): 3 từ ngắn đã thuộc, sống 4 s, +3 lông mỗi từ sau 0,3 s, cả lời gọi Hoàn hảo +1. Phím `=`, nút "Tối Thượng" trên thanh hành động (nạp theo bậc 5 %, "Mở ở Ngày 3", "Mưa lông lửa"), vòng nạp quanh đèn lồng của Draconis.
+2. **Gõ trực tiếp và Ngắt** (§9; `src/sim/systems/direct.ts`): lời gọi `direct` (bậc 0) 1 từ ngắn đã thuộc đi theo quái (`foe`), cửa sổ T = clamp(0,8 + k_d × (len + 1) × 12 / E; 3; 7) s, tối đa 2 mở cùng lúc (3 khi có boss), cái thứ ba trống mà không có lời gọi. Gõ được: hủy trống, Tanuki choáng 2 s, +5 + 2 Vàng, Tối Thượng +3. Để chạy: quái trong 6 m (cả nó, trừ boss) hồi 25 % máu tối đa. Quái mới (§10, `slice-1a.ts`): Lửng Tanuki, Nuppeppō (chết không vì nổ thì tách 2 Nuppeppō con tại chỗ, cùng đợt), Nuppeppō con. Lệnh hộp cát `spawn`, `ult` (nút "Gọi: Tanuki, 3 Nupp., Nạp =").
+3. **Thư Đồng hoảng** (§5.5 R2, `panicNear` trong `agents.ts`, số `PANIC`): Thư Đồng trong 6 m quanh mép nhà trúng Rễ Trồi chạy về Lũy, đứng 5 s rồi về lệnh cũ; lúc hoảng vòng giúp không thắp lời gọi; vẽ lạch bạch có dấu "!" đỏ.
+4. **Hình R2** (§13.1 cột R2, §13.3; `FxView` trong `src/view/fx-2d.ts` dùng chung pool hạt): chân dung Draconis trượt vào 0,6 s, vòng mưa, bóng dưới mỗi lông đậm dần, lông rơi chéo có vệt lửa, vũng than; thẻ trực tiếp dạng cuộn giấy có vòng đồng hồ T, trống vỡ thành chữ, Tanuki choáng có sao, vòng hồi máu xanh lá loang 6 m, Tanuki đang trống có vòng son đập; Chữ Chiêu viền cam. Boss: mạch rễ đập theo trống lặng, đá văng và rễ con quất ra lúc trồi, lá rơi khi đi, mảnh gỗ ở nhà trúng Rễ Trồi, lính lóe trắng 60 ms khi bị Quật cành, đất tơi ở mầm, vỏ cây bung lúc choáng, đá Lũy văng, boss rung 1–2 px và thanh boss giật 2 px khi trúng đòn lớn (tắt khi giảm chuyển động), ánh hổ phách dưới chân tắt từ ngoài vào lúc rút.
+5. **Bot** (§18.1 R2, `tests/td/policies/ult.ts`): `ultRule` (dùng khi đầy và boss trong 12 m hoặc ≥ 5 quái trong 6 m; Kém dùng ngay khi đầy), `dodgeRoots` (Tốt đưa Thư Đồng khỏi nhà đang bị nhắm Rễ Trồi); `HumanTypist` coi Chữ Chiêu và gõ trực tiếp như Bắn mạnh (từ có hạn, cùng phản xạ). Báo cáo thêm bảng R2 (Tối Thượng mỗi ván, % lên boss, % cả ải, từ trực tiếp % số từ, Ngắt được / để chạy, giây Đêm 4 mỗi trống, tỉ lệ gõ Đêm 1–4 và Đêm 5, số lời gọi trực tiếp mở cùng lúc) và dòng G2, G5, G6; `--modes`, `--bots`, `--quick`, `--set=…` để thử chỉnh không sửa mã (`scripts/td/overrides.ts`).
+6. **Cân bằng lại** theo quyết định (b) (dưới).
+7. **File vàng** làm lại (dưới).
+8. **Kịch bản** `td-1b-ult`, `td-1b-direct` (mới), `td-1b-perf` thêm Tối Thượng hai lần giữa `flood(300)`.
+
+Cùng đợt (việc còn lại của phản biện R1):
+
+- **Thẻ nhà ở 1280 × 720:** nút Bán cạnh "Gửi Draconis" của Tháp Cung, Trại Lính, Mỏ, Ruộng tràn khỏi thẻ, "Gửi Draconis" lố 2 px, nhãn mua hạt của Ruộng tràn. Sửa chung cho mọi thẻ (`td.css`): hàng nút của thẻ được xuống dòng, nút không vừa thì sang dòng riêng và rộng hết thẻ, nhãn quá dài thì xuống dòng trong nút. `td-1b-build` đo mọi nút của thẻ Tháp Cung, Tháp Pháo, Trại Lính, Mỏ, Ruộng (cả lúc "Bấm lần nữa: bán") ở hai cỡ: không nút nào bị cắt hay ra ngoài thẻ; ảnh đã xem ở 1280 × 720 và 1920 × 1080.
+- **`td-1a6-perf` `typedInTheWindow`:** số phím gõ được trong 10 s tùy lời gọi sáng (29–35 phím), không tùy tốc gõ. Cửa sổ đo giờ kéo dài tới khi gõ đủ 30 phím (tối đa 20 s); khung của cả cửa sổ đều được đo như nhau.
+
+**Lệch so với spec (có lý do):**
+
+- **Tanuki chỉ trống trong 9 m quanh mép một nhà đánh** (Lũy, tháp; `ability.reachM`, kiểu `AbilitySpec` của §15 đã có `reachM`). §9.2 chỉ đòi ≥ 3 quái trong 6 m và hồi 12 s, nên Tanuki trống ngay cạnh Khe Nứt, lúc toán vừa ra (đo 10 ván bot Chuẩn: trống ở 20 % đường, cách Draconis trung vị 26 m; 1/18 lần được gõ, vì không vòng giúp nào thắp được, mà hồi máu ở đó cũng vô nghĩa vì quái còn đủ máu). Với 9 m: trống ở 60 % đường, 7/14 lần gõ được, 10/14 lần sáng. Thử 6 m: 6/13, không hơn.
+- **Đêm 4 có 3 Tanuki** (§4.2: 2) và **phần đầu Đêm 5 có 6 Thuồng Luồng** (một toán; §4.2 "như R1, chỉnh theo bot"): 3 Tanuki cho một trống mỗi ~29 s ở Đêm 4 (§9.1: 25–40 s; 2 Tanuki: ~51 s). Đêm 1–3 khó hơn bảng §4.2 theo quyết định (b): Đêm 1 10 Cương Thi (8), Đêm 2 12 Cương Thi + 2 Ma Trơi (10 + 1), Đêm 3 10 Cương Thi + 4 Nuppeppō + 2 Ma Trơi (8 + 3 + 2), Đêm 4 3 Tanuki + 1 Thuồng Luồng + 9 Cương Thi (2 + 1 + 7).
+- **G6 đo theo tần suất của §9.1** (quyết định, dưới): "5–10 % số từ của ải" của TK 9.1 tính cho đủ ba động từ trên cả bản đồ; R2 bản đồ 1 có một động từ ở một đêm.
+- **Tối Thượng mở từ Ngày 3** (lịch mở tính theo ngày; §12 ghi "dùng được từ Đêm 3"): ban Ngày 3 không có quái nên khác biệt chỉ là nút sáng sớm hơn vài chục giây.
+- **Gõ trực tiếp được +5 + 2 Vàng** (Lá Tanuki §9.2 cộng +2 của §9.1).
+- **Tiếng:** nhịp trống to dần mỗi Chữ Chiêu (§13.3) và tiếng gỗ gãy ở Rễ Trồi (§13.1 cột R2) chưa làm: luật mới về tiếng thuộc làn âm thanh (`tools/audio-lab/DECISIONS.md` Q6), đợt này không thêm tiếng trong game.
+- **Không có `src/sim/systems/abilities.ts`** (§16): trống Tanuki nằm ở `direct.ts`, tách Nuppeppō ở `deaths.ts` (ít dòng hơn một file riêng).
+- **`CALL.slipS` 1,1 → 1,15 s:** lượt đầu R2 đo cổng 5a 8,13 s (một chuỗi từ Chặt); với 1,15 s cổng 5a 8,00 s (đạt sát mép), 5b 30,2 % (đạt).
+- `view/boss-2d.ts` 404 dòng (cột §16: R1 ≤ 320, R2 +30; R1 đã 378).
+
+**Cân bằng (quyết định (b): nâng Bắn mạnh nối cùng lúc làm Đêm 1–4 khó hơn).** Bắn mạnh nối `quick` 0,6 → 0,8, `quickS` 4 → 5 s (số R1 đã thử ở §7.2); Đêm 1–4 như trên. Rồi chỉnh boss và Đêm 5 bằng đầu dò `td:balance --modes=balanced --quick --set=…` (6 bot, có hàng tắt nhịp của B7). Thắng / Biên S gộp hai bộ seed ở Cân bằng; B7 là thắng gộp của Chuẩn tắt bộ điều nhịp:
+
+| Lượt (seed mỗi bộ) | Đổi | Mới | Chậm chắc | Chuẩn | Khá | Ẩu | Nhanh | B7 |
+|---|---|---|---|---|---|---|---|---|
+| p0 (40) | mã R2 lúc đó, không ghi đè | 88 / 70 | 98 / 73 | 95 / 70 | 94 / 53 | 86 / 55 | 96 / 80 | 95 |
+| p1 (40) | máu boss 4.300, Thuồng Luồng 420, Đêm 3, 4 mới | 66 / 40 | 83 / 65 | 78 / 55 | 94 / 70 | 60 / 35 | 80 / 75 | 86 |
+| p2 (40) | 4.000, `kHp2` 6,5, Thuồng Luồng 420, Đêm 1–4 mới | 85 / 55 | 89 / 73 | 93 / 70 | 96 / 65 | 80 / 38 | 95 / 75 | 95 |
+| p3 (40) | 4.200, `kHp2` 6,5, Đêm 3, 4 mới, phần đầu Đêm 5 6 Thuồng Luồng | 80 / 50 | 83 / 60 | 81 / 68 | 83 / 68 | 61 / 15 | 80 / 63 | 75 |
+| p4 (120) | 4.200, `kHp2` 6,5, Đêm 1–4 mới | 68 / 40 | 79 / 70 | 82 / 65 | 89 / 65 | 74 / 35 | 86 / 70 | 86 |
+| full1 (120, đủ chế độ) | p4, `kHp` 0,2 → 0,45 | 85 / 53 | 91 / 70 | 82 / 65 | 85 / 65 | 69 / 30 | 86 / 70 | 86 |
+| p5 (60) | `kHp` 0,2, phần đầu Đêm 5 6 Thuồng Luồng (từ đây: Tanuki 9 m, `slipS` 1,15) | 63 / 23 | 83 / 60 | 83 / 60 | 83 / 60 | 68 / 40 | 82 / 70 | 77 |
+| p6 (60) | p5, Thuồng Luồng 440, toán đi trước 2 × 5 | 65 / 25 | 79 / 53 | 75 / 60 | 81 / 60 | 63 / 30 | 81 / 68 | 77 |
+| p7 (60) | p5, `quick` 1,0, Đêm 4 3 Tanuki | 65 / 25 | 83 / 70 | 90 / 70 | 94 / 65 | 80 / 45 | 93 / 75 | 88 |
+| p8 (60) | p7, `kHp` 0,3 | 69 / 33 | 85 / 75 | 90 / 70 | 94 / 65 | 80 / 48 | 93 / 75 | 88 |
+| p9 (60) | `kHp` 0,3, `quick` 1,0, 3 Tanuki, Đêm 5 5 Thuồng Luồng, toán đi trước 2 × 5, 5 Mầm Gỗ | 76 / 35 | 93 / 73 | 92 / 75 | 93 / 65 | 83 / 55 | 87 / 75 | 94 |
+| p10 (60) | p5, 3 Tanuki | 66 / 25 | 79 / 70 | 83 / 70 | 83 / 60 | 71 / 38 | 80 / 70 | 86 |
+| p11 (60) | `kHp` 0,3, `quick` 0,9, 6 Thuồng Luồng, 3 Tanuki | 78 / 35 | 88 / 70 | 84 / 65 | 83 / 65 | 69 / 33 | 89 / 75 | 90 |
+| **cuối (120, đủ chế độ)** | `kHp` 0,3, `quick` 0,8, 6 Thuồng Luồng, 3 Tanuki | **72 / 30** | **82 / 70** | **83 / 70** | **82 / 60** | **67 / 30** | **81 / 70** | **85** |
+
+p12 (Thư giãn, 120 × 2, Trẻ em, Mới, Ẩu): hệ số máu boss của Thư giãn, Học 0,85 → 0,78 (bằng Thử thách): Trẻ em 88 / 90 % (B3 ≥ 85 %; ở số cuối trước p12: 78 / 83 %), Mới và Ẩu 100 %. Số này chỉ đổi Thư giãn, Học.
+
+Số cuối (trong mã): máu Mộc Tinh 3.800 → 4.200; hệ số k `kHp` 0,2 → 0,3, `kHp2` 4,3 → 6,5 (trần ×1,5 giữ); `modeHp` Thư giãn, Học 0,85 → 0,78; Thuồng Luồng 385 → 420 máu; phần đầu Đêm 5 5 → 6 Thuồng Luồng; Đêm 1–4 như trên; Bắn mạnh nối 0,8 / 5 s; `CALL.slipS` 1,15 s.
+
+**Vì sao dừng (lệch có lý do, BUILD_1B §6.5 bước 6):** 16 lượt đo cho họ cổng này (6 ở lượt bị cắt; ở lượt này 8 đầu dò p5–p12 và hai lượt đủ `full.md`, `final.md`), quá khung ~6 lượt.
+
+- **Biên S tách theo sức gõ, không theo núm.** Chậm chắc, Chuẩn, Nhanh tới đỉnh boss với 16–17 mạng và mất 0–3,5 mạng ở đỉnh (p50; S 70 %); Mới, Ẩu tới với 18 và 14 mạng và mất 12 và 7–9 (S 25–30 %). Mọi núm lấy thêm mạng (6 Thuồng Luồng, Thuồng Luồng 440, toán đi trước 2 × 5, 5 Mầm Gỗ) lấy mạng của Mới, Ẩu trước (giáp 60 % là chỗ độ chính xác và Phát Chữ quyết, như R1), S của ba bot mạnh gần như đứng yên (p5 → p6, p9). Dải chặt 40–60 % cho cả sáu bot không chứa được hai cụm cách nhau ~40 điểm.
+- **Quyết định (b) chỉ nâng Ẩu khi Bắn mạnh nối tới 1,0**: Ẩu 80–83 % (p7–p9), nhưng Khá, Nhanh, Chuẩn lên 90–94 % và Chuẩn tắt nhịp 88–94 % (B7 trượt). Ở 0,8 / 5 s (số giữ lại) Ẩu 62–73 % như R1. Độ chính xác vẫn tách bot (Mới 92 %, Chậm chắc 99 % cùng E 25: cách 10 điểm thắng), núm (a) của §7.2 chưa làm.
+- Số cuối chọn vì giữ thắng của 4/6 bot trong 78–88 % gộp và B7 đạt; p11 (`quick` 0,9) kéo Mới lên 78 % nhưng Nhanh 89 %, B7 90 %.
+
+**Kết quả cuối** (`pnpm td:balance --threads=4`, hai bộ × 120 seed, 780 s, sau p12; `tmp/dell-2026-10-24/c/final.md`; Cân bằng, Thử thách giống từng dòng lượt trước p12, `full.md`):
+
+- B1 trượt ở cả hai bộ và gộp (dải §3 mỗi bộ, dải chặt gộp): Mới (thắng 76 / 68 %, Biên S 30 / 25 %), Chậm chắc, Chuẩn, Nhanh (Biên S 68–70 %), Ẩu (thắng 73 / 62 %, S 38 / 23 %); Khá đạt (83 / 80 %, S 60 %). Đích chặt gộp: chỉ Khá đạt (82 %, 60 %).
+- B3 trượt ở bộ 2: Mới ở Cân bằng 68 % (≥ 70 %); bộ 1 (76 %) và gộp (72 %) đạt. Trẻ em ở Thư giãn 88 / 90 %, gộp 89 % (≥ 85 %).
+- B2, B4 (S Chậm chắc 70 % > Ẩu 30 %; hạ quái 4,36 s < 4,64 s; hạ boss 42,5 > 39,4 sát thương/s), B5 (Không gõ và `no-type@kite` 0 % thắng, boss rút 0/240), B6 (Tốt − Kém 93 − 24 ở Cân bằng, 79 − 11 ở Thử thách), B7 (Chuẩn tắt nhịp 86 / 83 %, gộp 85 %, Biên S 53–55 %; bậc mỗi đợt ≤ 3, khoảng sinh ±15 %), B8 đạt ở hai bộ và gộp; B9 thiếu số.
+- G2 đạt (gõ Đêm 1–4 23,4 %, Đêm 5 23,9 %); G5 đạt (Tối Thượng 2,1 % sát thương lên boss, 10,9 % cả ải); G6 đạt theo §9.1 (một trống mỗi 28,6 s ở Đêm 4, tối đa 2 lời gọi trực tiếp mở cùng lúc), còn "5–10 % số từ của ải" thì 0,5 %.
+- Đỉnh boss, bot Chuẩn, Cân bằng: tới boss 120/120 mỗi bộ, rút 83 / 82 %, trồi → trúng đầu p50 24,1 s (G8), giao chiến p50 45,0 / 45,3 s (G3 45–75 s, sát mép dưới), Nhàn I đỉnh boss 1 %, phần gõ 59–61 %, Draconis 12–13 %. Bảng §12 trên ải truyện (G1): 4 (mạng 9 / 12 / 12 / 12 / 10), 5a 8,00 s, 5b 30,2 %, 5c 23,6 %, 6, 7 (+38,2 %) đạt. Cửa sổ 20 s thật của bot Chuẩn kiểu người: p50 7,69 / 7,68 s, lớn nhất 8,73 / 9,27 s, 18 và 15 / 120 ván quá 8 s (đích mềm đạt).
+- Thư giãn, Thử thách (báo cáo): Thư giãn Mới tới Nhanh thắng 100 % (Biên S 95–100 %), Trẻ em 89 % (Biên S 55 %), Chuẩn Kém 98 %. Thử thách thắng gộp: Mới 68 %, Chậm chắc 87 %, Chuẩn 67 %, Khá 90 %, Ẩu 49 %, Nhanh 95 % (dải 50–75 %).
+
+**Quyết định thiết kế (đã chọn theo đề xuất):**
+
+- **G6 đo theo §9.1.** Lựa chọn: (a) G6 đọc theo tần suất của §9.1 (một lời gọi trực tiếp mỗi 25–40 s ở đêm có quái đó, ≤ 2 mở cùng lúc) cho tới khi bản đồ có đủ động từ, báo cáo vẫn in tỉ lệ trên cả ải; (b) thêm Tanuki ở nhiều đêm để kéo tỉ lệ cả ải lên 5 % (Ngắt thành vòng chơi chính, đổi cân bằng mọi đêm); (c) để G6 trượt. Đề xuất (a); **đã chọn theo đề xuất (a)**. Bản đồ 1 ở R2 chỉ có Ngắt ở Đêm 4: với một trống mỗi 25–40 s, từ trực tiếp chỉ ~0,5 % số từ cả ải.
+- **Cân bằng còn trượt (B1, B3 phần Mới bộ 2, đích chặt):** cần chủ dự án chọn hướng; đề xuất cho đợt sửa R2: (a) của §7.2 (giảm sức nặng của độ chính xác: `CALL.sloppy`, `SCORE.qA`) cho Ẩu và Mới, và đọc dải chặt của Biên S theo bot Chuẩn (các bot khác giữ dải §3), vì Biên S tách theo sức gõ là điều game muốn người chơi thấy. Chưa làm: đổi luật gõ và đổi đích là việc của chủ dự án.
+
+**Số dòng:** 8.883 → 9.488 (trần R2 10.000). Từng file: `sim/systems/ult.ts` 127 (≤ 170), `sim/systems/direct.ts` 94 (≤ 180), `sim/stores/ult.ts` 20, `view/fx-2d.ts` 196 (≤ 230), `sim/systems/agents.ts` +19 (≤ +30), `sim/systems/boss.ts` 305 (≤ 320), `view/boss-2d.ts` 404 (vượt, ở trên).
+
+**File vàng** (`pnpm td:golden:update`): nội dung `87f80da6` → `357eacfb` (số R2, quái mới, luật mới vào mã băm nội dung; kho Tối Thượng, cột quái, Thư Đồng, lời gọi, thống kê mới vào mã băm trạng thái). `td-1a.json`: 18.993 → 19.540 tick, 316 → 325 mã băm, 362 → 379 lệnh; bot hộp cát có thêm luật R2: Đêm 2 một Tanuki rồi hai toán 5 Cương Thi đuổi kịp nó ở khúc nhập (một lần Ngắt được gõ), Đêm 3 Tối Thượng đầy và được dùng (12 lông); 18 mạng. `td-1b-boss.json`: 4.811 → 5.306 tick, 80 → 88 mã băm, 30 → 45 lệnh; Tối Thượng đầy lúc boss trồi, Chữ Chiêu gõ đủ 3 từ (21 lông); boss rút với 2.404 sát thương, 20 mạng.
+
+**Kiểm (Dell):**
+
+- `pnpm check` (WSL) đạt: kit sha256 (31 file), 286 test (25 file), `tsc`, `vite build`. **Gói JS gzip 87,16 kB, vượt ngân sách §20 (85 kB)**; R1 81,87 kB, phần R2 ~5,3 kB. Chưa sửa ở đợt này; hướng: tách màn đầu, Cài đặt, Hồ sơ gõ và bảng hộp cát thành phần nạp sau (`import()` động). `pnpm td:golden:check` khớp cả hai file vàng (nội dung `357eacfb`).
+- Bước sim trên Node (`td-sim-perf`, lúc vitest chạy 4 luồng): boss + 300 quái (có Mầm Gỗ, Tanuki, Nuppeppō) + mưa Tối Thượng: trung vị 0,063 ms, p95 0,166 ms (§20 ≤ 0,5 ms); 300 quái 0,065 / 0,227 ms.
+- Kịch bản trình duyệt (máy chủ dev của game, cổng 3006; Chrome for Testing trong WSL), ở 1280 × 720 và 1920 × 1080, đều đạt, 0 lỗi console, 0 ngoại lệ; chín kịch bản có kiểm chạy lại (`td-1b-*`, `td-1a6-day`, `-keyboard`, `-learn`, `-night`) ra cùng mã băm trên Node: R2 `td-1b-ult` (Chữ Chiêu gõ đủ 3 từ, cả lời gọi Hoàn hảo: 22 lông; bỏ qua: 12 lông, Chuỗi không giảm; cửa sổ 20 s của bộ điều phối 2,0 s), `td-1b-direct` (5 lần trống; gõ được: Tanuki choáng, còn 35–41 tick lúc đo, +7 vàng; để chạy: hồi máu; ba Tanuki cùng lúc: tối đa 2 lời gọi, 2 thẻ; thẻ 18 px ở 1280 × 720, 24 px ở 1920 × 1080); R1 `td-1b-boss`, `td-1b-night5`, `td-1b-build` (thẻ mọi nhà vừa khung); kịch bản cũ `td-1a-boot`, `td-1a-ime`, `td-1a6-attention`, `td-1a6-day`, `td-1a6-keyboard`, `td-1a6-learn`, `td-1a6-night`, `td-1a6-tour`, `td-balance`, `td-theme`. `td-1a-ime` lần đầu trượt kiểm "`-` và `=` không ra lệnh": từ R2 `=` là Tối Thượng (§8.2, §14), nên kịch bản đổi thành "`-` không ra lệnh, `=` gửi một lệnh `ult`" rồi chạy lại: đạt ở hai cỡ.
+- **Hiệu năng §20 (Dell, Windows Chrome 155, RTX 3050 Ti; node Windows, máy chủ dev trong WSL, khoá GPU dùng chung; lúc đo, lượt kịch bản trong WSL vẫn chạy song song):** `td-1b-perf` 1280 × 720: luồng chính 1,58 ms mỗi khung (bận 24,7 %, 1.565 khung, 156 khung/s), vẽ 2D + thẻ p95 1,2 ms, bước + HUD p95 0,3 ms, khung lớn nhất lúc trồi 2,2 ms, 251 quái, Tối Thượng 2 lần (24 lông); 1920 × 1080: 1,65 ms (130 khung/s), vẽ p95 1,5 ms, lúc trồi 2,4 ms: đạt (≤ 4 ms, ≤ 16,7 ms, ≤ 8 ms). `td-1a6-perf` 1280 × 720: cửa sổ kéo tới 17,2 s để gõ đủ 30 phím, luồng chính trung bình 1,60 ms, p95 các khoảng 1,93 ms, vẽ p95 1,3 ms, 152 khung/s, bước sim trong Chrome 0,05 / 0,10 ms; 1920 × 1080: 17,1 s, 1,58 / 1,99 ms, vẽ p95 1,1 ms, 140 khung/s: đạt mọi kiểm trong trình duyệt (`typedInTheWindow` đạt cả hai cỡ). Phần Node của bốn lần chạy này chạy trong WSL trên file JSON đã lưu: 4/4 nhật ký khớp mã băm; `scripts/td/golden.ts --check --log` ra `same: true` và Chrome bước nhật ký vàng đó ra đủ mã băm (`chromeStepsNodeGoldenLog` đạt).
+- Ảnh đã xem: thẻ năm nhà và thẻ Lũy ở hai cỡ (`ui/cards-1280.png`, `cards-1920.png`), trống vỡ thành chữ và vòng hồi máu (`r2/direct-sheet.png`), chân dung và lông rơi lúc dùng Tối Thượng (`visual/ult-cast-sheet.png`, lượt kịch bản trước p12, cùng mã trừ hệ số máu boss ở Thư giãn), boss trồi (`final/boss-r2-sheet.png`; ở 1280 × 720 đá văng và rễ con nhỏ, khó thấy ở ảnh thu nhỏ).
+- Chưa làm: phản biện độc lập R2; chủ dự án chơi thử (B9).
 

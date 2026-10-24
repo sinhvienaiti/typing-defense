@@ -22,13 +22,15 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
   ceiling 10,500, balance targets and gates.
 - **State (24/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
-  §7.2, with the fix's own minor review at its end). R1's done-line (`BUILD_1B.md`
-  §17) is not met yet: B1 set 1 (Chậm chắc 92 %, Ẩu 73 %), B7 set 1 (91 %), and
-  on the pooled sets the tight band of §18.3 for B1 (Chậm chắc 90 %, S 65 %;
-  Ẩu 76 %) and B7 (89 %) miss; §7.2 says why. Design call: đã chọn theo đề xuất
-  (b), làm ở R2 (raise Bắn mạnh nối while making Nights 1–4 harder, then measure
-  again). Next: the owner plays map 1 at 1280 × 720 (`BUILD_1B.md` §17
-  done-line, §22, B9 numbers), then R2 starting with (b).
+  §7.2); **1B R2 built** (§7.3: Tối Thượng, Chữ Chiêu, Mảnh Chữ, Ngắt on Lửng
+  Tanuki, Nuppeppō, Thư Đồng's panic, R2's 2D layers, design call (b) applied).
+  Gates after R2 (both seed sets × 120): B2, B4–B8, G1–G3, G5, G8 pass, G6 read as
+  §9.1's frequency (đã chọn theo đề xuất); B1 misses (Biên S splits by typing
+  skill: Chậm chắc, Chuẩn, Nhanh ~70 %, Mới, Ẩu 25–30 %; Ẩu wins 67 %), B3 misses
+  on set 2 (Mới 68 %), the pooled tight targets pass for Khá only; §7.3 says why
+  and proposes the next lever (owner's call). The JS bundle is 87.2 kB gzip, over
+  §20's 85 kB. Next: the R2 review and its fix; the
+  owner's playtest of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
@@ -68,6 +70,17 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   (`POWER.quick`, `quickS`); wood sells 10 for 4 gold (`sellWood`, the Bastion's
   card); the boss's hit points take a two-way k factor with a square term and a
   factor per mode (`boss.kHp`, `kHp2`, `modeHp`).
+- 1B R2 (`BUILD_1B.md` §8–§10): Tối Thượng `src/sim/systems/ult.ts` (store
+  `src/sim/stores/ult.ts`, the `ult` command, key `=`, the app's spot `ultSpot`;
+  Chữ Chiêu is call kind `ult`), direct calls and Ngắt `src/sim/systems/direct.ts`
+  (call kind `direct`, its enemy in the call's `foe`; a Tanuki drums only within
+  `ability.reachM` of an attack building's rim), Nuppeppō's split in
+  `deaths.ts`, Thư Đồng's panic `panicNear` in `agents.ts`; numbers `ULT`,
+  `SHARDS`, `DIRECT`, `PANIC` in `rules.ts`, Tanuki and Nuppeppō in
+  `slice-1a.ts`. Their 2D layers: `FxView` in `src/view/fx-2d.ts` (portrait,
+  feather shadows, embers, heal ring); the charge ring on Draconis' lantern
+  (`team-bar.ts`), the action button (`hud.ts`). Sandbox ops `spawn`, `ult`.
+  Bot habits `tests/td/policies/ult.ts` (`ultRule`, `dodgeRoots`).
 - Balance (parent `docs/games/BALANCE.md` §9.2; `docs/td/BUILD_NOTES.md` §6): the typing profile
   `src/app/skill.ts` (kit key `typing-defense.skill`, folded after each day and night) gives the run header
   (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
@@ -90,9 +103,12 @@ pnpm test                # vitest run
 pnpm build               # tsc --noEmit && vite build
 pnpm check               # kit sha256 check, tests, build
 pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B1–B9 per seed set, the boss table,
-                         #   the split table, the pooled tight targets (BUILD_1B §6.4, §18.2) with B1–B9 pooled
+                         #   the split table, R2's table (Tối Thượng, direct words, typing by night; G2, G5, G6),
+                         #   the pooled tight targets (BUILD_1B §6.4, §18.2) with B1–B9 pooled
                          #   (B1, B7 on the tight band of §18.3, the BALANCE §3 verdict after), then the BUILD_1A6 §12 table
                          #   options: --stage-seeds=120 --stage-sets=2 --threads=6 --seeds=5 --nights=4 (§12 runs)
+                         #   probes: --modes=balanced --bots=standard,fast --quick (no profiles, no §12 report)
+                         #   --set=slice.enemies.3.hp=4300 --set=POWER.quick=0.8 … (numbers overridden in every worker, printed on top)
 node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable: --khp2, --modehp, --quick, --woodgold, --tl, …)
 node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json  # a long bot run kept as "Chơi lại Ngày n" keeps it (td-1b-night5 uses it)
 pnpm td:golden:check     # golden runs must match tests/golden/td-1a.json and td-1b-boss.json
@@ -104,7 +120,10 @@ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-ba
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-boss.mjs --width=1280 --height=720    # boss peak, frame sets
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-night5.mjs --width=1280 --height=720  # day 5 warning, blows, Chơi lại Ngày 5
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720   # story locks, sell, Bastion
-URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-perf.mjs --width=1280 --height=720    # boss + flood(300)
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-perf.mjs --width=1280 --height=720    # boss + flood(300) + Tối Thượng ×2
+# 1B R2:
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-ult.mjs --width=1280 --height=720     # =, feathers, Chữ Chiêu typed / left alone
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720  # Tanuki: Ngắt typed, let run (heal), ≤ 2 cards
 # Perf numbers need a Chrome with a GPU (Chrome in WSL draws in software): on the Dell, Windows node + Windows Chrome,
 # then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2.
 ```
