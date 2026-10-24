@@ -33,10 +33,13 @@ export default defineConfig({
   },
   build: {
     target: "es2022",
+    // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
+    manifest: true,
     rollupOptions: {
       output: {
-        // BUILD_1B §20: what the game needs to start is one chunk (scripts/bundle-budget.mjs, ≤ 85 kB gzip); sound, the
-        // title, the settings and Hồ sơ gõ cards, the pause and results cards and the sandbox panel load apart (src/main.ts).
+        // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
+        // pause and results cards and the sandbox panel load apart (src/main.ts). At "/" the start set is that chunk and
+        // the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
         manualChunks: (id) => (/[\\/]src[\\/](ui[\\/](title|settings|profile|sheets)|app[\\/]sandbox|view[\\/](audio-min|folk|music))\.ts$/.test(id) ? undefined : "game"),
       },
     },

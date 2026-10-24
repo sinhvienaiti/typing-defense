@@ -12,11 +12,14 @@
  * events, Esc's pause card and the results card sit over it, and window.__td
  * lets the browser scenarios drive it through commands. The typing profile
  * (app/skill.ts, BALANCE.md §2) gives the run its header (E, pace k, the pace
- * director by the settings) and takes each day and night's typing after it. The title with its settings and Hồ sơ gõ
- * cards, the pause and results cards and the sandbox panel are chunks of their own, loaded when wanted (BUILD_1B §20).
+ * director by the settings) and takes each day and night's typing after it. The title, its settings and Hồ sơ gõ
+ * cards, the pause and results cards, sound and the sandbox panel are chunks of their own (BUILD_1B §20): at "/" the
+ * page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest comes once
+ * the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review fix 2).
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
+import { Chunk } from "./app/chunks";
 import { installDevHandle } from "./app/dev-handle";
 import { installKeys, installPointer } from "./app/input";
 import { learningBridge } from "./app/learning";
@@ -61,26 +64,46 @@ const canvas = byId<HTMLCanvasElement>("tdCanvas");
 const view = new DebugView(canvas);
 let painted = false;
 const settings = loadSettings();
-/** Sound and music, a chunk loaded right after the start: nothing sounds before a key or a click anyway (TypingAudio.resume). */
+/** Sound and music, a chunk fetched once the page is usable (prefetch): nothing sounds before a key or a click anyway (TypingAudio.resume). */
+const sound = new Chunk("sound", async () => new (await import("./view/audio-min")).TypingAudio(settings));
 let audio: TypingAudio | null = null;
-void import("./view/audio-min").then((m) => (audio = new m.TypingAudio(settings)));
 let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
 /** The run header from the profile and the "Nhịp tự điều" setting. */
 const header = () => paceHeader(profile, settings.pace);
+/** A chunk the page could not load, told in the HUD for a while (`until`, ms of performance.now()). */
+let lost = { text: "", until: 0 };
+const tellLost = (text: string): void => void (lost = { text, until: performance.now() + 10_000 });
 
-// The title, its chunk and its cards loaded on first use (a run opened by a scenario's link never loads them, nor its
-// painting); its choice waits for the run. `titleUp`: the title is up or on its way, so the world waits and keys wait too.
+// The title, its chunk loaded on first use (a run opened by a scenario's link never loads it, nor its painting), its
+// settings and Hồ sơ gõ cards when picked; its choice waits for the run. `titleUp`: the title is up or on its way, so
+// the world waits and keys wait too. A title that cannot load is skipped: the run goes on (R2 review fix 2).
 let title: TitleScreen | null = null;
 let titleUp = false;
-let titleLoad: Promise<void> | null = null;
 let choose: (choice: TitleChoice) => void = () => {};
+const cardChunks = { settings: new Chunk("settings", () => import("./ui/settings")), profile: new Chunk("profile", () => import("./ui/profile")) };
+const titleCards = {
+  settings: async () => {
+    const s = await cardChunks.settings.get();
+    return s && new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => title?.settingsDone());
+  },
+  profile: async () => {
+    const p = await cardChunks.profile.get();
+    return p && new p.ProfileCard(() => title?.settingsDone());
+  },
+};
+const titleChunk = new Chunk("title", async () => {
+  const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: (ui: UiSound) => audio?.ui(ui), wake: () => audio?.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
+  return new (await import("./ui/title")).TitleScreen(document.body, hooks, titleCards, true);
+});
 function showTitle(canContinue: boolean): void {
   titleUp = true;
-  titleLoad ??= Promise.all([import("./ui/title"), import("./ui/settings"), import("./ui/profile")]).then(([t, s, p]) => {
-    const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: (sound: UiSound) => audio?.ui(sound), wake: () => audio?.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
-    title = new t.TitleScreen(document.body, hooks, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => title?.settingsDone()), new p.ProfileCard(() => title?.settingsDone()), true);
+  void titleChunk.get().then((shown) => {
+    title = shown;
+    if (shown === null) return void ((titleUp = false), tellLost("Màn đầu chưa tải được: vào thẳng ván · F5 để thử lại"));
+    if (titleUp) shown.show(canContinue);
+    void cardChunks.settings.get(); // its cards, ready before they are picked
+    void cardChunks.profile.get();
   });
-  void titleLoad.then(() => titleUp && title?.show(canContinue));
 }
 /** "Chơi lại Ngày n" (BUILD_1B §4.3): the run's header, its log up to day n's start, the hash there; one page load reads it. */
 type Retry = { seed: number; sandbox: boolean; deck: string; content: string; mode: Mode; header: PaceHeader & { expected: number }; day: number; tick: number; hashes: string[]; log: Command[] };
@@ -145,9 +168,8 @@ choose = (choice) => {
   titleUp = false;
   title?.hide();
 };
-/** The sandbox panel's markup (?sandbox=1), its own chunk. */
-let sandboxPanel: ((w: World) => string) | null = null;
-if (sandbox) void import("./app/sandbox").then((m) => (sandboxPanel = m.sandboxHtml));
+/** The sandbox panel's markup (?sandbox=1), its own chunk (fetched with the others once the page is usable). */
+const panel = new Chunk("sandbox", async () => (await import("./app/sandbox")).sandboxHtml as (w: World) => string);
 
 /** Buttons and keys: the camera's and the sound's own, the rest the selection's. */
 function act(action: string): void {
@@ -160,11 +182,16 @@ function act(action: string): void {
 const hud = new Hud(byId("tdHud"), act);
 const banner = new BossBanner();
 for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio?.resume());
-/** Esc's pause card and the results card, with their settings card: a chunk loaded as the run starts; "Xem bản đồ" puts the results away. */
+/**
+ * Esc's pause card and the results card, with their settings card: a chunk fetched once the page is usable, asked again
+ * when a card is wanted; without it the HUD says the pause or the end (R2 review fix 2). "Xem bản đồ" puts the results away.
+ */
 let mapOnly = false;
 let sheet: Sheet | null = null;
-void Promise.all([import("./ui/sheets"), import("./ui/settings")]).then(([m, s]) => {
-  sheet = new m.Sheet(document.body, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => sheet?.settingsDone()), (action: SheetAction) => {
+const sheets = new Chunk("sheets", async () => {
+  const [m, s] = await Promise.all([import("./ui/sheets"), cardChunks.settings.get()]);
+  if (s === null) throw new Error("no settings card");
+  return new m.Sheet(document.body, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => sheet?.settingsDone()), (action: SheetAction) => {
     if (action === "resume") selection.act("pause");
     else if (action === "map") mapOnly = true;
     else if (action === "again") window.location.search = freshRun(false);
@@ -173,6 +200,13 @@ void Promise.all([import("./ui/sheets"), import("./ui/settings")]).then(([m, s])
     else if (action === "title") showTitle(world.phase !== "defeat");
   });
 });
+const wantSheet = (): void => void sheets.get().then((m) => (sheet = m));
+/** Once the page is usable: sound, the cards' chunk and the sandbox panel, so none of them holds up the start. */
+function prefetch(): void {
+  void sound.get().then((m) => (audio = m));
+  wantSheet();
+  if (sandbox) void panel.get();
+}
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
 window.addEventListener("keydown", (event) => {
   if (titleUp && title === null) return void (event.preventDefault(), event.stopImmediatePropagation());
@@ -199,16 +233,28 @@ installPointer(canvas, view, {
   },
 });
 
+let sheetAsked = -Infinity;
 function showHud(): void {
   const refused = [...recent].reverse().find((event) => event.t === "rejected" && world.tick - event.tick < 150);
+  const now = performance.now();
+  const over = world.phase === "defeat" || world.phase === "victory";
+  const card = titleUp ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "";
+  // A card wanted before its chunk is in: asked again (at most once a second); a chunk given up is told here instead.
+  if (card !== "" && sheet === null && now - sheetAsked > 1000) {
+    sheetAsked = now;
+    wantSheet();
+  }
+  const noCard = card !== "" && sheet === null && sheets.failed;
   const notices = [
     selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", imeWarning ? "Tắt bộ gõ tiếng Việt để gõ" : "",
     world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Gỗ thừa: bán gỗ ở thẻ Lũy" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
+    now < lost.until ? lost.text : "",
+    noCard ? (card === "pause" ? "Tạm dừng · Esc để chạy tiếp (thẻ tạm dừng chưa tải được)" : "Hết ải · F5 để chơi lại (thẻ kết chưa tải được)") : "",
+    sandbox && selection.panel && panel.failed ? "Bảng hộp cát chưa tải được · F5 để thử lại" : "",
   ];
-  const now = performance.now();
   hud.update([
     statusHtml(world, sandbox, selection.halted, audio?.muted === true, notices.filter((notice) => notice !== ""), banner.hit(now)),
-    sandbox && selection.panel && sandboxPanel !== null ? sandboxPanel(world) : "",
+    sandbox && selection.panel && panel.value !== null ? panel.value(world) : "",
     teamHtml(world, selection.agent),
     stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical),
     dockHtml(world, selection),
@@ -216,8 +262,7 @@ function showHud(): void {
     banner.html(world, now),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
-  const over = world.phase === "defeat" || world.phase === "victory";
-  sheet?.show(titleUp ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "", world, { story: !sandbox, retried: retry?.day ?? 0 });
+  sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0 });
 }
 
 /** The boss bar takes the top of the screen from its warning on: the field moves down under it (BUILD_1B §13.1). */
@@ -235,6 +280,7 @@ window.addEventListener("resize", resize);
 const recent: RareEvent[] = [];
 resize();
 showHud();
+prefetch();
 
 /** The last 600 frames' costs in ms (BUILD_NOW §7 gate 5): the steps with the HUD and sound, then the 2D view with the cards. */
 const costs = { update: [] as number[], draw: [] as number[] };
@@ -312,8 +358,8 @@ function retryDay(): void {
 }
 
 installDevHandle({
-  // Painted, and the chunks this page wants are in (sound, the cards, the title when it is up, the sandbox panel).
-  ready: () => painted && audio !== null && sheet !== null && (!titleUp || title !== null) && (!sandbox || sandboxPanel !== null),
+  // Painted, and the chunks this page wants are in or given up (sound, the cards, the title when it is up, the sandbox panel).
+  ready: () => painted && sound.settled && sheets.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
   // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
   flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director }, mode: startMode }),
   send: (command: CommandBody) => session.send(command),

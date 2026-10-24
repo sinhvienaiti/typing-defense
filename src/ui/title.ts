@@ -5,7 +5,8 @@
  * A string of paper lanterns lights up one by one, villagers call across the fields (audio-min.ts), the name
  * "Lời Gọi" is brushed in Baloo 2 by a vermilion seal. Keyboard first: ↑ ↓ pick, Enter or 1–5 choose, Esc
  * goes back to the run left open; while the title is up it takes every key and the world does not step.
- * "Hồ sơ gõ" opens the typing profile (BALANCE.md §2) in the menu's place, as "Cài đặt" opens the settings.
+ * "Hồ sơ gõ" opens the typing profile (BALANCE.md §2) in the menu's place, as "Cài đặt" opens the settings. Those two
+ * cards are chunks of their own (BUILD_1B §20, R2 review fix 2): asked for when picked, an error sound if one cannot load.
  */
 import type { UiSound } from "../view/audio-min";
 import type { ProfileCard } from "./profile";
@@ -139,12 +140,15 @@ export class TitleScreen {
   private focus = 0;
   private readonly off = new Set<EntryId>();
   private timers: number[] = [];
+  private settings: SettingsCard | null = null;
+  private profile: ProfileCard | null = null;
+  /** A card's chunk is on its way: picks wait. */
+  private pending = false;
 
   constructor(
     root: HTMLElement,
     private readonly hooks: { choose(choice: TitleChoice): void; sound(sound: UiSound): void; wake(): void; profile(card: ProfileCard): void },
-    private readonly settings: SettingsCard,
-    private readonly profile: ProfileCard,
+    private readonly cards: { settings(): Promise<SettingsCard | null>; profile(): Promise<ProfileCard | null> },
     learn: boolean,
   ) {
     this.el = Object.assign(document.createElement("div"), { className: "tt-screen", hidden: true });
@@ -156,14 +160,13 @@ export class TitleScreen {
       `<nav class="tt-menu vd-sheet" aria-label="Màn đầu">${ENTRIES.map(([id, label, sub], k) => `<div class="tt-entry" role="button" data-entry="${id}"><kbd>${k + 1}</kbd><b>${label}</b><small>${sub}</small></div>`).join("")}</nav>` +
       `<p class="tt-keys">↑ ↓ chọn · Enter vào · 1–5 chọn nhanh</p>`;
     this.menu = this.el.querySelector(".tt-menu")!;
-    this.menu.append(settings.el, profile.el);
     this.entries = [...this.el.querySelectorAll<HTMLElement>(".tt-entry")];
     if (!learn) this.off.add("learn");
     root.appendChild(this.el);
     this.el.addEventListener("pointerdown", (event) => {
       this.hooks.wake();
       const entry = (event.target as Element).closest<HTMLElement>(".tt-entry");
-      if (entry === null || this.settings.shown || this.profile.shown) return;
+      if (entry === null || this.settings?.shown === true || this.profile?.shown === true) return;
       event.preventDefault();
       this.pick(this.entries.indexOf(entry));
     });
@@ -188,8 +191,8 @@ export class TitleScreen {
     this.el.hidden = false;
     if (canContinue) this.off.delete("continue");
     else this.off.add("continue");
-    this.settings.close();
-    this.profile.close();
+    this.settings?.close();
+    this.profile?.close();
     this.entries.forEach((entry) => (entry.hidden = false));
     this.entries.forEach((entry, k) => entry.classList.toggle("is-off", this.off.has(ENTRIES[k]![0])));
     this.move(canContinue ? 1 : 0, false);
@@ -206,8 +209,8 @@ export class TitleScreen {
 
   hide(): void {
     this.el.hidden = true;
-    this.settings.close();
-    this.profile.close();
+    this.settings?.close();
+    this.profile?.close();
     this.timers.forEach(clearTimeout);
   }
 
@@ -221,18 +224,35 @@ export class TitleScreen {
     const id = ENTRIES[at]?.[0];
     if (id === undefined) return;
     if (this.off.has(id)) return this.hooks.sound("off");
-    this.hooks.sound("pick");
-    if (id !== "settings" && id !== "profile") return this.hooks.choose(id);
-    this.entries.forEach((entry) => (entry.hidden = true));
-    if (id === "settings") this.settings.open();
-    else this.hooks.profile(this.profile);
+    if (id !== "settings" && id !== "profile") {
+      this.hooks.sound("pick");
+      return this.hooks.choose(id);
+    }
+    if (this.pending) return;
+    this.pending = true;
+    void this.card(id).then((card) => {
+      this.pending = false;
+      if (card === null) return this.hooks.sound("off"); // its chunk did not load (logged); the menu stays
+      if (this.el.hidden) return;
+      this.hooks.sound("pick");
+      this.entries.forEach((entry) => (entry.hidden = true));
+      if (id === "settings") this.settings!.open();
+      else this.hooks.profile(this.profile!);
+    });
+  }
+
+  /** The settings or profile card, its chunk loaded on first use and its element put in the menu. */
+  private async card(id: "settings" | "profile"): Promise<SettingsCard | ProfileCard | null> {
+    const card = id === "settings" ? (this.settings ??= await this.cards.settings()) : (this.profile ??= await this.cards.profile());
+    if (card !== null && !card.el.isConnected) this.menu.append(card.el);
+    return card;
   }
 
   /** Settings or the profile closed: the entries come back, the focus on the entry that opened it. */
   settingsDone(): void {
-    const at = this.profile.shown ? ENTRIES.findIndex(([id]) => id === "profile") : 2;
-    this.settings.close();
-    this.profile.close();
+    const at = this.profile?.shown === true ? ENTRIES.findIndex(([id]) => id === "profile") : 2;
+    this.settings?.close();
+    this.profile?.close();
     this.entries.forEach((entry) => (entry.hidden = false));
     this.move(at, false);
   }
@@ -241,8 +261,8 @@ export class TitleScreen {
   key(event: KeyboardEvent): boolean {
     this.hooks.wake();
     if (event.repeat && !event.code.startsWith("Arrow")) return true;
-    if (this.settings.shown) return this.settings.key(event);
-    if (this.profile.shown) return this.profile.key(event);
+    if (this.settings?.shown === true) return this.settings.key(event);
+    if (this.profile?.shown === true) return this.profile.key(event);
     const step = event.code === "ArrowDown" || (event.code === "Tab" && !event.shiftKey) ? 1 : event.code === "ArrowUp" || event.code === "Tab" ? -1 : 0;
     if (step !== 0) {
       let to = this.focus;
