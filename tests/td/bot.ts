@@ -12,12 +12,13 @@ import type { FlowSummary } from "../../src/kit/balance/flow";
 import type { PaceSummary } from "../../src/kit/balance/director";
 import type { TypistParams } from "../../src/kit/balance/typist";
 import { createRng } from "../../src/kit/platform/rng";
-import { MODES, TICK_HZ } from "../../src/content/rules";
+import { DIRECT, MODES, TICK_HZ } from "../../src/content/rules";
+import { bossSlot } from "../../src/sim/systems/boss";
 import type { Mode } from "../../src/content/types";
 import type { Command, CommandBody } from "../../src/sim/commands";
 import { hashHex } from "../../src/sim/hash";
 import { STAT, statsObject, type StatName } from "../../src/sim/stats";
-import { CALL_STATE } from "../../src/sim/stores/calls";
+import { CALL_KIND, CALL_STATE } from "../../src/sim/stores/calls";
 import type { PaceHeader } from "../../src/sim/systems/pace";
 import { createWorld, step, type World } from "../../src/sim/world";
 import { wordText, type Deck } from "../../src/typing/decks";
@@ -102,6 +103,8 @@ export type BotRun = {
   killSeconds: number | null;
   /** The boss peak (BUILD_1B §18.2). */
   boss: BossRun;
+  /** The most direct calls open at once (G6, R2). */
+  directMax: number;
 };
 
 /** Eyes and hands: one key a tick at most, when the hands are free and there is something seen to type. */
@@ -151,6 +154,8 @@ export function callProblems(w: World): string[] {
   const out: string[] = [];
   const bright = C.live().filter((c) => C.bright[c] === 1).length;
   if (bright > MODES[w.mode].open) out.push(bright + " bright calls");
+  const direct = C.live().filter((c) => C.kind[c] === CALL_KIND.direct).length;
+  if (direct > (bossSlot(w) >= 0 ? DIRECT.openBoss : DIRECT.open)) out.push(direct + " direct calls open"); // G6 (R2)
   for (const c of C.live()) if (C.bright[c] === 1 && C.state[c] !== CALL_STATE.open) out.push("call " + c + " is bright and queued");
   for (const c of C.live()) if (C.word[c]! >= 0 && (C.bright[c] !== 1 || W.call[C.word[c]!] !== c)) out.push("call " + c + " holds a word it should not");
   const live = W.live();
@@ -240,7 +245,7 @@ export function runBot(spec: BotSpec): BotRun {
   const run: BotRun = {
     world, log: [], hashes: [], stats: statsObject(world.stats), ticks: 0, typedTicks: [0, 0], emptyTicks: [0, 0], phaseTicks: [0, 0], byDay: [], windowMax: 0, windowAt: 0,
     atNightfall: [], atDawn: [], calls: tally(), callsByKind: [], stepMs: null, livesAtWaveEnd: [], rejected: [], problems: [], defeat: false,
-    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run,
+    flow: world.pace.meter.summary("quit"), pace: paceSummary(world), killSeconds: null, boss: new BossProbe().run, directMax: 0,
   };
   const probe = new BossProbe();
   run.atDawn[1] = earned(world);
@@ -271,6 +276,9 @@ export function runBot(spec: BotSpec): BotRun {
       else [day.nightTicks, day.nightTyped] = [day.nightTicks + 1, day.nightTyped + typed];
     }
     if (world.typing.typedSum > run.windowMax) [run.windowMax, run.windowAt] = [world.typing.typedSum, world.tick];
+    let direct = 0;
+    for (let c = 0; c < world.calls.top; c += 1) if (world.calls.used[c] === 1 && world.calls.kind[c] === CALL_KIND.direct) direct += 1;
+    run.directMax = Math.max(run.directMax, direct);
     spec.onTick?.(world);
     probe.tick(world);
     meter.read(world);

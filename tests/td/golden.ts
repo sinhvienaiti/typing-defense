@@ -9,12 +9,14 @@
  * change of behaviour. `pnpm td:golden:update` remakes it after a change that was meant.
  */
 import { readFileSync } from "node:fs";
+import { BOSS } from "../../src/sim/stores/boss";
 import { compileDeck, wordText, type Deck } from "../../src/typing/decks";
 import { runBot, type BotRun, type BotSpec } from "./bot";
 import { heroBoss } from "./policies/boss";
 import { heroDay, heroNight } from "./policies/hero";
 import { ARCHER_WEST, STANDARD } from "./policies/layouts";
 import { Plan, type Rule } from "./policies/stand";
+import { ultRule } from "./policies/ult";
 import { realDeck } from "./typing";
 
 export const GOLDEN_URL = new URL("../golden/td-1a.json", import.meta.url);
@@ -64,13 +66,35 @@ const undoOnce: Rule = (bot) => {
   if (w.tick === 300 && built !== undefined) bot.send({ t: "sell", building: w.buildings.id(built) });
 };
 
-/** The standard bot at 35 WPM, 95 % (BUILD_1A6 §12 gate 2), its hero where the calls gather, three days and nights, every invariant checked. */
+/**
+ * R2 (BUILD_1B §8, §9): night 2 brings a Tanuki, then two packs of 5 that catch it up where the merge's soldiers hold
+ * them, under the towers, so it drums (Ngắt; BUILD_NOTES §7.3); night 3 a full Tối Thượng (cast by ultRule).
+ */
+function r2Moves(): Rule {
+  let done = 0;
+  let at = 0;
+  return (bot) => {
+    const { w } = bot;
+    if (done === 0 && w.phase === "night" && w.wave === 2) {
+      bot.send({ t: "sandbox", op: { op: "spawn", enemy: "tanuki", value: 1 } });
+      [done, at] = [1, w.tick];
+    } else if ((done === 1 || done === 2) && w.tick === at + 300 * done) {
+      bot.send({ t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } });
+      done += 1;
+    } else if (done === 3 && w.phase === "night" && w.wave === 3) {
+      bot.send({ t: "sandbox", op: { op: "ult" } });
+      done = 4;
+    }
+  };
+}
+
+/** The standard bot at 35 WPM, 95 % (BUILD_1A6 §12 gate 2), its hero where the calls gather, three days and nights, every invariant checked; R2's moves. */
 export function goldenSpec(deck: Deck): BotSpec {
   return {
     seed: 1,
     deck,
     hands: { wpm: 35, accuracy: 0.95, backspace: 0.3 },
-    plan: () => new Plan({ ...STANDARD, callAfterS: 60 }, [undoOnce, heroDay(), heroNight()]),
+    plan: () => new Plan({ ...STANDARD, callAfterS: 60 }, [undoOnce, heroDay(), heroNight(), r2Moves(), ultRule()]),
     nights: 3,
     hashEvery: GOLDEN_EVERY,
     check: true,
@@ -79,7 +103,7 @@ export function goldenSpec(deck: Deck): BotSpec {
   };
 }
 
-/** Tick 0: the preset; tick 1: its towers to level 3, the Bastion to 4; tick 2: the boss. Draconis follows it (heroBoss). */
+/** Tick 0: the preset; tick 1: its towers to level 3, the Bastion to 4; tick 2: the boss; R2: a full Tối Thượng as it rises. Draconis follows it (heroBoss). */
 const callBoss: Rule = (bot) => {
   const { w } = bot;
   if (w.tick === 0) bot.send({ t: "sandbox", op: { op: "preset" } });
@@ -88,12 +112,13 @@ const callBoss: Rule = (bot) => {
     bot.send({ t: "sandbox", op: { op: "keepLevel", value: 4 } });
   }
   if (w.tick === 2) bot.send({ t: "sandbox", op: { op: "boss" } });
+  if (w.boss.stage === BOSS.emerge && w.boss.emergeAt === w.tick + 1) bot.send({ t: "sandbox", op: { op: "ult" } });
 };
 
 /** The boss golden: the sandbox, the standard bot's hands at 35 WPM, nothing built but the preset; until the stage ends. */
 export function bossGoldenSpec(deck: Deck): BotSpec {
   return {
-    seed: 1, deck, hands: { wpm: 35, accuracy: 0.95, backspace: 0.3 }, plan: () => new Plan({ name: "Boss", builds: [], helpers: [null, null, null] }, [callBoss, heroBoss()]),
+    seed: 1, deck, hands: { wpm: 35, accuracy: 0.95, backspace: 0.3 }, plan: () => new Plan({ name: "Boss", builds: [], helpers: [null, null, null] }, [callBoss, heroBoss(), ultRule()]),
     nights: 99, hashEvery: GOLDEN_EVERY, check: true, pace: GOLDEN_PACE, maxTicks: 60 * 60 * 6,
   };
 }
@@ -117,6 +142,7 @@ export function goldenOf(run: BotRun, deck: Deck, words: string[][]): Golden {
     summary: {
       kills: s.kills, livesLost: s.livesLost, wavesCleared: s.wavesCleared, calls: s.calls, callWords: s.callWords, callsPerfect: s.callsPerfect, keys: s.keys, keyErrors: s.keyErrors,
       gold: run.world.gold / 1000, wood: run.world.wood, food: run.world.food, bossDamage: s.bossDamage, bossRetreats: s.bossRetreats, lives: run.world.lives,
+      ultCasts: s.ultCasts, ultFeathers: s.ultFeathers, directOk: s.directOk, directMissed: s.directMissed,
     },
     words,
   };

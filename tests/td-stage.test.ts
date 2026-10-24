@@ -27,7 +27,7 @@ function untilLevel(w: World, level: number, limit = T(60)): void {
 
 describe("the story's unlock days (BUILD_1B §12)", () => {
   it("Trại Lính opens on day 2; Mỏ, Tháp Pháo and the Bastion's level 2 on day 3; upgrades on day 4; level 3 on day 5; the sandbox opens all", () => {
-    expect(SLICE_1A.stage!.unlock).toEqual({ barracks: 2, "gold-mine": 3, cannon: 3, keep2: 3, upgrade: 4, keep3: 5 });
+    expect(SLICE_1A.stage!.unlock).toEqual({ barracks: 2, "gold-mine": 3, cannon: 3, keep2: 3, upgrade: 4, keep3: 5, ult: 3 });
     const w = world({ sandbox: false, gold: 5000 });
     expect(reason(send(w, { t: "build", def: def(w, "barracks"), qx: q(3), qz: q(18) }))).toBe("locked");
     expect(reason(send(w, { t: "build", def: def(w, "cannon"), qx: q(7), qz: q(12) }))).toBe("locked");

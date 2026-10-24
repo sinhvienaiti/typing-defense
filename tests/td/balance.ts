@@ -14,6 +14,7 @@ import type { HandsSpec } from "./keystrokes";
 import { heroDay, heroNight } from "./policies/hero";
 import { STANDARD } from "./policies/layouts";
 import { Plan } from "./policies/stand";
+import { ultRule } from "./policies/ult";
 import { loadedWorld, stepCost } from "./perf";
 import { realDeck } from "./typing";
 
@@ -33,7 +34,7 @@ export function play(mode: Mode, typing: boolean, seeds: number, nights: number)
   // BUILD_1B §18.2: the §12 gates run on the story stage (its unlock days, the Bastion raised through its builders).
   const runs = Array.from({ length: seeds }, (_, k) => runBot({
     seed: k + 1, deck, hands: typing ? HANDS : null, expected: 35, mode, nights, check: true, timeSteps: true, pace: { k: 1, director: true }, sandbox: false,
-    plan: () => new Plan(STANDARD, [heroDay(), heroNight()]),
+    plan: () => new Plan(STANDARD, [heroDay(), heroNight(), ultRule()]),
   }));
   return { mode, typing, runs };
 }

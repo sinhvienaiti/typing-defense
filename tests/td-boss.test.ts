@@ -123,7 +123,8 @@ describe("Mộc Tinh's peak (BUILD_1B §4.4)", () => {
     expect(at("balanced", 0.75)).toBeLessThan(HP);
     expect(at("balanced", 1.2)).toBe(Math.round(HP * kMul(1.2)));
     expect(at("balanced", 1.3)).toBe(Math.round(HP * kMul(1.3)));
-    expect(at("balanced", 1.3) / at("balanced", 1.2)).toBeGreaterThan(at("balanced", 1.2) / at("balanced", 1.1)); // steeper at the top
+    expect(at("balanced", 1.2) / at("balanced", 1.1)).toBeGreaterThan(at("balanced", 1.1) / at("balanced", 1)); // steeper above 1
+    expect(at("balanced", 1.3)).toBe(Math.round(HP * BOSS_DEF.kHpMax)); // R2 (kHp2 6.5): the cap holds the fastest
     expect(kMul(1.3)).toBeLessThanOrEqual(BOSS_DEF.kHpMax);
     expect(at("relax", 1)).toBe(Math.round(HP * 0.5 * (BOSS_DEF.modeHp.relax ?? 1)));
     expect(at("learn", 1)).toBe(at("relax", 1));

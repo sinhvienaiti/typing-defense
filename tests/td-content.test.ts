@@ -20,7 +20,7 @@ describe("1A content", () => {
     expect(validateContent(SLICE_1A)).toEqual([]);
     const c = compile(SLICE_1A);
     expect(c.buildings.map((building) => building.id)).toEqual(["keep", "archer", "cannon", "barracks", "gold-mine", "farm"]);
-    expect(c.enemies.map((enemy) => enemy.id)).toEqual(["cuong-thi", "ma-troi", "thuong-luong", "moc-tinh", "mam-go"]);
+    expect(c.enemies.map((enemy) => enemy.id)).toEqual(["cuong-thi", "ma-troi", "thuong-luong", "moc-tinh", "mam-go", "tanuki", "nuppeppo", "nuppeppo-con"]);
     for (const wave of SLICE_1A.waves.list) for (const entry of wave) expect(c.enemyIndex(entry.enemy)).toBeGreaterThanOrEqual(0);
     expect(c.content.hero.affinity.every((id) => c.buildingIndex(id) > 0)).toBe(true);
   });
@@ -151,10 +151,13 @@ describe("1A content", () => {
   it("cuts waves into packs that take the two ground routes in turn; past wave 6 the last wave grows 15 % a wave", () => {
     const c = compile(SLICE_1A);
     const first = waveSchedule(c, 1);
-    expect(first.map((spawn) => spawn.lane)).toEqual([0, 0, 0, 0, 0, 1, 1, 1]);
-    expect(first.map((spawn) => spawn.at)).toEqual([0, 27, 54, 81, 108, 258, 285, 312]);
+    // 1B R2 (BUILD_NOTES §7.3): night 1 has 10 Cương Thi, night 2 two Ma Trơi (design call (b): nights 1–4 harder).
+    expect(first.map((spawn) => spawn.lane)).toEqual([0, 0, 0, 0, 0, 1, 1, 1, 1, 1]);
+    expect(first.map((spawn) => spawn.at)).toEqual([0, 27, 54, 81, 108, 258, 285, 312, 339, 366]);
     const second = waveSchedule(c, 2);
-    expect(second.filter((spawn) => spawn.lane < 0).map((spawn) => c.enemies[spawn.enemy]!.id)).toEqual(["ma-troi"]);
+    expect(second.filter((spawn) => spawn.lane < 0).map((spawn) => c.enemies[spawn.enemy]!.id)).toEqual(["ma-troi", "ma-troi"]);
+    // Night 4's Tanuki leave first, one a pack, so the packs after them catch up (Ngắt, R2).
+    expect(waveSchedule(c, 4).slice(0, 2).map((spawn) => [c.enemies[spawn.enemy]!.id, spawn.lane])).toEqual([["tanuki", 0], ["tanuki", 1]]);
     const count = (wave: number, id: string) => waveSchedule(c, wave).filter((spawn) => c.enemies[spawn.enemy]!.id === id).length;
     expect([count(6, "thuong-luong"), count(6, "cuong-thi"), count(6, "ma-troi")]).toEqual([4, 20, 4]);
     expect([count(7, "thuong-luong"), count(7, "cuong-thi"), count(7, "ma-troi")]).toEqual([5, 23, 5]);

@@ -5,7 +5,8 @@
  * commands (`key`, `unlock` for Esc) on its ticks. The router keeps no wrong letter and the card never shows one, so
  * a key the plan calls right is the locked word's next letter and a planned Backspace has nothing to erase (its
  * moment passes, no key is sent); letters a plan did not cover are planned again at the same pace (no second look). Targets come by the typist's mix: the most dangerous (a power
- * word, which runs out), the nearest the hero, the first shown; a power word that cannot be finished in time is let
+ * word, Chữ Chiêu or a direct call's: words that run out, by the same telegraph reflex: BUILD_1B §18.1 R2), the nearest
+ * the hero, the first shown; one that cannot be finished in time is let
  * go. After a placement or a menu the hands rest a moment (lookAway). Its draws use a stream of its own.
  */
 import { HumanTypist, KeyPlayer, type TypistParams } from "../../src/kit/balance/typist";
@@ -16,6 +17,8 @@ import { CALL_KIND } from "../../src/sim/stores/calls";
 import type { World } from "../../src/sim/world";
 
 const MS = 1000 / 60;
+/** Words that run out and answer an attack (BUILD_1B §18.1 R2): power, Chữ Chiêu and direct calls, by the same reflex. */
+const urgent = (kind: number): boolean => kind === CALL_KIND.power || kind === CALL_KIND.ult || kind === CALL_KIND.direct;
 
 /** The word's familiarity as the sim tells it in `wordHit` (calls.ts): a quiz is being learned, the run's top level is new. */
 export function familiarity(w: World, s: number): Familiarity {
@@ -67,7 +70,7 @@ export class HumanHands {
     });
     const options = live.map((s) => {
       const c = W.call[s]!;
-      return { danger: C.kind[c] === CALL_KIND.power ? 2 : C.kind[c] === CALL_KIND.quiz ? 0 : 1, distance: Math.hypot(C.x[c]! - w.agents.x[0]!, C.z[c]! - w.agents.z[0]!), shown: W.born[s]! };
+      return { danger: urgent(C.kind[c]!) ? 2 : C.kind[c] === CALL_KIND.quiz ? 0 : 1, distance: Math.hypot(C.x[c]! - w.agents.x[0]!, C.z[c]! - w.agents.z[0]!), shown: W.born[s]! };
     });
     const pick = this.typist.choose(options);
     return pick < 0 ? -1 : live[pick]!;
@@ -84,9 +87,9 @@ export class HumanHands {
     // A power call lights while the word in hand is not begun: by reflex (BALANCE.md §2 factor 9) the hands go to it;
     // its first letter takes the lock from a call's next word (the router's soft switch).
     const current = s >= 0 ? s : lock;
-    if (current < 0 || (W.typed[current] === 0 && w.calls.kind[W.call[current]!] !== CALL_KIND.power)) {
+    if (current < 0 || (W.typed[current] === 0 && !urgent(w.calls.kind[W.call[current]!]!))) {
       for (const p of W.live()) {
-        if (w.calls.kind[W.call[p]!] !== CALL_KIND.power || this.weighed.has(W.id(p))) continue;
+        if (!urgent(w.calls.kind[W.call[p]!]!) || this.weighed.has(W.id(p))) continue;
         this.weighed.add(W.id(p));
         if (current < 0 || !this.typist.handlesTelegraph()) continue;
         const born = W.born[p]!;

@@ -40,10 +40,11 @@ describe("keys by event.code (BUILD_NOW §5.4)", () => {
       [{ key: "Delete", code: "Delete" }, "undo"], [{ key: "Escape", code: "Escape" }, "escape"], [{ key: "Pause", code: "Pause" }, "pause"],
       [{ key: "F9", code: "F9" }, "sandbox"], [{ key: " ", code: "Space" }, "space"], [{ key: "ArrowLeft", code: "ArrowLeft" }, "pan:1:0"],
       [{ key: "ArrowDown", code: "ArrowDown" }, "pan:0:-1"], [{ key: "Backspace", code: "Backspace" }, "backspace"],
+      [{ key: "=", code: "Equal" }, "ult"], // BUILD_1B §8.2 (R2): Tối Thượng
     ];
     for (const [event, action] of expected) expect(press(event), JSON.stringify(event)).toBe(action);
-    // §8: the tempo keys are gone; the page leaves them alone.
-    for (const event of [{ key: "-", code: "Minus" }, { key: "=", code: "Equal" }, { key: "_", code: "Minus", shiftKey: true }, { key: "+", code: "Equal", shiftKey: true }]) expect(press(event)).toBeNull();
+    // §8: the tempo keys are gone; the page leaves them alone ("-" stays free for 1C, BUILD_1B §14).
+    for (const event of [{ key: "-", code: "Minus" }, { key: "_", code: "Minus", shiftKey: true }, { key: "+", code: "Equal", shiftKey: true }]) expect(press(event)).toBeNull();
   });
 
   it("never turns a letter into a command: a letter key types, whatever its code; a letter code that prints no letter does nothing", () => {

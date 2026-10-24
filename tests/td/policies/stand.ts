@@ -58,6 +58,8 @@ export class Plan {
   readonly slots: number[];
   /** The tick something was last bought: a rule buying too waits for the next (one price at a time). */
   asked = -1;
+  /** Helpers a rule keeps off their building (agent → until tick): not sent back meanwhile (R2's dodge). */
+  hold: ReadonlyMap<number, number> = new Map();
 
   constructor(readonly layout: Layout, readonly rules: readonly Rule[] = []) {
     this.slots = layout.builds.map(() => -1);
@@ -88,7 +90,7 @@ export class Plan {
     layout.helpers.forEach((k, index) => {
       const a = index + 1;
       const goal = k === null ? -1 : this.slot(w, k);
-      if (a < slotsOpen(w) && goal >= 0 && A.goal[a] !== goal) bot.send({ t: "assignUnit", agent: a, building: w.buildings.id(goal) });
+      if (a < slotsOpen(w) && goal >= 0 && A.goal[a] !== goal && !this.hold.has(a)) bot.send({ t: "assignUnit", agent: a, building: w.buildings.id(goal) });
     });
     const villagers = countNpcs(w, NPC_KIND.villager);
     if (layout.marks !== undefined && w.tick % 60 === 0) this.mark(bot, villagers + layout.marks.spare);

@@ -425,7 +425,7 @@ describe("invariants (§12 gate 6) and replay", () => {
     }
   });
 
-  it("ignoring every call never lowers the chain and loses nothing: gold falls only by seeds bought, food only by soldiers' meals, wood never", { timeout: 20_000 }, () => {
+  it("ignoring every call (Chữ Chiêu and direct calls too, BUILD_1B §21.3) never lowers the chain and loses nothing: gold falls only by seeds bought, food only by soldiers' meals, wood never", { timeout: 20_000 }, () => {
     const w = createWorld({ seed: 4, deck, expected: 40 });
     send(w, { t: "sandbox", op: { op: "preset" } });
     const rng = createRng(4).ai;
@@ -433,6 +433,9 @@ describe("invariants (§12 gate 6) and replay", () => {
     let calls = 0;
     for (let tick = 0; tick < T(300); tick += 1) {
       const bodies: CommandBody[] = tick % 120 === 0 ? [{ t: "move", agent: 0, qx: q(rng.int(-30, 30)), qz: q(rng.int(-30, 40)) }] : [];
+      // R2: Tanuki among packs every 10 s (they drum by the preset's towers), Tối Thượng cast every 50 s, none of it typed.
+      if (tick % T(10) === T(5)) bodies.push({ t: "sandbox", op: { op: "spawn", enemy: "tanuki", value: 1 } }, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } });
+      if (tick % T(50) === T(20)) bodies.push({ t: "sandbox", op: { op: "ult" } }, { t: "ult", qx: q(w.agents.x[0]!), qz: q(w.agents.z[0]!) });
       send(w, ...bodies);
       calls = Math.max(calls, w.calls.count);
       expect(w.typing.chain).toBe(0);
@@ -444,6 +447,7 @@ describe("invariants (§12 gate 6) and replay", () => {
     }
     expect(calls).toBeGreaterThan(2);
     expect(w.stats[STAT.calls]).toBeGreaterThan(10);
+    expect([w.stats[STAT.ultCasts]! >= 5, w.stats[STAT.directMissed]! >= 1, w.stats[STAT.directOk]]).toEqual([true, true, 0]);
     expect(live(w).length).toBeLessThanOrEqual(MODES.balanced.open);
   });
 });

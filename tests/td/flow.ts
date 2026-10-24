@@ -20,6 +20,7 @@ import { bossArcher, heroBoss, heroKite } from "./policies/boss";
 import { heroDay, heroNight } from "./policies/hero";
 import { FAIR, GOOD, NONE, POOR } from "./policies/layouts";
 import { Plan, type Layout, type Rule } from "./policies/stand";
+import { dodgeRoots, ultRule } from "./policies/ult";
 
 /** A stage of Lời Gọi for the gates: nights 1–5 (BUILD_1A6 §12 gate 4 holds nights 1–4 apart). */
 export const STAGE_NIGHTS = 5;
@@ -31,11 +32,12 @@ export const STAGE_MODES: readonly BandMode[] = ["relax", "balanced", "challenge
  * `kite`: the no-type check with the hero kiting the boss).
  */
 export function tacticsPlan(tactics: Tactics, kite = false): () => Plan {
+  // R2 (§18.1): Tối Thượng by the bots' rule (a poor player's as soon as it is full); a good player's helpers dodge Rễ Trồi.
   const plans: Record<Tactics, [Layout, Rule[]]> = {
-    good: [GOOD, [heroDay(), heroNight(), bossArcher(), kite ? heroKite() : heroBoss(30, true)]],
-    fair: [FAIR, [heroDay(), heroNight(), heroBoss()]],
-    poor: [POOR, [heroDay(), heroNight(120), heroBoss(120)]],
-    none: [NONE, [heroDay(), heroNight(), heroBoss()]],
+    good: [GOOD, [heroDay(), heroNight(), bossArcher(), kite ? heroKite() : heroBoss(30, true), ultRule(), dodgeRoots()]],
+    fair: [FAIR, [heroDay(), heroNight(), heroBoss(), ultRule()]],
+    poor: [POOR, [heroDay(), heroNight(120), heroBoss(120), ultRule(true)]],
+    none: [NONE, [heroDay(), heroNight(), heroBoss(), ultRule()]],
   };
   const [layout, rules] = plans[tactics];
   return () => new Plan(layout, rules);
@@ -87,8 +89,25 @@ export const record = (run: BotRun): RunRecord => ({ flow: run.flow, pace: run.p
 
 /** A matrix cell to play: the director's column is false only for B7's row. */
 export type CellSpec = { bot: string; mode: BandMode; director: boolean };
-/** A run's night share with nothing to type and its fullest 20 s window in seconds (1B R1 review). */
-export type RunExtra = { empty: number; window: number };
+/**
+ * A run's night share with nothing to type and its fullest 20 s window in seconds (1B R1 review); R2 (§18.2): Tối Thượng's
+ * casts and damage (on the boss, in all), all damage and the boss's, direct words typed and mechanics let run, words typed,
+ * the most direct calls open at once, typing ticks and ticks of nights 1–4, of night 4 (the Tanuki's) and of night 5.
+ */
+export type RunExtra = {
+  empty: number; window: number; casts: number; ultBoss: number; ultAll: number; boss: number; all: number; direct: number; missed: number; words: number; directMax: number;
+  n14: [number, number]; n4: [number, number]; n5: [number, number];
+};
+
+/** The R2 part of a run's extra. */
+function r2Extra(run: BotRun): Omit<RunExtra, "empty" | "window"> {
+  const s = run.stats;
+  const nights = (from: number, to: number): [number, number] => [sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTyped ?? 0)), sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTicks ?? 0))];
+  return {
+    casts: s.ultCasts, ultBoss: s.bossUlt, ultAll: s.damageUlt, boss: s.bossDamage, all: s.damageTower + s.damageCrossbow + s.damageSoldier + s.damageWordShot + s.damageHero + s.damageUlt,
+    direct: s.directOk, missed: s.directMissed, words: s.callWords, directMax: run.directMax, n14: nights(1, 4), n4: nights(4, 4), n5: nights(5, 5),
+  };
+}
 /** Its runs (to pool two seed sets, BUILD_1B §6.4), their boss peaks and extras. */
 export type Cell = CellSpec & { k: number; summary: BotModeSummary; records: RunRecord[]; boss: BossRun[]; extra: RunExtra[] };
 
@@ -106,7 +125,7 @@ export function playCell(spec: CellSpec, seeds: number, deck: Deck, nights = STA
   const bot = botById(spec.bot);
   const runs = Array.from({ length: seeds }, (_, k) => playStage(bot, spec.mode, from + k + 1, deck, spec.director, nights));
   const records = runs.map(record);
-  const extra = runs.map((run) => ({ empty: run.emptyTicks[1] / Math.max(1, run.phaseTicks[1]), window: run.windowMax / 60 }));
+  const extra = runs.map((run) => ({ empty: run.emptyTicks[1] / Math.max(1, run.phaseTicks[1]), window: run.windowMax / 60, ...r2Extra(run) }));
   return { ...spec, k: paceHeader(botProfile(bot, spec.mode), spec.director).k, summary: summarizeRuns(bot.id, spec.mode, records, spec.director), records, boss: runs.map((run) => run.boss), extra };
 }
 
@@ -261,6 +280,51 @@ export function windowLine(cells: readonly Cell[]): string {
   return `Cửa sổ 20 s đầy nhất mỗi ván, bot Chuẩn kiểu người (Cân bằng): p50 ${(median(windows) ?? 0).toFixed(2)} s, lớn nhất ${Math.max(...windows).toFixed(2)} s, ván quá 8 s ${over}/${windows.length} (đích mềm ≤ 20 % ván, không ván nào quá 10 s; bộ điều phối giữ mọi cửa sổ nó dự tính ≤ 8 s).`;
 }
 
+const share1 = (part: number, whole: number): string => (whole > 0 ? ((100 * part) / whole).toFixed(1).replace(".", ",") + " %" : "—");
+
+/**
+ * R2 (BUILD_1B §18.2): Tối Thượng's casts a run, its share of the damage on the boss and of all damage; direct words as a
+ * share of the words typed, Ngắt broken / let run and the seconds of night 4 (the Tanuki's) a drum; the typing share of
+ * nights 1–4 and of night 5; the most direct calls open at once.
+ */
+export function r2Table(cells: readonly Cell[]): string[] {
+  const lines = [
+    "| Chế độ | Bot | Tối Thượng / ván | Tối Thượng % lên boss | Tối Thượng % cả ải | Từ trực tiếp % số từ | Ngắt được / để chạy | Một trống mỗi (s Đêm 4) | Gõ Đêm 1–4 | Gõ Đêm 5 | Trực tiếp mở cùng lúc (tối đa) |",
+    "|---|---|---|---|---|---|---|---|---|---|---|",
+  ];
+  for (const c of cells) {
+    if (!c.director) continue;
+    const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
+    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${(t((x) => x.casts) / Math.max(1, c.extra.length)).toFixed(2)} | ${share1(t((x) => x.ultBoss), t((x) => x.boss))} | ${share1(t((x) => x.ultAll), t((x) => x.all))} | ${share1(t((x) => x.direct), t((x) => x.words))} | ${t((x) => x.direct)} / ${t((x) => x.missed)} | ${drumEvery(c)} | ${share1(t((x) => x.n14[0]), t((x) => x.n14[1]))} | ${share1(t((x) => x.n5[0]), t((x) => x.n5[1]))} | ${Math.max(0, ...c.extra.map((x) => x.directMax))} |`);
+  }
+  return lines;
+}
+
+/** Seconds of night 4 a drum (§9.1: a direct call each 25–40 s in a night with the enemy), as text. */
+function drumEvery(c: Cell): string {
+  const drums = sum(c.extra.map((x) => x.direct + x.missed));
+  return drums > 0 ? (sum(c.extra.map((x) => x.n4[1])) / 60 / drums).toFixed(1) : "—";
+}
+
+/** G2, G5, G6 of BUILD_1B §18.3 for the standard bot in Cân bằng: typing shares by night, Tối Thượng's damage shares, direct words. */
+export function r2Gates(cells: readonly Cell[]): string {
+  const c = cells.find((x) => x.bot === "standard" && x.mode === "balanced" && x.director);
+  if (c === undefined) return "";
+  const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
+  const [n14, n5] = [t((x) => x.n14[0]) / Math.max(1, t((x) => x.n14[1])), t((x) => x.n5[0]) / Math.max(1, t((x) => x.n5[1]))];
+  const [boss, all] = [t((x) => x.ultBoss) / Math.max(1, t((x) => x.boss)), t((x) => x.ultAll) / Math.max(1, t((x) => x.all))];
+  const direct = t((x) => x.direct) / Math.max(1, t((x) => x.words));
+  const most = Math.max(0, ...c.extra.map((x) => x.directMax));
+  const every = Number(drumEvery(c));
+  const mark = (pass: boolean): string => (pass ? "đạt" : "**trượt**");
+  return [
+    `G2 (bot Chuẩn, Cân bằng): gõ Đêm 1–4 ${share1(n14 * 1000, 1000)} (15–25 %), Đêm 5 ${share1(n5 * 1000, 1000)} (≤ 35 %): ${mark(n14 >= 0.15 && n14 <= 0.25 && n5 <= 0.35)}.`,
+    `G5: Tối Thượng ${share1(boss * 1000, 1000)} sát thương lên boss, ${share1(all * 1000, 1000)} cả ải (≤ 15 %, ≤ 15 %): ${mark(boss <= 0.15 && all <= 0.15)}.`,
+    // BUILD_NOTES §7.3: map 1 has one verb on one night, so G6 is read as §9.1's frequency; the stage share is printed to compare.
+    `G6 (theo §9.1, BUILD_NOTES §7.3): một trống mỗi ${Number.isFinite(every) ? every.toFixed(1) : "—"} s ở Đêm 4 (25–40 s), mở cùng lúc tối đa ${most} (≤ 2, ≤ 3 khi có boss): ${mark(every >= 25 && every <= 40 && most <= 3)}; từ trực tiếp ${share1(direct * 1000, 1000)} số từ cả ải (5–10 % của TK 9.1 cần đủ ba động từ: ${mark(direct >= 0.05 && direct <= 0.1)}).`,
+  ].join(" ");
+}
+
 const LABEL: Record<string, string> = Object.fromEntries(STANDARD_BOTS.map((bot) => [bot.id, bot.label]));
 
 /** The stage part of `pnpm td:balance` (BALANCE.md §3, §7; Markdown, Vietnamese): the bots, the §3 table, B1–B9, the measured profiles. */
@@ -276,6 +340,9 @@ export function stageReport(cells: readonly Cell[], measured: readonly { bot: st
   print("\n### Tách hai số: thắng do boss, Biên S do các đêm trước (BUILD_1B §6)\n");
   print(splitTable(cells).join("\n"));
   print("\n" + windowLine(cells));
+  print("\n### R2: Tối Thượng, gõ trực tiếp, tỉ lệ gõ theo đêm (BUILD_1B §18.2)\n");
+  print(r2Table(cells).join("\n"));
+  print("\n" + r2Gates(cells));
   if (measured.length === 0) return gates;
   print("\n### Hồ sơ game đo được (một ải Cân bằng, tắt nhịp, `SkillTally` sau mỗi ngày đêm)\n");
   print("| Bot | E (đặt / đo) | a (đặt / đo) | CV (đặt / đo) | Nhận từ mới (s) | Lời khuyên |");
