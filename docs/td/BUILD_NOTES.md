@@ -43,7 +43,7 @@ Mốc đang làm: **1B.R1**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.5 Bot, báo cáo (xong) | 41 thật (mục 1.11): op hộp cát `flood` (TK 25.12) ở `spawn.ts` +19 và `commands.ts` +6, đo khung ở `main.ts` +16; bot, chính sách, báo cáo nằm ở `tests/` và `scripts/` | 40 | 5.500 |
 | 1A.6 Lời Gọi (R1, R2, R3 xong; đếm mới, chỉ `.ts` của `src/td`) | R1: 5.319 → 5.540 thật (mục 3, gồm sửa review); R2: 5.540 → 5.850 thật (mục 4); R3 6.012 (mục 5); tách repo và chủ đề Văn Điền: 7.064 | R1 tới 6.600; R2 tới 7.000; R3 phần còn lại | 7.300 |
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
-| 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1) | 1.351 | 8.850 |
+| 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -835,4 +835,78 @@ Bảng boss (Chuẩn, Cân bằng, bộ 1): tới boss 40/40, rút 83 %, trồi 
 - Thử thách quá khó (25–41 %), Trẻ em ở Thư giãn 74 % (B3 ≥ 85 %). Cần quyết định có cho boss hệ số máu riêng theo chế độ hay không (hiện chỉ nhân `hpMul` của chế độ).
 - Phần đầu Đêm 5: 4 Thuồng Luồng một toán vẫn là chỗ mất mạng chính ở đỉnh boss (con nào còn ở khúc nhập lúc boss tới thì lọt khi Quật cành hất lính).
 - Hình R1: thân boss hay bị thẻ chữ của tháp bên cạnh che (thẻ luôn trên cùng là luật); dải chữ hai dòng lúc báo Ngày 5 che một phần Khe Nứt ở 1280 × 720.
+
+### 7.2 Sửa sau phản biện R1 (24/10/2026)
+
+Changelog: `docs/changelog/2026-10-24-td-1b-r1-fix.md`. Bản sửa làm trên máy Mac (mã, 4 lượt `td:balance`), kiểm lại, chỉnh thử và ghi số trên máy Dell (WSL Ubuntu 24.04, Node 24.11, Chrome for Testing không dùng GPU; số hiệu năng ở dưới là của máy này, không phải Mac M4). Bằng chứng (ngoài Git): phản biện `tmp/review-r1/`, các lượt chỉnh của Mac `tmp/fix-r1/` (`bal-r1.md` … `bal-r4.md`, đầu dò `runs/`), lượt của Dell `tmp/dell-2026-10-24/` (`balance-final.md`, đầu dò `probe/`, kịch bản `visual/`). Văn bản phản biện không có trên máy Dell: bảng dưới dựng từ bằng chứng trong `tmp/review-r1` và từ thay đổi của bản sửa.
+
+**Phát hiện và cách xử lý:**
+
+| # | Phát hiện (bằng chứng) | Sửa |
+|---|---|---|
+| 1 | Gõ nhanh không đổi kết quả: ba ván chơi trình duyệt kiểu người (35 WPM 3,5 % lỗi, 25 WPM 7 %, 60 WPM 2 %) đều thua ở đỉnh boss, Mộc Tinh còn 2.109–2.196 / 3.400 máu (`play/*.json`); báo cáo đủ hai bộ lúc phản biện: Ẩu 71 %, Chậm chắc 92 %, Nhanh 92 % (`balance/full-2x120.md`) | **Bắn mạnh nối:** từ Bắn mạnh gõ xong t giây sau khi hiện kéo lời gọi kế của tháp sớm lên `cd·quick·max(0, 1 − t / quickS)` (`POWER.quick` 0,6, `quickS` 4 s). Hệ số k của máu boss đi hai chiều, thêm số hạng bậc hai (`kHp` 0,2, `kHp2` 4,3, trần ×1,5) và hệ số theo chế độ (`modeHp`: Thư giãn, Học 0,85; Thử thách 0,78): mục "Còn mở" của §7.1 "có cho boss hệ số máu riêng theo chế độ hay không" đã chọn theo đề xuất (có) |
+| 2 | Dồn lửa hiếm ra và ít từ: lời gọi chỉ có ở 28/40 (Mới), 24/37 (Chuẩn) lần choáng (nhà ngoài vòng giúp hoặc đang có lời gọi), trung bình 0,46–0,5 từ được gõ; 5 s Dễ Tổn Thương chỉ mang 21 % (Chuẩn), 33 % (Nhanh) sát thương lên boss (`probes/stagger-*.txt`, `vuln.txt`) | Dồn lửa sáng dù ngoài vòng giúp; round(E / 20) từ (1–3, `burstPerE`, `burstWords`); nhà đã có lời gọi Bắn mạnh thì lời gọi đó thành Dồn lửa (thêm từ, hạn mới 5 s, nhắm boss). Thanh boss đếm lùi "Dễ Tổn Thương N s". Gợi ý thua "Lúc nó choáng, gõ Bắn mạnh ngay" so số từ Dồn lửa đã gõ với số được giao (thống kê mới `burstWords`) |
+| 3 | Gỗ dư không dùng vào đâu | Lệnh `sellWood` (thẻ Lũy): 10 Gỗ → 4 Vàng; HUD nhắc "Gỗ thừa: bán gỗ ở thẻ Lũy" ban Ngày khi Gỗ ≥ 150, Vàng < 50; bot bố cục Chuẩn, Tốt, Vừa bán phần trên 100 |
+| 4 | B4 "hạ quái" đo từ lúc sinh, lẫn cả đường đi | Đo từ đòn trúng đầu tới khi chết (cột mới `hitAt` của quái); "hạ boss" là sát thương mỗi giây lên boss (BUILD_1B §18.3 B4) |
+| 5 | Cửa sổ 20 s thật của bot Chuẩn kiểu người vượt 8 s ở 3/40 ván, lớn nhất 9,8 s (`probes/window.txt`) | BUILD_1B §9.3: ngân sách là dự tính (cổng cứng 5a, bot gõ đều); cửa sổ thật là đích mềm (≤ 20 % ván quá 8 s, không ván nào quá 10 s), báo cáo in mỗi ván |
+| 6 | Chơi lại Ngày n: kịch bản so mã băm đã ghi chứ không so mã băm trang tính lại; chip và câu của Bà Cú Mực mất sau khi chạy lại | `__td.retry()` cho kết quả lần chạy lại (ngày, tick, mã băm, khớp); `BossBanner` dựng lại chip, câu từ trạng thái thế giới; câu dài tách mỗi câu một dòng ở 1280 × 720. `td-1b-night5` thêm một nhật ký dài (bot Chuẩn tới Ngày 5 ở Thư giãn, `scripts/td/retry-log.ts`, ~40.000 tick) |
+| 7 | 4 test hết giờ 5 s khi chạy song song (`check.log`) | Hạn 20 s cho bốn test dài (`boundary`, `td-calls`, `td-nav`, `td-sim-economy`) |
+| 8 | `view/boss-2d.ts` 417 dòng (cột §16 ≤ 320) | Pool hạt cố định tách sang `src/view/fx-2d.ts` (74 dòng, R2 dùng tiếp); `boss-2d.ts` 378; dấu tê vẽ sau quái (`marks`) |
+| 9 | Màn thắng không thấy rương; chữ "rút lui" dưới thanh boss chạm dòng dưới | Hàng "Rương +150 vàng" ở màn thắng; lề dưới của thanh boss |
+
+Thêm số (cùng bản sửa, chỉ dữ liệu): máu Mộc Tinh 3.400 → 3.800; Thuồng Luồng 365 → 385 máu; phần đầu Đêm 5 trở lại 5 Thuồng Luồng một toán (vòng 1: 4). BUILD_1B §1, §4.2, §5.1, §5.6, §10, §15, §24 ghi lại theo mã.
+
+**Số dòng:** 8.883 (trần R1 sau sửa review 8.900, lấy 50 dòng của phần R2). Từng file vượt cột §16: `sim/systems/boss.ts` 321 (≤ 300), `view/boss-2d.ts` 378 (≤ 320); `view/fx-2d.ts` 74 là file của R2 (≤ 230) làm sớm.
+
+**File vàng (làm lại bằng `pnpm td:golden:update` trên Mac, 08:57; Dell kiểm `pnpm td:golden:check` khớp):** `td-1a.json` nội dung `ef790fee` → `87f80da6`, 19.098 → 18.993 tick, 318 → 316 mã băm, 336 → 362 lệnh: số mới vào mã băm nội dung (hệ số máu boss, Dồn lửa, Bắn mạnh nối, bán gỗ, Thuồng Luồng), cột `hitAt` và thống kê `burstWords` vào mã băm trạng thái, và bot hộp cát được lời gọi Bắn mạnh sớm hơn nên gõ nhiều lệnh hơn. `td-1b-boss.json`: nội dung `87f80da6`, vẫn 4.811 tick, 80 mã băm, boss rút với 1.946 sát thương, 20 mạng. Bản sửa trên Dell không đổi luật hay số nên không làm lại file vàng.
+
+**Các lượt chỉnh cân bằng.** Mac: 4 lượt `td:balance` đủ hai bộ × 120 seed (`bal-r1` … `bal-r4`, 427–625 s, 5 luồng) chỉnh hệ số k và máu; Khá và Nhanh đi vào dải (Nhanh 83 → 80 → 76 → 80 %, Khá 90 → 88 → 87 → 88 % gộp), còn Chậm chắc (90 % gộp) và Ẩu (76 % gộp) đứng yên qua cả bốn lượt. Dell: đầu dò `scripts/td/boss-tune.ts` (thêm `--director=0`, `--sprouts`, `--summonS`) trên đúng hai bộ seed của báo cáo, rồi một lượt `td:balance --threads=4` trên số cuối (giống hệt `bal-r4` của Mac từng dòng, trừ thời gian chạy: sim tất định giữa hai máy). Thắng ở Cân bằng, bộ 1 / bộ 2 (gộp là trung bình hai bộ):
+
+| Lượt (Dell, đầu dò) | Đổi so với số hiện tại | Mới | Chậm chắc | Chuẩn | Khá | Ẩu | Nhanh | Chuẩn tắt nhịp |
+|---|---|---|---|---|---|---|---|---|
+| Hiện tại (`bal-r4`) | — | 82 / 81 | **92** / 88 | 89 / 84 | 86 / 90 | **73** / 78 | 80 / 80 | **91** / 88 |
+| Cháy 65 (bộ 1) | Cháy Draconis 55 → 65/s | 85 | 90 | 95 | — | 76 | — | — |
+| Máu 4.000 (bộ 1) | 3.800 → 4.000 | 73 | 81 | 78 | 81 | 67 | 68 | — |
+| Bắn mạnh nối 0,8 | `quick` 0,8, `quickS` 5 s | 81 / 87 | 88 / 93 | 93 / 93 | 95 / 96 | 87 / 86 | 92 / 93 | — |
+| A | như trên, máu 3.950, `kHp` 0,3, `kHp2` 4,9, trần 1,44 | 81 / 86 | 86 / 92 | 88 / 88 | 92 / 92 | 78 / 79 | 89 / 88 | — |
+| C | như trên, Cháy 50, `kHp` 0,25, `kHp2` 6, trần 1,46 | 83 / 88 | 87 / 92 | 82 / 88 | 84 / 83 | 79 / 74 | 87 / 86 | — |
+| I | như trên, máu 3.900, `kHp` 0,1, trần 1,49 | 76 / 86 | 83 / 87 | 82 / 91 | 88 / 87 | 81 / 81 | 84 / 83 | — |
+| K2 | như I, `kHp` 0,13, Cháy 48 | 80 / 83 | 84 / 88 | 86 / 90 | 87 / 88 | 80 / 79 | 83 / 86 | **96 / 94** |
+| Q1 | `quick` 0,8, `quickS` 3 s, máu 3.750 | 82 / 87 | 91 / 93 | 88 / 87 | 86 / 87 | 77 / 79 | 89 / 83 | 91 / 93 |
+| Q2 | `quick` 1,0, `quickS` 3 s, máu 3.750 | 85 / 86 | 94 / 95 | 92 / 93 | 94 / 91 | 86 / 83 | 91 / 88 | 94 / 97 |
+
+Các đầu dò khác (bộ 1): 3 Mầm Gỗ mỗi lần gọi, 1 toán đi trước (4 Cương Thi) đổi thắng của mọi bot 0–3 điểm, không tách bot nào.
+
+**Vì sao dừng, giữ số của `bal-r4` (lệch có lý do):**
+
+- **Độ chính xác tách các bot mà không núm nào của §6.5 tách theo độ chính xác.** Mới và Chậm chắc cùng E 25, k 0,75 và 0,79 (khác 4 %), nhưng độ chính xác 92 % và 99 %: ở mọi lượt Chậm chắc hơn Mới 4–14 điểm thắng (gộp). Ẩu và Khá cùng E 50, độ chính xác 85 % và 96 %: Ẩu kém Khá 6–13 điểm. Máu, Cháy, Thuồng Luồng, Mầm Gỗ, toán đi trước, hệ số k dời cả cặp cùng chiều; dải đích 10 điểm không chứa nổi cả hai đầu cùng lúc với nhiễu ±2,4 điểm của 240 ván.
+- **Núm tốc gõ (Bắn mạnh nối) nâng được Ẩu nhưng hỏng B7.** `quick` 0,8 đưa Ẩu từ 76 lên 86 % gộp, nhưng làm Đêm 1–4 dễ hơn với mọi bot gõ nhanh; bộ điều nhịp phải tăng bậc nhiều hơn, nên tắt bộ điều nhịp thì Chuẩn thắng 91–97 % mỗi bộ (B7 cần ≤ 90 % mỗi bộ, 78–88 % gộp). Bộ số hiện tại chỉ cần bộ điều nhịp gỡ 2–4 điểm (91 / 88 % so với 89 / 84 %), đúng ý B7 ("chỉ bot lệch xa mới cần nó").
+- Bộ số thử đổi chỗ trượt chứ không bớt chỗ trượt: K2 đạt B1 hai bộ và đích chặt (thắng) cho cả sáu bot nhưng B7 96 / 94 %; I trượt B1 bộ 2 ở Chuẩn (91 %); máu 4.000 kéo mọi bot xuống 67–81 % (bộ 1). Theo §6.5 bước 6, không ép bằng một số toàn cục.
+
+**Còn trượt (số cuối, `td:balance` trên Dell = `bal-r4`):**
+
+- B1 bộ 1: Chậm chắc thắng 92 % (dải 75–90 %), Ẩu 73 %. Bộ 2 đạt.
+- B7 bộ 1: Chuẩn tắt bộ điều nhịp thắng 91 % (≤ 90 %). Gộp 89 %: báo cáo chấm B7 gộp bằng dải BALANCE §3 (75–90 %, đạt), còn BUILD_1B §18.3 ghi dải chặt 78–88 % cho gộp, nên theo spec là trượt 1 điểm.
+- Đích chặt §6.4 (gộp 240 ván): Chậm chắc thắng 90 %, Biên S 65 % (đích 78–88 %, 40–60 %); Ẩu thắng 76 % (Biên S 45 %, đạt). Mới 81 %, Chuẩn 87 %, Khá 88 %, Nhanh 80 % đạt.
+- B2–B6, B8 đạt ở cả hai bộ và gộp; B9 thiếu số (cần chủ dự án chơi).
+- Thư giãn, Thử thách (báo cáo, không là cổng): Thư giãn Mới tới Nhanh thắng 100 %, Trẻ em 97 / 94 % (B3 đạt; §7.1: 74 %). Thử thách thắng Mới 74 / 83 %, Chậm chắc 92 / 93 %, Chuẩn 52 / 58 %, Khá 83 / 78 %, Ẩu 63 / 55 %, Nhanh 77 / 83 % (dải 50–75 %; §7.1: 25–41 %); Biên S của Chuẩn 5 / 15 % (dải 15–45 %).
+- Đỉnh boss, bot Chuẩn, Cân bằng, bộ 1: tới boss 120/120, rút 89 %, trồi → trúng đầu p50 24,1 s (G8 ≤ 35 s), giao chiến p50 50,0 s (G3 45–75 s), Nhàn I đỉnh boss 2 % (G8 ≤ 10 %), phần gõ 58 %, phần Draconis 14 %. Cổng §12 trên ải truyện (G1): 4 (mạng 13 / 17 / 12 / 12 / 13), 5a 7,95 s, 5b 30,5 %, 5c 23,8 %, 6, 7 (+41,1 %) đạt. Cửa sổ 20 s thật của bot Chuẩn kiểu người: p50 7,77 s, lớn nhất 9,20 s, 17/120 ván quá 8 s (đích mềm §9.3 đạt).
+
+**Quyết định thiết kế cần có (để đợt sau):** một trong ba: (a) giảm sức nặng của độ chính xác trong luật gõ (`CALL.sloppy` ×0,6, trọng số `SCORE.qA`) cho mọi đêm, là luật của BUILD_1A6 §5.1 chứ không phải núm R1; (b) nâng Bắn mạnh nối (`quick` 0,8, `quickS` 5 s) cùng lúc làm Đêm 1–4 khó hơn để B7 giữ được: R2 đã phải cân bằng lại Đêm 3, 4 với Nuppeppō và Tanuki (BUILD_1B §4.2), nên đây là chỗ hợp nhất; (c) nới đích chặt cho hai bot ở hai đầu độ chính xác (Chậm chắc, Ẩu) về dải BALANCE §3. Đề xuất: (b) ở R2, rồi đo lại; (a) và (c) cần chủ dự án.
+
+**Công cụ:** `pnpm td:balance` không chạy được trên Node 24.11 (Linux): luồng worker không nhận hook của `tsx` (`ERR_MODULE_NOT_FOUND` ở `tests/td/flow`). Worker giờ khởi động qua `scripts/td/tsx-worker.mjs` (gọi `tsx/esm/api` `register()` rồi nạp `balance-worker.ts`); trên Mac (Node 24.22) cách cũ chạy được, cách mới chưa chạy lại ở đó. Lượt đủ trên Dell: `td:balance --threads=4`, 1.317 s, ra giống `bal-r4` từng dòng trừ dòng thời gian và giá bước sim.
+
+**Kiểm trên máy Dell (24/10/2026; số hiệu năng của máy này):**
+
+- `pnpm check` đạt hai lần (trên bản sửa của Mac, rồi sau các sửa của Dell): kit sha256, 271 test (24 file), `tsc`, `vite build` (JS gzip 81,86 kB, ngân sách 85 kB). `pnpm td:golden:check` khớp cả hai file vàng.
+- Bước sim trên Node: 300 quái trung vị 0,046 ms, p95 0,148 ms (`td-sim-perf`, lúc vitest chạy 4 luồng); tải §12 cổng 3 trong `td:balance`: trung vị 0,025 ms, p95 0,110 ms (§20 ≤ 0,5 ms).
+- Kịch bản trình duyệt (máy chủ dev của game, cổng 3006; Chrome for Testing không đầu; mỗi kịch bản giữ khoá máy nặng dùng chung với các agent khác):
+  - 1B ở 1280 × 720 và 1920 × 1080: `td-1b-boss`, `td-1b-night5`, `td-1b-build` đạt, 0 lỗi console, 0 ngoại lệ, nhật ký trang chạy lại trên Node ra cùng mã băm. `td-1b-night5`: mã băm trang tính lại sau Chơi lại Ngày 5 khớp mã đã ghi (`65ceabd0` ở 1280 × 720); nhật ký dài (39.937 tick, 421 lệnh) chạy lại ra `a7d6f491` như Node. `td-1b-build` có bán gỗ.
+  - `td-1b-perf` trượt kiểm luồng chính trên máy này: 6,6 ms (1280 × 720) và 9,2 ms (1920 × 1080) mỗi khung (§20 ≤ 4 ms; Mac lúc phản biện 0,8 / 1,0 ms); ở 1920 × 1080 một khung lúc boss trồi 24,4 ms (≤ 16,7 ms; 1280 × 720: 6,9 ms). Phần của game đạt: vẽ 2D + thẻ chữ p95 0,9 / 1,0 ms (≤ 8 ms), bước sim + HUD p95 0,4 ms, 306 quái.
+  - Kịch bản cũ ở 1280 × 720 đạt cả 11 (`td-1a-boot`, `td-1a-ime`, `td-1a6-attention`, `td-1a6-day`, `td-1a6-keyboard`, `td-1a6-learn`, `td-1a6-night`, `td-1a6-perf`, `td-1a6-tour`, `td-balance`, `td-theme`); ở 1920 × 1080 chạy bốn kịch bản có HUD, thẻ, hiệu năng: `td-theme`, `td-1a6-day`, `td-balance` đạt, `td-1a6-perf` trượt kiểm luồng chính (10,2 ms, ngưỡng 8 ms).
+  - Vì sao luồng chính cao: Chrome không đầu trong WSL không có GPU, vẽ canvas và ghép lớp chạy bằng phần mềm. Kịch bản cũ `td-1a6-perf` (không boss) cũng 6,8 / 10,2 ms trên Dell, so với 1,1 / 0,9 ms trên Mac, trong đó script chỉ 1,0 ms. Kiểm luồng chính và khung lớn nhất của §20 cần đo lại trên Mac hoặc máy có GPU: chưa tính là đạt.
+  - Thẻ chữ trên Dell hiện ô vuông thay cho biểu tượng loại lời gọi (emoji 🏹, 🔨 …): WSL thiếu phông emoji, không phải lỗi mã.
+- Ảnh đã xem (`tmp/dell-2026-10-24/visual/`): `td-1b-boss` báo Rễ Trồi (vòng son dưới nhà, câu "Rễ ơi, mọc lên!" dưới thanh boss), nhà tê ("Tê 2 s"), choáng (dải "Mộc Tinh choáng! Gõ Bắn mạnh!", thanh boss "Dễ Tổn Thương 5 s", hai thẻ Dồn lửa viền hổ phách nằm trên cùng), màn thắng (3 sao, "Rương +150 vàng", Từ cần ôn) ở 1280 × 720 và 1920 × 1080; `td-1b-night5` màn thua (gợi ý "Thêm tháp trên nhánh rễ sáng.", "Chơi lại Ngày 5" là nút Enter).
+- Cổng R1 (`BUILD_1B.md` §17, đo trên Dell): §21 cổng 1, 2, 3, 10 (8.883 ≤ 8.900) đạt; 4 đạt (5a 7,95 s, cửa sổ thật trong đích mềm); 7 đạt; 8, 9 đạt trừ kiểm luồng chính và khung lớn nhất của hai kịch bản hiệu năng (môi trường, ở trên); G1, G3, G8 đạt (số ở trên), G4, G7 đạt (test). B1–B8 hai bộ và đích chặt gộp: còn trượt như ghi ở trên. Chủ dự án chơi bản đồ 1 (§17, §22) và số B9: chưa có.
+- Chưa làm ở đợt này: ván chơi trình duyệt kiểu người (`tmp/fix-r1/play-r1.mjs`) chưa chạy lại trên số cuối.
 
