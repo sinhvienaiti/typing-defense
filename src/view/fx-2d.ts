@@ -14,7 +14,7 @@ import type { Pen } from "./boss-2d";
 
 const POOL = 300;
 const NEW_PER_FRAME = 40;
-const FILL = ["rgba(160, 130, 90, 0.8)", "#8a5a2b", "", "#8cc152", "#e0b33a", "#f26322", "#8d867a", ""] as const;
+const FILL = ["rgba(160, 130, 90, 0.8)", "#8a5a2b", "", "#8cc152", "#e0b33a", "#f26322", "#5d5850", ""] as const;
 export type Kind = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7; // dust, chip, spike, leaf, coin, ember, stone, rootlet
 
 export class Particles {
@@ -74,8 +74,9 @@ export class Particles {
         ctx.stroke();
         ctx.lineCap = "butt";
       } else if (this.kind[k] === 6) {
-        // A stone: an inked five-sided chunk turning as it flies.
+        // A stone: a dark inked five-sided chunk turning as it flies, whole for half its life (the field is mid-green).
         const r = 0.5 * this.size[k]!;
+        ctx.globalAlpha = age < 0.5 ? 1 : (1 - age) / 0.5;
         ctx.beginPath();
         for (let v = 0; v < 5; v += 1) {
           const a = v * 1.2566 + k + t * 4;
