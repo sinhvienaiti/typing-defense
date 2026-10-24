@@ -14,35 +14,34 @@
  * building Rễ Trồi stunned does not fire.
  */
 import { ticks, type CompiledAttack, type CompiledAttackLevel } from "../../content/compile";
-import { COMBAT, TICK_HZ } from "../../content/rules";
+import { COMBAT, TICK_HZ, ULT } from "../../content/rules";
 import { FX } from "../events";
 import { SOURCE, STAT, bump } from "../stats";
 import { PROJECTILE } from "../stores/projectiles";
 import type { World } from "../world";
 
-export function damageEnemy(w: World, e: number, power: number, damageType: number, source: number): number {
+/** `blast`: a blast's damage (a Nuppeppō it kills does not split, BUILD_1B §10). */
+export function damageEnemy(w: World, e: number, power: number, damageType: number, source: number, blast = false): number {
   const E = w.enemies;
   if (E.dying[e] !== 0) return 0;
   const def = w.c.enemies[E.def[e]!]!;
   const armour = damageType === 0 ? def.armor : damageType === 1 ? def.resist : 0;
   const boss = def.boss ? w.c.content.boss! : null;
-  const mul = boss === null ? 1 : (source === SOURCE.hero ? boss.heroMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
+  const mul = boss === null ? 1 : (source === SOURCE.hero ? boss.heroMul : source === SOURCE.ult ? ULT.bossMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
   let dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour) * mul));
   if (boss !== null) {
     dmg = Math.min(dmg, E.hp[e]! - 1);
     bump(w.stats, STAT.bossDamage, dmg);
     if (source === SOURCE.wordShot) bump(w.stats, STAT.bossTyped, dmg);
     if (source === SOURCE.hero) bump(w.stats, STAT.bossHero, dmg);
+    if (source === SOURCE.ult) bump(w.stats, STAT.bossUlt, dmg);
     w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 32 + damageType * 8 + source, w.tick);
   }
   E.hp[e] = E.hp[e]! - dmg;
   if (E.hitAt[e] === 0) E.hitAt[e] = w.tick + 1;
   bump(w.stats, STAT.damageTower + source, dmg);
   bump(w.stats, STAT.hits);
-  if (E.hp[e]! <= 0) {
-    E.dying[e] = 1;
-    E.killer[e] = source;
-  }
+  if (E.hp[e]! <= 0) [E.dying[e], E.killer[e], E.blast[e]] = [1, source, blast ? 1 : 0];
   return dmg;
 }
 
@@ -97,7 +96,7 @@ export function fireAt(w: World, kind: number, x: number, z: number, attack: Com
   launch(w, kind, x, z, attack, level, e, source, base * dmgMul, attack.crit > 0 && w.rng.crit.chance(attack.crit), areaMul);
 }
 
-/** Burning (TK 10.3, Draconis' Word Shots from a cannon): magic damage a second after resist, dealt in whole points. */
+/** Burning (TK 10.3, Draconis' Word Shots from a cannon; Tối Thượng's rain): magic damage a second after resist, dealt in whole points, by who set it. */
 export function statusStep(w: World): void {
   const E = w.enemies;
   const perTick = w.c.content.hero.burn.dps / TICK_HZ;
@@ -107,7 +106,7 @@ export function statusStep(w: World): void {
     const owed = E.burnAcc[e]! + perTick * (1 - def.resist) * def.burnTaken;
     const whole = Math.floor(owed);
     E.burnAcc[e] = owed - whole;
-    if (whole > 0) damageEnemy(w, e, whole, 2, SOURCE.wordShot);
+    if (whole > 0) damageEnemy(w, e, whole, 2, E.burnBy[e]!);
   }
 }
 

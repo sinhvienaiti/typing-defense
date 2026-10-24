@@ -7,20 +7,21 @@
  * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow. At
  * 50 % it retreats: the chest is paid, 2 s later every enemy left melts and the stage is won.
  */
-import { packSchedule, ticks } from "../../content/compile";
-import { MODES } from "../../content/rules";
+import { ticks } from "../../content/compile";
+import { MODES, SHARDS } from "../../content/rules";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
 import { CALL_KIND } from "../stores/calls";
 import type { World } from "../world";
+import { panicNear } from "./agents";
 import { expectedE, makeCall } from "./calls";
 import { hurtSoldier } from "./combat";
 import { SINKING } from "./move";
-import { maxHp } from "./spawn";
+import { maxHp, putEnemy, queuePacks } from "./spawn";
+import { ultShards } from "./ult";
 import { enter } from "./waves";
 
-const spot = { x: 0, z: 0 };
 const order = new Int32Array(16);
 
 /** Squared distance between two points. */
@@ -72,34 +73,15 @@ export function callBoss(w: World): boolean {
 
 /** The lull is over: the escort packs leave the rift, one a branch, in tonight's wave. */
 function escort(w: World): void {
-  const [wave, grounds] = [w.wave, w.lanes.length - 1];
-  const list = packSchedule(w.c, w.c.content.stage!.boss.escort);
-  for (const s of list) w.spawnQueue.push({ tick: w.tick + s.at, enemy: s.enemy, route: s.lane < 0 ? grounds : s.lane % grounds, wave });
-  w.spawnQueue.sort((a, b) => a.tick - b.tick);
-  [w.waveLeft[wave], w.waveAlive[wave]] = [(w.waveLeft[wave] ?? 0) + list.length, w.waveAlive[wave] ?? 0];
+  queuePacks(w, w.c.content.stage!.boss.escort);
   Object.assign(w.boss, { stage: BOSS.emerge, emergeAt: w.tick + ticks(w.c.content.stage!.boss.emergeAfterS) });
-}
-
-/** Puts enemy `index` on route `route` at `dist` m (lateral `lateral`), in tonight's wave; its slot, −1 none free. */
-function put(w: World, index: number, hp: number, route: number, dist: number, lateral: number): number {
-  const E = w.enemies;
-  const slot = E.add(index, hp, 0, route, w.wave, lateral);
-  if (slot < 0) return -1;
-  E.dist[slot] = dist;
-  E.born[slot] = w.tick;
-  w.lanes[route]!.point(dist, lateral, spot);
-  [E.x[slot], E.z[slot]] = [spot.x, spot.z];
-  w.waveAlive[w.wave] = (w.waveAlive[w.wave] ?? 0) + 1;
-  bump(w.stats, STAT.spawned);
-  w.events.ring.push(FX.spawn, spot.x, spot.z, index, w.tick);
-  return slot;
 }
 
 /** It comes up at the fork on the warned branch. */
 function rise(w: World): void {
   const S = w.boss;
   const hp = bossHp(w);
-  const slot = put(w, w.c.enemyIndex(w.c.content.boss!.enemy), hp, S.route, w.c.content.stage!.boss.emergeM, 0);
+  const slot = putEnemy(w, w.c.enemyIndex(w.c.content.boss!.enemy), hp, S.route, w.wave, w.c.content.stage!.boss.emergeM, 0);
   if (slot < 0) return;
   Object.assign(S, { e: w.enemies.id(slot), hpMax: hp, stage: BOSS.fight, phase: 1, rootsAt: -1, slamAt: w.tick, keepAt: w.tick });
   w.events.rare.push({ t: "bossEmerge", tick: w.tick, route: S.route, hp });
@@ -133,6 +115,7 @@ function roots(w: World, e: number): void {
       if (b < 0) continue;
       w.buildings.stunUntil[b] = w.tick + ticks(spec.stunS);
       bump(w.stats, STAT.rootsHits);
+      panicNear(w, b); // R2: a helper by it runs home
       w.events.rare.push({ t: "stun", tick: w.tick, building: S.targets[k]!, until: w.buildings.stunUntil[b]! });
     }
     w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "roots", hit: true, end: w.tick, count: S.targetN });
@@ -198,7 +181,7 @@ function summon(w: World, e: number): void {
     if (w.tick < S.summonEnd) return;
     const index = w.c.enemyIndex(spec.enemy);
     const spread = Math.max(0, w.map.roadHalfM - w.c.enemies[index]!.radius);
-    for (let k = 0; k < spec.count; k += 1) put(w, index, maxHp(w, index), S.route, w.enemies.dist[e]! + 0.5, (w.rng.spawn.float() * 2 - 1) * spread);
+    for (let k = 0; k < spec.count; k += 1) putEnemy(w, index, maxHp(w, index), S.route, w.wave, w.enemies.dist[e]! + 0.5, (w.rng.spawn.float() * 2 - 1) * spread);
     S.summonEnd = -1;
     w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "summon", hit: true, end: w.tick, count: spec.count });
     return;
@@ -246,6 +229,7 @@ function stagger(w: World, e: number): void {
   Object.assign(S, { rootsAt: S.rootsAt < 0 ? -1 : Math.max(S.rootsAt, end), slamAt: Math.max(S.slamAt, end), keepAt: Math.max(S.keepAt, end) });
   S.summonAt = end + ticks(w.c.content.boss!.summon.firstS);
   E.stunUntil[e] = end;
+  ultShards(w, E.x[e]!, E.z[e]!, SHARDS.stagger); // R2: its Mảnh Chữ, Draconis within 12 m
   for (let b = 0; b < B.top; b += 1) if (B.stunUntil[b]! > w.tick) B.stunUntil[b] = w.tick;
   const near: [number, number][] = [];
   for (let b = 0; b < B.top; b += 1) {

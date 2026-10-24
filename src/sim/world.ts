@@ -27,6 +27,7 @@ import { EnemyStore } from "./stores/enemies";
 import { NpcStore } from "./stores/npcs";
 import { ProjectileStore } from "./stores/projectiles";
 import { TreeStore } from "./stores/trees";
+import { UltStore } from "./stores/ult";
 import { UnitStore } from "./stores/units";
 import { WordStore } from "./stores/words";
 import { agentsStep, heroAttack, home } from "./systems/agents";
@@ -35,12 +36,14 @@ import { bossStep } from "./systems/boss";
 import { soldiersStep } from "./systems/block";
 import { meleeStep, statusStep, towersAttack } from "./systems/combat";
 import { deathsStep } from "./systems/deaths";
+import { directStep } from "./systems/direct";
 import { addVillager, economyStep, staffBuilders } from "./systems/economy";
 import { moveEnemies } from "./systems/move";
 import { projectilesStep } from "./systems/projectile";
 import { fireWordShots } from "./systems/rewards";
 import { spawnEnemies } from "./systems/spawn";
 import { createPace, PACE_OFF, paceStep, type Pace, type PaceHeader } from "./systems/pace";
+import { ultStep } from "./systems/ult";
 import { dayTicks, phaseStep } from "./systems/waves";
 
 export type Phase = "day" | "night" | "dawn" | "defeat" | "victory";
@@ -121,6 +124,8 @@ export type World = {
   /** The run's pace k, flow meter and pace directors (systems/pace.ts). */
   readonly pace: Pace;
   readonly boss: BossStore;
+  /** Tối Thượng (BUILD_1B §8, R2). */
+  readonly ult: UltStore;
 };
 
 /** `deck`: the compiled vocabulary (levels 1–5); none deals no word. `pace`: the run header (none: k 1, director off). */
@@ -175,6 +180,7 @@ export function createWorld(options: WorldOptions): World {
     events: new Events(),
     pace: createPace(mode, options.pace ?? PACE_OFF),
     boss: new BossStore(),
+    ult: new UltStore(),
   };
   placeBuilding(w, 0, map.keep[0], map.keep[1], -1, true);
   for (let agent = 0; agent <= c.content.helpers.length; agent += 1) w.agents.add(home(w, agent));
@@ -194,9 +200,11 @@ export function step(w: World, commands: readonly Command[] = []): void {
   agentsStep(w); // 3
   moveEnemies(w); // 4
   soldiersStep(w); // 5
+  directStep(w); // BUILD_1B §9 (R2): mechanics begin and end, their direct calls
   towersAttack(w); // 6–7: targets, shots (a power charge spent)
   fireWordShots(w); // 7: Word Shots waiting
   heroAttack(w); // 7: the hero's fireballs
+  ultStep(w); // BUILD_1B §8 (R2): Tối Thượng's charge and its feathers
   meleeStep(w); // 7: melee
   projectilesStep(w); // 8
   statusStep(w); // 9

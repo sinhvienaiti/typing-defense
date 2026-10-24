@@ -89,7 +89,10 @@ export function attentionStep(w: World): void {
   let economy = 0;
   for (let c = 0; c < C.top; c += 1) {
     if (C.used[c] === 0) continue;
-    if (c !== locked && ((C.expire[c]! >= 0 && w.tick >= C.expire[c]!) || (C.kind[c] === CALL_KIND.quiz && w.phase !== "day"))) {
+    // A direct call whose enemy is gone ends, its word too (BUILD_1B §9.1).
+    const gone = C.foe[c]! >= 0 && w.enemies.slotOf(C.foe[c]!) < 0;
+    if (gone || (c !== locked && ((C.expire[c]! >= 0 && w.tick >= C.expire[c]!) || (C.kind[c] === CALL_KIND.quiz && w.phase !== "day")))) {
+      if (c === locked) locked = -1;
       closeCall(w, c);
       continue;
     }

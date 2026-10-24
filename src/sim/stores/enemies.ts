@@ -30,6 +30,11 @@ export class EnemyStore extends Slots {
   /** Standing still until this tick (the boss's stagger); first hit at this tick − 1 (0: none yet). */
   readonly stunUntil = new Int32Array(this.cap);
   readonly hitAt = new Int32Array(this.cap);
+  /** BUILD_1B R2: its mechanic runs until castEnd (0 none) and may start again from abilityAt; a blast killed it (no split); who set it burning. */
+  readonly castEnd = new Int32Array(this.cap);
+  readonly abilityAt = new Int32Array(this.cap);
+  readonly blast = new Uint8Array(this.cap);
+  readonly burnBy = new Uint8Array(this.cap);
 
   add(def: number, hp: number, altitude: number, route: number, wave: number, lateral: number): number {
     const slot = this.take();

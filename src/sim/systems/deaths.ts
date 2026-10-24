@@ -1,13 +1,18 @@
 /**
  * Deaths and leaks (TK 25.6 step 15). A kill's gold reaches the treasury on
  * the tick the enemy dies (TK 17.4: coins flying to the HUD are only a
- * picture); a leak costs the Bastion its lives, and at 0 the run is lost.
+ * picture), its Mảnh Chữ charge Tối Thượng near Draconis, and a Nuppeppō no
+ * blast killed splits in two where it fell (BUILD_1B §8.1, §10); a leak costs
+ * the Bastion its lives, and at 0 the run is lost.
  */
+import { SHARDS } from "../../content/rules";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
 import type { World } from "../world";
 import { LEAKED, SINKING } from "./move";
+import { maxHp, putEnemy } from "./spawn";
+import { ultShards } from "./ult";
 
 export function deathsStep(w: World): void {
   const E = w.enemies;
@@ -29,6 +34,13 @@ export function deathsStep(w: World): void {
       bump(w.stats, STAT.goldKill, def.gold * 1000);
       w.events.ring.push(FX.death, E.x[e]!, E.z[e]!, def.index, w.tick);
       w.events.ring.push(FX.coin, E.x[e]!, E.z[e]!, def.gold, w.tick);
+      ultShards(w, E.x[e]!, E.z[e]!, SHARDS[def.tier]);
+      const split = def.def.split;
+      if (split !== undefined && E.blast[e] === 0) {
+        const index = w.c.enemyIndex(split.enemy);
+        const spread = Math.max(0, w.map.roadHalfM - w.c.enemies[index]!.radius);
+        for (let k = 0; k < split.count; k += 1) putEnemy(w, index, maxHp(w, index), E.route[e]!, E.wave[e]!, E.dist[e]!, Math.max(-spread, Math.min(spread, E.lateral[e]! + (k % 2 === 0 ? -0.6 : 0.6))));
+      }
     }
     w.waveAlive[E.wave[e]!]! -= 1;
     E.release(e);

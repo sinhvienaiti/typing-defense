@@ -80,8 +80,18 @@ export type EnemyDef = {
   /** Soldiers fight it but never stop it (the boss); burning hurts it ×burnTakenMul. */
   unblockable?: true;
   burnTakenMul?: number;
+  /** BUILD_1B §9.2: a mechanic a direct call breaks; §10: what it splits into when no blast kills it (Nuppeppō). */
+  ability?: AbilitySpec;
+  split?: { enemy: string; count: number };
   view: ViewBlock;
 };
+
+/**
+ * Ngắt (BUILD_1B §9.2, TK 9.2): with `need` other enemies within radiusM, its cooldown past and (reachM) the rim of an
+ * attack building within reachM, it stands and drums for the direct call's window; broken, it is stunned stunS and drops
+ * `gold`; let run, every enemy within radiusM heals healPct.
+ */
+export type AbilitySpec = { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number };
 
 /** `affinity`: building ids where the hero's passive applies (its Word Shots set enemies burning). */
 export type HeroDef = { id: string; flySpeed: number; takeoffS: number; landS: number; attack: AttackSpec; affinity: readonly string[]; burn: { dps: number; durationS: number }; view: ViewBlock };
@@ -131,7 +141,7 @@ export type BossDef = {
 export type StageDef = {
   nights: number; keepMax: number;
   boss: { night: number; lullS: number; lullAlive: number; lullWaitS: number; escort: readonly WaveEntry[]; emergeM: number; emergeAfterS: number };
-  /** Building id, "keep2", "keep3" or "upgrade" → the day it opens. */
+  /** Building id, "keep2", "keep3", "upgrade" or "ult" (Tối Thượng, R2) → the day it opens. */
   unlock: Readonly<Record<string, number>>;
 };
 

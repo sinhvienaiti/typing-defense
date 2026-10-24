@@ -143,7 +143,7 @@ export function flowSnapshot(w: World): FlowSnapshot {
   busy ||= w.buildings.count <= BUILD.caps.total && w.c.buildings.some((d) => d.placement !== "fixed" && w.gold >= d.gold[0]! * 1000 && w.wood >= d.wood[0]!);
   const s = w.stats;
   const seen = w.pace.seen;
-  const now = [s[STAT.damageWordShot]!, s[STAT.damageTower]! + s[STAT.damageCrossbow]! + s[STAT.damageSoldier]! + s[STAT.damageHero]!, s[STAT.abandons]!];
+  const now = [s[STAT.damageWordShot]!, s[STAT.damageTower]! + s[STAT.damageCrossbow]! + s[STAT.damageSoldier]! + s[STAT.damageHero]! + s[STAT.damageUlt]!, s[STAT.abandons]!];
   const damage = { typed: now[0]! - seen[0]!, other: now[1]! - seen[1]! };
   const abandons = now[2]! - seen[2]!;
   for (let k = 0; k < 3; k += 1) seen[k] = now[k]!;

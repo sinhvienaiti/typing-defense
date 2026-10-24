@@ -47,6 +47,10 @@ export type RareEvent = { tick: number } & (
   | { t: "bossRetreat"; gold: number }
   | { t: "victory" }
   | { t: "stun"; building: number; until: number }
+  | { t: "ult"; x: number; z: number } // Tối Thượng cast (R2)
+  | { t: "drum"; enemy: number; end: number } // a mechanic begins, its direct call's window to `end`
+  | { t: "direct"; enemy: number; ok: boolean; x: number; z: number } // broken by its word, or let run (healed)
+  | { t: "panic"; agent: number }
   | { t: "waveStart"; wave: number }
   | { t: "waveEnd"; wave: number; bonus: number }
   | { t: "nightCalled"; day: number; bonus: number }

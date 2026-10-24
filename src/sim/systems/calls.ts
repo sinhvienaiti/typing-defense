@@ -8,7 +8,7 @@
  * locked, until it is done or Esc. Nothing is ever lost: a call that dims,
  * closes or runs out costs nothing, and what was typed stays done.
  */
-import { AGENT, BUILD, CALL, FARM, LENGTH_BY_E, MINE, MODES, POWER, TREE, WORD_D } from "../../content/rules";
+import { AGENT, BUILD, CALL, FARM, LENGTH_BY_E, MINE, MODES, POWER, TREE, ULT, WORD_D } from "../../content/rules";
 import { bandWords } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
 import { createBag, pickWord, type Bag } from "../../typing/picker";
@@ -21,7 +21,9 @@ import { addAt, DONE } from "../stores/slots";
 import type { World } from "../world";
 import { inRing } from "./agents";
 import { chainMul, chainStep } from "./chain";
+import { breakDirect } from "./direct";
 import { shotPower } from "./rewards";
+import { ultCharge, ultFeathers } from "./ult";
 
 const firstLetter = (w: World, s: number): number => w.typing.deck.letters[w.typing.deck.start[w.words.word[s]!]!]!;
 
@@ -41,28 +43,33 @@ export function configureDeck(w: World): void {
 }
 
 /**
- * The bag of the band ending at `hi` letters, made on first use (a band's low end follows E alone). The hook for
- * word topics (§5.2, TK 22.5: harvest words of fields and food…): a topic would key its own bag here; the
- * vocabulary tags none yet, so every call draws on the level's common words.
+ * The bag of the band ending at `hi` letters, made on first use (a band's low end follows E alone); `known`: words of
+ * the levels below the run's top only (Chữ Chiêu, direct calls: BUILD_1B §8.3, §9.1). The hook for word topics (§5.2,
+ * TK 22.5: harvest words of fields and food…): a topic would key its own bag here; the vocabulary tags none yet.
  */
-function bagFor(w: World, power: boolean): Bag {
+function bagFor(w: World, power: boolean, known = false): Bag {
   const [lo, hi] = lengthBand(expectedE(w), power);
-  return (w.typing.bags[hi] ??= createBag(bandWords(w.typing.deck, w.vocab, lo, hi)));
+  return (w.typing.bags[hi + (known ? 16 : 0)] ??= createBag(bandWords(w.typing.deck, known ? Math.max(1, w.vocab - 1) : w.vocab, lo, hi)));
 }
 
-/** A call follows whoever makes it: its NPC, its helper (a quiz), else its building. */
+/** A call follows whoever makes it: its enemy (a direct call), its NPC, its helper (a quiz) or Draconis (Chữ Chiêu), else its building. */
 export function placeCall(w: World, c: number): void {
   const C = w.calls;
   const npc = C.npc[c]!;
   const a = C.agent[c]!;
-  C.x[c] = npc >= 0 ? w.npcs.x[npc]! : a >= 0 ? w.agents.x[a]! : w.buildings.x[C.b[c]!]!;
-  C.z[c] = npc >= 0 ? w.npcs.z[npc]! : a >= 0 ? w.agents.z[a]! : w.buildings.z[C.b[c]!]!;
+  const e = C.foe[c]! >= 0 ? w.enemies.slotOf(C.foe[c]!) : -1;
+  if (e >= 0) [C.x[c], C.z[c]] = [w.enemies.x[e]!, w.enemies.z[e]!];
+  else if (C.foe[c]! < 0) {
+    C.x[c] = npc >= 0 ? w.npcs.x[npc]! : a >= 0 ? w.agents.x[a]! : w.buildings.x[C.b[c]!]!;
+    C.z[c] = npc >= 0 ? w.npcs.z[npc]! : a >= 0 ? w.agents.z[a]! : w.buildings.z[C.b[c]!]!;
+  }
 }
 
-/** A new call, queued; `life` ticks to live (−1: no end); a quiz names its helper. Returns its slot (−1: none free). */
-export function makeCall(w: World, kind: number, words: number, npc: number, b: number, tree: number, plot: number, life = -1, agent = -1): number {
+/** A new call, queued; `life` ticks to live (−1: no end); a quiz names its helper, a direct call its enemy (id). Returns its slot (−1: none free). */
+export function makeCall(w: World, kind: number, words: number, npc: number, b: number, tree: number, plot: number, life = -1, agent = -1, foe = -1): number {
   const c = w.calls.add(kind, words, npc, b, tree, plot, w.tick, life < 0 ? -1 : w.tick + life, agent);
   if (c < 0) return -1;
+  w.calls.foe[c] = foe;
   placeCall(w, c);
   bump(w.stats, STAT.calls);
   w.events.rare.push({ t: "call", tick: w.tick, call: w.calls.id(c), kind, state: "made" });
@@ -77,18 +84,23 @@ function quizWord(w: World): number {
   return -1;
 }
 
-/** Gives bright call c its next word (tier 1 only: one first letter a live word), on the `call` kind's letters; a quiz waits for a word of the book quietly. */
+/**
+ * Gives bright call c its next word (tier 1 only: one first letter a live word), on the `call` kind's letters (Chữ Chiêu's and a
+ * direct call's on their own kinds, which may take the letters the others leave: TK 6.5); a quiz waits for a word of the book quietly.
+ */
 export function giveWord(w: World, c: number): void {
   const T = w.typing;
   const C = w.calls;
   const quiz = C.kind[c] === CALL_KIND.quiz;
-  const pick = quiz ? quizWord(w) : pickWord(bagFor(w, C.kind[c] === CALL_KIND.power), T.deck, T.letters, w.words, KIND.call, w.tick, w.vocab, C.last[c]!, w.rng.words);
+  const known = C.kind[c] === CALL_KIND.ult || C.kind[c] === CALL_KIND.direct;
+  const kind = C.kind[c] === CALL_KIND.ult ? KIND.ultWord : C.kind[c] === CALL_KIND.direct ? KIND.direct : KIND.call;
+  const pick = quiz ? quizWord(w) : pickWord(bagFor(w, known || C.kind[c] === CALL_KIND.power, known), T.deck, T.letters, w.words, kind, w.tick, w.vocab, C.last[c]!, w.rng.words);
   if (pick < 0 || (pick & 3) !== 1) {
     if (!quiz) bump(w.stats, STAT.jams);
     return;
   }
   const word = pick >> 2;
-  const s = w.words.add(word, c, KIND.call, 1, w.tick, lifeTicks(T.deck.len[word]!, expectedE(w), WORD_D.known, w.mode));
+  const s = w.words.add(word, c, kind, 1, w.tick, lifeTicks(T.deck.len[word]!, expectedE(w), WORD_D.known, w.mode));
   if (s < 0) return;
   T.letters.take(s, firstLetter(w, s), 1);
   C.word[c] = s;
@@ -139,6 +151,10 @@ function perfectBonus(w: World, c: number): void {
     }
     case CALL_KIND.power:
       w.buildings.charges[b] = Math.min(POWER.max, w.buildings.charges[b]! + POWER.perfect);
+      return;
+    case CALL_KIND.ult:
+      return ultFeathers(w, ULT.perfectFeathers);
+    case CALL_KIND.direct:
       return;
     default:
       w.knowledge += 1;
@@ -211,6 +227,12 @@ function work(w: World, c: number, share: number, word: number, len: number, qua
       B.powerAt[b] = Math.min(B.powerAt[b]!, w.tick - Math.round(ticks(MODES[w.mode].powerCdS) * POWER.quick * soon));
       return false;
     }
+    case CALL_KIND.ult:
+      ultFeathers(w, Math.round(ULT.perWordFeathers * share));
+      return false;
+    case CALL_KIND.direct:
+      breakDirect(w, c);
+      return false;
     default:
       w.knowledge += 1;
       return false;
@@ -245,6 +267,7 @@ function finishWord(w: World, s: number): void {
   if (!top) C.perfect[c] = 0;
   C.done[c] = C.done[c]! + 1;
   bump(w.stats, STAT.callWords);
+  ultCharge(w, ULT.perWord * (0.5 + 0.5 * score.quality)); // BUILD_1B §8.1: every call's word charges Tối Thượng
   if (C.burst[c] === 1) bump(w.stats, STAT.burstTyped);
   if (top) bump(w.stats, STAT.wordsPerfect);
   if (score.grade === "sloppy") bump(w.stats, STAT.wordsSloppy);
@@ -259,15 +282,17 @@ function finishWord(w: World, s: number): void {
     C.finished[c] = 1;
     return;
   }
-  if (C.done[c]! < C.words[c]!) {
+  // A call past its life gives no next word (R2: Chữ Chiêu lives 4 s, Dồn lửa 5 s, however its words go).
+  const late = C.expire[c]! >= 0 && w.tick >= C.expire[c]!;
+  if (C.done[c]! < C.words[c]! && !late) {
     giveWord(w, c);
     const next = C.word[c]!;
     if (next >= 0) {
       w.typing.router.lock = next;
       W.touched[next] = 1;
     }
-  } else if (C.kind[c] === CALL_KIND.mine || C.kind[c] === CALL_KIND.power || C.kind[c] === CALL_KIND.quiz) endWork(w, c, true);
-  else closeCall(w, c); // every word typed, a sloppy one among them: the worker finishes alone
+  } else if (C.done[c]! >= C.words[c]! && C.kind[c] !== CALL_KIND.build && C.kind[c] !== CALL_KIND.harvest && C.kind[c] !== CALL_KIND.chop) endWork(w, c, true);
+  else closeCall(w, c); // every word typed, a sloppy one among them: the worker finishes alone (or its life ran out)
 }
 
 /** A letter key (0–25) at `atMs` (the key's own clock, logged: raw speed only). */

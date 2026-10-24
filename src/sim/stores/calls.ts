@@ -1,9 +1,9 @@
 import { Slots } from "./slots";
 
-/** BUILD_1A6 §5.1, in the director's priority order (§5.3): power, build, then harvest = chop = mine, then quiz. */
-export const CALL_KIND = { power: 0, build: 1, harvest: 2, chop: 3, mine: 4, quiz: 5 } as const;
-/** Rank of each kind for the director: the economy three share one. */
-export const CALL_RANK = [0, 1, 2, 2, 2, 3] as const;
+/** BUILD_1A6 §5.1, in the director's priority order (§5.3): power, build, then harvest = chop = mine, then quiz; 1B R2: Chữ Chiêu (ult) and direct calls. */
+export const CALL_KIND = { power: 0, build: 1, harvest: 2, chop: 3, mine: 4, quiz: 5, ult: 6, direct: 7 } as const;
+/** Rank of each kind for the director: the economy three share one; Chữ Chiêu and direct calls rank with power (BUILD_1B §8.3, §9.1). */
+export const CALL_RANK = [0, 1, 2, 2, 2, 3, 0, 0] as const;
 export const CALL_STATE = { queued: 0, open: 1 } as const;
 
 /**
@@ -35,6 +35,8 @@ export class CallStore extends Slots {
   readonly finished = new Uint8Array(this.cap);
   /** A "Dồn lửa" power call of the boss's stagger (BUILD_1B §5.2). */
   readonly burst = new Uint8Array(this.cap);
+  /** A direct call's enemy, by id (−1 none): the call follows it (BUILD_1B §9.1). */
+  readonly foe = new Int32Array(this.cap);
 
   add(kind: number, words: number, npc: number, b: number, tree: number, plot: number, tick: number, expire: number, agent = -1): number {
     const slot = this.take();
@@ -48,7 +50,7 @@ export class CallStore extends Slots {
     this.plot[slot] = plot;
     this.born[slot] = tick;
     this.expire[slot] = expire;
-    this.word[slot] = this.last[slot] = -1;
+    this.word[slot] = this.last[slot] = this.foe[slot] = -1;
     this.perfect[slot] = 1;
     return slot;
   }

@@ -1,7 +1,7 @@
 /**
  * Map 1 "Đồng Cỏ Thác Bạc" (`w1-silverfall`, BUILD_1B §4): the 1A sandbox field `td-sandbox` (docs/td/BUILD_NOW.md
  * §3, TYPING_DEFENSE_DESIGN.md 22.9 cut down) with its trees (BUILD_1A6 §4.2), six buildings (the farm from 1A.6),
- * the enemies (Mộc Tinh and its Mầm Gỗ from 1B), Draconis, the three Thư Đồng, the waves, the boss and the
+ * the enemies (Mộc Tinh and its Mầm Gỗ from 1B R1, Tanuki and Nuppeppō from R2), Draconis, the three Thư Đồng, the waves, the boss and the
  * five-night stage with its unlock days. Numbers come from the design (§11–14, 22.2–22.7); this file is where they
  * are retuned.
  */
@@ -94,13 +94,13 @@ export const SLICE_1A: Content = {
       view: { name: "Đàn Ma Trơi", short: "MT", color: "#8a63d2" },
     },
     {
-      id: "thuong-luong", tier: "medium", hp: 385, armorPct: 60, resistPct: 0, speed: 1.9, altitude: "ground", leak: 3, gold: 20,
+      id: "thuong-luong", tier: "medium", hp: 420, armorPct: 60, resistPct: 0, speed: 1.9, altitude: "ground", leak: 3, gold: 20,
       blockWeight: 2, radiusM: 1.4, packSize: 6, melee: { damage: [10, 14], periodS: 1.2 },
       view: { name: "Thuồng Luồng", short: "TL", color: "#3e2766" },
     },
     {
-      // BUILD_1B §6.5 round 1 (docs/td/BUILD_NOTES.md §7.1): 3,200 → 3,400 hit points, 0.9 → 0.8 m/s (G3); R1 review: 3,800.
-      id: "moc-tinh", tier: "boss", hp: 3800, armorPct: 30, resistPct: 0, speed: 0.8, altitude: "ground", leak: 0, gold: 0,
+      // BUILD_1B §6.5 round 1 (docs/td/BUILD_NOTES.md §7.1): 3,200 → 3,400 hit points, 0.9 → 0.8 m/s (G3); R1 review: 3,800; R2 (§7.3): 4,200.
+      id: "moc-tinh", tier: "boss", hp: 4200, armorPct: 30, resistPct: 0, speed: 0.8, altitude: "ground", leak: 0, gold: 0,
       blockWeight: 3, radiusM: 2.5, packSize: 1, unblockable: true, burnTakenMul: 1.25,
       view: { name: "Mộc Tinh", short: "MT", color: "#6b4a2a" },
     },
@@ -108,6 +108,24 @@ export const SLICE_1A: Content = {
       id: "mam-go", tier: "swarm", hp: 40, armorPct: 0, resistPct: 0, speed: 3.0, altitude: "ground", leak: 1, gold: 1,
       blockWeight: 1, radiusM: 0.5, packSize: 4, melee: { damage: [2, 3], periodS: 1.0 },
       view: { name: "Mầm Gỗ", short: "MG", color: "#5f9a3a" },
+    },
+    // BUILD_1B §10 (R2; TK 22.6): Tanuki drums (Ngắt breaks it) only within 9 m of a tower's or the Bastion's rim (BUILD_NOTES
+    // §7.3: by the rift no ring lit it), Nuppeppō splits in two unless a blast kills it. Melee: starting numbers.
+    {
+      id: "tanuki", tier: "small", hp: 110, armorPct: 0, resistPct: 30, speed: 2.4, altitude: "ground", leak: 1, gold: 12,
+      blockWeight: 1, radiusM: 0.8, packSize: 1, melee: { damage: [3, 5], periodS: 1.0 },
+      ability: { verb: "interrupt", cooldownS: 12, radiusM: 6, need: 3, reachM: 9, healPct: 25, stunS: 2, gold: 5 },
+      view: { name: "Lửng Tanuki", short: "TN", color: "#9a6a3e" },
+    },
+    {
+      id: "nuppeppo", tier: "small", hp: 90, armorPct: 0, resistPct: 0, speed: 2.6, altitude: "ground", leak: 1, gold: 6,
+      blockWeight: 1, radiusM: 0.8, packSize: 3, melee: { damage: [2, 4], periodS: 1.0 }, split: { enemy: "nuppeppo-con", count: 2 },
+      view: { name: "Nuppeppō", short: "NP", color: "#d9a8a0" },
+    },
+    {
+      id: "nuppeppo-con", tier: "swarm", hp: 30, armorPct: 0, resistPct: 0, speed: 4.0, altitude: "ground", leak: 1, gold: 2,
+      blockWeight: 1, radiusM: 0.5, packSize: 2, melee: { damage: [1, 3], periodS: 1.0 },
+      view: { name: "Nuppeppō con", short: "np", color: "#e8c3bc" },
     },
   ],
   hero: {
@@ -147,13 +165,16 @@ export const SLICE_1A: Content = {
     preset: [["archer", -8, 12], ["cannon", 7, 12], ["barracks", 3, 18], ["gold-mine", 26, -30], ["farm", -17, 40]],
   },
   waves: {
+    // BUILD_1B §4.2 R2 with design call (b) (BUILD_NOTES §7.2–§7.3): nights 1–4 harder (night 1: 8 → 10, night 2: 10 + 1 →
+    // 12 + 2); night 3 brings Nuppeppō (the cannon's foe), night 4 three Tanuki (Ngắt; 3 for a drum every 25–40 s, §9.1)
+    // first, so the packs after them catch up.
     list: [
-      [{ enemy: "cuong-thi", count: 8 }],
-      [{ enemy: "cuong-thi", count: 10 }, { enemy: "ma-troi", count: 1 }],
+      [{ enemy: "cuong-thi", count: 10 }],
       [{ enemy: "cuong-thi", count: 12 }, { enemy: "ma-troi", count: 2 }],
-      [{ enemy: "thuong-luong", count: 1 }, { enemy: "cuong-thi", count: 10 }],
-      // BUILD_1B §4.2: the first part of night 5, one pack of Thuồng Luồng (§6.5 round 1: 5 → 4; R1 review: 5 again); the boss peak follows it.
-      [{ enemy: "thuong-luong", count: 5 }, { enemy: "cuong-thi", count: 7 }, { enemy: "ma-troi", count: 3 }],
+      [{ enemy: "cuong-thi", count: 10 }, { enemy: "nuppeppo", count: 4 }, { enemy: "ma-troi", count: 2 }],
+      [{ enemy: "tanuki", count: 3 }, { enemy: "thuong-luong", count: 1 }, { enemy: "cuong-thi", count: 9 }],
+      // BUILD_1B §4.2: the first part of night 5, one pack of Thuồng Luồng (§6.5 round 1: 5 → 4; R1 review: 5; R2: 6); the boss peak follows it.
+      [{ enemy: "thuong-luong", count: 6 }, { enemy: "cuong-thi", count: 7 }, { enemy: "ma-troi", count: 3 }],
       [{ enemy: "thuong-luong", count: 4 }, { enemy: "cuong-thi", count: 20 }, { enemy: "ma-troi", count: 4 }],
     ],
     endlessGrowth: 0.15,
@@ -161,8 +182,9 @@ export const SLICE_1A: Content = {
     memberGapS: 0.45,
   },
   // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.35 on its bark (heroMul).
+  // R2 (BUILD_NOTES §7.3): k factor 0.3 / 6.5 (R1 review: 0.2 / 4.3), Thư giãn and Học ×0.78 like Thử thách (R1 review: 0.85).
   boss: {
-    enemy: "moc-tinh", retreatPct: 50, kHp: 0.2, kHp2: 4.3, kHpMax: 1.5, modeHp: { relax: 0.85, learn: 0.85, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
+    enemy: "moc-tinh", retreatPct: 50, kHp: 0.3, kHp2: 6.5, kHpMax: 1.5, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },
     slam: { damage: [40, 60], reachM: 3, everyS: 2.5, warnS: 1.2, knockM: 1.5 },
     stagger: { atPct: 70, stunS: 5, vulnerable: 1.25, burstLifeS: 5, burstReachM: 2, burstWords: 3, burstPerE: 20 },
@@ -173,6 +195,6 @@ export const SLICE_1A: Content = {
   stage: {
     nights: 5, keepMax: 3,
     boss: { night: 5, lullS: 12, lullAlive: 2, lullWaitS: 30, escort: [{ enemy: "cuong-thi", count: 8, pack: 4 }], emergeM: 25, emergeAfterS: 6 },
-    unlock: { barracks: 2, "gold-mine": 3, cannon: 3, keep2: 3, upgrade: 4, keep3: 5 },
+    unlock: { barracks: 2, "gold-mine": 3, cannon: 3, keep2: 3, upgrade: 4, keep3: 5, ult: 3 },
   },
 };

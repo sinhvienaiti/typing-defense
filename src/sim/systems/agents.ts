@@ -5,10 +5,10 @@
  * The hero throws fireballs whenever it stands on the ground with an enemy in reach.
  */
 import { ticks } from "../../content/compile";
-import { AGENT, TICK_HZ } from "../../content/rules";
+import { AGENT, PANIC, TICK_HZ } from "../../content/rules";
 import { findPath, nearestOpen, pullPath } from "../nav/astar";
 import { socketCell, type Point } from "../placement";
-import { SOURCE } from "../stats";
+import { SOURCE, STAT, bump } from "../stats";
 import { NPC_KIND, TASK } from "../stores/npcs";
 import { MODE, PATH_MAX, type Walkers } from "../stores/walkers";
 import { PROJECTILE } from "../stores/projectiles";
@@ -78,10 +78,10 @@ export function walk(w: World, S: Walkers, k: number, speed: number): void {
   else plan(w, S, k); // the path needed more than PATH_MAX points (or none was found): on from here next tick
 }
 
-/** Sends agent a toward building `goal` (−1: just the point). The hero takes off unless it is there; a helper finds its path. */
+/** Sends agent a toward building `goal` (−1: just the point). The hero takes off unless it is there; a helper finds its path (a panic ends). */
 function go(w: World, a: number, goal: number, point: Point): void {
   const A = w.agents;
-  A.goal[a] = goal;
+  [A.goal[a], A.panic[a]] = [goal, 0];
   if (a > 0) walkTo(w, A, a, point.x, point.z);
   else {
     A.gx[a] = point.x;
@@ -108,7 +108,21 @@ export function moveAgent(w: World, a: number, x: number, z: number): boolean {
 /** assignUnit (TK 5.1, 25.9): agent a goes to stand by building b. */
 export const orderAgent = (w: World, a: number, b: number): void => go(w, a, b, stand(w, b));
 
-/** Step 3: the hero's timed takeoff, straight flight and timed landing; the helpers' walks. */
+/** Rễ Trồi struck building b (BUILD_1B §5.5, R2): a helper within 6 m of its rim panics and runs to the Bastion. */
+export function panicNear(w: World, b: number): void {
+  const A = w.agents;
+  const reach = w.c.buildings[w.buildings.def[b]!]!.radius + PANIC.m;
+  for (let a = 1; a < slotsOpen(w); a += 1) {
+    if (A.panic[a] !== 0 || !within(w, a, w.buildings.x[b]!, w.buildings.z[b]!, reach)) continue;
+    [A.backGoal[a], A.backX[a], A.backZ[a], A.panic[a]] = [A.goal[a]!, A.gx[a]!, A.gz[a]!, -1];
+    const at = home(w, a);
+    walkTo(w, A, a, at.x, at.z);
+    bump(w.stats, STAT.panics);
+    w.events.rare.push({ t: "panic", tick: w.tick, agent: a });
+  }
+}
+
+/** Step 3: the hero's timed takeoff, straight flight and timed landing; the helpers' walks; a panicked helper home stands 5 s, then goes back. */
 export function agentsStep(w: World): void {
   const A = w.agents;
   const hero = w.c.content.hero;
@@ -119,16 +133,21 @@ export function agentsStep(w: World): void {
       A.until[a] = w.tick + ticks(hero.landS);
     }
     if (A.mode[a] === MODE.walk) walk(w, A, a, w.c.content.helpers[a - 1]!.speed);
+    if (A.panic[a]! < 0 && A.mode[a] === MODE.stand) A.panic[a] = w.tick + ticks(PANIC.s);
+    else if (A.panic[a]! > 0 && w.tick >= A.panic[a]!) {
+      const goal = A.backGoal[a]! >= 0 && w.buildings.used[A.backGoal[a]!] === 1 ? A.backGoal[a]! : -1;
+      go(w, a, goal, goal >= 0 ? stand(w, goal) : { x: A.backX[a]!, z: A.backZ[a]! });
+    }
   }
 }
 
 const within = (w: World, a: number, x: number, z: number, r: number): boolean =>
   (w.agents.x[a]! - x) * (w.agents.x[a]! - x) + (w.agents.z[a]! - z) * (w.agents.z[a]! - z) <= r * r;
 
-/** §6: (x, z) lies in a help ring: the hero's 10 m, an out helper's 6 m. */
+/** §6: (x, z) lies in a help ring: the hero's 14 m, an out helper's 6 m (not while it panics). */
 export function inRing(w: World, x: number, z: number): boolean {
   if (within(w, 0, x, z, AGENT.heroRingM)) return true;
-  for (let a = 1; a < slotsOpen(w); a += 1) if (within(w, a, x, z, AGENT.helperRingM)) return true;
+  for (let a = 1; a < slotsOpen(w); a += 1) if (w.agents.panic[a] === 0 && within(w, a, x, z, AGENT.helperRingM)) return true;
   return false;
 }
 

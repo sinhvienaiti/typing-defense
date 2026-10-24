@@ -49,13 +49,13 @@ export function projectilesStep(w: World): void {
         const d2 = ex * ex + ez * ez;
         if (d2 > splash * splash) continue;
         const share = 1 - (fade * Math.sqrt(d2)) / splash;
-        damageEnemy(w, e, P.power[p]! * share * w.c.enemies[E.def[e]!]!.splashMul, P.damageType[p]!, P.source[p]!);
-        if (burnUntil > 0) E.burnUntil[e] = burnUntil;
+        damageEnemy(w, e, P.power[p]! * share * w.c.enemies[E.def[e]!]!.splashMul, P.damageType[p]!, P.source[p]!, true);
+        if (burnUntil > 0) [E.burnUntil[e], E.burnBy[e]] = [burnUntil, P.source[p]!];
       }
       w.events.ring.push(FX.burst, x, z, Math.round(splash * 100), w.tick);
     } else if (alive) {
       damageEnemy(w, t, P.power[p]!, P.damageType[p]!, P.source[p]!);
-      if (burnUntil > 0) E.burnUntil[t] = burnUntil;
+      if (burnUntil > 0) [E.burnUntil[t], E.burnBy[t]] = [burnUntil, P.source[p]!];
       w.events.ring.push(FX.hit, x, z, P.crit[p]!, w.tick);
     }
     P.release(p);

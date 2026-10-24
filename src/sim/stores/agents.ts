@@ -10,6 +10,11 @@ export class AgentStore extends Walkers {
   readonly atkCd = new Float64Array(this.cap);
   /** A helper's next quiz may come from this tick (BUILD_1A6 §6). */
   readonly quizAt = new Int32Array(this.cap);
+  /** BUILD_1B §5.5 R2: a panicked helper runs home (−1) and stands there until this tick, then goes back to its building (or point). */
+  readonly panic = new Int32Array(this.cap);
+  readonly backGoal = new Int16Array(this.cap);
+  readonly backX = new Float64Array(this.cap);
+  readonly backZ = new Float64Array(this.cap);
 
   add(point: { x: number; z: number }): number {
     const slot = this.place(point.x, point.z);

@@ -15,12 +15,12 @@ export const STORE = { enemies: 640, soldiers: 96, projectiles: 512, buildings: 
 export const CAP = { soldiers: 64, agents: 4, streamLiveMax: 12, streamLiveMin: 4 } as const;
 
 /** BUILD_1A6 §2: what a mode sets. lifeK scales the clock a word is scored against (TK 6.4's k_L); powerCdS is §4.5's cooldown. */
-/** BUILD_1B §5.2: warnK scales a boss move's warning (relax, learn 1.33; challenge 0.8). */
+/** BUILD_1B §5.2: warnK scales a boss move's warning (relax, learn 1.33; challenge 0.8); §9.1: directK a direct call's window. */
 export const MODES = {
-  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33 },
-  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false, warnK: 1 },
-  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false, warnK: 0.8 },
-  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33 },
+  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
+  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false, warnK: 1, directK: 2.2 },
+  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false, warnK: 0.8, directK: 1.6 },
+  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
 } as const;
 /** §2: dawn's length; building at night takes ×1.5 as long. */
 export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
@@ -56,16 +56,36 @@ export const CHAIN = {
  * the power call's life. §5.3: the attention window, and how many economy calls the night keeps open. §6–§7: a
  * helper's quiz every 25 s by day; the review book holds 20 words, a word with 2 errors goes in like a sloppy one.
  * The director's word budget (review R3, docs/td/BUILD_NOTES.md §5): a word's lock time at E ×paceK, and slipS
- * more for slips, must fit the 20 s window (the bot at 35 WPM, 95 %: no window past 8 s, 30 % of the day typed).
+ * more for slips, must fit the 20 s window (the bot at 35 WPM, 95 %: no window past 8 s, 30 % of the day typed;
+ * 1B R2: 1.1 → 1.15 s, a chain of chop words ran one window to 8.13 s, BUILD_NOTES §7.3).
  */
 export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
-  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.1,
+  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.15,
 } as const;
 /** A power word's Word Shot (TK 6.11): D̄ × (0.8 + 1.2·Q) × lenF, lenF = clamp((len + 1)/6; 0.8; 1.2). */
 export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [1.6, 0.4] } as const;
-/** §4.5: power charges of a tower; a power word adds 2, a whole Perfect call 1 more. quick (1B R1 review): a power word typed t s after it showed brings the next call to cd·(1 − quick·r) after it, r = max(0, 1 − t / quickS), if sooner. */
-export const POWER = { max: 5, perWord: 2, perfect: 1, quick: 0.6, quickS: 4 } as const;
+/**
+ * §4.5: power charges of a tower; a power word adds 2, a whole Perfect call 1 more. quick (1B R1 review): a power word typed t s
+ * after it showed brings the next call to cd·(1 − quick·r) after it, r = max(0, 1 − t / quickS), if sooner (R2, design call (b): 0.8, 5 s).
+ */
+export const POWER = { max: 5, perWord: 2, perfect: 1, quick: 0.8, quickS: 5 } as const;
+
+/**
+ * BUILD_1B §8: Tối Thượng's charge (0–max): a call's word +perWord·(0.5 + 0.5 Q), a direct word +DIRECT.ult, an enemy dying within
+ * ringM of Draconis +shard a Mảnh Chữ (SHARDS by tier; the boss's stagger `stagger`), +nightPerS a second by night; nothing while full;
+ * minGapS at least between uses. Cast within castM of him (the app's spot otherwise: the most enemy hit points within areaM of a point
+ * within autoM of him): a feather every everyTicks, each at the enemy with the most hit points within radiusM not yet aimed at (round
+ * and round; none: the spot), landing ~fallS later in a blastM blast of `damage` magic; the boss takes ×bossMul and never burns; at the
+ * rain's end the enemies left in it burn burnS. Chữ Chiêu: a call of `words` known short words living lifeS; each word typed brings
+ * perWordFeathers more delayS later, a whole Perfect call perfectFeathers more.
+ */
+export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 25, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
+export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, boss: 0, stagger: 6 } as const;
+/** BUILD_1B §9.1: direct calls open at once (3 with the boss up); a broken mechanic's gold and charge; its window clamp(base + directK·(len + 1)·12 / E; minS; maxS). */
+export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8 } as const;
+/** BUILD_1B §5.5 (R2): a helper within m of a building's rim when Rễ Trồi strikes runs to the Bastion and stands there s seconds. */
+export const PANIC = { m: 6, s: 5 } as const;
 export const RICHNESS = [0.8, 1.0, 1.25] as const;
 
 /** §6: help rings (hero 10 m, helpers 6 m) and the helpers' passive on economy work; idle helpers stand in a row west of the Bastion (TK 23.7). */

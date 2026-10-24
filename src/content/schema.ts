@@ -61,6 +61,7 @@ export function validateContent(content: Content): string[] {
     if (!armour.includes(enemy.armorPct) || !armour.includes(enemy.resistPct)) fail(enemy.id, "armour and resist must be a tier: " + armour.join(" / "));
     if (!(enemy.hp > 0 && enemy.speed > 0 && enemy.radiusM > 0 && enemy.packSize >= 1)) fail(enemy.id, "hp, speed, radius and pack must be positive");
     if (enemy.melee) range(enemy.id + " melee", enemy.melee.damage);
+    if (enemy.split && !content.enemies.some((other) => other.id === enemy.split!.enemy && other.split === undefined)) fail(enemy.id, "splits into an unknown enemy or one that splits");
   }
 
   const buildingIds = new Set(content.buildings.map((building) => building.id));
@@ -85,7 +86,7 @@ export function validateContent(content: Content): string[] {
   }
   const stage = content.stage;
   if (stage !== undefined) {
-    const keys = new Set([...buildingIds, "keep2", "keep3", "upgrade"]);
+    const keys = new Set([...buildingIds, "keep2", "keep3", "upgrade", "ult"]);
     for (const key of Object.keys(stage.unlock)) if (!keys.has(key)) fail("stage", "unlocks unknown " + key);
     for (const entry of stage.boss.escort) if (!enemyIds.has(entry.enemy)) fail("stage", "escort of unknown enemy " + entry.enemy);
     if (stage.nights > content.waves.list.length || stage.boss.night > stage.nights) fail("stage", "nights beyond the wave list, or the boss after the last night");

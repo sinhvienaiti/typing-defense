@@ -81,6 +81,7 @@ function compileEnemy(def: EnemyDef, index: number) {
     weight: def.blockWeight, radius: def.radiusM, packSize: def.packSize, splashMul: def.splashTakenMul ?? 1,
     boss: def.tier === "boss", unblockable: def.unblockable === true, burnTaken: def.burnTakenMul ?? 1,
     melee: def.melee ? { min: def.melee.damage[0], max: def.melee.damage[1], period: ticks(def.melee.periodS) } : null,
+    ability: def.ability ? { cooldown: ticks(def.ability.cooldownS), radius: def.ability.radiusM, need: def.ability.need, reach: def.ability.reachM ?? 0, heal: def.ability.healPct / 100, stun: ticks(def.ability.stunS), gold: def.ability.gold } : null,
     def,
   };
 }

@@ -6,7 +6,7 @@
  * Positions are quarter metres.
  */
 import { ticks } from "../content/compile";
-import { BUILD, ECONOMY, EXPECTED, FARM, MODES, PRESET, RALLY, SELL, STORE, VILLAGERS } from "../content/rules";
+import { BUILD, ECONOMY, EXPECTED, FARM, MODES, PRESET, RALLY, SELL, STORE, ULT, VILLAGERS } from "../content/rules";
 import type { Mode } from "../content/types";
 import { routeBackspace } from "../typing/router";
 import { CELL } from "./nav/grid";
@@ -19,7 +19,8 @@ import { callBoss } from "./systems/boss";
 import { closeCall, closeCallsOf, configureDeck, typeKey } from "./systems/calls";
 import { addVillager, countNpcs, finishSite, releaseNpc, staffBuilders, villagerCap } from "./systems/economy";
 import { setPaceMode } from "./systems/pace";
-import { flood } from "./systems/spawn";
+import { flood, queuePacks } from "./systems/spawn";
+import { castUlt } from "./systems/ult";
 import { callNight, dayTicks, locked, skipTo, startNight } from "./systems/waves";
 import type { World } from "./world";
 
@@ -36,7 +37,9 @@ export type SandboxOp =
   | { op: "preset" }
   | { op: "flood"; value: number }
   | { op: "boss" }
-  | { op: "skipTo"; value: number };
+  | { op: "skipTo"; value: number }
+  | { op: "spawn"; enemy: string; value: number }
+  | { op: "ult" };
 
 export type CommandBody =
   | { t: "build"; def: number; qx: number; qz: number }
@@ -57,6 +60,7 @@ export type CommandBody =
   | { t: "key"; letter: number; atMs: number }
   | { t: "backspace"; atMs: number }
   | { t: "unlock" }
+  | { t: "ult"; qx: number; qz: number }
   | { t: "sandbox"; op: SandboxOp };
 
 export type Command = CommandBody & { tick: number };
@@ -230,6 +234,8 @@ function run(w: World, command: Command): string | null {
       w.typing.router.lock = -1;
       w.typing.router.group = -1;
       return null;
+    case "ult":
+      return castUlt(w, command.qx, command.qz);
     case "sandbox":
       return w.sandbox ? sandbox(w, command.op) : "noSandbox";
   }
@@ -285,6 +291,16 @@ function sandbox(w: World, op: SandboxOp): string | null {
       return callBoss(w) ? null : "bossBusy";
     case "skipTo":
       return skipTo(w, op.value) ? null : "badValue";
+    case "spawn": {
+      // BUILD_1B §14 (R2): packs of any enemy but the boss leave the rift in the running wave.
+      const def = w.c.content.enemies.find((enemy) => enemy.id === op.enemy);
+      if (def === undefined || def.tier === "boss" || !(Number.isInteger(op.value) && op.value >= 1 && op.value <= 40)) return "badValue";
+      queuePacks(w, [{ enemy: op.enemy, count: op.value }]);
+      return null;
+    }
+    case "ult":
+      [w.ult.charge, w.ult.castAt] = [ULT.max, -0x40000000];
+      return null;
   }
 }
 

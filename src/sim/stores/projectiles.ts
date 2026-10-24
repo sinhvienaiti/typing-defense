@@ -1,6 +1,6 @@
 import { Slots } from "./slots";
 
-export const PROJECTILE = { arrow: 0, shell: 1, bolt: 2, fireball: 3, wordShot: 4 } as const;
+export const PROJECTILE = { arrow: 0, shell: 1, bolt: 2, fireball: 3, wordShot: 4, feather: 5 } as const;
 
 /**
  * Shots in flight (TK 10). Damage is rolled when the shot leaves; armour

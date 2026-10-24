@@ -1,9 +1,12 @@
 /**
  * Spawning (TK 25.6 step 2): queued spawns whose tick has come enter at the
  * gate, spread across the road by the spawn stream, with the mode's hit
- * points (BUILD_1A6 §2).
+ * points (BUILD_1A6 §2). Enemies may also come up along a road (the boss, its
+ * Mầm Gỗ, a Nuppeppō's halves) and packs be queued into the running wave.
  */
+import { packSchedule } from "../../content/compile";
 import { MODES, PACE } from "../../content/rules";
+import type { WaveEntry } from "../../content/types";
 import { FX } from "../events";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
@@ -13,6 +16,29 @@ const spot = { x: 0, z: 0 };
 
 /** An enemy's hit points in the run's mode. */
 export const maxHp = (w: World, enemy: number): number => Math.round(w.c.enemies[enemy]!.hp * MODES[w.mode].hpMul);
+
+/** Puts enemy `index` on route `route` at `dist` m (lateral `lateral`) in wave `wave`; its slot, −1 none free. */
+export function putEnemy(w: World, index: number, hp: number, route: number, wave: number, dist: number, lateral: number): number {
+  const E = w.enemies;
+  const slot = E.add(index, hp, w.c.enemies[index]!.altitude, route, wave, lateral);
+  if (slot < 0) return -1;
+  [E.dist[slot], E.born[slot]] = [dist, w.tick];
+  w.lanes[route]!.point(dist, lateral, spot);
+  [E.x[slot], E.z[slot]] = [spot.x, spot.z];
+  w.waveAlive[wave] = (w.waveAlive[wave] ?? 0) + 1;
+  bump(w.stats, STAT.spawned);
+  w.events.ring.push(FX.spawn, spot.x, spot.z, index, w.tick);
+  return slot;
+}
+
+/** Packs of `entries` leave the rift in the running wave from now on, one a ground route in turn (the boss's escort, the sandbox's `spawn`). */
+export function queuePacks(w: World, entries: readonly WaveEntry[]): void {
+  const [wave, grounds] = [w.wave, w.lanes.length - 1];
+  const list = packSchedule(w.c, entries);
+  for (const s of list) w.spawnQueue.push({ tick: w.tick + s.at, enemy: s.enemy, route: s.lane < 0 ? grounds : s.lane % grounds, wave });
+  w.spawnQueue.sort((a, b) => a.tick - b.tick);
+  [w.waveLeft[wave], w.waveAlive[wave]] = [(w.waveLeft[wave] ?? 0) + list.length, w.waveAlive[wave] ?? 0];
+}
 
 export function spawnEnemies(w: World): void {
   const E = w.enemies;
