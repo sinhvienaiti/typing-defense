@@ -525,28 +525,58 @@
    "script": "jiangshi_hop",
    "loop": true,
    "frames": 14,
-   "height": 0.22
+   "height": 0.22,
+   "crouch": [
+    0.35,
+    1.0,
+    0.45
+   ],
+   "closeLoop": 0,
+   "airborne": true,
+   "note": "3 of 14 frames on the ground; the game moves the body only inside airborne_s (speed / air share), so planted feet never slide"
   },
   {
    "name": "Enemy_Attack",
    "script": "jiangshi_attack",
    "frames": 22,
    "blendIn": 2,
-   "blendOut": 3
+   "blendOut": 3,
+   "lockFeet": true
   },
   {
    "name": "Enemy_Hit",
    "script": "jiangshi_hit",
    "frames": 12,
    "blendIn": 1,
-   "blendOut": 3
+   "blendOut": 3,
+   "lockFeet": true,
+   "recoil": "back",
+   "shift": 0.03
   },
   {
    "name": "Enemy_Death",
    "script": "jiangshi_death",
    "frames": 30,
-   "blendIn": 2
+   "blendIn": 2,
+   "headLevel": false,
+   "settle": 0,
+   "endsOnIdle": false
   }
  ],
- "smoothPasses": 6
+ "smoothPasses": 6,
+ "headLevel": {
+  "minPitch": -5,
+  "bones": {
+   "neck_01": 0.4,
+   "head": 0.6
+  },
+  "why": "review 24/10: keep the face (under the talisman) toward the 55-degree game camera when leaning in"
+ },
+ "settle": 6,
+ "lookAt": {
+  "bone": "head",
+  "yawDeg": 20,
+  "pitchDeg": 20,
+  "why": "same limit as Lam (rigid head, hat brim)"
+ }
 }

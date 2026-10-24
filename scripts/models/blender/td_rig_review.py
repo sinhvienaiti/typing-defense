@@ -231,18 +231,161 @@ def clip_frames(rig, track_name):
     return int(strip.frame_start), int(strip.frame_end)
 
 
-def setup_cameras(height, res):
-    cams = {}
+GAME_EL, GAME_AZ = 55.0, -30.0
+
+
+def game_dir():
+    """Game camera: 55 degrees down, from the front-left like the default view."""
+    el, az = math.radians(GAME_EL), math.radians(GAME_AZ)
+    return Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), -math.sin(el)))
+
+
+def camera_specs(height):
+    """{view: (direction, target, ortho size)} of the default framing."""
     size = height * 1.45
     centre = (0, 0, height * 0.48)
-    cams["front"] = C.camera("Cam_front", (0, 1, 0), centre, size)
-    cams["side"] = C.camera("Cam_side", (-1, 0, 0), centre, size)
-    # Game camera: 55 degrees down, from the front-left like the default view.
-    el = math.radians(55)
-    az = math.radians(-30)
-    d = Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), -math.sin(el)))
-    cams["game"] = C.camera("Cam_game", d, (0, 0, height * 0.42), size * 1.05)
-    return cams
+    return {"front": ((0, 1, 0), centre, size), "side": ((-1, 0, 0), centre, size),
+            "game": (tuple(game_dir()), (0, 0, height * 0.42), size * 1.05)}
+
+
+def setup_cameras(height, res):
+    return {view: C.camera("Cam_" + view, d, target, size) for view, (d, target, size) in camera_specs(height).items()}
+
+
+def fit_cameras(height, lo, hi):
+    """Widen and re-centre a camera only when the clip's mesh (box lo..hi over
+    its frames) leaves the default frame: a body lying down (Death) was cut."""
+    corners = [Vector((x, y, z)) for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])]
+    for view, (d, target, size) in camera_specs(height).items():
+        d = Vector(d).normalized()
+        right = d.cross(Vector((0, 0, 1))).normalized()
+        up = right.cross(d).normalized()
+        pr = [(c - Vector(target)).dot(right) for c in corners]
+        pu = [(c - Vector(target)).dot(up) for c in corners]
+        if max(map(abs, pr + pu)) > 0.46 * size:
+            mid = (Vector(lo) + Vector(hi)) / 2
+            size = max(size, 1.12 * max(max(pr) - min(pr), max(pu) - min(pu)))
+            target = tuple(mid)
+        C.camera("Cam_" + view, tuple(d), target, size)
+
+
+# ----------------------------------------------------------------------------
+# Motion checks (review 24/10): face toward the game camera, steady torso
+# lean, wide hand arcs seen from above, chains back on Idle, sockets on the
+# right bones.
+# ----------------------------------------------------------------------------
+CHAIN_PREFIXES = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf")
+
+
+class Motion:
+    def __init__(self, rig):
+        self.rig = rig
+        self.bones = rig.pose.bones
+        self.head_rest = rig.data.bones["head"].matrix_local.to_quaternion() if "head" in self.bones else None
+        self.to_cam = -game_dir()
+        self.rows = []
+
+    def sample(self):
+        mw = self.rig.matrix_world
+        row = {}
+        if self.head_rest is not None:
+            q = mw.to_quaternion() @ self.bones["head"].matrix.to_quaternion() @ self.head_rest.inverted()
+            f = q @ Vector((0, -1, 0))
+            row["pitch"] = math.degrees(math.asin(max(-1.0, min(1.0, f.z))))
+            row["cam"] = math.degrees(math.acos(max(-1.0, min(1.0, f.dot(self.to_cam)))))
+        if "neck_01" in self.bones and "pelvis" in self.bones:
+            u = (mw @ self.bones["neck_01"].head) - (mw @ self.bones["pelvis"].head)
+            row["lean"] = math.degrees(math.atan2(-u.y, u.z))
+        for side in ("l", "r"):
+            if "hand_" + side in self.bones:
+                row["hand_" + side] = tuple(mw @ self.bones["hand_" + side].tail)
+        self.rows.append(row)
+
+    def summary(self):
+        out = {}
+        if not self.rows:
+            return out
+        if "pitch" in self.rows[0]:
+            out["facePitchMinDeg"] = round(min(r["pitch"] for r in self.rows), 1)
+            # 0 = the face looks straight at the game camera; at rest about 60.
+            out["faceToGameCamMaxDeg"] = round(max(r["cam"] for r in self.rows), 1)
+        if "lean" in self.rows[0]:
+            lean = [r["lean"] for r in self.rows]
+            out["torsoLeanDeg"] = {"min": round(min(lean), 1), "mean": round(float(np.mean(lean)), 1), "max": round(max(lean), 1)}
+        arcs = {}
+        for side in ("l", "r"):
+            key = "hand_" + side
+            if key in self.rows[0]:
+                p = np.array([r[key] for r in self.rows])
+                # Seen from above: 0 = straight ahead (-Y), + = the character's left.
+                ang = np.degrees(np.unwrap(np.arctan2(p[:, 0], -p[:, 1])))
+                wide = np.hypot(p[:, 0], p[:, 1]) >= 0.6  # outside a chibi head's silhouette from above
+                arcs[side] = {"sweepDeg": round(float(ang.max() - ang.min())),
+                              "wideSweepDeg": round(float(ang[wide].max() - ang[wide].min())) if wide.any() else 0,
+                              "wideFrames": int(wide.sum()),
+                              "reachMax_m": round(float(np.hypot(p[:, 0], p[:, 1]).max()), 2),
+                              "pathTop_m": round(float(np.linalg.norm(np.diff(p[:, :2], axis=0), axis=1).sum()), 2)}
+        if arcs:
+            out["handArcTop"] = arcs
+        return out
+
+
+def chain_dirs(rig):
+    mw = rig.matrix_world.to_3x3()
+    return {pb.name: (mw @ pb.matrix.to_3x3() @ Vector((0, 1, 0))).normalized()
+            for pb in rig.pose.bones if pb.name.startswith(CHAIN_PREFIXES)}
+
+
+def chain_offset(now, idle):
+    return max([math.degrees(now[n].angle(idle[n], 0.0)) for n in now if n in idle] or [0.0])
+
+
+def socket_report(rig):
+    """Each FX_ empty: its parent bone and the nearest deform bone, in the
+    current (Idle) pose. Toggling pose_position to REST from Python froze the
+    later frame evaluation in Blender 5.2, so the posed bones are used."""
+    mw = rig.matrix_world
+    segments = {pb.name: (mw @ pb.head, mw @ pb.tail) for pb in rig.pose.bones if pb.bone.use_deform}
+
+    def dist(p, a, b):
+        ab = b - a
+        t = max(0.0, min(1.0, (p - a).dot(ab) / max(ab.dot(ab), 1e-12)))
+        return (p - (a + ab * t)).length
+
+    out = {}
+    for obj in bpy.context.scene.objects:
+        if obj.type == "EMPTY" and obj.name.startswith("FX_") and obj.parent == rig:
+            p = obj.matrix_world.translation
+            near = min(segments, key=lambda n: dist(p, *segments[n]))
+            out[obj.name] = {"bone": obj.parent_bone, "nearestBone": near, "at": [round(v, 3) for v in p],
+                             "distToBone_m": round(dist(p, *segments[obj.parent_bone]), 3) if obj.parent_bone in segments else None}
+    return out
+
+
+def model_contact(folder, clips, count, label):
+    """One row of game-camera frames per clip: the whole model on one page."""
+    rows = []
+    for clip in clips:
+        files = [os.path.join(folder, clip, f"game_{i:02d}.png") for i in range(count)]
+        if not all(os.path.exists(f) for f in files):
+            continue
+        row = os.path.join(folder, f"_contact_{clip}.png")
+        subprocess.run(["magick"] + files + ["+append", "-resize", "40%", row], check=True)
+        height = subprocess.run(["magick", "identify", "-format", "%h", row], check=True, capture_output=True, text=True).stdout.strip()
+        # (-splice on these renders fails with "pixels are not authentic": label as its own tile)
+        subprocess.run(["magick", "-size", "190x" + height, "xc:white", "-font", FONT, "-pointsize", "17", "-gravity", "West",
+                        "-annotate", "+6+0", clip, row, "+append", row], check=True)
+        rows.append(row)
+    if not rows:
+        return None
+    sheet = os.path.join(folder, "contact.png")
+    subprocess.run(["magick"] + rows + ["-append", "+repage", sheet], check=True)
+    width = subprocess.run(["magick", "identify", "-format", "%w", sheet], check=True, capture_output=True, text=True).stdout.strip()
+    subprocess.run(["magick", "-size", width + "x34", "xc:white", "-font", FONT, "-pointsize", "20", "-gravity", "West",
+                    "-annotate", "+8+0", label + " - game camera 55 deg, %d frames per clip" % count, sheet, "-append", "+repage", sheet], check=True)
+    for row in rows:
+        os.remove(row)
+    return sheet
 
 
 def contact_sheet(folder, clip, views, count, label):
@@ -253,7 +396,7 @@ def contact_sheet(folder, clip, views, count, label):
         subprocess.run(["magick"] + files + ["+append", row], check=True)
         rows.append(row)
     sheet = os.path.join(folder, "sheet.png")
-    subprocess.run(["magick"] + rows + ["-append", "-resize", "50%", "-gravity", "North", "-background", "white",
+    subprocess.run(["magick"] + rows + ["-append", "+repage", "-resize", "50%", "-gravity", "North", "-background", "white",
                     "-splice", "0x28", "-font", FONT, "-pointsize", "20", "-annotate", "+0+3", label, sheet], check=True)
     for row in rows:
         os.remove(row)
@@ -292,6 +435,16 @@ def mode_clips(args):
     report = {}
     feet = [n for n in ("foot_l", "foot_r") if n in rig.pose.bones]
     rest_ankle = {f: (rig.matrix_world @ rig.data.bones[f].head_local).z for f in feet}
+    tracks = [t.name for t in rig.animation_data.nla_tracks]
+    idle_name = next((t for t in ("Hero_Idle", "Enemy_Idle", "Unit_Idle", "Helper_Idle", "Boss_Idle") if t in tracks), None)
+    idle_dirs = {}
+    if idle_name:
+        first = clip_frames(rig, idle_name)[0]
+        for f in (first + 1, first):  # evaluate the mesh too: a bare frame_set left the saved pose
+            bpy.context.scene.frame_set(f)
+            checker.frame()
+        idle_dirs = chain_dirs(rig)
+    sockets = socket_report(rig)
     for clip in wanted:
         start, end = clip_frames(rig, clip)
         folder = os.path.join(args.out, clip)
@@ -299,10 +452,21 @@ def mode_clips(args):
         stats = []
         foot_track = {f: [] for f in feet}
         first_co = last_co = None
+        setup_cameras(height, res)  # a fitted camera of the last clip goes back to the default frame
+        motion = Motion(rig)
+        lo, hi = np.full(3, np.inf), np.full(3, -np.inf)
+        start_dirs = end_dirs = {}
+        bpy.context.scene.frame_set(start + 1)  # the first frame_set(start) must re-evaluate
         for f in range(start, end + 1):
             bpy.context.scene.frame_set(f)
             s, co = checker.frame()
             stats.append(s)
+            motion.sample()
+            lo, hi = np.minimum(lo, co.min(0)), np.maximum(hi, co.max(0))
+            if f == start:
+                start_dirs = chain_dirs(rig)
+            if f == end:
+                end_dirs = chain_dirs(rig)
             for foot in feet:
                 foot_track[foot].append(tuple(bone_world(rig, foot)))
             if f == start:
@@ -313,6 +477,7 @@ def mode_clips(args):
         render_heat(checker, rig, mesh, worst_frame, folder, dict(cams, _h=height))
         n = args.frames
         picks = [int(round(start + (end - start) * i / max(n - 1, 1))) for i in range(n)]
+        fit_cameras(height, lo, hi)
         for i, f in enumerate(picks):
             bpy.context.scene.frame_set(f)
             for view, cam in cams.items():
@@ -329,6 +494,9 @@ def mode_clips(args):
             "loopSeamChains_m": round(float(np.linalg.norm(first_co - last_co, axis=1)[checker.chain_rows].max()), 4) if checker.chain_rows.any() else 0.0,
             "feet": foot_metrics(foot_track, rest_ankle),
             "worstFrame": worst_frame - start,
+            "chainStartOffsetDeg": round(chain_offset(start_dirs, idle_dirs), 1),
+            "chainEndOffsetDeg": round(chain_offset(end_dirs, idle_dirs), 1),
+            **motion.summary(),
         }
         worst = max(stats, key=lambda s: s["trianglesCollapsed"])
         if worst.get("collapsedBy"):
@@ -340,6 +508,8 @@ def mode_clips(args):
         label = f"{args.label} {clip}  {agg['seconds']}s  stretch max {agg['edgeStretchMax']}  collapsed {agg['trianglesCollapsedMax']}  seam {agg['loopSeamMaxVertex_m']} m"
         contact_sheet(folder, clip, list(cams), n, label)
         log("clip", clip, json.dumps({k: agg[k] for k in ("edgeStretchMax", "trianglesCollapsedMax", "loopSeamMaxVertex_m", "minZ")}))
+    report["_sockets"] = sockets
+    model_contact(args.out, wanted, args.frames, args.label)
     path = os.path.join(args.out, "checks-" + (args.tag or "clips") + ".json")
     old = {}
     if os.path.exists(path):

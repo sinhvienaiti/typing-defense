@@ -168,23 +168,25 @@ def jiangshi_idle(rest, clip):
 
 
 def jiangshi_hop(rest, clip):
-    """One hop per loop: crouch, launch, air (legs straight, toes down), land, squash."""
+    """One hop per loop with a short ground contact (review 24/10: 6 of 15
+    frames on the ground slid at 3.8 m/s). Frames 0..contact-1 are on the
+    ground (touch down, squash, push off; "crouch" per frame), the rest fly a
+    ballistic arc, legs straight and toes down; frame n = frame 0. The clip
+    metadata gives the airborne window: the game moves the body only then."""
     poser = Poser(rest)
     n = int(clip.get("frames", 14))  # 0.58 s per hop
     height = float(clip.get("height", 0.22))
+    crouch_keys = clip.get("crouch", [0.35, 1.0, 0.45])
+    contact = len(crouch_keys)
+    take_off = contact - 0.5
     frames = []
     for i in range(n + 1):
-        u = (i % n) / n
-        # contact 0..0.18 (squash), push 0.18..0.3, air 0.3..0.85, land 0.85..1
-        if u < 0.3:
-            crouch = math.sin(math.pi * u / 0.3) * 1.0
-            air = 0.0
-        elif u < 0.85:
-            crouch = 0.0
-            air = math.sin(math.pi * (u - 0.3) / 0.55)
+        k = i % n
+        if k < contact:
+            crouch, air = float(crouch_keys[k]), 0.0
         else:
-            crouch = 0.6 * math.sin(math.pi * (u - 0.85) / 0.30)
-            air = 0.0
+            x = (k - take_off) / (n - take_off)
+            crouch, air = 0.0, 4.0 * x * (1.0 - x)
         knee = 22 * crouch
         rot, aim = jiangshi_arms(lift=4 - 8 * air + 6 * crouch, droop=35 + 15 * air)
         legs = {}
@@ -198,6 +200,24 @@ def jiangshi_hop(rest, clip):
         basis = poser.plant(basis, lift=height * air)
         frames.append(basis)
     return frames
+
+
+def airborne(rest, frames, clear=0.03):
+    """Windows [start, end] in seconds (flat list) where both ankles are more
+    than `clear` m above their rest height, and the frames with a foot down.
+    A hopper's game movement runs only inside these windows (no slide)."""
+    feet = [f for f in ("foot_l", "foot_r") if f in rest.rot]
+    up = [all(rest.fk(b)[f].translation.z > rest.matrix[f].translation.z + clear for f in feet) for b in frames]
+    windows, k = [], 0
+    while k < len(up):
+        if up[k]:
+            s = k
+            while k < len(up) and up[k]:
+                k += 1
+            windows += [round(s / T.FPS, 3), round(k / T.FPS, 3)]
+        else:
+            k += 1
+    return windows, len(up) - sum(up)
 
 
 def jiangshi_attack(rest, clip):
@@ -228,8 +248,15 @@ def jiangshi_hit(rest, clip):
     for i in range(n):
         k = keyframes(n, [(0, 0.0), (2, 1.0), (5, 0.7), (n - 1, 0.0)], i)
         rot, aim = jiangshi_arms(lift=2 + 30 * k, droop=35 - 25 * k, spread=12 * k)
-        body = {"spine_01": Q("x", 10 * k), "spine_02": Q("x", 8 * k), "head": Q("x", 14 * k) @ Q("z", 8 * k)}
-        basis = poser.pose(rot=merge_rot(rot, body), aim=aim, pelvis=Vector((0, 0.05 * k, 0)))
+        if clip.get("recoil") == "back":
+            # Knocked back stiffly, face up toward the 55-degree camera (no
+            # neck counter-turn needed); the feet stay (lockFeet).
+            body = {"spine_01": Q("x", -6 * k), "spine_02": Q("x", -5 * k), "head": Q("x", -8 * k) @ Q("z", 8 * k)}
+            shift = float(clip.get("shift", 0.03))
+        else:  # "fold": doubles over a blow to the belly
+            body = {"spine_01": Q("x", 10 * k), "spine_02": Q("x", 8 * k), "head": Q("x", 14 * k) @ Q("z", 8 * k)}
+            shift = float(clip.get("shift", 0.05))
+        basis = poser.pose(rot=merge_rot(rot, body), aim=aim, pelvis=Vector((0, shift * k, 0)))
         frames.append(poser.plant(basis))
     return frames
 

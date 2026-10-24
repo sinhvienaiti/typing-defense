@@ -56,14 +56,39 @@ MIXAMO = {"pelvis": "Hips", "spine_01": "Spine", "spine_02": "Spine1", "spine_03
 # ----------------------------------------------------------------------------
 # Preset
 # ----------------------------------------------------------------------------
+SIDES = (("_l", "_r"), ("_L", "_R"))
+
+
 def mirror_name(name):
-    if name.endswith("_l"):
-        return name[:-2] + "_r"
-    if name.endswith("_L"):
-        return name[:-2] + "_R"
-    if "_l_" in name:
-        return name.replace("_l_", "_r_")
+    """The other side's name, both ways (hand_l <-> hand_r, FX_HAND_L <->
+    FX_HAND_R, ear_l_tip <-> ear_r_tip); None for a centre name."""
+    for left, right in SIDES:
+        if name.endswith(left):
+            return name[:-2] + right
+        if name.endswith(right):
+            return name[:-2] + left
+    for left, right in (("_l_", "_r_"), ("_r_", "_l_")):
+        if left in name:
+            return name.replace(left, right)
     return None
+
+
+def left_twin(name):
+    """Authoring convention: only left-side entries (*_l) make a mirrored
+    right twin; a lone right-side bone (Lam's bag_r) stays single."""
+    return mirror_name(name) if name.endswith(("_l", "_L")) or "_l_" in name else None
+
+
+def socket_side_errors(spec):
+    """FX_*_L must sit on a left bone and FX_*_R on a right one."""
+    errors = []
+    for socket, value in spec.get("sockets", {}).items():
+        side = socket[-2:] if socket[-2:] in ("_L", "_R") else None
+        bone = value.get("bone", "")
+        bone_side = "_L" if bone.endswith("_l") else "_R" if bone.endswith("_r") else None
+        if side and bone_side and side != bone_side:
+            errors.append("%s on %s" % (socket, bone))
+    return errors
 
 
 def load_spec(path):
@@ -72,7 +97,7 @@ def load_spec(path):
     bones = {}
     for name, bone in spec["bones"].items():
         bones[name] = dict(bone)
-        twin = mirror_name(name)
+        twin = left_twin(name)
         if twin and twin not in spec["bones"] and spec.get("mirror", True):
             copy = dict(bone)
             copy["head"] = [-bone["head"][0], bone["head"][1], bone["head"][2]]
@@ -88,7 +113,7 @@ def load_spec(path):
         table = spec.get(key, {})
         for name, value in list(table.items()):
             value["bones"] = expand(value.get("bones", []), bones)
-            twin = mirror_name(name)
+            twin = left_twin(name)
             if twin and twin not in table:
                 copy = dict(value)
                 copy["bones"] = mirror_list(value["bones"])
@@ -98,7 +123,7 @@ def load_spec(path):
     regions = []
     for rule in spec.get("regions", []):
         regions.append(rule)
-        twin = mirror_name(rule["part"])
+        twin = left_twin(rule["part"])
         if twin and rule.get("mirror", True):
             copy = dict(rule)
             copy["part"] = twin
@@ -116,10 +141,15 @@ def load_spec(path):
                     copy[key] = mirror_list(rule[key])
             regions.append(copy)
     spec["regions"] = regions
+    # FX_*_R sockets get a mirrored FX_*_L twin on the mirrored bone (hand_r ->
+    # hand_l); before 24/10 the bone kept its _r name and FX_HAND_L rode hand_r.
     for socket, value in list(spec.get("sockets", {}).items()):
         twin = socket[:-2] + "_L" if socket.endswith("_R") else None
         if twin and twin not in spec["sockets"] and value.get("mirror", True):
             spec["sockets"][twin] = {"bone": mirror_name(value["bone"]) or value["bone"], "at": [-value["at"][0], value["at"][1], value["at"][2]]}
+    errors = socket_side_errors(spec)
+    if errors:
+        raise SystemExit("socket on the wrong side: " + ", ".join(errors))
     return spec
 
 

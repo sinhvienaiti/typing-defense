@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-23T20:53:33.983Z",
+  "generatedAt": "2026-10-24T01:01:17.402Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
@@ -207,12 +207,12 @@
       "id": "archer",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/archer/archer.high.glb?v=bcfab1548b",
-          "bytes": 1007504
+          "url": "/assets/typing-defense/models/buildings/archer/archer.high.glb?v=97e01ae6cc",
+          "bytes": 1007624
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/archer/archer.medium.glb?v=ed6c0688cf",
-          "bytes": 358332
+          "url": "/assets/typing-defense/models/buildings/archer/archer.medium.glb?v=c67670e582",
+          "bytes": 358452
         }
       },
       "triangles": 10000,
@@ -233,9 +233,9 @@
       ],
       "clips": [],
       "size": [
-        3.9346,
-        7.4991,
-        3.3773
+        3.6723,
+        6.9991,
+        3.1521
       ]
     },
     "buildings/barracks": {
@@ -388,12 +388,12 @@
       "id": "keep",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/keep/keep.high.glb?v=6c4cb9098f",
-          "bytes": 977188
+          "url": "/assets/typing-defense/models/buildings/keep/keep.high.glb?v=72aba1ee94",
+          "bytes": 977168
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/keep/keep.medium.glb?v=5e4d98c963",
-          "bytes": 384504
+          "url": "/assets/typing-defense/models/buildings/keep/keep.medium.glb?v=987df05a33",
+          "bytes": 384484
         }
       },
       "triangles": 15000,
@@ -414,9 +414,9 @@
       ],
       "clips": [],
       "size": [
-        6.8376,
-        6.6781,
-        6.7829
+        8.2052,
+        8.0137,
+        8.1395
       ]
     },
     "buildings/seal-dais": {
@@ -459,12 +459,12 @@
       "id": "cuong-thi",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/enemies/cuong-thi/cuong-thi.high.glb?v=9882328ad7",
-          "bytes": 346196
+          "url": "/assets/typing-defense/models/enemies/cuong-thi/cuong-thi.high.glb?v=4be76b412d",
+          "bytes": 350404
         },
         "medium": {
-          "url": "/assets/typing-defense/models/enemies/cuong-thi/cuong-thi.medium.glb?v=7610a89098",
-          "bytes": 228352
+          "url": "/assets/typing-defense/models/enemies/cuong-thi/cuong-thi.medium.glb?v=5fbdbcd5f9",
+          "bytes": 232564
         }
       },
       "triangles": 5813,
@@ -493,12 +493,12 @@
       "id": "lam",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/heroes/lam/lam.high.glb?v=eb7649ae9e",
-          "bytes": 1296772
+          "url": "/assets/typing-defense/models/heroes/lam/lam.high.glb?v=a7475ea163",
+          "bytes": 1299768
         },
         "medium": {
-          "url": "/assets/typing-defense/models/heroes/lam/lam.medium.glb?v=f9023ac366",
-          "bytes": 824828
+          "url": "/assets/typing-defense/models/heroes/lam/lam.medium.glb?v=a02ff294dd",
+          "bytes": 827824
         }
       },
       "triangles": 20000,

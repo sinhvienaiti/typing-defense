@@ -615,7 +615,17 @@
     "spine_01": 0.45,
     "spine_02": 0.45,
     "spine_03": 0.45
-   }
+   },
+   "lean": {
+    "deg": 15,
+    "bones": [
+     "spine_01",
+     "spine_02",
+     "spine_03"
+    ]
+   },
+   "note": "steady 15 degree lean; play x1.25 at 6.5 m/s (planted foot moves back at 5.2 m/s)",
+   "locomotion": true
   },
   {
    "name": "Hero_Attack",
@@ -625,113 +635,113 @@
      "t": 0
     },
     {
-     "t": 5,
+     "t": 4,
      "aim": {
       "upperarm_r": [
-       -0.75,
-       0.25,
-       0.6
+       -0.92,
+       0.3,
+       0.25
       ],
       "lowerarm_r": [
-       -0.35,
-       0.15,
-       0.92
+       -0.7,
+       0.62,
+       0.35
       ],
       "upperarm_l": [
-       0.55,
-       -0.55,
-       -0.6
+       0.45,
+       -0.75,
+       -0.45
       ],
       "lowerarm_l": [
-       0.25,
+       0.2,
        -0.95,
-       0.1
+       0.15
       ]
      },
      "add": {
       "pelvis": [
        [
         "z",
-        -8
+        -12
        ]
       ],
       "spine_02": [
        [
         "z",
-        -8
+        -10
        ]
       ],
       "spine_03": [
        [
         "z",
-        -6
+        -8
        ]
       ],
       "hand_r": [
        [
         "x",
-        -20
+        -25
        ]
       ],
       "thigh_l": [
        [
         "x",
-        -12
+        -10
        ]
       ],
       "thigh_r": [
        [
         "x",
-        -12
+        -10
        ]
       ],
       "calf_l": [
        [
         "x",
-        24
+        20
        ]
       ],
       "calf_r": [
        [
         "x",
-        24
+        20
        ]
       ],
       "foot_l": [
        [
         "x",
-        -12
+        -10
        ]
       ],
       "foot_r": [
        [
         "x",
-        -12
+        -10
        ]
       ]
      },
      "ease": "out"
     },
     {
-     "t": 8,
+     "t": 7,
      "aim": {
       "upperarm_r": [
-       0.35,
-       -0.9,
-       -0.1
+       -0.25,
+       -0.95,
+       0.12
       ],
       "lowerarm_r": [
-       0.75,
-       -0.6,
-       -0.25
+       -0.05,
+       -0.99,
+       0.08
       ],
       "upperarm_l": [
-       0.6,
-       0.15,
-       -0.75
+       0.55,
+       0.1,
+       -0.8
       ],
       "lowerarm_l": [
-       0.45,
+       0.4,
        0.3,
        -0.85
       ]
@@ -740,13 +750,13 @@
       "pelvis": [
        [
         "z",
-        10
+        8
        ]
       ],
       "spine_02": [
        [
         "z",
-        11
+        10
        ]
       ],
       "spine_03": [
@@ -758,7 +768,7 @@
       "spine_01": [
        [
         "x",
-        -8
+        -6
        ]
       ],
       "thigh_r": [
@@ -797,25 +807,32 @@
       -0.1,
       0
      ],
+     "feet": {
+      "foot_r": [
+       0,
+       -0.24,
+       0
+      ]
+     },
      "ease": "in"
     },
     {
-     "t": 11,
+     "t": 9,
      "aim": {
       "upperarm_r": [
-       0.6,
-       -0.6,
-       -0.5
+       0.15,
+       -0.98,
+       0.0
       ],
       "lowerarm_r": [
-       0.85,
-       -0.2,
-       -0.5
+       0.3,
+       -0.95,
+       -0.05
       ],
       "upperarm_l": [
-       0.6,
+       0.55,
        0.15,
-       -0.75
+       -0.8
       ],
       "lowerarm_l": [
        0.45,
@@ -827,19 +844,19 @@
       "pelvis": [
        [
         "z",
-        13
+        16
        ]
       ],
       "spine_02": [
        [
         "z",
-        11
+        12
        ]
       ],
       "spine_03": [
        [
         "z",
-        6
+        8
        ]
       ],
       "spine_01": [
@@ -881,122 +898,22 @@
      "ease": "out"
     },
     {
-     "t": 19
-    }
-   ]
-  },
-  {
-   "name": "Hero_Skill1",
-   "script": "keys",
-   "keys": [
-    {
-     "t": 0
-    },
-    {
-     "t": 4,
+     "t": 12,
      "aim": {
       "upperarm_r": [
-       -0.75,
-       0.25,
-       0.6
+       0.4,
+       -0.6,
+       -0.7
       ],
       "lowerarm_r": [
-       -0.35,
-       0.15,
-       0.92
+       0.5,
+       -0.5,
+       -0.7
       ],
       "upperarm_l": [
        0.55,
-       -0.55,
-       -0.6
-      ],
-      "lowerarm_l": [
-       0.25,
-       -0.95,
-       0.1
-      ]
-     },
-     "add": {
-      "pelvis": [
-       [
-        "z",
-        -8
-       ]
-      ],
-      "spine_02": [
-       [
-        "z",
-        -8
-       ]
-      ],
-      "spine_03": [
-       [
-        "z",
-        -6
-       ]
-      ],
-      "hand_r": [
-       [
-        "x",
-        -20
-       ]
-      ],
-      "thigh_l": [
-       [
-        "x",
-        -12
-       ]
-      ],
-      "thigh_r": [
-       [
-        "x",
-        -12
-       ]
-      ],
-      "calf_l": [
-       [
-        "x",
-        24
-       ]
-      ],
-      "calf_r": [
-       [
-        "x",
-        24
-       ]
-      ],
-      "foot_l": [
-       [
-        "x",
-        -12
-       ]
-      ],
-      "foot_r": [
-       [
-        "x",
-        -12
-       ]
-      ]
-     },
-     "ease": "out"
-    },
-    {
-     "t": 7,
-     "aim": {
-      "upperarm_r": [
-       0.35,
-       -0.9,
-       -0.1
-      ],
-      "lowerarm_r": [
-       0.75,
-       -0.6,
-       -0.25
-      ],
-      "upperarm_l": [
-       0.6,
        0.15,
-       -0.75
+       -0.8
       ],
       "lowerarm_l": [
        0.45,
@@ -1014,167 +931,175 @@
       "spine_02": [
        [
         "z",
-        11
+        6
        ]
       ],
       "spine_03": [
        [
         "z",
-        8
-       ]
-      ],
-      "spine_01": [
-       [
-        "x",
-        -8
+        4
        ]
       ],
       "thigh_r": [
        [
         "x",
-        -28
+        -24
        ]
       ],
       "calf_r": [
        [
         "x",
-        30
-       ]
-      ],
-      "foot_r": [
-       [
-        "x",
-        -5
+        26
        ]
       ],
       "thigh_l": [
        [
         "x",
-        12
+        10
        ]
       ],
       "calf_l": [
        [
         "x",
-        14
+        12
        ]
       ]
      },
      "pelvis": [
       0,
-      -0.1,
+      -0.08,
       0
      ],
-     "ease": "in"
+     "ease": "out"
     },
     {
-     "t": 10,
+     "t": 20,
+     "feet": {
+      "foot_r": [
+       0,
+       0,
+       0
+      ]
+     }
+    }
+   ],
+   "feetLock": true
+  },
+  {
+   "name": "Hero_Skill1",
+   "script": "keys",
+   "keys": [
+    {
+     "t": 0
+    },
+    {
+     "t": 4,
      "aim": {
-      "upperarm_l": [
-       0.75,
-       0.25,
-       0.6
-      ],
-      "lowerarm_l": [
-       0.35,
-       0.15,
-       0.92
-      ],
       "upperarm_r": [
-       -0.55,
-       -0.55,
-       -0.6
+       -0.92,
+       0.3,
+       0.25
       ],
       "lowerarm_r": [
-       -0.25,
+       -0.7,
+       0.62,
+       0.35
+      ],
+      "upperarm_l": [
+       0.45,
+       -0.75,
+       -0.45
+      ],
+      "lowerarm_l": [
+       0.2,
        -0.95,
-       0.1
+       0.15
       ]
      },
      "add": {
       "pelvis": [
        [
         "z",
-        8
+        -12
        ]
       ],
       "spine_02": [
        [
         "z",
-        8
+        -10
        ]
       ],
       "spine_03": [
        [
         "z",
-        6
+        -8
        ]
       ],
-      "hand_l": [
+      "hand_r": [
        [
         "x",
-        -20
-       ]
-      ],
-      "thigh_r": [
-       [
-        "x",
-        -12
+        -25
        ]
       ],
       "thigh_l": [
        [
         "x",
-        -12
+        -10
        ]
       ],
-      "calf_r": [
+      "thigh_r": [
        [
         "x",
-        24
+        -10
        ]
       ],
       "calf_l": [
        [
         "x",
-        24
+        20
        ]
       ],
-      "foot_r": [
+      "calf_r": [
        [
         "x",
-        -12
+        20
        ]
       ],
       "foot_l": [
        [
         "x",
-        -12
+        -10
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -10
        ]
       ]
      },
      "ease": "out"
     },
     {
-     "t": 13,
+     "t": 7,
      "aim": {
-      "upperarm_l": [
-       -0.35,
-       -0.9,
-       -0.1
-      ],
-      "lowerarm_l": [
-       -0.75,
-       -0.6,
-       -0.25
-      ],
       "upperarm_r": [
-       -0.6,
-       0.15,
-       -0.75
+       -0.25,
+       -0.95,
+       0.12
       ],
       "lowerarm_r": [
-       -0.45,
+       -0.05,
+       -0.99,
+       0.08
+      ],
+      "upperarm_l": [
+       0.55,
+       0.1,
+       -0.8
+      ],
+      "lowerarm_l": [
+       0.4,
        0.3,
        -0.85
       ]
@@ -1183,13 +1108,283 @@
       "pelvis": [
        [
         "z",
-        -10
+        8
        ]
       ],
       "spine_02": [
        [
         "z",
-        -11
+        10
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -6
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -28
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        30
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -5
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        12
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        14
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "feet": {
+      "foot_r": [
+       0,
+       -0.22,
+       0
+      ]
+     },
+     "ease": "in"
+    },
+    {
+     "t": 9,
+     "aim": {
+      "upperarm_r": [
+       0.15,
+       -0.98,
+       0.0
+      ],
+      "lowerarm_r": [
+       0.3,
+       -0.95,
+       -0.05
+      ],
+      "upperarm_l": [
+       0.55,
+       0.15,
+       -0.8
+      ],
+      "lowerarm_l": [
+       0.45,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        16
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        12
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "spine_01": [
+       [
+        "x",
+        -6
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -24
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        26
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        10
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        12
+       ]
+      ]
+     },
+     "pelvis": [
+      0,
+      -0.1,
+      0
+     ],
+     "ease": "out"
+    },
+    {
+     "t": 11,
+     "aim": {
+      "upperarm_l": [
+       0.92,
+       0.3,
+       0.25
+      ],
+      "lowerarm_l": [
+       0.7,
+       0.62,
+       0.35
+      ],
+      "upperarm_r": [
+       -0.45,
+       -0.75,
+       -0.45
+      ],
+      "lowerarm_r": [
+       -0.2,
+       -0.95,
+       0.15
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        12
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        10
+       ]
+      ],
+      "spine_03": [
+       [
+        "z",
+        8
+       ]
+      ],
+      "hand_l": [
+       [
+        "x",
+        -25
+       ]
+      ],
+      "thigh_l": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "thigh_r": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "calf_l": [
+       [
+        "x",
+        20
+       ]
+      ],
+      "calf_r": [
+       [
+        "x",
+        20
+       ]
+      ],
+      "foot_l": [
+       [
+        "x",
+        -10
+       ]
+      ],
+      "foot_r": [
+       [
+        "x",
+        -10
+       ]
+      ]
+     },
+     "ease": "out",
+     "feet": {
+      "foot_r": [
+       0,
+       0,
+       0
+      ]
+     }
+    },
+    {
+     "t": 14,
+     "aim": {
+      "upperarm_l": [
+       0.25,
+       -0.95,
+       0.12
+      ],
+      "lowerarm_l": [
+       0.05,
+       -0.99,
+       0.08
+      ],
+      "upperarm_r": [
+       -0.55,
+       0.1,
+       -0.8
+      ],
+      "lowerarm_r": [
+       -0.4,
+       0.3,
+       -0.85
+      ]
+     },
+     "add": {
+      "pelvis": [
+       [
+        "z",
+        -8
+       ]
+      ],
+      "spine_02": [
+       [
+        "z",
+        -10
        ]
       ],
       "spine_03": [
@@ -1201,7 +1396,7 @@
       "spine_01": [
        [
         "x",
-        -8
+        -6
        ]
       ],
       "thigh_l": [
@@ -1240,25 +1435,32 @@
       -0.1,
       0
      ],
+     "feet": {
+      "foot_l": [
+       0,
+       -0.22,
+       0
+      ]
+     },
      "ease": "in"
     },
     {
-     "t": 15,
+     "t": 16,
      "aim": {
       "upperarm_l": [
-       -0.6,
-       -0.6,
-       -0.5
+       -0.15,
+       -0.98,
+       0.0
       ],
       "lowerarm_l": [
-       -0.85,
-       -0.2,
-       -0.5
+       -0.3,
+       -0.95,
+       -0.05
       ],
       "upperarm_r": [
-       -0.6,
+       -0.55,
        0.15,
-       -0.75
+       -0.8
       ],
       "lowerarm_r": [
        -0.45,
@@ -1270,19 +1472,19 @@
       "pelvis": [
        [
         "z",
-        -13
+        -16
        ]
       ],
       "spine_02": [
        [
         "z",
-        -11
+        -12
        ]
       ],
       "spine_03": [
        [
         "z",
-        -6
+        -8
        ]
       ],
       "spine_01": [
@@ -1397,7 +1599,14 @@
        ]
       ]
      },
-     "ease": "smooth"
+     "ease": "smooth",
+     "feet": {
+      "foot_l": [
+       0,
+       0,
+       0
+      ]
+     }
     },
     {
      "t": 24,
@@ -1474,24 +1683,24 @@
      "t": 27,
      "aim": {
       "upperarm_r": [
-       -0.2,
-       -0.85,
+       -0.5,
+       -0.7,
        -0.5
       ],
       "lowerarm_r": [
-       0.05,
-       -0.6,
-       -0.8
+       -0.3,
+       -0.75,
+       -0.6
       ],
       "upperarm_l": [
-       0.2,
-       -0.85,
+       0.5,
+       -0.7,
        -0.5
       ],
       "lowerarm_l": [
-       -0.05,
-       -0.6,
-       -0.8
+       0.3,
+       -0.75,
+       -0.6
       ]
      },
      "add": {
@@ -1561,24 +1770,24 @@
      "t": 31,
      "aim": {
       "upperarm_r": [
-       -0.2,
-       -0.85,
+       -0.5,
+       -0.7,
        -0.5
       ],
       "lowerarm_r": [
-       0.05,
-       -0.6,
-       -0.8
+       -0.3,
+       -0.75,
+       -0.6
       ],
       "upperarm_l": [
-       0.2,
-       -0.85,
+       0.5,
+       -0.7,
        -0.5
       ],
       "lowerarm_l": [
-       -0.05,
-       -0.6,
-       -0.8
+       0.3,
+       -0.75,
+       -0.6
       ]
      },
      "add": {
@@ -1646,13 +1855,15 @@
     {
      "t": 40
     }
-   ]
+   ],
+   "feetLock": true
   },
   {
    "name": "Hero_Skill2",
    "src": "base:Spell_Simple_Enter+base:Spell_Simple_Shoot+base:Spell_Simple_Exit",
    "blendIn": 3,
-   "blendOut": 6
+   "blendOut": 6,
+   "lockFeet": true
   },
   {
    "name": "Hero_Ult",
@@ -1735,7 +1946,19 @@
        ]
       ]
      },
-     "ease": "out"
+     "ease": "out",
+     "feet": {
+      "foot_l": [
+       -0.035,
+       0.025,
+       0.0
+      ],
+      "foot_r": [
+       0.053,
+       -0.033,
+       0.0
+      ]
+     }
     },
     {
      "t": 11,
@@ -1822,7 +2045,19 @@
       0,
       -0.04
      ],
-     "ease": "in"
+     "ease": "in",
+     "feet": {
+      "foot_l": [
+       -0.049,
+       -0.079,
+       0.084
+      ],
+      "foot_r": [
+       0.031,
+       0.257,
+       0.141
+      ]
+     }
     },
     {
      "t": 18,
@@ -2064,12 +2299,37 @@
        ]
       ]
      },
-     "ease": "out"
+     "ease": "out",
+     "feet": {
+      "foot_l": [
+       -0.013,
+       -0.14,
+       0.046
+      ],
+      "foot_r": [
+       0.03,
+       0.18,
+       0.109
+      ]
+     }
     },
     {
-     "t": 40
+     "t": 40,
+     "feet": {
+      "foot_l": [
+       0,
+       0,
+       0
+      ],
+      "foot_r": [
+       0,
+       0,
+       0
+      ]
+     }
     }
-   ]
+   ],
+   "feetLock": true
   },
   {
    "name": "Hero_Assist",
@@ -2080,12 +2340,16 @@
    "name": "Hero_Hit",
    "src": "base:Hit_Chest",
    "blendIn": 1,
-   "blendOut": 4
+   "blendOut": 4,
+   "lockFeet": true
   },
   {
    "name": "Hero_Death",
    "src": "base:Death_D",
-   "blendIn": 3
+   "blendIn": 3,
+   "headLevel": false,
+   "settle": 0,
+   "endsOnIdle": false
   },
   {
    "name": "Hero_Respawn",
@@ -2163,6 +2427,18 @@
         "x",
         15
        ]
+      ]
+     },
+     "feet": {
+      "foot_l": [
+       -0.07,
+       0.044,
+       0.055
+      ],
+      "foot_r": [
+       0.089,
+       -0.07,
+       0.025
       ]
      }
     },
@@ -2280,7 +2556,19 @@
       ]
      },
      "lift": 0.14,
-     "ease": "out"
+     "ease": "out",
+     "feet": {
+      "foot_l": [
+       0,
+       0,
+       0
+      ],
+      "foot_r": [
+       0,
+       0,
+       0
+      ]
+     }
     },
     {
      "t": 23,
@@ -2349,24 +2637,53 @@
     {
      "t": 34
     }
-   ]
+   ],
+   "feetLock": true,
+   "startsOnIdle": false
   },
   {
    "name": "Hero_Victory",
    "src": "addon:Victory Fist Pump",
    "blendIn": 4,
-   "blendOut": 6
+   "blendOut": 6,
+   "lockFeet": true
   },
   {
    "name": "Hero_Idle_Fidget",
    "src": "base:Idle_ShakeOff",
    "blendIn": 4,
-   "blendOut": 6
+   "blendOut": 6,
+   "lockFeet": true
   },
   {
    "name": "Hero_Dash",
    "src": "addon:Run_Anime",
-   "loop": true
+   "loop": true,
+   "lean": {
+    "deg": 22,
+    "bones": [
+     "spine_01",
+     "spine_02",
+     "spine_03"
+    ]
+   },
+   "locomotion": true
   }
- ]
+ ],
+ "headLevel": {
+  "minPitch": -5,
+  "bones": {
+   "spine_03": 0.3,
+   "neck_01": 0.3,
+   "head": 0.4
+  },
+  "why": "review 24/10: the face must stay visible from the 55-degree game camera when the body leans"
+ },
+ "settle": 6,
+ "lookAt": {
+  "bone": "head",
+  "yawDeg": 20,
+  "pitchDeg": 20,
+  "why": "stress test: past about 25 degrees the back of the hood rim stretches (45 degrees: 418 edges)"
+ }
 }

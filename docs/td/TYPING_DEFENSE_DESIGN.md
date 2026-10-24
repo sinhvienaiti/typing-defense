@@ -2440,14 +2440,27 @@ Camera mặc định 55° ở 58 m.
 | Quái nhỏ / vừa / to | 1,6–2,2 / 2,4–3,2 / 3,5–4,5 m | 22–32 / 34–46 / 50–65 px |
 | Tướng đi bộ | 2,6–2,9 m | 40–50 px |
 | Draconis (bay 4–6 m) | Thân 3,5 m, sải cánh 6 m | 60–90 px |
-| Nhà đánh | 6–7,5 m | 100–130 px |
+| Nhà đánh | 6–7 m (Tháp Cung trần 7,0 m) | 100–115 px |
 | Nhà sản xuất, hỗ trợ | 5–6 m | 90–110 px |
-| Lũy Chữ | 10–12 m | 160–200 px |
+| Lũy Chữ | khoảng 8 m (ngoại lệ ×1,2, vòng Ø 8,4 m) | khoảng 130 px |
 | Boss | 7–10 m | 150–220 px |
 | Cây lớn (2D) | 6–10 m | 90–160 px |
 
 - Tháp Pháo thấp tròn (23.12): 3,5–4,5 m, ngoại lệ của dòng Nhà đánh.
-- Kịch bản `td-scale.mjs` đo hộp bao trên ảnh chụp. Lệch quá 20 % thì báo lỗi.
+
+**Nhà cấp 1 theo model đã dựng** (chủ dự án quyết 24/10/2026; ảnh 2D đã thấp nên model thấp, luật file 02 mục 8 không cho kéo dãn riêng chiều cao):
+
+| Nhà | Vòng chiếm chỗ | Cao model | Cỡ ở 1080p | Quyết định |
+|---|---|---|---|---|
+| Lũy Chữ | r 4,2 m (Ø 8,4 m) | 8,0 m | khoảng 130 px | Ngoại lệ: phóng đều ×1,2 (vòng XL Ø 7 m thành Ø 8,4 m) để Lũy là mốc cao nhất. Vòng chiếm chỗ của Lũy lớn theo. |
+| Tháp Cung | r 2,0 m (chân thật Ø 3,3 m) | 7,0 m | khoảng 115 px | Trần 7,0 m để thấp hơn Lũy (đầy vòng thì cao 9,1 m). |
+| Mỏ Vàng | r 2,7 m (Ø 5,4 m) | 3,83 m | khoảng 63 px | Chấp nhận như model (thiết kế cũ 5–6 m). |
+| Đài Ấn | r 2,0 m (Ø 4 m) | 2,25 m | khoảng 37 px | Chấp nhận như model: đài thấp, cột sau ngắn (thiết kế cũ: đỉnh cột sau khoảng 5 m). |
+| Trại Lính | r 2,3 m (Ø 4,6 m) | 4,5–5 m (model tạm 1,8 m) | 75–80 px | Model hiện tại thấp hơn cả lính, chỉ dùng tạm. Chủ dự án làm lại từ ảnh 2D cao hơn `buildings/barracks-v2.png` (hai tầng có sàn canh, chân trong vòng khoảng 4 m). |
+
+- Kịch bản `td-scale.mjs` đo hộp bao trên ảnh chụp. Lệch quá 20 % thì báo lỗi. Nhà cấp 1 đo theo cột "Cao model" ở bảng trên, không theo dòng nhóm. Nhà nào cao hơn Lũy thì báo lỗi.
+- `td-scale` với Trại Lính: đo theo 4,5–5 m; khi còn model tạm 1,8 m thì chỉ cảnh báo, không báo lỗi.
+- `td-scale` với Lũy: vòng chiếm chỗ đo theo Ø 8,4 m. Cỡ Lũy trong luật đặt nhà (mục 12.5; mã ghi cỡ XL ở `src/content/slice-1a.ts`) phải dùng vòng mới khi bước hình 3D (1C) đặt model Lũy.
 
 ### 23.3 Màu có nghĩa
 

@@ -108,10 +108,10 @@ Chỉ liệt kê, ở mục 7.
 
 | Cỡ | Bán kính r | Đường kính | Nhà | Cao trong game (23.2) |
 |---|---|---|---|---|
-| S | 2,0 m | 4,0 m | Tháp Cung, Đài Ấn | Tháp Cung 6–7,5 m. Đài Ấn là đài thấp, đỉnh cột sau cách đất khoảng 5 m. |
-| M | 2,3 m | 4,6 m | Tháp Pháo, Tháp Thư Pháp, Trại Lính, Nhà Thuốc | Tháp Thư Pháp 6–7,5 m. Tháp Pháo 3,5–4,5 m (ngoại lệ ở 23.2; xem P3). Trại Lính khoảng 4,5–5 m (xem P5). Nhà Thuốc 5–6 m. |
-| L | 2,7 m | 5,4 m | Mỏ Vàng, Trại Gỗ | 5–6 m |
-| XL | 3,5 m | 7,0 m | Ruộng Lúa; Lũy Chữ | Ruộng: đỉnh chòi khoảng 5 m. Lũy 10–12 m. |
+| S | 2,0 m | 4,0 m | Tháp Cung, Đài Ấn | Tháp Cung 6–7 m (model: trần 7,0 m, thấp hơn Lũy). Đài Ấn là đài thấp; model chấp nhận 2,25 m (24/10/2026). |
+| M | 2,3 m | 4,6 m | Tháp Pháo, Tháp Thư Pháp, Trại Lính, Nhà Thuốc | Tháp Thư Pháp 6–7,5 m. Tháp Pháo 3,5–4,5 m (ngoại lệ ở 23.2; xem P3). Trại Lính khoảng 4,5–5 m (xem P5; model hiện tại 1,8 m chỉ là tạm). Nhà Thuốc 5–6 m. |
+| L | 2,7 m | 5,4 m | Mỏ Vàng, Trại Gỗ | 5–6 m (Mỏ Vàng: model chấp nhận 3,83 m, 24/10/2026) |
+| XL | 3,5 m | 7,0 m | Ruộng Lúa; Lũy Chữ | Ruộng: đỉnh chòi khoảng 5 m. Lũy: ngoại lệ phóng đều ×1,2, vòng r 4,2 m (Ø 8,4 m), cao khoảng 8 m, mốc cao nhất (24/10/2026). |
 
 - Nhìn từ trên xuống, chân nhà phủ gần kín vòng tròn và không lòi ra ngoài vòng.
 - Bục trợ lực nằm trên mép vòng (8.4), có thể lòi ra ngoài vòng một chút. Khi đo bề ngang chân, không tính bục.
@@ -271,7 +271,7 @@ Các thay đổi khác (nhánh, bộ cấp Lũy, đổ nát, đồ dùng) ghi �
 | Là gì | Nhà chính, giữ 20 mạng. Tướng hồi sinh ở đây. Thư Đồng hoảng chạy về đây. Có nỏ thủ thành. Trợ lực được. |
 | Ảnh 2D | `art-src/td/buildings/keep.png` · 1024×1536 (dọc) |
 | Model 3D | `art-src/3d/td/buildings/keep.glb` |
-| Vòng, cao | XL · r 3,5 m (Ø 7 m) · cao 10–12 m |
+| Vòng, cao | Ngoại lệ ×1,2 đều (24/10/2026): r 4,2 m (Ø 8,4 m) · cao khoảng 8 m, nhà cao nhất (thiết kế cũ: XL r 3,5 m, cao 10–12 m) |
 | Bóng hình | Nhà cao nhất. Ba tầng thu dần, chòi canh trên đỉnh, cờ chữ ở góc sau. Nhìn từ trên: khối vuông nhiều lớp mái giữa một vòng sân đá. |
 | Socket | `FX_assist`: bục ở góc trước phải, trên sân đá ngoài · `FX_core`: mề đay trên cổng · `FX_top`, `FX_word`: chóp mái chòi canh · `FX_lantern_0..4`: xà mái tầng 2, mặt trước · `FX_crew`, `FX_muzzle`: sàn chòi canh, phía trước · `FX_banner`: đầu cột cờ, góc sau trái |
 | Chừa cho cấp sau | Vòng sân đá ngoài để trống (L2: tường đá cao, cổng có trống, chòi nỏ). Chòi canh nhỏ, gọn (L3: tháp canh hai tầng chụp lên). Mái chòi đơn giản (L4: mái vàng chụp lên). |
@@ -297,7 +297,7 @@ The Bastion, the village's main fort and the biggest building, about one and a h
 | Là gì | Tháp bắn tên, đánh đất và bay. Thiết kế 22.4: "Chòi tre trên chân đá, mái lá". |
 | Ảnh 2D | `art-src/td/buildings/archer.png` · 1024×1536 (dọc) |
 | Model 3D | `art-src/3d/td/buildings/archer.glb` |
-| Vòng, cao | S · r 2,0 m (Ø 4 m) · cao 6–7,5 m |
+| Vòng, cao | S · r 2,0 m (Ø 4 m) · cao 6–7 m; model trần 7,0 m (chân thật Ø 3,3 m) để thấp hơn Lũy |
 | Bóng hình | Cao mảnh, cao gần gấp đôi bề ngang. Nhìn từ trên: mái chóp vuông nhỏ trên chân tròn. |
 | Socket | `FX_assist`: bục ở góc trước phải, cạnh chân đá · `FX_core`: mề đay trên cửa · `FX_top`, `FX_word`: chóp tròn đỉnh mái · `FX_lantern_0..4`: xà mái trước, ngay trên sàn canh · `FX_crew`, `FX_muzzle`: mép trước sàn canh (Chị Én, Em Sẻ bắn từ đây) · `FX_banner`: góc sau trái của mái |
 | Chừa cho cấp sau | Mái lá gọn (L2: vỏ mái ngói chụp lên). Sàn canh không lan can (L2: lan can ôm sàn). Chóp mái bằng (L3: tầng canh thứ hai đặt lên). |
@@ -333,7 +333,7 @@ The Archer Tower, tall and slim, almost twice as tall as it is wide. A round foo
 
 Tự quyết: nòng là model riêng (P4) đặt trên mâm xoay; game quay nòng theo quái, Blender làm clip nòng giật khi bắn.
 Tự quyết: giữ dáng "thấp tròn nòng to" (23.12). Nòng dài 3 m, chếch 40°, giữa nòng đặt trên mâm, nên đỉnh Pháo chỉ khoảng 4 m.
-Tự quyết (22/10, đổi được): Pháo là ngoại lệ của dòng Nhà đánh 6–7,5 m: 23.2 ghi Tháp Pháo thấp tròn 3,5–4,5 m. `td-scale` đo Pháo theo mức này.
+Tự quyết (22/10, đổi được): Pháo là ngoại lệ của dòng Nhà đánh 6–7 m: 23.2 ghi Tháp Pháo thấp tròn 3,5–4,5 m. `td-scale` đo Pháo theo mức này.
 Tự quyết: cấp 1 không có mái, nên 5 cột gỗ ngắn có chốt trên tường ụ giữ chỗ cho 5 đèn lồng.
 
 ```text
@@ -380,6 +380,7 @@ A short, fat cannon barrel of aged bronze for a storybook village cannon tower: 
 | Ảnh phụ | Không |
 
 Tự quyết: Trại Lính cao khoảng 4,5–5 m, hơi thấp hơn mức 5–6 m của 23.2, để giữ dáng "rộng" (23.12) trên vòng Ø 4,6 m. Mức lệch vẫn dưới 20 % mà `td-scale` cho phép.
+Quyết định (chủ dự án, 24/10/2026): model từ ảnh 2D trên chỉ cao 1,8 m, thấp hơn lính 1,85 m; giữ làm model tạm. Chủ dự án làm lại bằng Tripo từ ảnh mới `buildings/barracks-v2.png` (Codex, cùng phong cách và bảng màu; nhà trại hai tầng có sàn canh, rào ôm sát, chân trong vòng khoảng 4 m, cao khoảng 4,5–5 m). Khi còn model tạm, `td-scale` chỉ cảnh báo cho Trại Lính.
 
 ```text
 The Barracks, wide and sturdy, a little wider than tall. A round palisade of thick sharpened timber stakes, as thick as legs and packed tightly with no gaps, about one third as tall as the building, encircles the whole footprint. In the middle of the front, the palisade opens on a heavy timber gate with two thick doors hung between two extra-thick stakes of the palisade. To the left of the gate stands a big round village war drum with a red-brown hide face and a bronze-studded rim, held upright on a sturdy timber stand. Inside the palisade, filling most of it, a long, low barracks hall with dark-brown timber walls under a broad, low, gently curved roof of thick wheat-gold rice-straw thatch, much wider than it is tall, ending in a short, thick, flat-topped ridge cap in the middle. Along the front, under the thatch edge, a straight, thick eave beam with nothing hanging from it, and a round carved stone medallion on the hall's front wall just above the palisade. Three round woven-rattan shields hang flat on the outside of the palisade, right of the gate. The back right corner inside the palisade is an empty yard. At the front right, just outside the palisade: a small, low wooden platform, one step high, with a little slanted writing desk at its front edge. Disciplined, loud and ready to march.
@@ -393,7 +394,7 @@ The Barracks, wide and sturdy, a little wider than tall. A round palisade of thi
 | Là gì | Nhà ra Vàng, đặt trên node quặng. Vàng tự sản dồn thành đống ở cửa mỏ. Thiết kế 22.4: "Cửa hầm trên vách, xe goòng, ròng rọc". |
 | Ảnh 2D | `art-src/td/buildings/gold-mine.png` · 1024×1024 |
 | Model 3D | `art-src/3d/td/buildings/gold-mine.glb` |
-| Vòng, cao | L · r 2,7 m (Ø 5,4 m) · cao 5–6 m |
+| Vòng, cao | L · r 2,7 m (Ø 5,4 m) · cao 5–6 m; model chấp nhận 3,83 m (24/10/2026) |
 | Bóng hình | Đồi đá nhỏ có giá ròng rọc trên đỉnh, cửa hầm và đường ray ở trước. Nhìn từ trên: khối đá tròn, bánh xe gỗ ở giữa, sàn ván phía trước. |
 | Socket | `FX_assist`: bục ở góc trước phải, trên sàn ván · `FX_core`: mề đay trên cửa hầm · `FX_top`, `FX_word`: xà bằng trên đỉnh giá ròng rọc · `FX_lantern_0..4`: xà mái hiên cửa hầm · `FX_pile`: sàn trống bên trái đường ray · `FX_crew`: hai bên cửa hầm (ba anh em thợ mỏ) · `FX_banner`: góc sau trái, trên đỉnh đá · Đường chạy của goòng: ray từ cửa hầm ra mép trước |
 | Chừa cho cấp sau | Vai đá bên phải trơn (L2: tời quay tay). Mặt đá bên trái trơn (L3: guồng nước). |
@@ -621,6 +622,7 @@ A big storybook treasure chest won from a boss, standing on a flat bottom: a dee
 
 Tự quyết: đài không mái, nên 5 cột đá quanh mép đài mang 5 móc đèn (`FX_lantern_0..4`).
 Tự quyết: đỉnh cột sau cách đất khoảng 5 m, để Đài Ấn gần cỡ nhà hỗ trợ trên màn hình (23.2).
+Quyết định (chủ dự án, 24/10/2026): model Tripo chỉ cao 2,25 m (cột sau ngắn); chấp nhận như model, `td-scale` đo theo 2,25 m.
 
 ```text
 The Seal Dais, a low round stone stage, wider than tall; it is not a shrine and not an altar. A round dais of three wide limestone steps; its top is a flat round stage with shallow carved channels running out from the centre like the spokes of a wheel, and a big, flat, round carved stone seal disc set level in the very centre. Five square limestone posts, each rising about half as high as the dais is wide, stand evenly spaced around the edge of the top step, leaving the front open between two of them; each post is carved with swirling brush-stroke ornament that is clearly not letters, and has one small, thick iron hook near its top, facing outward, with nothing hanging from it. The post at the back centre is about twice as tall as the others, rising about as high as the dais is wide, and carries a short curved bronze arm holding a compact bronze wind chime: four short, thick chime tubes fused together into one solid cluster hanging close under the arm. At the front right, at the foot of the steps: a small, low wooden platform, one step high, with a little slanted writing desk at its front edge. Calm, clear and quietly powerful. No altar, incense, statue or offerings.

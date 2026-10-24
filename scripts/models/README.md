@@ -35,8 +35,7 @@ pnpm models:index --root games/typing-defense --preset games/typing-defense/scri
 
 | Việc | Chi tiết |
 |---|---|
-| Nhà thấp hơn thiết kế | Ảnh 2D đã thấp nên model thấp. Lũy 6,7 m (cần 10–12), Trại Lính 1,8 m (cần 4,5–5; thấp hơn lính 1,85 m), Đài Ấn 2,25 m (đỉnh cột sau cần khoảng 5), Mỏ Vàng 3,8 m (cần 5–6). Không kéo dãn riêng chiều cao (file 02 mục 8). Chọn: chấp nhận, hoặc làm lại ảnh 2D + Tripo cho các nhà này. |
-| Tháp Cung | Đầy vòng thì cao 9,1 m; đã giới hạn ở 7,5 m, chân chiếm 3,55/4 m của vòng. |
+| Chiều cao nhà (đã quyết 24/10/2026) | Lũy: ngoại lệ phóng đều ×1,2 (`size.metres` 8,4), cao 8,01 m, vòng Ø 8,4 m (r 4,2), mốc cao nhất; socket dạng tia nhân ×1,2. Tháp Cung: trần 7,0 m (cao 7,00 m, chân thật Ø 3,32 m); socket nhân 7,0/7,5. Mỏ Vàng 3,83 m và Đài Ấn 2,25 m: chấp nhận như model. Trại Lính 1,8 m: model tạm, chủ dự án làm lại từ `~/Downloads/td-tripo-2d/buildings/barracks-v2.png`. Bảng ở TK 23.2. Ảnh kiểm: `/Users/toandx/AudioLab/work/_td-models/prep/heights/`. |
 | Mũ Đầu Đàn | Thân mũ rộng 0,86 m (mũ thường 0,78 m, +10 %) thì mũ cao 0,76 m, gấp khoảng 2,5 lần mũ thường (thiết kế ghi gấp đôi). |
 | Xe goòng | Chưa có `art-src/3d/props/gold-mine-cart.glb`: tạo bằng Tripo (Image to 3D, face limit 2000, không rig), rồi chạy lại hai lệnh trên. |
 | Duyệt | Ảnh so sánh: `/Users/toandx/AudioLab/work/_td-models/prep/contact-*.png`. Duyệt xong thì đổi `reviewed` thành `true`. |
@@ -86,3 +85,26 @@ Mỗi lần chỉ chạy một Blender (máy 16 GB). Dựng Lam mất khoảng 1
 | Duyệt clip | Sheet ở `/Users/toandx/AudioLab/work/_td-models/rig/<id>/<clip>/sheet.png`, thử tư thế khó ở `.../rig/<id>/stress/stress_sheet.png`, so với Tripo ở `.../rig/compare-lam/<clip>/compare.png`. Duyệt xong thì đổi `reviewed` thành `true`. |
 | Tay áo Cương Thi | Lưới Tripo dính mặt trong tay áo vào thân áo từ nách xuống cổ tay (khoảng 24 cạnh mỗi bên). Khi tay giơ ngang, phần dính căng thành dải vải mỏng dưới tay; giơ qua đầu thì thành màng rõ. Không xoá mặt nào (luật không sửa lưới). Chọn: giữ (ở camera game gần như không thấy), cho phép tách khoảng 25 mặt mỗi bên, hoặc làm lại ảnh 2D có khe rõ giữa tay áo và thân rồi tạo lại bằng Tripo. |
 | Rig Tripo của Lam | `Lam_skeleton_3d.glb` không dùng được: 14.071/14.132 đỉnh gắn cứng vào `Hips` (mỗi đỉnh 1 xương), nên tay, chân, đầu, đuôi không bao giờ cong; khung xương lúc gắn lệch 90° và thấp hơn lưới; trong three.js lưới hiện ra bị xoay và lún 0,41 đơn vị. Không cần tốn thêm credit Tripo cho rig nhân vật. |
+
+## Sửa theo bản duyệt 24/10/2026 (Lam, Cương Thi)
+
+| Việc | Đã làm | Số đo (trước → sau, `td_rig_review.py`) |
+|---|---|---|
+| `FX_HAND_L` gắn nhầm `hand_r` | `mirror_name` đổi cả hai chiều (`_l`↔`_r`, `_L`↔`_R`); chỉ mục `_l` mới sinh bản đối xứng (`left_twin`, nên `bag_r` của Lam vẫn một mình); `load_spec` dừng nếu socket `_L` nằm trên xương `_r` hoặc ngược lại | Lam, Cương Thi: `FX_HAND_L` trên `hand_l` |
+| Mặt bị che khi thân cúi | `headLevel` (preset): mặt không cúi quá −5°; cổ, đầu (Lam thêm `spine_03`) xoay bù | Lam Run: mặt −39,7° → −5°, góc mặt–camera 55° lớn nhất 102,7° → 71,6° (Dash 97,5° → 64,5°, Fidget 88,9° → 66,2°); Cương Thi Hit −31,7° → 0° |
+| Run chúi như mổ thóc | `lean` (clip): độ chúi giữ đều; `td_rig_post.steady_lean` lặp tới khi khớp | Lam Run 24,2–26,6° → 14,4–14,7° |
+| Cú vuốt thấp, sát thân | Attack và Skill1 viết lại: vung ngang rộng ở tầm vai (giương sau phải → đâm thẳng trước → kết thúc trước trái), xoay hông và lưng ±30° | Góc quét của tay ở xa trục thân ≥ 0,6 m (nhìn từ trên): Attack 107° → 154°, Skill1 111° → 169° |
+| Trượt chân | Clip khoá (`feetLock` + `feet` mỗi khoá): IK hai xương giữ chân trụ, bước đổi chỗ thành bước nhấc ngắn có vòng cung; clip CC0 (`lockFeet`): chân gần đất kéo về thế đứng Idle | m/s khi chân chạm đất: Attack 0,72 → 0, Skill1 0,72 → 0, Skill2 1,9 → 0,01, Victory 1,65 → 0,2, Respawn 0,8 → 0, Ult 0,6 → 0,35; Cương Thi Attack 0,15 → 0, Hit 0,6 → 0 |
+| Cương Thi Move chạm đất lâu | `jiangshi_hop`: 3/14 khung chạm đất (đáp, nén, bật), còn lại bay theo đường parabol; `airborne` ghi cửa sổ bay vào metadata | Khung chạm đất 6 → 2 (cặp khung liền); bay 0,125–0,583 s của 0,583 s: game chỉ di chuyển thân trong cửa sổ này (tốc độ ÷ 0,79) |
+| Đuôi, tai lệch cuối clip | `settle` 6 khung (preset): xích lò xo về tư thế Idle ở cuối clip một lần | Lệch cuối so với Idle: Attack 36°, Skill1 42,5°, Hit 48,3°, Victory 40,1° … → 0°. Metadata `crossfade_s`: 0,1 s khi đã về Idle, 0,15 s cho clip lặp (đuôi đang đung đưa) và Death |
+| Nhìn theo mục tiêu | `lookAt` (preset) → extras GLB `td_lookAt`: ±20° | — |
+| Bảng Death cắt thân | Camera từng clip tự nới khi lưới ra khỏi khung | Thấy trọn tư thế nằm cuối |
+| Cương Thi Hit | `recoil: "back"`: bật ngửa cứng, mặt hướng camera, không cần xoay cổ bù | Cạnh giãn > 1,6: 82 → 94 (không thấy ở 22–32 px) |
+
+Còn lại: Dash giãn lưng và mũ trùm nhiều hơn (585 → 652 cạnh) vì đầu xoay bù tới 31° để thấy mặt; ở 45 px không thấy. Ult còn trượt 0,35 m/s ở hai khung nhấc gót.
+
+Metadata clip trong GLB (extras của nút xương, `td_rig_attach.extras`): `td_clips` = `{clip: {loop, seconds, crossfade_s, notes, airborne_s?, groundFrames?, groundSpeed_mps?}}`, `td_lookAt` = `{bone, yawDeg, pitchDeg}`.
+
+Kiểm thêm trong `td_rig_review.py`: `facePitchMinDeg`, `faceToGameCamMaxDeg` (0 = mặt nhìn thẳng camera game; lúc đứng khoảng 60–65), `torsoLeanDeg`, `handArcTop` (`sweepDeg`, `wideSweepDeg`, `reachMax_m`), `chainStartOffsetDeg` / `chainEndOffsetDeg` (so với khung đầu Idle), `_sockets` (xương cha và xương gần nhất của từng `FX_`), và `contact.png` (mỗi clip một hàng ảnh camera game). Không đổi `pose_position` sang REST trong lúc kiểm: Blender 5.2 ngừng tính lại khung sau đó.
+
+Ảnh: `/Users/toandx/AudioLab/work/_td-models/rig/<id>/<clip>/sheet.png`, `/Users/toandx/AudioLab/work/_td-models/rig/<id>/contact.png`, trước/sau ở `/Users/toandx/AudioLab/work/_td-models/rig/lam/_evidence/` và `/Users/toandx/AudioLab/work/_td-models/rig/<id>/_before-fix/`; số đo `checks-after-review-fixes.json`.

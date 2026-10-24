@@ -13,12 +13,12 @@
       "source": "buildings/keep.glb",
       "triangles": 15000,
       "reviewed": false,
-      "note": "P1 Lũy Chữ: XL r 3,5 m, cao 10–12 m",
+      "note": "P1 Lũy Chữ: ngoại lệ ×1,2 đều (chủ dự án 24/10/2026, mốc cao nhất): vòng r 4,2 m (Ø 8,4 m), cao khoảng 8 m",
       "static": {
         "yaw": 90,
         "size": {
           "measure": "footprint",
-          "metres": 7.0,
+          "metres": 8.4,
           "maxHeight": 12
         },
         "pivot": "footprint",
@@ -35,20 +35,20 @@
         },
         "expect": {
           "height": [
-            10,
-            12
+            7.6,
+            8.4
           ],
           "footprint": [
-            5.25,
-            7.14
+            6.3,
+            8.57
           ]
         },
-        "ring": 3.5,
+        "ring": 4.2,
         "sockets": {
           "FX_core": {
             "ray": "+z",
             "x": 0,
-            "y": 2.65,
+            "y": 3.18,
             "offset": [
               0,
               0,
@@ -58,7 +58,7 @@
           "FX_top": {
             "ray": "-y",
             "x": 0,
-            "z": 0.05
+            "z": 0.06
           },
           "FX_word": {
             "from": "FX_top",
@@ -78,27 +78,27 @@
           },
           "FX_lantern_0": {
             "ray": "+z",
-            "y": 3.55,
+            "y": 4.26,
             "offset": [
               0,
               -0.12,
               -0.12
             ],
-            "x": 1.6
+            "x": 1.92
           },
           "FX_lantern_1": {
             "ray": "+z",
-            "y": 3.55,
+            "y": 4.26,
             "offset": [
               0,
               -0.12,
               -0.12
             ],
-            "x": 0.8
+            "x": 0.96
           },
           "FX_lantern_2": {
             "ray": "+z",
-            "y": 3.55,
+            "y": 4.26,
             "offset": [
               0,
               -0.12,
@@ -108,34 +108,34 @@
           },
           "FX_lantern_3": {
             "ray": "+z",
-            "y": 3.55,
+            "y": 4.26,
             "offset": [
               0,
               -0.12,
               -0.12
             ],
-            "x": -0.8
+            "x": -0.96
           },
           "FX_lantern_4": {
             "ray": "+z",
-            "y": 3.55,
+            "y": 4.26,
             "offset": [
               0,
               -0.12,
               -0.12
             ],
-            "x": -1.6
+            "x": -1.92
           },
           "FX_crew": {
             "ray": "-y",
             "x": 0,
-            "z": -0.3,
-            "start": 5.5
+            "z": -0.36,
+            "start": 6.6
           },
           "FX_muzzle": {
             "ray": "+z",
             "x": 0,
-            "y": 4.95,
+            "y": 5.94,
             "offset": [
               0,
               0.15,
@@ -144,13 +144,13 @@
           },
           "FX_banner": {
             "ray": "-y",
-            "x": 1.85,
-            "z": 0.2
+            "x": 2.22,
+            "z": 0.24
           },
           "FX_assist": {
             "ray": "-y",
-            "x": -2.25,
-            "z": -2.1
+            "x": -2.7,
+            "z": -2.52
           }
         }
       }
@@ -159,13 +159,13 @@
       "source": "buildings/archer.glb",
       "triangles": 10000,
       "reviewed": false,
-      "note": "P2 Tháp Cung: S r 2 m, cao 6–7,5 m; bục bên trái (-X) không tính vào vòng",
+      "note": "P2 Tháp Cung: S r 2 m, trần cao 7,0 m (chủ dự án 24/10/2026: thấp hơn Lũy khoảng 8 m); bục bên trái (-X) không tính vào vòng",
       "static": {
         "yaw": 90,
         "size": {
           "measure": "footprint",
           "metres": 4.0,
-          "maxHeight": 7.5
+          "maxHeight": 7.0
         },
         "pivot": "footprint",
         "ringExclude": [
@@ -190,7 +190,7 @@
         "expect": {
           "height": [
             6,
-            7.5
+            7.0
           ],
           "footprint": [
             3.0,
@@ -201,8 +201,8 @@
         "sockets": {
           "FX_core": {
             "ray": "+z",
-            "x": 0.12,
-            "y": 2.2,
+            "x": 0.112,
+            "y": 2.054,
             "offset": [
               0,
               0,
@@ -232,27 +232,27 @@
           },
           "FX_lantern_0": {
             "ray": "+z",
-            "y": 5.9,
+            "y": 5.507,
             "offset": [
               0,
               -0.12,
               -0.1
             ],
-            "x": 1.0
+            "x": 0.933
           },
           "FX_lantern_1": {
             "ray": "+z",
-            "y": 5.9,
+            "y": 5.507,
             "offset": [
               0,
               -0.12,
               -0.1
             ],
-            "x": 0.5
+            "x": 0.467
           },
           "FX_lantern_2": {
             "ray": "+z",
-            "y": 5.9,
+            "y": 5.507,
             "offset": [
               0,
               -0.12,
@@ -262,29 +262,29 @@
           },
           "FX_lantern_3": {
             "ray": "+z",
-            "y": 5.9,
+            "y": 5.507,
             "offset": [
               0,
               -0.12,
               -0.1
             ],
-            "x": -0.5
+            "x": -0.467
           },
           "FX_lantern_4": {
             "ray": "+z",
-            "y": 5.9,
+            "y": 5.507,
             "offset": [
               0,
               -0.12,
               -0.1
             ],
-            "x": -1.0
+            "x": -0.933
           },
           "FX_crew": {
             "ray": "-y",
             "x": 0,
-            "z": -0.8,
-            "start": 5.6
+            "z": -0.747,
+            "start": 5.227
           },
           "FX_muzzle": {
             "from": "FX_crew",
@@ -296,13 +296,13 @@
           },
           "FX_banner": {
             "ray": "-y",
-            "x": 1.2,
-            "z": 1.0
+            "x": 1.12,
+            "z": 0.933
           },
           "FX_assist": {
             "ray": "-y",
-            "x": -1.8,
-            "z": -1.0
+            "x": -1.68,
+            "z": -0.933
           }
         }
       }
@@ -456,7 +456,7 @@
       "source": "buildings/barracks.glb",
       "triangles": 10000,
       "reviewed": false,
-      "note": "P5 Trại Lính: M r 2,3 m, cao 4,5–5 m; trống (trước trái) và bục (trước phải) không tính vào vòng rào",
+      "note": "P5 Trại Lính: M r 2,3 m, cao 4,5–5 m; trống (trước trái) và bục (trước phải) không tính vào vòng rào; model tạm (ảnh 2D thấp, 1,8 m): chủ dự án làm lại từ buildings/barracks-v2.png (cao khoảng 4,5–5 m)",
       "static": {
         "yaw": 90,
         "size": {
