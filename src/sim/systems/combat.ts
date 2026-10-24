@@ -9,7 +9,7 @@
  * the "crit" stream, and rounding happens once, on impact. A tower aims at
  * the enemy furthest along its route (least distance left); ties go to the
  * lower id. A tower with a power charge fires a powered volley and spends it.
- * The boss (BUILD_1B §5.1) takes Draconis' own fireballs ×0.5 ("Vỏ dày"), every
+ * The boss (BUILD_1B §5.1) takes Draconis' own fireballs ×heroMul (0.35, "Vỏ dày"), every
  * hit ×1.25 while it staggers, and never dies of it (it retreats at 50 %); a
  * building Rễ Trồi stunned does not fire.
  */

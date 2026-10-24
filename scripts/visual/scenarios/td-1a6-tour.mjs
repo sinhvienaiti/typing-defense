@@ -13,7 +13,7 @@
 // Every look's cards are measured and gated (cardsClean: no overlap, clear of the HUD, ≥ 18 px); no console error.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-tour.mjs --width=1280 --height=720
 import {
-  KIND, arrows, boot, cardStats, cardSummary, cardsClean, click, consoleChecks, finish, key, letter, look, out, sandbox, send, sizeOf, state, td, typeFor, until, wheel,
+  KIND, arrows, boot, cardStats, cardSummary, cardsClean, click, consoleChecks, finish, key, letter, look, out, overflowing, sandbox, send, sizeOf, state, td, typeFor, until, wheel,
 } from "./td-1a6-common.mjs";
 
 const q = (m) => Math.round(m * 4);
@@ -111,8 +111,10 @@ export default async function (page) {
   await click(page, 0, 43.5);
   await page.sleep(300);
   const keepCard = (await page.eval(`document.querySelector(".td-dock")?.textContent ?? ""`)) ?? "";
+  const keepCut = (await overflowing(page, ".td-dock button")) ?? ["?"];
   await shot("07-keep-card");
-  shown.keepCard = /Dân/.test(keepCard) && /Bán 10 Lúa/.test(keepCard);
+  // Both sales read in full (1B R1 review fix: side by side they ran past their buttons at 1280 × 720).
+  shown.keepCard = /Dân/.test(keepCard) && /Bán 10 Lúa/.test(keepCard) && /Bán 10 Gỗ/.test(keepCard) && keepCut.length === 0;
   await key(page, "Escape");
 
   // 08: the learn mode, the hero back in the village: meanings on the cards as they light.
@@ -213,6 +215,6 @@ export default async function (page) {
     ...consoleChecks(page),
   };
   return finish(page, checks, {
-    sites, village, arrows: edge.filter((a) => a.edge), callCard, farmCard, keepCard, quiz: quiz?.word?.text ?? null, quizCard, paused, cards: { clean: cardsClean(cards), ...cardSummary(cards) }, shots,
+    sites, village, arrows: edge.filter((a) => a.edge), callCard, farmCard, keepCard, keepCut, quiz: quiz?.word?.text ?? null, quizCard, paused, cards: { clean: cardsClean(cards), ...cardSummary(cards) }, shots,
   });
 }

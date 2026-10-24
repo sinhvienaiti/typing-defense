@@ -24,14 +24,19 @@ export default async function (page) {
   const rise = await page.eval(td("return t.costs();"));
   await page.eval(td("t.flood(300); return true;"));
   await page.sleep(500);
+  // Frames are counted by requestAnimationFrame: t.costs() keeps only the last 600, fewer than 10 s holds above 60 fps.
+  await page.eval(`window.__perfFrames = 0; (function count() { window.__perfFrames += 1; requestAnimationFrame(count); })(); true`);
   await page.send("Performance.enable");
   const before = await page.send("Performance.getMetrics");
+  const framesBefore = await page.eval("window.__perfFrames");
+  const started = Date.now();
   await page.sleep(10000);
   const after = await page.send("Performance.getMetrics");
+  const frames = (await page.eval("window.__perfFrames")) - framesBefore;
+  const seconds = (Date.now() - started) / 1000;
   const costs = await page.eval(td("return t.costs();"));
   const metric = (m, name) => m.metrics.find((x) => x.name === name)?.value ?? 0;
   const busy = (metric(after, "TaskDuration") - metric(before, "TaskDuration")) * 1000;
-  const frames = costs.draw.length;
   const s = await state(page);
   const shot = await page.shot(out("td-1b-perf-" + size + ".png"));
   const replay = await replayOnNode(page, "td-1b-perf");
@@ -46,5 +51,5 @@ export default async function (page) {
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { draw, update, mainMsPerFrame: busy / Math.max(1, frames), riseMax: Math.max(...rise.draw, ...rise.update), enemies: s.enemies, shot, replay });
+  return finish(page, checks, { draw, update, mainMsPerFrame: busy / Math.max(1, frames), mainBusyShare: busy / (seconds * 1000), frames, fps: frames / seconds, riseMax: Math.max(...rise.draw, ...rise.update), enemies: s.enemies, shot, replay });
 }

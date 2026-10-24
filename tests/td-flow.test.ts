@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { GATE_IDS, STANDARD_BOTS } from "../src/kit/balance";
+import { GATE_IDS, STANDARD_BOTS, type BotModeSummary } from "../src/kit/balance";
 import { STAT } from "../src/sim/stats";
 import { paceSummary } from "./td/bot";
-import { botById, learnOk, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS } from "./td/flow";
+import { botById, learnOk, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS, TIGHT_BANDS, type Cell } from "./td/flow";
 import { realDeck } from "./td/typing";
 
 /**
@@ -61,5 +61,16 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(text).toContain("| B9 | Khớp người thật | THIẾU SỐ |");
     expect(text).toContain("Đêm 1–" + STAGE_NIGHTS);
     expect(text).toMatch(/\| Chuẩn \| 35 \/ \d+\.\d \|/);
+  });
+
+  it("grades B1 and B7's director-off row on the 1B tight band when asked (the pooled sets, BUILD_1B §18.3)", () => {
+    const summary = (bot: string, win: number, director = true): BotModeSummary => ({
+      bot, mode: "balanced", director, runs: 240, win, s: 600, p: 250, i: 30, o: 0, n: 0.2, q: 600, support: null, killSeconds: null, stepsPerWave: 1.5, maxWaveSteps: 3, spawnMin: 900, spawnMax: 1100, learnOk: true,
+    });
+    const rows = [...["novice", "steady", "standard", "skilled", "sloppy", "fast"].map((bot) => summary(bot, bot === "steady" ? 900 : 830)), summary("standard", 890, false)];
+    const cells: Cell[] = rows.map((s) => ({ bot: s.bot, mode: s.mode, director: s.director, k: 1, summary: s, records: [], boss: [], extra: [] }));
+    const status = (bands?: typeof TIGHT_BANDS) => ["B1", "B7"].map((id) => stageGates(cells, bands).find((gate) => gate.id === id)!.status);
+    expect(status()).toEqual(["pass", "pass"]); // BALANCE §3: 75–90 %
+    expect(status(TIGHT_BANDS)).toEqual(["fail", "fail"]); // 1B: 78–88 %
   });
 });

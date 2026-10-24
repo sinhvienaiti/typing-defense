@@ -160,7 +160,7 @@ export const SLICE_1A: Content = {
     packGapS: 2.5,
     memberGapS: 0.45,
   },
-  // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.5 on its bark.
+  // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.35 on its bark (heroMul).
   boss: {
     enemy: "moc-tinh", retreatPct: 50, kHp: 0.2, kHp2: 4.3, kHpMax: 1.5, modeHp: { relax: 0.85, learn: 0.85, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },

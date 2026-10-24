@@ -122,11 +122,18 @@ export function poolCells(sets: readonly (readonly Cell[])[]): Cell[] {
 }
 
 /**
- * B1–B9 for Lời Gọi: the no-type bot may hold Thư giãn (BUILD_1A6's own design, BALANCE.md §7 B5); B5 also asks the
- * no-type bot kiting the boss with Draconis never to win, nor to make it retreat (BUILD_1B §18.3).
+ * BUILD_1B §6.4, §18.3: the 1B tight band of Cân bằng (win 78–88 %, Biên S 40–60 %; P, I, O as BALANCE §3), read
+ * on the pooled seed sets for B1 and for B7's director-off row; each set alone keeps BALANCE §3's bands.
  */
-export function stageGates(cells: readonly Cell[]): GateResult[] {
-  const gates = runGates({ summaries: cells.map((c) => c.summary), options: { noTypeExempt: ["relax"] } });
+export const TIGHT_BANDS: typeof BANDS = { ...BANDS, balanced: { ...BANDS.balanced, win: { min: 780, max: 880 }, s: { min: 400, max: 600 } } };
+
+/**
+ * B1–B9 for Lời Gọi: the no-type bot may hold Thư giãn (BUILD_1A6's own design, BALANCE.md §7 B5); B5 also asks the
+ * no-type bot kiting the boss with Draconis never to win, nor to make it retreat (BUILD_1B §18.3). `bands` grades B1
+ * and B7 (TIGHT_BANDS on the pooled sets).
+ */
+export function stageGates(cells: readonly Cell[], bands: typeof BANDS = BANDS): GateResult[] {
+  const gates = runGates({ summaries: cells.map((c) => c.summary), options: { noTypeExempt: ["relax"], bands } });
   const kites = cells.filter((c) => c.bot === KITE);
   // B4's other half (BUILD_1B §18.3, 1B R1 review): the standard bot brings the boss down faster than the sloppy one (its damage a second, p50).
   const dps = (bot: string) => median(cells.find((c) => c.bot === bot && c.mode === "balanced" && c.director)?.boss.filter((b) => b.reached).map(bossDps) ?? []);
@@ -234,7 +241,8 @@ export function tightTable(sets: readonly (readonly Cell[])[], pooled: readonly 
     if (!c.director) continue;
     const rows = [...sets.map((cells) => cells.find((x) => x.bot === c.bot && x.mode === c.mode && x.director)!.summary), c.summary];
     const tight = c.mode === "balanced" && !c.bot.startsWith("no-type") && c.bot !== "child" && c.bot !== "type-only" && !c.bot.includes("@");
-    const ok = c.summary.win >= 780 && c.summary.win <= 880 && c.summary.s >= 400 && c.summary.s <= 600;
+    const { win, s } = TIGHT_BANDS.balanced;
+    const ok = c.summary.win >= win.min! && c.summary.win <= win.max! && c.summary.s >= s.min! && c.summary.s <= s.max!;
     lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${rows.map((r) => pct(r.win)).join(" / ")} | ${rows.map((r) => pct(r.s)).join(" / ")} | ${num(c.summary.n, 2)} | ${tight ? (ok ? "đạt" : "**trượt**") + " (78–88 %, 40–60 %)" : "—"} |`);
   }
   return lines;

@@ -9,7 +9,7 @@
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
 import { balanceReport } from "../../tests/td/balance";
-import { botById, matrixCells, measuredProfile, poolCells, stageGates, stageReport, tightTable, type Cell } from "../../tests/td/flow";
+import { botById, matrixCells, measuredProfile, poolCells, stageGates, stageReport, TIGHT_BANDS, tightTable, type Cell } from "../../tests/td/flow";
 import { formatGates } from "../../src/kit/balance";
 import { realDeck } from "../../tests/td/typing";
 
@@ -39,13 +39,16 @@ for (let set = 0; set < sets; set += 1) {
   stageReport(played[set]!, set === sets - 1 ? measured : [], seeds, (text) => console.log(text), set * seeds);
   console.log("");
 }
-// BUILD_1B §6.4: the tight targets in Cân bằng read the sets pooled; each set alone keeps BALANCE §3's bands (B1 above).
+// BUILD_1B §6.4, §18.3: the tight targets in Cân bằng read the sets pooled (B1, B7's director-off row); each set alone
+// keeps BALANCE §3's bands (B1 above). The wide verdict of B1 and B7 is printed after, to compare.
 if (sets > 1) {
   const pooled = poolCells(played);
   console.log(`## Gộp ${sets} bộ seed (${sets * seeds} ván mỗi ô): đích chặt 1B (BUILD_1B §6.4)\n`);
   console.log(tightTable(played, pooled).join("\n"));
-  console.log("\n### Cổng B1–B9 trên các bộ gộp\n");
-  console.log(formatGates(stageGates(pooled)));
+  console.log("\n### Cổng B1–B9 trên các bộ gộp (B1 và hàng tắt nhịp của B7 chấm theo đích chặt 1B: thắng 78–88 %, Biên S 40–60 %, BUILD_1B §18.3)\n");
+  console.log(formatGates(stageGates(pooled, TIGHT_BANDS)));
+  const wide = stageGates(pooled).filter((gate) => gate.id === "B1" || gate.id === "B7");
+  console.log(`\nĐể so, B1 và B7 gộp theo dải BALANCE §3 (75–90 %, 35–65 %): ${wide.map((gate) => gate.id + " " + (gate.status === "pass" ? "đạt" : gate.status === "fail" ? "trượt" : "thiếu số")).join(", ")}.`);
   console.log("");
 }
 

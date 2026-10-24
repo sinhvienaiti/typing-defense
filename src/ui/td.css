@@ -55,6 +55,9 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-row.td-wide > small:first-child { flex-basis: 100%; }
 .td-row.td-wide > button { flex-basis: calc(50% - 3px); }
 .td-row > span:first-child { flex: 1; }
+/* Two long labels (the Bastion's food and wood sales) stack, each the panel's width: never cut, never over the edge. */
+.td-row.td-stack { flex-direction: column; align-items: stretch; gap: 4px; }
+.td-row.td-stack > button { flex: none; padding: 3px 6px; }
 .td-actions { padding: 6px; }
 .td-stat { display: flex; flex: 1; flex-direction: column; }
 .td-stat b { font-size: 1.5em; font-weight: 800; font-variant-numeric: tabular-nums; }

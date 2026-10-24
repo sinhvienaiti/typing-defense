@@ -232,6 +232,12 @@ export const LOOK = td(`
     words: t.liveWords(), ui: t.ui(), review: s.review, knowledge: s.knowledge, typedTicks: t.typing().typedTicks,
   };`);
 
+/** Labels of the buttons under `selector` that do not fit: cut in the button, or past their panel's edge (1B R1 review fix). */
+export const overflowing = (page, selector) => page.eval(`[...document.querySelectorAll(${JSON.stringify(selector)})].filter((el) => {
+  const panel = el.closest(".td-panel")?.getBoundingClientRect();
+  return el.scrollWidth > el.clientWidth + 1 || (panel !== undefined && el.getBoundingClientRect().right > panel.right + 0.5);
+}).map((el) => el.textContent)`);
+
 const overlap = (a, b) => Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
 
 export const cardStats = () => ({ samples: 0, cards: 0, small: 0, overlaps: [], overHud: [], offScreen: 0, maxBright: 0 });
