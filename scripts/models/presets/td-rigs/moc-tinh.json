@@ -1,0 +1,766 @@
+{
+ "version": 1,
+ "id": "moc-tinh",
+ "kind": "bosses",
+ "source": "bosses/moc-tinh.glb",
+ "note": "P17 Mộc Tinh (boss), cao 7 m, 29.177 tam giác (giới hạn 30.000, không giảm). Xương người không ngón + finger_l/r (bốn ngón rễ một xương), tán lá 9 khối (crown_top, crown_up, crown_side, crown_front, crown_back; trái phải soi gương) mỗi khối một xương lò xo, khối cứng theo màu lá và quả. Tay rễ dài 3,1 m. Toạ độ: mét, Z lên, mặt nhìn -Y, +X là tay trái.",
+ "yaw": -90,
+ "height": 7.0,
+ "triangles": 30000,
+ "material": {
+  "metallic": 0.0,
+  "roughnessMin": 0.5
+ },
+ "reviewed": false,
+ "bones": {
+  "root": {
+   "head": [
+    0,
+    0,
+    0
+   ],
+   "tail": [
+    0,
+    0.8,
+    0
+   ],
+   "parent": null,
+   "deform": false
+  },
+  "pelvis": {
+   "head": [
+    0,
+    0.08,
+    2.7
+   ],
+   "tail": [
+    0,
+    0.08,
+    3.2
+   ],
+   "parent": "root",
+   "part": "torso",
+   "radius": 1.1
+  },
+  "spine_01": {
+   "head": [
+    0,
+    0.08,
+    3.2
+   ],
+   "tail": [
+    0,
+    0.08,
+    3.65
+   ],
+   "parent": "pelvis",
+   "part": "torso",
+   "radius": 1.1
+  },
+  "spine_02": {
+   "head": [
+    0,
+    0.08,
+    3.65
+   ],
+   "tail": [
+    0,
+    0.08,
+    4.1
+   ],
+   "parent": "spine_01",
+   "part": "torso",
+   "radius": 1.1
+  },
+  "spine_03": {
+   "head": [
+    0,
+    0.08,
+    4.1
+   ],
+   "tail": [
+    0,
+    0.08,
+    4.5
+   ],
+   "parent": "spine_02",
+   "part": "torso",
+   "radius": 1.0
+  },
+  "neck_01": {
+   "head": [
+    0,
+    0.08,
+    4.5
+   ],
+   "tail": [
+    0,
+    0.0,
+    4.95
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.9
+  },
+  "head": {
+   "head": [
+    0,
+    0.0,
+    4.95
+   ],
+   "tail": [
+    0,
+    -0.05,
+    6.4
+   ],
+   "parent": "neck_01",
+   "part": "head",
+   "radius": 0.9
+  },
+  "crown_top": {
+   "head": [
+    0,
+    0.0,
+    6.05
+   ],
+   "tail": [
+    0,
+    -0.1,
+    6.85
+   ],
+   "parent": "head",
+   "radius": 0.9
+  },
+  "crown_up_l": {
+   "head": [
+    0.55,
+    0.3,
+    5.7
+   ],
+   "tail": [
+    1.35,
+    0.45,
+    6.2
+   ],
+   "parent": "head",
+   "radius": 0.8
+  },
+  "crown_side_l": {
+   "head": [
+    1.45,
+    0.5,
+    4.6
+   ],
+   "tail": [
+    2.05,
+    0.6,
+    5.35
+   ],
+   "parent": "clavicle_l",
+   "radius": 0.85
+  },
+  "crown_front_l": {
+   "head": [
+    0.65,
+    -0.3,
+    4.6
+   ],
+   "tail": [
+    0.95,
+    -0.55,
+    5.0
+   ],
+   "parent": "spine_03",
+   "radius": 0.45
+  },
+  "crown_back_l": {
+   "head": [
+    0.65,
+    0.85,
+    4.6
+   ],
+   "tail": [
+    0.85,
+    1.25,
+    5.0
+   ],
+   "parent": "spine_03",
+   "radius": 0.45
+  },
+  "clavicle_l": {
+   "head": [
+    0.3,
+    0.4,
+    4.3
+   ],
+   "tail": [
+    1.4,
+    0.6,
+    4.35
+   ],
+   "parent": "spine_03",
+   "part": "torso",
+   "radius": 0.5
+  },
+  "upperarm_l": {
+   "head": [
+    1.45,
+    0.62,
+    4.3
+   ],
+   "tail": [
+    2.15,
+    0.64,
+    3.15
+   ],
+   "parent": "clavicle_l",
+   "part": "arm_l",
+   "radius": 0.55
+  },
+  "lowerarm_l": {
+   "head": [
+    2.15,
+    0.64,
+    3.15
+   ],
+   "tail": [
+    2.3,
+    0.55,
+    2.45
+   ],
+   "parent": "upperarm_l",
+   "part": "arm_l",
+   "radius": 0.5
+  },
+  "hand_l": {
+   "head": [
+    2.3,
+    0.55,
+    2.45
+   ],
+   "tail": [
+    2.32,
+    0.45,
+    1.95
+   ],
+   "parent": "lowerarm_l",
+   "part": "arm_l",
+   "radius": 0.5
+  },
+  "finger_l": {
+   "head": [
+    2.32,
+    0.45,
+    1.95
+   ],
+   "tail": [
+    2.35,
+    0.3,
+    1.45
+   ],
+   "parent": "hand_l",
+   "part": "arm_l",
+   "radius": 0.45
+  },
+  "thigh_l": {
+   "head": [
+    0.55,
+    0.2,
+    2.65
+   ],
+   "tail": [
+    0.78,
+    0.12,
+    1.45
+   ],
+   "parent": "pelvis",
+   "part": "leg_l",
+   "radius": 0.6
+  },
+  "calf_l": {
+   "head": [
+    0.78,
+    0.12,
+    1.45
+   ],
+   "tail": [
+    0.9,
+    0.2,
+    0.5
+   ],
+   "parent": "thigh_l",
+   "part": "leg_l",
+   "radius": 0.6
+  },
+  "foot_l": {
+   "head": [
+    0.9,
+    0.2,
+    0.5
+   ],
+   "tail": [
+    1.0,
+    -0.5,
+    0.12
+   ],
+   "parent": "calf_l",
+   "part": "foot_l",
+   "radius": 0.6
+  },
+  "ball_l": {
+   "head": [
+    1.0,
+    -0.5,
+    0.12
+   ],
+   "tail": [
+    1.05,
+    -1.2,
+    0.04
+   ],
+   "parent": "foot_l",
+   "part": "foot_l",
+   "radius": 0.5
+  }
+ },
+ "parts": {
+  "torso": {
+   "bones": [
+    "pelvis",
+    "spine_01",
+    "spine_02",
+    "spine_03",
+    "neck_01",
+    "head",
+    "clavicle_l",
+    "clavicle_r",
+    "upperarm_l",
+    "upperarm_r",
+    "thigh_l",
+    "thigh_r"
+   ]
+  },
+  "head": {
+   "bones": [
+    "head",
+    "neck_01",
+    "spine_03"
+   ],
+   "rigid": "head",
+   "band": [
+    4.75,
+    5.15
+   ]
+  },
+  "arm_l": {
+   "bones": [
+    "clavicle_l",
+    "upperarm_l",
+    "lowerarm_l",
+    "hand_l",
+    "finger_l",
+    "spine_03"
+   ]
+  },
+  "leg_l": {
+   "bones": [
+    "pelvis",
+    "thigh_l",
+    "calf_l",
+    "foot_l",
+    "spine_01"
+   ]
+  },
+  "foot_l": {
+   "bones": [
+    "calf_l",
+    "foot_l",
+    "ball_l"
+   ]
+  },
+  "crown_top": {
+   "bones": [
+    "crown_top"
+   ],
+   "rigid": "crown_top"
+  },
+  "crown_up_l": {
+   "bones": [
+    "crown_up_l"
+   ],
+   "rigid": "crown_up_l"
+  },
+  "crown_side_l": {
+   "bones": [
+    "crown_side_l"
+   ],
+   "rigid": "crown_side_l"
+  },
+  "crown_front_l": {
+   "bones": [
+    "crown_front_l"
+   ],
+   "rigid": "crown_front_l"
+  },
+  "crown_back_l": {
+   "bones": [
+    "crown_back_l"
+   ],
+   "rigid": "crown_back_l"
+  }
+ },
+ "regions": [
+  {
+   "part": "head",
+   "box": [
+    [
+     -1.3,
+     -1.2,
+     4.9
+    ],
+    [
+     1.3,
+     1.0,
+     7.1
+    ]
+   ],
+   "notFrom": [
+    "arm_l",
+    "arm_r"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "torso",
+   "zMax": 4.85,
+   "from": [
+    "head"
+   ],
+   "mirror": false
+  },
+  {
+   "part": "arm_l",
+   "box": [
+    [
+     1.55,
+     -0.6,
+     1.3
+    ],
+    [
+     3.1,
+     1.4,
+     4.0
+    ]
+   ]
+  },
+  {
+   "part": "foot_l",
+   "zMax": 0.55,
+   "side": "l"
+  },
+  {
+   "part": "crown_top",
+   "capsule": [
+    "crown_top"
+   ],
+   "radius": 1.05,
+   "zMin": 5.85,
+   "colour": {
+    "hue": [
+     55,
+     170
+    ],
+    "satMin": 0.2,
+    "valMin": 0.08
+   },
+   "mirror": false
+  },
+  {
+   "part": "crown_top",
+   "capsule": [
+    "crown_top"
+   ],
+   "radius": 1.05,
+   "zMin": 5.85,
+   "colour": {
+    "hue": [
+     0,
+     40
+    ],
+    "satMin": 0.45,
+    "valMin": 0.15
+   },
+   "mirror": false
+  },
+  {
+   "part": "crown_up_l",
+   "capsule": [
+    "crown_up_l"
+   ],
+   "radius": 0.95,
+   "colour": {
+    "hue": [
+     55,
+     170
+    ],
+    "satMin": 0.2,
+    "valMin": 0.08
+   }
+  },
+  {
+   "part": "crown_up_l",
+   "capsule": [
+    "crown_up_l"
+   ],
+   "radius": 0.95,
+   "colour": {
+    "hue": [
+     0,
+     40
+    ],
+    "satMin": 0.45,
+    "valMin": 0.15
+   }
+  },
+  {
+   "part": "crown_side_l",
+   "capsule": [
+    "crown_side_l"
+   ],
+   "radius": 0.95,
+   "colour": {
+    "hue": [
+     55,
+     170
+    ],
+    "satMin": 0.2,
+    "valMin": 0.08
+   }
+  },
+  {
+   "part": "crown_side_l",
+   "capsule": [
+    "crown_side_l"
+   ],
+   "radius": 0.95,
+   "colour": {
+    "hue": [
+     0,
+     40
+    ],
+    "satMin": 0.45,
+    "valMin": 0.15
+   }
+  },
+  {
+   "part": "crown_front_l",
+   "capsule": [
+    "crown_front_l"
+   ],
+   "radius": 0.55,
+   "colour": {
+    "hue": [
+     55,
+     170
+    ],
+    "satMin": 0.2,
+    "valMin": 0.08
+   }
+  },
+  {
+   "part": "crown_front_l",
+   "capsule": [
+    "crown_front_l"
+   ],
+   "radius": 0.55,
+   "colour": {
+    "hue": [
+     0,
+     40
+    ],
+    "satMin": 0.45,
+    "valMin": 0.15
+   }
+  },
+  {
+   "part": "crown_back_l",
+   "capsule": [
+    "crown_back_l"
+   ],
+   "radius": 0.6,
+   "colour": {
+    "hue": [
+     55,
+     170
+    ],
+    "satMin": 0.2,
+    "valMin": 0.08
+   }
+  },
+  {
+   "part": "crown_back_l",
+   "capsule": [
+    "crown_back_l"
+   ],
+   "radius": 0.6,
+   "colour": {
+    "hue": [
+     0,
+     40
+    ],
+    "satMin": 0.45,
+    "valMin": 0.15
+   }
+  }
+ ],
+ "rigidIslands": 64,
+ "springs": {
+  "crown_top": {
+   "bones": [
+    "crown_top"
+   ],
+   "freq": 1.1,
+   "damping": 0.35,
+   "maxAngle": 9
+  },
+  "crown_up_l": {
+   "bones": [
+    "crown_up_l"
+   ],
+   "freq": 1.4,
+   "damping": 0.35,
+   "maxAngle": 9
+  },
+  "crown_side_l": {
+   "bones": [
+    "crown_side_l"
+   ],
+   "freq": 1.1,
+   "damping": 0.35,
+   "maxAngle": 9
+  },
+  "crown_front_l": {
+   "bones": [
+    "crown_front_l"
+   ],
+   "freq": 1.4,
+   "damping": 0.35,
+   "maxAngle": 9
+  },
+  "crown_back_l": {
+   "bones": [
+    "crown_back_l"
+   ],
+   "freq": 1.4,
+   "damping": 0.35,
+   "maxAngle": 9
+  }
+ },
+ "settle": 8,
+ "flatFeet": {
+  "band": 0.12,
+  "reach": 0.35
+ },
+ "groundIgnore": [
+  "hand_l",
+  "hand_r",
+  "finger_l",
+  "finger_r"
+ ],
+ "sockets": {
+  "FX_HAND_R": {
+   "bone": "hand_r",
+   "at": [
+    -2.32,
+    0.45,
+    1.95
+   ]
+  },
+  "FX_HEAD": {
+   "bone": "head",
+   "at": [
+    0,
+    -0.9,
+    5.55
+   ]
+  },
+  "FX_CORE": {
+   "bone": "spine_02",
+   "at": [
+    0,
+    -1.0,
+    4.0
+   ]
+  },
+  "FX_FEET": {
+   "bone": "root",
+   "at": [
+    0,
+    0.0,
+    0.0
+   ]
+  }
+ },
+ "headLevel": {
+  "minPitch": -12,
+  "bones": {
+   "neck_01": 0.4,
+   "head": 0.6
+  }
+ },
+ "lookAt": {
+  "bone": "head",
+  "yawDeg": 20,
+  "pitchDeg": 12
+ },
+ "retarget": {
+  "direction": [
+   "upperarm_l",
+   "upperarm_r",
+   "lowerarm_l",
+   "lowerarm_r",
+   "hand_l",
+   "hand_r"
+  ],
+  "abduct": {
+   "upperarm_l": [
+    [
+     0,
+     1,
+     0
+    ],
+    -14
+   ],
+   "upperarm_r": [
+    [
+     0,
+     1,
+     0
+    ],
+    14
+   ]
+  },
+  "inplace": "trend",
+  "bodyScale": {
+   "pelvis": 0.9,
+   "spine_01": 0.45,
+   "spine_02": 0.35,
+   "spine_03": 0.35,
+   "neck_01": 0.5,
+   "head": 0.5
+  }
+ },
+ "cc0": {
+  "base": "anim/mesh2motion/human-base-animations.glb",
+  "addon": "anim/mesh2motion/human-addon-animations.glb"
+ },
+ "clips": [
+  {
+   "name": "Boss_Idle",
+   "src": "base:Idle_A",
+   "loop": true,
+   "speed": 0.6,
+   "plantFeet": true
+  }
+ ]
+}

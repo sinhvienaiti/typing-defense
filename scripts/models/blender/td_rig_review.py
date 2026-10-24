@@ -42,6 +42,8 @@ def scene_parts():
     skinned = [o for o in bpy.context.scene.objects if o.type == "MESH" and o.parent == rig]
     mesh = next((o for o in skinned if not o.get("td_attachment")), skinned[0])
     for o in bpy.context.scene.objects:
+        if o.get("td_preview"):
+            continue  # worn / held gear, shown per clip (show_preview)
         if o not in (rig, mesh) and o.type in ("MESH", "ARMATURE") and not (o.parent == rig and o.get("td_attachment")):
             o.hide_render = True
             o.hide_viewport = True
@@ -84,13 +86,14 @@ def paint(mesh, colours):
 
 def mode_bones(args):
     rig, mesh = scene_parts()
+    show_preview("")  # no gear on the bone and part renders
     rig.data.pose_position = "REST"
     bpy.context.view_layer.update()
     names = [b.name for b in rig.data.bones if b.use_deform]
     co = C.vertex_array(mesh)
     H = co[:, 2].max()
     size = max(H, np.ptp(co[:, 0]), np.ptp(co[:, 1])) * 1.1
-    centre = (0, 0, H / 2)
+    centre = (0, float(co[:, 1].min() + co[:, 1].max()) / 2, H / 2)  # mesh box centre (a long serpent's tail stays in frame)
     res = 768
     C.render_setup(res)
     shading = bpy.context.scene.display.shading
@@ -145,7 +148,7 @@ class Checker:
         self.dominant = np.array(names)[w.argmax(1)]
         self.head_rows = (w[:, names.index("head")] > 0.999) if "head" in names else np.zeros(len(w), bool)
         self.names = names
-        chains = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf")
+        chains = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf", "stem", "crown_")
         self.chain_rows = np.array([str(d).startswith(chains) for d in self.dominant])
 
     def area(self, co):
@@ -222,6 +225,17 @@ def render_heat(checker, rig, mesh, frame, folder, cams):
         os.remove(path)
 
 
+def show_preview(clip):
+    """Gear the game hangs on sockets (td_rig_attach.preview_items): only the
+    clips that use it show it (the brush in Helper_Assist, the drum in .drum)."""
+    import td_rig_attach
+    for o in bpy.context.scene.objects:
+        if o.get("td_preview"):
+            visible = td_rig_attach.preview_visible(o, clip)
+            o.hide_render = not visible
+            o.hide_viewport = not visible
+
+
 def bone_world(rig, name, point="head"):
     pb = rig.pose.bones[name]
     return rig.matrix_world @ (pb.head if point == "head" else pb.tail)
@@ -245,12 +259,16 @@ def game_dir():
     return Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), -math.sin(el)))
 
 
+VIEWS = ["front", "side", "game"]  # --views adds "top" (serpents, birds: the wave and the wing spread)
+
+
 def camera_specs(height):
     """{view: (direction, target, ortho size)} of the default framing."""
     size = height * 1.45
     centre = (0, 0, height * 0.48)
-    return {"front": ((0, 1, 0), centre, size), "side": ((-1, 0, 0), centre, size),
-            "game": (tuple(game_dir()), (0, 0, height * 0.42), size * 1.05)}
+    specs = {"front": ((0, 1, 0), centre, size), "side": ((-1, 0, 0), centre, size),
+             "game": (tuple(game_dir()), (0, 0, height * 0.42), size * 1.05), "top": ((0, 0, -1), (0, 0, 0), size)}
+    return {view: specs[view] for view in VIEWS}
 
 
 def setup_cameras(height, res):
@@ -263,8 +281,11 @@ def fit_cameras(height, lo, hi):
     corners = [Vector((x, y, z)) for x in (lo[0], hi[0]) for y in (lo[1], hi[1]) for z in (lo[2], hi[2])]
     for view, (d, target, size) in camera_specs(height).items():
         d = Vector(d).normalized()
-        right = d.cross(Vector((0, 0, 1))).normalized()
-        up = right.cross(d).normalized()
+        if abs(d.z) > 0.99:  # top view: image right = +X, up = +Y
+            right, up = Vector((1, 0, 0)), Vector((0, 1, 0))
+        else:
+            right = d.cross(Vector((0, 0, 1))).normalized()
+            up = right.cross(d).normalized()
         pr = [(c - Vector(target)).dot(right) for c in corners]
         pu = [(c - Vector(target)).dot(up) for c in corners]
         if max(map(abs, pr + pu)) > 0.46 * size:
@@ -279,7 +300,7 @@ def fit_cameras(height, lo, hi):
 # lean, wide hand arcs seen from above, chains back on Idle, sockets on the
 # right bones.
 # ----------------------------------------------------------------------------
-CHAIN_PREFIXES = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf")
+CHAIN_PREFIXES = ("tail_", "ear_", "bag_", "robe_", "talisman", "kilt_", "leaf", "stem", "crown_")
 
 
 class Motion:
@@ -452,6 +473,7 @@ def mode_clips(args):
     sockets = socket_report(rig)
     for clip in wanted:
         start, end = clip_frames(rig, clip)
+        show_preview(clip)
         folder = os.path.join(args.out, clip)
         os.makedirs(folder, exist_ok=True)
         stats = []
@@ -536,7 +558,9 @@ def main():
     parser.add_argument("--resolution", type=int, default=320)
     parser.add_argument("--label", default="")
     parser.add_argument("--tag", default="")
+    parser.add_argument("--views", default=",".join(VIEWS), help="front,side,game[,top]")
     args = parser.parse_args(argv)
+    VIEWS[:] = [v for v in args.views.split(",") if v]
     bpy.ops.wm.open_mainfile(filepath=args.blend)
     os.makedirs(args.out, exist_ok=True)
     if args.mode == "bones":

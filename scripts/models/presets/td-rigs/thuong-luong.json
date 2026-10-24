@@ -1,0 +1,790 @@
+{
+  "version": 1,
+  "id": "thuong-luong",
+  "kind": "enemies",
+  "source": "enemies/thuong-luong.glb",
+  "note": "P12 Thuồng Luồng, rắn sông giáp nặng: đầu ngóc 2,4 m, thân dài 5,3 m theo đường giữa (thiết kế ghi khoảng 6 m; td-scale đo đầu ngóc). Xương rắn Mesh2Motion CC0 (head → neck → tail01..tail20 → tail_tip, 22 đốt đều 0,23 m dọc đường giữa thân, đặt theo fitChain.path đo trên ảnh mặt phẳng giữa), thêm pouch (túi cổ, phồng bằng scale), mouth (hàm dưới, con của pouch), barbel_l/_r (râu, lò xo). Toạ độ: mét, Z lên, đầu nhìn -Y, +X là bên trái con vật.",
+  "yaw": -90,
+  "height": 2.4,
+  "triangles": 6000,
+  "material": {
+    "metallic": 0.0,
+    "roughnessMin": 0.5
+  },
+  "reviewed": false,
+  "bones": {
+    "root": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.3,
+        0
+      ],
+      "parent": null,
+      "deform": false
+    },
+    "head": {
+      "head": [
+        0,
+        -1.4,
+        1.8
+      ],
+      "tail": [
+        0,
+        -2.25,
+        1.82
+      ],
+      "parent": "root",
+      "part": "head",
+      "radius": 0.45
+    },
+    "pouch": {
+      "head": [
+        0,
+        -1.55,
+        1.55
+      ],
+      "tail": [
+        0,
+        -2.05,
+        1.4
+      ],
+      "parent": "head",
+      "part": "jaw",
+      "radius": 0.3
+    },
+    "mouth": {
+      "head": [
+        0,
+        -1.65,
+        1.66
+      ],
+      "tail": [
+        0,
+        -2.22,
+        1.58
+      ],
+      "parent": "pouch",
+      "part": "jaw",
+      "radius": 0.25
+    },
+    "barbel_l": {
+      "head": [
+        0.22,
+        -2.18,
+        1.78
+      ],
+      "tail": [
+        0.4,
+        -2.02,
+        1.17
+      ],
+      "parent": "head",
+      "part": "barbel_l",
+      "radius": 0.06
+    },
+    "neck": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "head",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail01": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "neck",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail02": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail01",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail03": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail02",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail04": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail03",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail05": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail04",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail06": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail05",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail07": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail06",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail08": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail07",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail09": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail08",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail10": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail09",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail11": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail10",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail12": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail11",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail13": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail12",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail14": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail13",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail15": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail14",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail16": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail15",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail17": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail16",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail18": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail17",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail19": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail18",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail20": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail19",
+      "part": "body",
+      "radius": 0.45
+    },
+    "tail_tip": {
+      "head": [
+        0,
+        0,
+        0
+      ],
+      "tail": [
+        0,
+        0.1,
+        0
+      ],
+      "parent": "tail20",
+      "part": "body",
+      "radius": 0.45
+    }
+  },
+  "fitChain": {
+    "bones": [
+      "neck",
+      "tail01",
+      "tail02",
+      "tail03",
+      "tail04",
+      "tail05",
+      "tail06",
+      "tail07",
+      "tail08",
+      "tail09",
+      "tail10",
+      "tail11",
+      "tail12",
+      "tail13",
+      "tail14",
+      "tail15",
+      "tail16",
+      "tail17",
+      "tail18",
+      "tail19",
+      "tail20",
+      "tail_tip"
+    ],
+    "path": [
+      [
+        0,
+        -1.4,
+        1.8
+      ],
+      [
+        0,
+        -1.3,
+        1.55
+      ],
+      [
+        0,
+        -1.25,
+        1.3
+      ],
+      [
+        0,
+        -1.18,
+        1.05
+      ],
+      [
+        0,
+        -1.06,
+        0.82
+      ],
+      [
+        0,
+        -0.9,
+        0.63
+      ],
+      [
+        0,
+        -0.68,
+        0.5
+      ],
+      [
+        0,
+        -0.4,
+        0.44
+      ],
+      [
+        0,
+        0.0,
+        0.42
+      ],
+      [
+        0,
+        0.5,
+        0.42
+      ],
+      [
+        0,
+        1.0,
+        0.42
+      ],
+      [
+        0,
+        1.5,
+        0.42
+      ],
+      [
+        0,
+        1.9,
+        0.44
+      ],
+      [
+        0,
+        2.2,
+        0.48
+      ],
+      [
+        0,
+        2.5,
+        0.53
+      ],
+      [
+        0,
+        2.8,
+        0.55
+      ],
+      [
+        0,
+        2.95,
+        0.55
+      ]
+    ],
+    "why": "đường giữa ống thân (giữa bụng kem và lưng, dưới hàng giáp), đo trên ảnh chiếu cạnh có lưới 5 cm: cổ ngóc từ (y -1,40; z 1,80) xuống đất ở y -0,7, thân nằm z 0,42, vây đuôi tới y 2,95"
+  },
+  "parts": {
+    "head": {
+      "bones": [
+        "head",
+        "neck"
+      ],
+      "rigid": "head"
+    },
+    "jaw": {
+      "bones": [
+        "pouch",
+        "mouth",
+        "head"
+      ]
+    },
+    "barbel_l": {
+      "bones": [
+        "barbel_l",
+        "head"
+      ]
+    },
+    "body": {
+      "bones": [
+        "head",
+        "neck",
+        "tail01",
+        "tail02",
+        "tail03",
+        "tail04",
+        "tail05",
+        "tail06",
+        "tail07",
+        "tail08",
+        "tail09",
+        "tail10",
+        "tail11",
+        "tail12",
+        "tail13",
+        "tail14",
+        "tail15",
+        "tail16",
+        "tail17",
+        "tail18",
+        "tail19",
+        "tail20",
+        "tail_tip"
+      ]
+    }
+  },
+  "regions": [
+    {
+      "part": "body",
+      "zMax": 99,
+      "mirror": false
+    },
+    {
+      "part": "head",
+      "box": [
+        [
+          -0.7,
+          -2.45,
+          1.66
+        ],
+        [
+          0.7,
+          -1.36,
+          2.5
+        ]
+      ],
+      "mirror": false
+    },
+    {
+      "part": "head",
+      "box": [
+        [
+          -0.6,
+          -1.6,
+          2.02
+        ],
+        [
+          0.6,
+          -0.72,
+          2.6
+        ]
+      ],
+      "mirror": false
+    },
+    {
+      "part": "jaw",
+      "box": [
+        [
+          -0.55,
+          -2.45,
+          1.2
+        ],
+        [
+          0.55,
+          -1.66,
+          1.66
+        ]
+      ],
+      "mirror": false
+    },
+    {
+      "part": "jaw",
+      "box": [
+        [
+          -0.55,
+          -1.66,
+          1.45
+        ],
+        [
+          0.55,
+          -1.5,
+          1.66
+        ]
+      ],
+      "mirror": false
+    },
+    {
+      "part": "barbel_l",
+      "capsule": [
+        "barbel_l"
+      ],
+      "radius": 0.075
+    }
+  ],
+  "springs": {
+    "barbel_l": {
+      "bones": [
+        "barbel_l"
+      ],
+      "freq": 2.4,
+      "damping": 0.28,
+      "maxAngle": 28
+    }
+  },
+  "settle": 6,
+  "sockets": {
+    "FX_HAND_R": {
+      "bone": "barbel_r",
+      "at": [
+        -0.4,
+        -2.02,
+        1.17
+      ]
+    },
+    "FX_HEAD": {
+      "bone": "head",
+      "at": [
+        0,
+        -1.65,
+        2.22
+      ]
+    },
+    "FX_TOOL": {
+      "bone": "mouth",
+      "at": [
+        0,
+        -2.28,
+        1.64
+      ]
+    },
+    "FX_CORE": {
+      "bone": "tail09",
+      "at": [
+        0,
+        -0.2,
+        0.45
+      ]
+    },
+    "FX_FEET": {
+      "bone": "tail05",
+      "at": [
+        0,
+        -0.95,
+        0.02
+      ]
+    }
+  },
+  "serpent": {
+    "head": "head",
+    "jaw": "mouth",
+    "pouch": "pouch",
+    "groundZ": 0.62,
+    "follow": 0.45
+  },
+  "groundBones": [
+    "head"
+  ],
+  "scaleBones": [
+    "pouch"
+  ],
+  "rigidIslands": 64,
+  "smoothPasses": 6,
+  "lookAt": {
+    "bone": "head",
+    "yawDeg": 20,
+    "pitchDeg": 20,
+    "why": "review 24/10: runtime look-at at most +-20 deg (rigid head on a neck chain)"
+  },
+  "clips": [
+    {
+      "name": "Enemy_Idle",
+      "script": "serpent_idle",
+      "loop": true,
+      "frames": 60,
+      "closeLoop": 0
+    },
+    {
+      "name": "Enemy_Move",
+      "script": "serpent_slither",
+      "loop": true,
+      "frames": 30,
+      "closeLoop": 0,
+      "amp": 0.42,
+      "lambda": 2.4
+    },
+    {
+      "name": "Enemy_Attack",
+      "script": "serpent_bite",
+      "frames": 26,
+      "impact": 11
+    },
+    {
+      "name": "Enemy_Hit",
+      "script": "serpent_hit",
+      "frames": 12
+    },
+    {
+      "name": "Enemy_Skill",
+      "script": "serpent_spit",
+      "frames": 38,
+      "spit": 18,
+      "note": "water ring: warn at 0, spit at the spit event (0.75 s, design 0.6-0.8 s); ring centre = FX_TOOL projected to the ground"
+    },
+    {
+      "name": "Enemy_Death",
+      "script": "serpent_death",
+      "frames": 44,
+      "blendOut": 0,
+      "settle": 0,
+      "note": "topples onto its left side and lies still; ends lying, not on Idle"
+    }
+  ],
+  "engine": {
+    "move": "Enemy_Move là sóng ngang chạy dọc thân, tốc độ sóng 1,92 m/s ở ×1: phát ×(tốc độ game / 1,92) thì mỗi điểm thân đi theo đường không trượt.",
+    "path": "Đường cong gấp (cua > 30°): bám đường bằng mã: lưu vết đầu (head) mỗi khung, đặt khớp đốt i tại điểm trên vết cách đầu s_i (bảng s_i = độ dài cung dọc chuỗi neck..tail_tip), xoay đốt theo tiếp tuyến vết; cộng sóng của clip với hệ số 0,5. Cổ (đốt trên mặt đất) giữ theo clip.",
+    "lookAt": "Quay đầu nhìn mục tiêu ±20° (td_lookAt), phần lớn quay cả thân theo đường.",
+    "skill": "Enemy_Skill: vệt báo đỏ từ khung 0, phun ở sự kiện spit; vòng nước 5 m tâm tại FX_TOOL chiếu xuống đất.",
+    "procedural": [
+      "giáp nặng trúng đạn: rung đầu nhỏ ±3° bằng mã thay vì phát lại Enemy_Hit mỗi phát",
+      "chết: cột nước và vảy ngọc rơi là VFX tại FX_CORE, FX_HEAD; chìm xuống nước là shader"
+    ]
+  }
+}

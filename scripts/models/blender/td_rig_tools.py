@@ -199,6 +199,9 @@ def prepare_mesh(spec, root):
         sub = {"warnings": []}
         static.matte({"material": spec["material"]}, sub, folder)
         report["material"] = sub.get("material")
+    if spec.get("colourUnify"):
+        import td_rig_colour
+        td_rig_colour.unify(spec, obj, root, report)
     return obj, report
 
 
@@ -463,12 +466,16 @@ class Rest:
                       for n in self.names}
         self.rot = {n: self.matrix[n].to_quaternion() for n in self.names}
 
-    def fk(self, basis):
-        """basis {bone: (Quaternion, Vector)} -> armature-space 4x4 per bone."""
+    def fk(self, basis, scales=None):
+        """basis {bone: (Quaternion, Vector)} -> armature-space 4x4 per bone.
+        scales {bone: Vector}: bone scale keys (squash and stretch), inherited
+        by children as in Blender and glTF."""
         out = {}
         for n in self.names:
             q, t = basis.get(n, (Quaternion(), Vector()))
             local = self.local[n] @ Matrix.Translation(t) @ q.to_matrix().to_4x4()
+            if scales and n in scales:
+                local = local @ Matrix.Diagonal(Vector(scales[n]).to_4d())
             out[n] = out[self.parent[n]] @ local if self.parent[n] else local
         return out
 
@@ -482,22 +489,31 @@ def identity_pose(rest):
     return {n: (Quaternion(), Vector()) for n in rest.names}
 
 
-def write_action(rig, name, frames, loop=False, track=True):
+def write_action(rig, name, frames, loop=False, track=True, scales=None, scale_bones=None):
     """frames: list of basis dicts (one per frame, frame 0..n-1) -> NLA track `name`
-    (track=False: the action stays assigned, for evaluation)."""
+    (track=False: the action stays assigned, for evaluation).
+    scales: optional list (one per frame) of {bone: Vector} scale keys; bones
+    named in any frame get a scale curve (1 where a frame leaves them out).
+    scale_bones: bones that scale in any clip of the model; every clip keys
+    them (at 1 if it leaves them out), or a clip without them would keep the
+    last clip's scale (Blender's NLA and the game's mixer both hold it)."""
     rig.animation_data_create()
     action = bpy.data.actions.new(name)
     action.use_fake_user = True
     rig.animation_data.action = action
     n = len(frames)
     names = [pb.name for pb in rig.pose.bones]
+    scaled = sorted(({b for s in (scales or []) for b in s} | set(scale_bones or [])) & set(names))
     for bone in names:
         pb = rig.pose.bones[bone]
         pb.rotation_mode = "QUATERNION"
         pb.rotation_quaternion = Quaternion()
         pb.location = Vector()
+        pb.scale = Vector((1, 1, 1))
         pb.keyframe_insert("rotation_quaternion", frame=0, group=bone)
         pb.keyframe_insert("location", frame=0, group=bone)
+        if bone in scaled:
+            pb.keyframe_insert("scale", frame=0, group=bone)
     curves = {}
     for fc in fcurves_of(action, rig):
         curves[(fc.data_path, fc.array_index)] = fc
@@ -514,6 +530,11 @@ def write_action(rig, name, frames, loop=False, track=True):
         for index in range(3):
             fc = curves[('pose.bones["%s"].location' % bone, index)]
             set_keys(fc, [(f, t[f][index]) for f in range(n)])
+        if bone in scaled:
+            s = [Vector(scales[f].get(bone, (1, 1, 1))) if scales and f < len(scales) else Vector((1, 1, 1)) for f in range(n)]
+            for index in range(3):
+                fc = curves[('pose.bones["%s"].scale' % bone, index)]
+                set_keys(fc, [(f, s[f][index]) for f in range(n)])
     if not track:
         return action
     rig.animation_data.action = None
@@ -526,11 +547,13 @@ def write_action(rig, name, frames, loop=False, track=True):
     return action
 
 
-def ground_clamp(rig, mesh, rest, frames, floor=0.0, ignore=None):
+def ground_clamp(rig, mesh, rest, frames, floor=0.0, ignore=None, bones=None, scales=None, scale_bones=None):
     """Raise the pelvis on frames where the skinned mesh goes below the floor
     (a big chibi head lying down, a deep crouch). Returns the largest lift.
-    ignore: vertex mask left out of the test (fists meant to pound the ground)."""
-    action = write_action(rig, "_ground_probe", frames, track=False)
+    ignore: vertex mask left out of the test (fists meant to pound the ground).
+    bones: the root's children that carry the body (default pelvis; a blob's
+    body and feet, a serpent's head-rooted chain); scales: the clip's scale keys."""
+    action = write_action(rig, "_ground_probe", frames, track=False, scales=scales, scale_bones=scale_bones)
     lifts = []
     for f in range(len(frames)):
         bpy.context.scene.frame_set(f)
@@ -551,8 +574,9 @@ def ground_clamp(rig, mesh, rest, frames, floor=0.0, ignore=None):
     out = []
     for basis, lift in zip(frames, lifts):
         basis = dict(basis)
-        q, t = basis["pelvis"]
-        basis["pelvis"] = (q, t + rest.rot["pelvis"].inverted() @ Vector((0, 0, lift)))
+        for bone in bones or ["pelvis"]:
+            q, t = basis.get(bone, (Quaternion(), Vector()))
+            basis[bone] = (q, t + rest.rot[bone].inverted() @ Vector((0, 0, lift)))
         out.append(basis)
     frames[:] = out
     return max(lifts, key=abs)
@@ -650,6 +674,13 @@ class Source:
             f += rate
         ad.action = None
         return frames
+
+    def reference(self, action_name, frame=0):
+        """Armature-space matrices of one frame of a source clip, used in place
+        of the source's bind pose when the target's rest matches that pose
+        (the serpent's raised neck = the CC0 snake Idle, not its flat bind pose)."""
+        inv = self.arm.matrix_world.inverted()
+        return {n: inv @ m for n, m in self.sample(action_name)[int(frame)].items()}
 
 
 def rmin(a, b):
@@ -887,6 +918,10 @@ def close_loop(frames, span):
 def build(args, spec):
     root = os.path.abspath(args.root)
     mesh, report = prepare_mesh(spec, root)
+    if spec.get("fitChain"):
+        # A serpent's spine: equal segments along the body centreline.
+        import td_rig_creatures
+        report["fitChain"] = td_rig_creatures.fit_chain(spec, mesh)
     report["snap"] = snap_joints(spec, mesh)
     rig = build_armature(spec)
     skin_report, part, weights, names = skin(spec, mesh, rig)
@@ -895,6 +930,8 @@ def build(args, spec):
     if spec.get("attachments"):
         report["attachments"] = td_rig_attach.attach(spec, rig, root)
     report["sockets"] = add_sockets(spec, rig)
+    if spec.get("previewItems"):
+        report["previewItems"] = td_rig_attach.preview_items(spec, rig, root)
     if args.mode == "bones":
         return rig, mesh, report, part, weights, names
     import td_rig_clips

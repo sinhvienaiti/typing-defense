@@ -1,6 +1,6 @@
 # 2026-10-24 — Model Lời Gọi: sửa rig Lam và Cương Thi theo bản duyệt, chốt chiều cao nhà
 
-Commit: nhánh `main` của repo `games/typing-defense`, xem `git log`. Chưa đẩy lên. Chỉ sửa công cụ model (`scripts/models/**`), preset, tài liệu và manifest. Không sửa `src/`. GLB, ảnh không vào Git.
+Commit: nhánh `main` của repo `games/typing-defense`, xem `git log`; đã đẩy lên `origin/main`. Chỉ sửa công cụ model (`scripts/models/**`), preset, tài liệu và manifest. Không sửa `src/`. GLB, ảnh không vào Git.
 
 ## Yêu cầu
 
