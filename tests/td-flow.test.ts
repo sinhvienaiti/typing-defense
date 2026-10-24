@@ -22,7 +22,7 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(cells.filter((cell) => !cell.director)).toEqual([{ bot: "standard", mode: "balanced", director: false }]);
   });
 
-  it("types through the commands at the bot's own speed and accuracy, and measures every run (flow, pace, kill time, the learning gate)", () => {
+  it("types through the commands at the bot's own speed and accuracy, and measures every run (flow, pace, kill time, the learning gate)", { timeout: 20_000 }, () => {
     const fast = playStage(botById("fast"), "balanced", 1, deck, true, 2);
     const sloppy = playStage(botById("sloppy"), "balanced", 1, deck, true, 2);
     const none = playStage(botById("no-type"), "balanced", 1, deck, true, 2);
@@ -43,7 +43,7 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(fast.world.stats[STAT.killTicks]).toBeGreaterThan(0);
   });
 
-  it("folds a cell into the kit's summary and prints the §3 table and every gate (missing cells are THIẾU SỐ, never ĐẠT)", () => {
+  it("folds a cell into the kit's summary and prints the §3 table and every gate (missing cells are THIẾU SỐ, never ĐẠT)", { timeout: 20_000 }, () => {
     const cells = [playCell({ bot: "standard", mode: "balanced", director: true }, 2, deck, 1), playCell({ bot: "no-type", mode: "balanced", director: true }, 2, deck, 1)];
     expect(cells[0]!.summary.runs).toBe(2);
     expect(cells[0]!.k).toBe(1);

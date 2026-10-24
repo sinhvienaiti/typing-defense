@@ -52,6 +52,7 @@ export type CommandBody =
   | { t: "buySeeds" }
   | { t: "autoSeeds"; on: boolean }
   | { t: "sellFood" }
+  | { t: "sellWood" }
   | { t: "harvestPlot"; building: number; plot: number }
   | { t: "key"; letter: number; atMs: number }
   | { t: "backspace"; atMs: number }
@@ -200,6 +201,11 @@ function run(w: World, command: Command): string | null {
       if (w.food < ECONOMY.sale.food) return "food";
       w.food -= ECONOMY.sale.food;
       w.gold += ECONOMY.sale.gold * 1000;
+      return null;
+    case "sellWood":
+      if (w.wood < ECONOMY.sale.wood) return "wood";
+      w.wood -= ECONOMY.sale.wood;
+      w.gold += ECONOMY.sale.woodGold * 1000;
       return null;
     case "harvestPlot": {
       const slot = B.slotOf(command.building);

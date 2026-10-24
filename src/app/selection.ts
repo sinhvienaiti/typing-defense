@@ -56,6 +56,7 @@ export class Selection {
     seeds: () => this.send({ t: "buySeeds" }),
     autoSeeds: () => this.send({ t: "autoSeeds", on: !this.w.autoSeeds }),
     sellFood: () => this.send({ t: "sellFood" }),
+    sellWood: () => this.send({ t: "sellWood" }),
     upgrade: () => this.focus >= 0 && this.send({ t: "upgrade", building: this.focus }),
     build: () => this.choose(this.kind, null),
     undo: () => this.undoable() && this.send({ t: "sell", building: this.focus }), // the card's button; Delete

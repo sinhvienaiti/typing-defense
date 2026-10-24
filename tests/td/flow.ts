@@ -14,7 +14,7 @@ import { paceHeader, SkillTally } from "../../src/app/skill";
 import { CALL, MODES } from "../../src/content/rules";
 import type { Deck } from "../../src/typing/decks";
 import type { World } from "../../src/sim/world";
-import type { BossRun } from "./boss-probe";
+import { bossDps, type BossRun } from "./boss-probe";
 import { runBot, type BotRun } from "./bot";
 import { bossArcher, heroBoss, heroKite } from "./policies/boss";
 import { heroDay, heroNight } from "./policies/hero";
@@ -87,8 +87,10 @@ export const record = (run: BotRun): RunRecord => ({ flow: run.flow, pace: run.p
 
 /** A matrix cell to play: the director's column is false only for B7's row. */
 export type CellSpec = { bot: string; mode: BandMode; director: boolean };
-/** Its runs (to pool two seed sets, BUILD_1B §6.4) and their boss peaks. */
-export type Cell = CellSpec & { k: number; summary: BotModeSummary; records: RunRecord[]; boss: BossRun[] };
+/** A run's night share with nothing to type and its fullest 20 s window in seconds (1B R1 review). */
+export type RunExtra = { empty: number; window: number };
+/** Its runs (to pool two seed sets, BUILD_1B §6.4), their boss peaks and extras. */
+export type Cell = CellSpec & { k: number; summary: BotModeSummary; records: RunRecord[]; boss: BossRun[]; extra: RunExtra[] };
 
 export const botById = (id: string): MatrixBot => MATRIX_BOTS.find((bot) => bot.id === id)!;
 
@@ -104,7 +106,8 @@ export function playCell(spec: CellSpec, seeds: number, deck: Deck, nights = STA
   const bot = botById(spec.bot);
   const runs = Array.from({ length: seeds }, (_, k) => playStage(bot, spec.mode, from + k + 1, deck, spec.director, nights));
   const records = runs.map(record);
-  return { ...spec, k: paceHeader(botProfile(bot, spec.mode), spec.director).k, summary: summarizeRuns(bot.id, spec.mode, records, spec.director), records, boss: runs.map((run) => run.boss) };
+  const extra = runs.map((run) => ({ empty: run.emptyTicks[1] / Math.max(1, run.phaseTicks[1]), window: run.windowMax / 60 }));
+  return { ...spec, k: paceHeader(botProfile(bot, spec.mode), spec.director).k, summary: summarizeRuns(bot.id, spec.mode, records, spec.director), records, boss: runs.map((run) => run.boss), extra };
 }
 
 export const playMatrix = (options: MatrixOptions): Cell[] => matrixCells(options.modes, options.bots).map((spec) => playCell(spec, options.seeds, options.deck, options.nights));
@@ -114,7 +117,7 @@ export function poolCells(sets: readonly (readonly Cell[])[]): Cell[] {
   return sets[0]!.map((first) => {
     const same = sets.map((cells) => cells.find((c) => c.bot === first.bot && c.mode === first.mode && c.director === first.director)!);
     const records = same.flatMap((c) => c.records);
-    return { ...first, records, boss: same.flatMap((c) => c.boss), summary: summarizeRuns(first.bot, first.mode, records, first.director) };
+    return { ...first, records, boss: same.flatMap((c) => c.boss), extra: same.flatMap((c) => c.extra), summary: summarizeRuns(first.bot, first.mode, records, first.director) };
   });
 }
 
@@ -125,13 +128,19 @@ export function poolCells(sets: readonly (readonly Cell[])[]): Cell[] {
 export function stageGates(cells: readonly Cell[]): GateResult[] {
   const gates = runGates({ summaries: cells.map((c) => c.summary), options: { noTypeExempt: ["relax"] } });
   const kites = cells.filter((c) => c.bot === KITE);
-  if (kites.length === 0) return gates;
-  return gates.map((gate) => {
-    if (gate.id !== "B5") return gate;
-    const checks = [...gate.checks, ...kites.map((c) => {
+  // B4's other half (BUILD_1B §18.3, 1B R1 review): the standard bot brings the boss down faster than the sloppy one (its damage a second, p50).
+  const dps = (bot: string) => median(cells.find((c) => c.bot === bot && c.mode === "balanced" && c.director)?.boss.filter((b) => b.reached).map(bossDps) ?? []);
+  const [standard, sloppy] = [dps("standard"), dps("sloppy")];
+  const extra: Record<string, { label: string; measured: string; threshold: string; pass: boolean }[]> = {
+    B4: standard === null || sloppy === null ? [] : [{ label: "Hạ boss: sát thương/s lên boss p50, Chuẩn vs Ẩu (Cân bằng)", measured: standard.toFixed(1) + " vs " + sloppy.toFixed(1), threshold: "Chuẩn > Ẩu", pass: standard > sloppy }],
+    B5: kites.map((c) => {
       const retreats = c.boss.filter((b) => b.retreated).length;
       return { label: KITE + " · " + MODE_LABELS[c.mode], measured: "thắng " + pct(c.summary.win) + ", boss rút " + retreats + "/" + c.boss.length, threshold: "0 %, không lần rút nào", pass: c.summary.win === 0 && retreats === 0 };
-    })];
+    }),
+  };
+  return gates.map((gate) => {
+    if ((extra[gate.id] ?? []).length === 0) return gate;
+    const checks = [...gate.checks, ...extra[gate.id]!];
     return { ...gate, checks, status: gate.missing.length > 0 ? "skip" : checks.every((check) => check.pass) ? "pass" : "fail" };
   });
 }
@@ -156,8 +165,8 @@ const num = (value: number | null, digits = 1): string => (value === null ? "—
 /** The BALANCE.md §3 table: one row per bot × mode (the director's column says off for the B7 row). */
 export function metricsTable(cells: readonly Cell[]): string[] {
   const lines = [
-    "| Chế độ | Bot | k | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q | Phe ta | Hạ quái (s) | Bậc/đợt | Khoảng sinh | Học |",
-    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    "| Chế độ | Bot | k | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q | Rỗi Đêm | Phe ta | Hạ quái (s) | Bậc/đợt | Khoảng sinh | Học |",
+    "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
   ];
   for (const c of cells) {
     const s = c.summary;
@@ -167,7 +176,7 @@ export function metricsTable(cells: readonly Cell[]): string[] {
       const off = value !== null && ((range.min !== undefined && value < range.min) || (range.max !== undefined && value > range.max));
       return off ? "**" + pct(value) + "**" : pct(value);
     };
-    lines.push(`| ${MODE_LABELS[c.mode]}${c.director ? "" : " (tắt nhịp)"} | ${c.bot} | ${c.k.toFixed(3)} | ${mark(s.win, "win")} | ${mark(s.s, "s")} | ${mark(s.p, "p")} | ${mark(s.i, "i")} | ${mark(s.o, "o")} | ${num(s.n, 2)} | ${mark(s.q, "q")} | ${pct(s.support)} | ${num(s.killSeconds)} | ${num(s.stepsPerWave, 2)} | ${s.spawnMin === null ? "—" : pct(s.spawnMin) + "–" + pct(s.spawnMax)} | ${s.learnOk === null ? "—" : s.learnOk ? "đạt" : "trượt"} |`);
+    lines.push(`| ${MODE_LABELS[c.mode]}${c.director ? "" : " (tắt nhịp)"} | ${c.bot} | ${c.k.toFixed(3)} | ${mark(s.win, "win")} | ${mark(s.s, "s")} | ${mark(s.p, "p")} | ${mark(s.i, "i")} | ${mark(s.o, "o")} | ${num(s.n, 2)} | ${mark(s.q, "q")} | ${share(sum(c.extra.map((x) => x.empty)), c.extra.length)} | ${pct(s.support)} | ${num(s.killSeconds)} | ${num(s.stepsPerWave, 2)} | ${s.spawnMin === null ? "—" : pct(s.spawnMin) + "–" + pct(s.spawnMax)} | ${s.learnOk === null ? "—" : s.learnOk ? "đạt" : "trượt"} |`);
   }
   return lines;
 }
@@ -220,15 +229,28 @@ export function splitTable(cells: readonly Cell[]): string[] {
 /** Win and Biên S by seed set and pooled (BUILD_1B §6.4: the tight targets in Cân bằng read the pooled column). */
 export function tightTable(sets: readonly (readonly Cell[])[], pooled: readonly Cell[]): string[] {
   const head = sets.map((_, k) => "bộ " + (k + 1));
-  const lines = [`| Chế độ | Bot | Thắng ${head.join(" / ")} / gộp | Biên S ${head.join(" / ")} / gộp | Đích chặt 1B (gộp) |`, "|---|---|---|---|---|"];
+  const lines = [`| Chế độ | Bot | Thắng ${head.join(" / ")} / gộp | Biên S ${head.join(" / ")} / gộp | Gần thua N gộp (Cân bằng 0,3–1) | Đích chặt 1B (gộp) |`, "|---|---|---|---|---|---|"];
   for (const c of pooled) {
     if (!c.director) continue;
     const rows = [...sets.map((cells) => cells.find((x) => x.bot === c.bot && x.mode === c.mode && x.director)!.summary), c.summary];
     const tight = c.mode === "balanced" && !c.bot.startsWith("no-type") && c.bot !== "child" && c.bot !== "type-only" && !c.bot.includes("@");
     const ok = c.summary.win >= 780 && c.summary.win <= 880 && c.summary.s >= 400 && c.summary.s <= 600;
-    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${rows.map((r) => pct(r.win)).join(" / ")} | ${rows.map((r) => pct(r.s)).join(" / ")} | ${tight ? (ok ? "đạt" : "**trượt**") + " (78–88 %, 40–60 %)" : "—"} |`);
+    lines.push(`| ${MODE_LABELS[c.mode]} | ${c.bot} | ${rows.map((r) => pct(r.win)).join(" / ")} | ${rows.map((r) => pct(r.s)).join(" / ")} | ${num(c.summary.n, 2)} | ${tight ? (ok ? "đạt" : "**trượt**") + " (78–88 %, 40–60 %)" : "—"} |`);
   }
   return lines;
+}
+
+/**
+ * The attention budget with the human-like standard bot (BUILD_1B §9.3, 1B R1 review): the director keeps every window
+ * it plans within the mode's seconds; a person's slow words may run one over. Its fullest window a run, p50 and worst,
+ * and runs past 8 s (soft target: ≤ 20 % of runs, none past 10 s).
+ */
+export function windowLine(cells: readonly Cell[]): string {
+  const c = cells.find((x) => x.bot === "standard" && x.mode === "balanced" && x.director);
+  if (c === undefined) return "";
+  const windows = c.extra.map((x) => x.window);
+  const over = windows.filter((x) => x > MODES.balanced.typeS + 1e-9).length;
+  return `Cửa sổ 20 s đầy nhất mỗi ván, bot Chuẩn kiểu người (Cân bằng): p50 ${(median(windows) ?? 0).toFixed(2)} s, lớn nhất ${Math.max(...windows).toFixed(2)} s, ván quá 8 s ${over}/${windows.length} (đích mềm ≤ 20 % ván, không ván nào quá 10 s; bộ điều phối giữ mọi cửa sổ nó dự tính ≤ 8 s).`;
 }
 
 const LABEL: Record<string, string> = Object.fromEntries(STANDARD_BOTS.map((bot) => [bot.id, bot.label]));
@@ -245,6 +267,7 @@ export function stageReport(cells: readonly Cell[], measured: readonly { bot: st
   print(bossTable(cells).join("\n"));
   print("\n### Tách hai số: thắng do boss, Biên S do các đêm trước (BUILD_1B §6)\n");
   print(splitTable(cells).join("\n"));
+  print("\n" + windowLine(cells));
   if (measured.length === 0) return gates;
   print("\n### Hồ sơ game đo được (một ải Cân bằng, tắt nhịp, `SkillTally` sau mỗi ngày đêm)\n");
   print("| Bot | E (đặt / đo) | a (đặt / đo) | CV (đặt / đo) | Nhận từ mới (s) | Lời khuyên |");

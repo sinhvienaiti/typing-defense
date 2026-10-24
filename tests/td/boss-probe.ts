@@ -13,11 +13,12 @@ export type BossRun = {
   /** The lull came (the run reached the peak). */
   reached: boolean;
   retreated: boolean;
-  /** Ticks: lull, rise, first damage, retreat (−1 none). */
+  /** Ticks: lull, rise, first damage, retreat (−1 none), the run's end. */
   lull: number;
   rise: number;
   firstHit: number;
   retreat: number;
+  end: number;
   /** Share of its road walked when it retreated (or at the end). */
   pathAt: number;
   livesAtLull: number;
@@ -34,7 +35,7 @@ export type BossRun = {
   fed: number;
 };
 
-export const emptyBossRun = (): BossRun => ({ reached: false, retreated: false, lull: -1, rise: -1, firstHit: -1, retreat: -1, pathAt: 0, livesAtLull: -1, livesEnd: -1, damage: 0, typed: 0, hero: 0, roots: 0, inReach: 0, stunned: 0, idle: 0, fed: 0 });
+export const emptyBossRun = (): BossRun => ({ reached: false, retreated: false, lull: -1, rise: -1, firstHit: -1, retreat: -1, end: -1, pathAt: 0, livesAtLull: -1, livesEnd: -1, damage: 0, typed: 0, hero: 0, roots: 0, inReach: 0, stunned: 0, idle: 0, fed: 0 });
 
 export class BossProbe {
   readonly run = emptyBossRun();
@@ -67,7 +68,7 @@ export class BossProbe {
   finish(w: World): BossRun {
     const r = this.run;
     const s = w.stats;
-    [r.livesEnd, r.damage, r.typed, r.hero, r.roots] = [w.lives, s[STAT.bossDamage]!, s[STAT.bossTyped]!, s[STAT.bossHero]!, s[STAT.rootsHits]!];
+    [r.livesEnd, r.damage, r.typed, r.hero, r.roots, r.end] = [w.lives, s[STAT.bossDamage]!, s[STAT.bossTyped]!, s[STAT.bossHero]!, s[STAT.rootsHits]!, w.tick];
     if (this.meterAt !== null) {
       const now = w.pace.meter.state();
       [r.fed, r.idle] = [now[0]! - this.meterAt[0]!, now[6]! - this.meterAt[6]!];
@@ -75,3 +76,6 @@ export class BossProbe {
     return r;
   }
 }
+
+/** Damage a second on it from its first hit to its retreat (or the run's end): B4's "hạ boss nhanh hơn" (1B R1 review). */
+export const bossDps = (r: BossRun): number => (r.firstHit < 0 ? 0 : (60 * r.damage) / Math.max(1, (r.retreat >= 0 ? r.retreat : r.end) - r.firstHit));

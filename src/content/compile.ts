@@ -6,7 +6,7 @@
  * slice, `view` blocks left out (docs/td/TYPING_DEFENSE_DESIGN.md 25.4).
  */
 import * as RULES from "./rules";
-import type { AttackSpec, BuildingDef, Content, EnemyDef } from "./types";
+import type { AttackSpec, BuildingDef, Content, EnemyDef, WaveEntry } from "./types";
 
 export const DAMAGE_TYPES = ["physical", "magic", "true"] as const;
 export const ALTITUDES = ["ground", "low", "high"] as const;
@@ -98,9 +98,13 @@ export function compile(content: Content): Compiled {
 
 /** Wave n (from 1), its gaps × `gap` (the run's pace, BALANCE.md §4). Past the list, the last wave grows by `endlessGrowth` per wave. */
 export function waveSchedule(c: Compiled, wave: number, gap = 1): ScheduledSpawn[] {
-  const { list, endlessGrowth, packGapS, memberGapS } = c.content.waves;
-  const base = list[Math.min(wave, list.length) - 1]!;
-  const scale = wave > list.length ? 1 + endlessGrowth * (wave - list.length) : 1;
+  const { list, endlessGrowth } = c.content.waves;
+  return packSchedule(c, list[Math.min(wave, list.length) - 1]!, wave > list.length ? 1 + endlessGrowth * (wave - list.length) : 1, gap);
+}
+
+/** Entries cut into packs (counts × `scale`), ground packs on lanes 0, 1, 2… in turn, flyers on −1; ticks from 0 (the boss's escort too). */
+export function packSchedule(c: Compiled, base: readonly WaveEntry[], scale = 1, gap = 1): ScheduledSpawn[] {
+  const { packGapS, memberGapS } = c.content.waves;
   const member = ticks(memberGapS);
   const packGap = Math.max(1, Math.round(ticks(packGapS) * gap));
   const out: ScheduledSpawn[] = [];

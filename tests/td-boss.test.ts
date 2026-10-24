@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ticks } from "../src/content/compile";
-import { MODES } from "../src/content/rules";
+import { MODES, POWER } from "../src/content/rules";
 import { SLICE_1A } from "../src/content/slice-1a";
 import type { RareEvent } from "../src/sim/events";
 import { STAT } from "../src/sim/stats";
@@ -11,6 +11,7 @@ import { damageEnemy } from "../src/sim/systems/combat";
 import { SOURCE } from "../src/sim/stats";
 import { step, type World } from "../src/sim/world";
 import { built, enemyAt, run, send, world } from "./td/fixtures";
+import { realDeck } from "./td/typing";
 
 /**
  * Mộc Tinh (docs/td/BUILD_1B.md §4.4, §5): the day-5 warning and its branch, the lull, the escort and the rise at the
@@ -114,16 +115,19 @@ describe("Mộc Tinh's peak (BUILD_1B §4.4)", () => {
     expect(w.enemies.elite[e]).toBe(0);
   });
 
-  it("its hit points: the enemy's × the mode's × (1 + kHp·max(0, k − 1)), at most ×kHpMax (§5.6)", () => {
-    const at = (mode: "relax" | "balanced" | "challenge", k: number) => bossHp(world({ mode, pace: { k, director: false } }));
-    const kMul = (k: number) => Math.min(BOSS_DEF.kHpMax, 1 + BOSS_DEF.kHp * Math.max(0, k - 1));
+  it("its hit points: the enemy's × the mode's × its own mode factor × (1 + kHp·d + kHp2·max(0, d)²), d = k − 1, at most ×kHpMax (§5.6; 1B R1 review)", () => {
+    const at = (mode: "relax" | "balanced" | "challenge" | "learn", k: number) => bossHp(world({ mode, pace: { k, director: false } }));
+    const kMul = (k: number) => Math.min(BOSS_DEF.kHpMax, 1 + BOSS_DEF.kHp * (k - 1) + BOSS_DEF.kHp2 * Math.max(0, k - 1) * Math.max(0, k - 1));
     expect(at("balanced", 1)).toBe(HP);
-    expect(at("balanced", 0.75)).toBe(HP);
+    expect(at("balanced", 0.75)).toBe(Math.round(HP * kMul(0.75)));
+    expect(at("balanced", 0.75)).toBeLessThan(HP);
     expect(at("balanced", 1.2)).toBe(Math.round(HP * kMul(1.2)));
     expect(at("balanced", 1.3)).toBe(Math.round(HP * kMul(1.3)));
+    expect(at("balanced", 1.3) / at("balanced", 1.2)).toBeGreaterThan(at("balanced", 1.2) / at("balanced", 1.1)); // steeper at the top
     expect(kMul(1.3)).toBeLessThanOrEqual(BOSS_DEF.kHpMax);
-    expect(at("relax", 1)).toBe(HP / 2);
-    expect(at("challenge", 1)).toBe(Math.round(HP * 1.19));
+    expect(at("relax", 1)).toBe(Math.round(HP * 0.5 * (BOSS_DEF.modeHp.relax ?? 1)));
+    expect(at("learn", 1)).toBe(at("relax", 1));
+    expect(at("challenge", 1)).toBe(Math.round(HP * 1.19 * (BOSS_DEF.modeHp.challenge ?? 1)));
   });
 });
 
@@ -248,13 +252,13 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     expect(U.x[behind]).not.toBeLessThan(bx - 0.2);
   });
 
-  it("at 70 % it staggers 5 s: still, vulnerable, every stun lifted, a 1-word 'Dồn lửa' power call on the nearest attack buildings in a help ring, at most the bright cap", () => {
+  it("at 70 % it staggers 5 s: still, vulnerable, every stun lifted, 'Dồn lửa' power calls of round(E / 20) words (1–3) on the nearest attack buildings in reach + 2 m, at most the bright cap, lit in a help ring or not (1B R1 review)", () => {
     const { w, e } = risen();
     const B = w.buildings;
     moveBoss(w, e, w.boss.mergeM);
-    // Draconis by the merge: the archer, the cannon and the Bastion... in his ring.
-    w.agents.x[0] = 0;
-    w.agents.z[0] = 14;
+    // Draconis far away: no help ring holds the merge's towers.
+    w.agents.x[0] = -40;
+    w.agents.z[0] = -40;
     for (const b of B.live()) B.stunUntil[b] = w.tick + 600;
     for (const c of w.calls.live()) if (w.calls.kind[c] === CALL_KIND.power) w.calls.release(c);
     for (const b of B.live()) B.call[b] = -1;
@@ -264,19 +268,63 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     expect(w.boss.staggerUntil - (w.tick - 1)).toBe(T(BOSS_DEF.stagger.stunS));
     expect(B.live().every((b) => B.stunUntil[b]! <= w.tick)).toBe(true);
     const burst = w.calls.live().filter((c) => w.calls.burst[c] === 1);
-    expect(burst.length).toBeGreaterThan(0);
+    expect(burst.length).toBeGreaterThan(1);
     expect(burst.length).toBeLessThanOrEqual(MODES.balanced.open);
+    const words = Math.max(1, Math.min(BOSS_DEF.stagger.burstWords, Math.round(w.expected / BOSS_DEF.stagger.burstPerE)));
+    expect(words).toBe(2); // E 35
     for (const c of burst) {
       expect(w.calls.kind[c]).toBe(CALL_KIND.power);
-      expect(w.calls.words[c]).toBe(1);
+      expect(w.calls.words[c]).toBe(words);
       expect(w.calls.expire[c]! - w.calls.born[c]!).toBe(T(BOSS_DEF.stagger.burstLifeS));
+      expect(w.calls.bright[c], "lit without a help ring").toBe(1);
     }
+    expect(w.stats[STAT.burstWords]).toBe(words * burst.length);
     const dist = w.enemies.dist[e];
     run(w, T(4));
     expect(w.enemies.dist[e]).toBe(dist);
     const before = w.enemies.hp[e]!;
     damageEnemy(w, e, 100, 2, SOURCE.tower);
     expect(before - w.enemies.hp[e]!).toBe(125);
+  });
+
+  it("a power call already open on a building in reach becomes its Dồn lửa call: more words, a fresh 5 s, aimed at the boss (1B R1 review)", () => {
+    const { w, e } = risen();
+    const B = w.buildings;
+    moveBoss(w, e, w.boss.mergeM);
+    const C = w.calls;
+    run(w, T(1));
+    const open = C.live().filter((c) => C.kind[c] === CALL_KIND.power && C.burst[c] === 0);
+    expect(open.length).toBeGreaterThan(0);
+    const c = open[0]!;
+    C.expire[c] = w.tick + 30;
+    w.enemies.hp[e] = Math.floor(w.boss.hpMax * 0.7);
+    until(w, () => w.boss.phase === 2, 2);
+    expect(C.used[c]).toBe(1);
+    expect(C.burst[c]).toBe(1);
+    expect(C.words[c]).toBe(2);
+    expect(C.expire[c]! - (w.tick - 1)).toBe(T(BOSS_DEF.stagger.burstLifeS));
+    expect(B.call[C.b[c]!]).toBe(c);
+  });
+
+  it("a power word typed t s after it showed brings its tower's next call to cd·(1 − quick·max(0, 1 − t / quickS)) after it when that is sooner (1B R1 review)", () => {
+    const { w, e } = risen({ deck: realDeck() });
+    moveBoss(w, e, w.boss.mergeM);
+    w.enemies.hp[e] = Math.floor(w.boss.hpMax * 0.7); // the stagger's calls light anywhere
+    until(w, () => w.calls.live().some((c) => w.calls.kind[c] === CALL_KIND.power && w.calls.word[c]! >= 0), 3);
+    const c = w.calls.live().find((k) => w.calls.kind[k] === CALL_KIND.power && w.calls.word[k]! >= 0)!;
+    const b = w.calls.b[c]!;
+    const made = w.buildings.powerAt[b]!;
+    const s = w.calls.word[c]!;
+    const born = w.words.born[s]!;
+    const { deck } = w.typing;
+    const word = w.words.word[s]!;
+    for (let k = 0; k < deck.len[word]!; k += 1) send(w, { t: "key", letter: deck.letters[deck.start[word]! + k]!, atMs: w.tick * 16 + k });
+    const hit = w.events.rare.find((ev) => ev.t === "wordHit") as Extract<RareEvent, { t: "wordHit" }>;
+    const soon = Math.max(0, 1 - (hit.tick - born) / T(POWER.quickS));
+    const cd = T(MODES.balanced.powerCdS);
+    expect(soon).toBeGreaterThan(0);
+    expect(w.buildings.powerAt[b]).toBe(Math.min(made, hit.tick - Math.round(cd * POWER.quick * soon)));
+    expect(w.buildings.powerAt[b]).toBeLessThan(made);
   });
 
   it("one blow past 70 % and 50 % alike retreats at once, without the stagger", () => {

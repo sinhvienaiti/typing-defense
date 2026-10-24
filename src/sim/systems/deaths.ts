@@ -24,7 +24,7 @@ export function deathsStep(w: World): void {
     } else {
       w.gold += def.gold * 1000;
       bump(w.stats, STAT.kills);
-      bump(w.stats, STAT.killTicks, w.tick - E.born[e]!);
+      bump(w.stats, STAT.killTicks, w.tick + 1 - E.hitAt[e]!); // under fire: first hit to death (B4, 1B R1 review)
       w.pace.kills.push(E.dist[e]! / w.lanes[E.route[e]!]!.length);
       bump(w.stats, STAT.goldKill, def.gold * 1000);
       w.events.ring.push(FX.death, E.x[e]!, E.z[e]!, def.index, w.tick);

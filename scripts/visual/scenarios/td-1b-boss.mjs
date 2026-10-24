@@ -3,7 +3,8 @@
 // rises at the fork on the warned branch, walks to the merge (game speed 2 on the way, 1 for the pictures), roots
 // buildings (the striped ring 1.5 s before the strike, stunned buildings marked), slams soldiers (the red arc), is
 // staggered at 70 % by real power words typed at 60 WPM (the banner under the boss bar at the top, the "Dồn lửa"
-// calls ≤ the cap), calls Mầm Gỗ and retreats at 50 %: the results card has its stars. Slow frame sets (jpg) of each
+// calls ≤ the cap, lit with or without a help ring, 2 words at E 35; the vulnerable countdown on the bar: review R1),
+// calls Mầm Gỗ and retreats at 50 %: the results card has its stars and the chest. Slow frame sets (jpg) of each
 // move: lull, rise, roots warning and strike, slam, stagger, sprouts, retreat. Checks: the warnings' times from the events, the
 // banner's place, no card over the HUD (the boss bar is a panel), the page's log replayed on Node to its hash.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-boss.mjs --width=1280 --height=720
@@ -49,12 +50,15 @@ export default async function (page) {
   let staggerAt = 0;
   let banner = null;
   let burstMax = 0;
+  let burstWords = 0;
+  let countdown = "";
   const sloppy = { left: 2 };
   const fight0 = Date.now();
   while (Date.now() - fight0 < 150000) {
     const b = await boss();
     const s = await state(page);
     burstMax = Math.max(burstMax, s.calls.filter((c) => c.burst && c.bright).length);
+    burstWords = Math.max(burstWords, ...s.calls.filter((c) => c.burst).map((c) => c.words), 0);
     if (!done.roots && b.rootsEnd >= 0) {
       done.roots = true;
       await film("roots-warn", 6, 150);
@@ -66,6 +70,7 @@ export default async function (page) {
     } else if (!done.stagger && s.tick < b.staggerUntil) {
       done.stagger = true;
       staggerAt = Date.now();
+      countdown = await page.eval(`document.querySelector(".td-boss .td-row small")?.textContent ?? ""`);
       banner = await page.eval(`(() => { const el = document.querySelector(".td-say"); const bar = document.querySelector(".td-boss"); if (!el || !bar) return null; const r = el.getBoundingClientRect(); const q = bar.getBoundingClientRect(); return { text: el.textContent, top: r.top, bottom: r.bottom, barTop: q.top, barBottom: q.bottom }; })()`);
       await film("stagger", 6, 200);
     } else if (!done.sprouts && b.summonEnd >= 0) {
@@ -98,6 +103,10 @@ export default async function (page) {
     slamWarned72: pairs("slam").every((d) => d === 72),
     staggerBannerUnderTheBar: banner !== null && banner.text.includes("choáng") && banner.top >= banner.barTop && banner.bottom <= 0.3 * page.height,
     burstWithinCap: burstMax <= 3,
+    // Review R1: Dồn lửa lights whether a help ring holds it or not, round(E / 20) words (E 35: 2); the countdown on the bar.
+    burstLitWithWords: burstMax >= 1 && burstWords === 2,
+    vulnerableCountdownOnBar: /Dễ Tổn Thương \d s/.test(countdown),
+    chestOnTheCard: sheet !== null && sheet.text.includes("Rương") && sheet.text.includes("+150 vàng"),
     sprouts: strikes.some((e) => e.move === "summon" && e.hit),
     won: end.phase === "victory" && sheet !== null && sheet.stars >= 1,
     cardsClean: cardsClean(cards),
@@ -105,7 +114,7 @@ export default async function (page) {
     ...consoleChecks(page),
   };
   return finish(page, checks, {
-    done, banner, burstMax, roots: pairs("roots"), slams: pairs("slam"), sheet: sheet && { stars: sheet.stars, review: sheet.review },
+    done, banner, burstMax, burstWords, countdown, roots: pairs("roots"), slams: pairs("slam"), sheet: sheet && { stars: sheet.stars, review: sheet.review },
     end: { phase: end.phase, lives: end.lives, tick: end.tick }, frames, shots, cards: cardSummary(cards), replay,
   });
 }

@@ -9,7 +9,12 @@ import { Selection } from "../src/app/selection";
 import { review } from "../src/sim/systems/calls";
 import { compileDeck } from "../src/typing/decks";
 import { dockHtml } from "../src/ui/build-menu";
-import { actionsHtml, REASON, statusHtml, stripHtml } from "../src/ui/hud";
+import { BOSS } from "../src/sim/stores/boss";
+import { STAT } from "../src/sim/stats";
+import { bossSlot } from "../src/sim/systems/boss";
+import { actionsHtml, BossBanner, REASON, statusHtml, stripHtml } from "../src/ui/hud";
+import { lossHint } from "../src/ui/sheets";
+import { TIPS } from "../src/ui/tips";
 import { teamHtml } from "../src/ui/team-bar";
 import { pips } from "../src/view/words/cards";
 import { built, run, send, world } from "./td/fixtures";
@@ -145,5 +150,36 @@ describe("the tactical pause and the word dots (review R2)", () => {
     w.calls.done[chop] = 1;
     expect(pips(w, chop)).toBe("●●●○");
     expect(pips(w, makeCall(w, CALL_KIND.power, 1, -1, 0, -1, -1))).toBe("");
+  });
+});
+
+describe("the boss bar and the results card (1B R1 review)", () => {
+  it("a replayed day 5 (its events gone) gets the warning's chip and Bà Cú Mực's line back, one sentence a line", () => {
+    const w = world({ sandbox: false });
+    w.day = 5;
+    run(w, 2);
+    expect(w.boss.stage).toBe(BOSS.warned);
+    const banner = new BossBanner();
+    banner.read([], w, 0); // as main.ts after the replay: no bossWarn left
+    const html = banner.html(w, 0);
+    expect(html).toContain(TIPS.day5!.chip);
+    expect(html).toContain("Bà Cú Mực: Đêm nay Mộc Tinh thức dậy.");
+    expect(html).not.toContain("Dồn tháp");
+    banner.read([], w, 4000);
+    expect(banner.html(w, 4000)).toContain("Bà Cú Mực: Dồn tháp lên nhánh rễ sáng.");
+  });
+
+  it("the stagger's vulnerable countdown is on the bar; the loss hint blames the stagger only when Dồn lửa words were left (the chest on the won card: td-1b-boss)", () => {
+    const w = world({ gold: 5000 });
+    send(w, { t: "sandbox", op: { op: "preset" } }, { t: "sandbox", op: { op: "boss" } });
+    while (w.boss.stage !== BOSS.fight) run(w, 1);
+    w.enemies.hp[bossSlot(w)] = Math.floor(w.boss.hpMax * 0.7);
+    run(w, 2);
+    expect(new BossBanner().html(w, 0)).toMatch(/choáng · Dễ Tổn Thương 5 s/);
+    w.stats[STAT.burstWords] = 2;
+    w.stats[STAT.burstTyped] = 2;
+    expect(lossHint(w)).not.toContain("choáng");
+    w.stats[STAT.burstTyped] = 1;
+    expect(lossHint(w)).toContain("Lúc nó choáng");
   });
 });

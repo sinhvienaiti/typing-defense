@@ -150,6 +150,7 @@ export class DebugView {
     this.soldiers(w);
     this.enemies(w);
     this.boss.over(this.pen, w, now);
+    this.boss.marks(this.pen, w);
     this.npcs(w);
     this.agents(w, hand);
     this.shots(w);
@@ -511,7 +512,6 @@ export class DebugView {
       if (spec.hp[0] > 0 && B.hp[b]! < spec.hp[level - 1]!) this.bar(x, z + r + 0.5, r * 2, B.hp[b]! / spec.hp[level - 1]!, COLOR.buildingHp);
       if (spec.barracks !== null) this.shape(FLAG, B.rallyX[b]!, B.rallyZ[b]!, COLOR.soldier);
       if (spec.mine !== null && B.pile[b]! > 0) this.text("+" + Math.floor(B.pile[b]! / 1000), x + r + 1.2, z, 11, "#7a4f12");
-      if (stunned) this.boss.stunMark(this.pen, w, b);
     }
   }
 

@@ -36,6 +36,7 @@ export function damageEnemy(w: World, e: number, power: number, damageType: numb
     w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 32 + damageType * 8 + source, w.tick);
   }
   E.hp[e] = E.hp[e]! - dmg;
+  if (E.hitAt[e] === 0) E.hitAt[e] = w.tick + 1;
   bump(w.stats, STAT.damageTower + source, dmg);
   bump(w.stats, STAT.hits);
   if (E.hp[e]! <= 0) {

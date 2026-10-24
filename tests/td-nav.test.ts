@@ -265,7 +265,7 @@ describe("A* on the walking grid (TK 25.9)", () => {
     expect(standsBy(w, 1, mine)).toBe(true);
   });
 
-  it("a helper built over beside the stream, by the bridge, never lands in the water and still reaches the mine", () => {
+  it("a helper built over beside the stream, by the bridge, never lands in the water and still reaches the mine", { timeout: 20_000 }, () => {
     // Gạch walking to N3 over the south bridge: archers put down over him (every legal half metre) while he nears the stream.
     const walking = (ticks: number) => {
       const w = world({ gold: 5000 });

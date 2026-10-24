@@ -113,12 +113,12 @@ export class BossBanner {
   }
 
   read(events: readonly RareEvent[], w: World, now: number): void {
+    // A replayed day (Chơi lại Ngày n) drops its events: the warning's chip and line come back from the world (review R1).
+    if (this.chip === "" && w.boss.stage >= BOSS.warned) this.tip(w.phase === "day" ? TIPS.day5! : TIPS.night5!, now);
     for (const e of events) {
       const tip = e.t === "bossWarn" ? TIPS.day5! : e.t === "phase" && e.phase === "night" && w.boss.stage === BOSS.warned ? TIPS.night5! : null;
-      if (tip !== null) {
-        this.chip = tip.chip;
-        this.say(now, ["Bà Cú Mực: " + tip.line, 7000]);
-      } else if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
+      if (tip !== null) this.tip(tip, now);
+      else if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
       else if (e.t === "bossStrike" && e.move === "roots" && !e.hit && !this.rooted) {
         this.rooted = true;
         this.say(now, ["Mộc Tinh: " + BOSS_LINES.roots, 2500]);
@@ -127,6 +127,12 @@ export class BossBanner {
       else if (e.t === "bossStrike" && e.move === "keep" && e.hit) [this.hitAt, this.hitLives] = [now, e.count];
     }
     if (now >= this.until) this.next(now);
+  }
+
+  /** Bà Cú Mực's line, one sentence a line so it stays one line at 1280 × 720 (review R1), and the chip. */
+  private tip(tip: { line: string; chip: string }, now: number): void {
+    this.chip = tip.chip;
+    this.say(now, ...tip.line.split(". ").map((part, k, all): [string, number] => ["Bà Cú Mực: " + part + (k < all.length - 1 ? "." : ""), 3800]));
   }
 
   /** Lives a blow on the Bastion took, for 0.9 s after it (0: none). */
@@ -157,7 +163,7 @@ export class BossBanner {
     else {
       const hp = w.enemies.hp[e]! / S.hpMax;
       const left = Math.max(0, Math.round(w.lanes[w.enemies.route[e]!]!.length - w.enemies.dist[e]!));
-      const phase = S.stage === BOSS.retreat ? "rút lui" : w.tick < S.staggerUntil ? "choáng" : "pha " + S.phase;
+      const phase = S.stage === BOSS.retreat ? "rút lui" : w.tick < S.staggerUntil ? `choáng · Dễ Tổn Thương ${Math.ceil((S.staggerUntil - w.tick) / TICK_HZ)} s` : "pha " + S.phase;
       const pct = (share: number): string => (100 * share).toFixed(1) + "%";
       main = `<div class="td-row"><b>Mộc Tinh</b><small>${phase} · còn ${left} m tới Lũy</small></div>` +
         `<div class="td-bar"><i class="td-ghost" style="width:${pct(this.ghostOf(hp, now))}"></i><i class="td-hp" style="width:${pct(hp)}"></i>` +

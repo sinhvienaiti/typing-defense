@@ -23,7 +23,8 @@ const threads = Math.max(1, Math.min(specs.length, arg("threads", Math.min(6, av
 async function playSet(from: number): Promise<Cell[]> {
   const shares = Array.from({ length: threads }, (_, t) => specs.filter((_, k) => k % threads === t));
   const played = await Promise.all(shares.map((cells) => new Promise<Cell[]>((resolve, reject) => {
-    const worker = new Worker(new URL("./balance-worker.ts", import.meta.url), { workerData: { cells, seeds, from } });
+    const entry = new URL("./balance-worker.ts", import.meta.url).href;
+    const worker = new Worker(new URL("./tsx-worker.mjs", import.meta.url), { workerData: { entry, cells, seeds, from } });
     worker.once("message", resolve);
     worker.once("error", reject);
   })));

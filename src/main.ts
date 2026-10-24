@@ -107,11 +107,14 @@ let runHeader = retry?.header ?? header();
 let startMode: Mode = retry?.mode ?? (params.get("learn") === "1" ? "learn" : "balanced");
 const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader, mode: startMode });
 const world = session.world;
+/** The replay's end, hashed before the first live step (review R1: the scenarios check this, not the kept hashes). */
+let replayed: { day: number; tick: number; hash: string; matched: boolean } | null = null;
 if (retry !== null) {
   runLog(world, retry.log, retry.tick);
-  const same = world.c.hash === retry.content && deck.hash === retry.deck && hashHex(world) === retry.hashes[retry.day];
+  replayed = { day: retry.day, tick: world.tick, hash: hashHex(world), matched: false };
+  replayed.matched = world.c.hash === retry.content && deck.hash === retry.deck && replayed.hash === retry.hashes[retry.day];
   // Another rule or vocabulary since: the run starts over (the replay would not be the run that was lost).
-  if (!same) window.location.search = "?" + new URLSearchParams({ ...Object.fromEntries(params), title: "0" }).toString();
+  if (!replayed.matched) window.location.search = "?" + new URLSearchParams({ ...Object.fromEntries(params), title: "0" }).toString();
   session.log.push(...retry.log);
   session.dayHashes.push(...retry.hashes);
   world.events.rare.length = 0;
@@ -184,7 +187,8 @@ installPointer(canvas, view, {
 function showHud(): void {
   const refused = [...recent].reverse().find((event) => event.t === "rejected" && world.tick - event.tick < 150);
   const notices = [
-    selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", imeWarning ? "Tắt bộ gõ tiếng Việt để gõ" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
+    selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", imeWarning ? "Tắt bộ gõ tiếng Việt để gõ" : "",
+    world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Gỗ thừa: bán gỗ ở thẻ Lũy" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
   ];
   const now = performance.now();
   hud.update([
@@ -303,6 +307,7 @@ installDevHandle({
   // A play-test's numbers for BALANCE.md §7 B9: the run's flow (night meter) and the profile the game keeps.
   balance: () => balanceOf(),
   dayHashes: () => session.dayHashes.slice(),
+  retry: () => replayed,
   hash: () => hashHex(world),
   defs: () => world.c.buildings.map((building) => building.id),
   canPlace: (id: string, x: number, z: number) => canPlace(world, world.c.buildingIndex(id), Math.round(x * 4), Math.round(z * 4)),
