@@ -2,11 +2,12 @@
  * The pause and results cards (SPLIT_PLAN D7): dó paper in the middle of the map, never a HUD panel (the
  * word cards do not part around them). Pause (Esc, the HUD's Ⅱ): Chơi tiếp, Cài đặt, Về màn đầu. Results
  * (BUILD_1B §4.3, §13.1): "Giữ được làng" with its stars stamped one by one, or "Lũy đã vỡ" with a hint read off
- * the run; the numbers, "Từ cần ôn" (the review book's newest five with their meaning); Chơi lại Ngày n (after a
+ * the run, and on a story won the best stars kept (R3: "Kỷ lục ★★", new or not); the numbers, "Từ cần ôn" (the review
+ * book's newest five with their meaning); Chơi lại Ngày n (after a
  * night past the first was lost), Chơi lại (từ đầu), Chép số chơi thử, Xem bản đồ, Về màn đầu.
  * Keyboard first: ↑ ↓ pick, Enter chooses, Esc goes back to the game (or closes the settings).
  */
-import { STARS } from "../content/rules";
+import { starsFor } from "../app/prefs";
 import { STAT } from "../sim/stats";
 import { BOSS } from "../sim/stores/boss";
 import type { World } from "../sim/world";
@@ -15,13 +16,17 @@ import type { SettingsCard } from "./settings";
 
 export type SheetAction = "resume" | "settings" | "title" | "again" | "retry" | "copy" | "map";
 type Button = readonly [action: SheetAction, label: string, key: string];
-/** The results card's run: a story or the sandbox, a "Chơi lại Ngày n" this run came from (0: none), and whether its chunk is in (R3 step 1). */
-export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean };
+/**
+ * The results card's run: a story or the sandbox, a "Chơi lại Ngày n" this run came from (0: none), whether its chunk is in
+ * (R3 step 1), the story's best stars after this run and whether this win set them (R3, td.campaign).
+ */
+export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean; best?: number; record?: boolean };
 
 const PAUSE: readonly Button[] = [["resume", "Chơi tiếp", "Esc"], ["settings", "Cài đặt", ""], ["title", "Về màn đầu", ""]];
 
-/** Stars for the lives left (TK 20.2): 18–20 three, 6–17 two, 1–5 one. */
-export const starsFor = (lives: number): number => STARS.filter((least) => lives >= least).length;
+export { starsFor };
+/** The won card's record line: the best stars kept, "mới" when this win set them (none in the sandbox). */
+export const recordLine = (best: number, record: boolean): string => (best <= 0 ? "" : `<p class="td-best">Kỷ lục${record ? " mới" : ""} <b>${"★".repeat(best)}</b></p>`);
 
 /**
  * The loss card's hint, read off the run (BALANCE §4.3): lost before the boss; it passed the merge with less than half
@@ -82,7 +87,7 @@ export class Sheet {
     this.el.innerHTML =
       (kind === "pause"
         ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ anh. Chữ trên thẻ vẫn ở đó.</p>`
-        : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div><p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
+        : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
           : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w)}</p>`) +
           `<dl>` + (won ? row("Rương", "+" + stats[STAT.goldChest]! / 1000 + " vàng") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
           (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +

@@ -186,6 +186,8 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-stars i.on { color: var(--vd-seal); animation: td-stamp 0.35s ease-out both; }
 .td-stars i.on:nth-child(2) { animation-delay: 0.35s; }
 .td-stars i.on:nth-child(3) { animation-delay: 0.7s; }
+.td-sheet .td-best { margin: 0 0 6px; text-align: center; font-weight: 800; }
+.td-sheet .td-best b { color: var(--vd-seal); letter-spacing: 2px; }
 @keyframes td-stamp { from { opacity: 0; transform: scale(2.2) rotate(-12deg); } to { opacity: 1; transform: none; } }
 .td-sheet .td-hint-line { padding: 6px 10px; border-left: 4px solid var(--vd-seal); background: rgba(255, 250, 235, 0.7); color: var(--vd-ink); font-weight: 700; }
 .td-review ul { margin: 2px 0 6px; padding-left: 18px; }

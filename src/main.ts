@@ -27,12 +27,13 @@ import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
 import { installKeys, installPointer } from "./app/input";
-import { loadSettings } from "./app/prefs";
+import { bestStars, keepStars, loadSettings, storyMode } from "./app/prefs";
 import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
 import { updateSkill } from "./kit/balance";
 import { Selection } from "./app/selection";
 import { Session } from "./app/session";
 import { loadDeck } from "./app/vocab";
+import { SLICE_1A } from "./content/slice-1a";
 import type { Mode } from "./content/types";
 import type { RareEvent } from "./sim/events";
 import { NO_LEARN, setLearn } from "./sim/systems/learn";
@@ -69,7 +70,9 @@ let audio: TypingAudio | null = null;
 const wantSound = (wake: boolean): void => void sound.get().then((m) => ((audio = m), wake && m?.resume()));
 /** A key or a click (the title's too): sound starts, or is asked for again while it is not in. */
 const wakeSound = (): void => (audio === null ? wantSound(true) : audio.resume());
-let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
+let profile = loadSkill(params.get("learn") === "1" ? "learn" : sandbox ? "balanced" : (settings.mode ?? "balanced"));
+/** A fresh run's mode: Học with ?learn=1, the sandbox Cân bằng (its panel switches), the story the settings' (R3, BUILD_1B §14). */
+const freshMode = (): Mode => (params.get("learn") === "1" ? "learn" : sandbox ? "balanced" : storyMode(settings, profile.audience === "child"));
 /** The run header from the profile and the "Nhịp tự điều" setting. */
 const header = () => paceHeader(profile, settings.pace);
 /** Học (app/learn.ts): the run waits for it at tick 0 (its study lists go in the header); one that cannot load plays with none. */
@@ -107,7 +110,7 @@ function showTitle(canContinue: boolean): void {
   void titleChunk.get().then((shown) => {
     title = shown;
     if (shown === null) return void ((titleUp = false), tellLost("Màn đầu chưa tải được: vào thẳng ván · F5 để thử lại"));
-    if (titleUp) shown.show(canContinue);
+    if (titleUp) shown.show(canContinue, bestStars()[SLICE_1A.id] ?? 0);
   });
 }
 /**
@@ -143,8 +146,8 @@ const replay = retryLoad === null ? null : await retryLoad;
 if (kept !== null && replay === null) tellLost("Chơi lại Ngày n chưa tải được: ván mới từ đầu · F5 để thử lại");
 const retry = kept === null || replay === null ? null : replay.readRetry(kept, seed, sandbox);
 let runHeader = retry?.header ?? header();
-/** The run's mode at its start (the replay's header): Học with ?learn=1 or the title's choice. */
-let startMode: Mode = retry?.mode ?? (params.get("learn") === "1" ? "learn" : "balanced");
+/** The run's mode at its start (the replay's header): Học with ?learn=1 or the title's choice, else the settings' (freshMode). */
+let startMode: Mode = retry?.mode ?? freshMode();
 const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader, mode: startMode });
 const world = session.world;
 /** The replay's end (__td.retry()); another rule or vocabulary since the run was kept: the run starts over. */
@@ -176,7 +179,8 @@ choose = (choice) => {
   if (choice === "continue") selection.paused = false;
   else if (begun) return void (window.location.search = freshRun(choice === "learn"));
   else if (choice === "learn") learnMode();
-  // Settings changed on the title apply to this run while it has not stepped (BALANCE.md §4.1: set before the run).
+  else if (world.tick === 0 && retry === null) setMode(world, (startMode = freshMode()));
+  // Settings changed on the title apply to this run while it has not stepped (BALANCE.md §4.1: set before the run; R3: the mode too).
   if (world.tick === 0) setPace(world, (runHeader = header()));
   begun = true;
   titleUp = false;
@@ -265,6 +269,8 @@ installPointer(canvas, view, {
   },
 });
 
+/** The story won: its stars kept in td.campaign, once (BUILD_1B §4.3, R3; a replayed day's win too). */
+let won: ReturnType<typeof keepStars> | null = null;
 let sheetAsked = -Infinity;
 let panelAsked = -Infinity;
 function showHud(): void {
@@ -303,7 +309,7 @@ function showHud(): void {
     banner.teachHtml(world),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
-  sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null });
+  sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null, best: won?.best ?? 0, record: won?.record === true });
 }
 
 /** The boss bar takes the top of the screen from its warning on: the field moves down under it (BUILD_1B §13.1). */
@@ -339,6 +345,7 @@ runFrameLoop({
       session.paused = selection.halted || titleUp || (world.tick === 0 && !learnChunk.settled);
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
+      if (!sandbox && won === null && world.phase === "victory") won = keepStars(world.c.content.id, world.lives);
       const fresh = world.events.rare.splice(0);
       if (banner.tips === null && fresh.some((event) => event.t === "phase")) wantTips();
       learner?.read(fresh, world, now);

@@ -7,6 +7,7 @@
  * goes back to the run left open; while the title is up it takes every key and the world does not step.
  * "Hồ sơ gõ" opens the typing profile (BALANCE.md §2) in the menu's place, as "Cài đặt" opens the settings. Those two
  * cards are chunks of their own (BUILD_1B §20, R2 review fix 2): asked for when picked, an error sound if one cannot load.
+ * "Bắt đầu" shows the best stars of map 1 once it was won (td.campaign, BUILD_1B §4.3, R3).
  */
 import type { UiSound } from "../view/audio-min";
 import type { ProfileCard } from "./profile";
@@ -24,6 +25,8 @@ const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
   ["profile", "Hồ sơ gõ", "Tốc độ, độ chính xác, một lời khuyên"],
 ];
 const LAMP_MS = 380;
+/** The best stars on "Bắt đầu" (none before a win). */
+export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Kỷ lục ${best} sao">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
 
 /** A seeded wobble for the painted scene: the same shapes every load. */
 const wob = (k: number): number => {
@@ -186,9 +189,10 @@ export class TitleScreen {
     return !this.el.hidden;
   }
 
-  /** Shows the title; "Chơi tiếp" is open only with a run left to go back to. Lanterns light one by one. */
-  show(canContinue: boolean): void {
+  /** Shows the title; "Chơi tiếp" is open only with a run left to go back to; `best`: map 1's stars. Lanterns light one by one. */
+  show(canContinue: boolean, best = 0): void {
     this.el.hidden = false;
+    this.entries[0]!.querySelector("small")!.innerHTML = ENTRIES[0]![2] + bestHtml(best);
     if (canContinue) this.off.delete("continue");
     else this.off.add("continue");
     this.settings?.close();
