@@ -1283,3 +1283,23 @@ Kế hoạch: `docs/td/R3_PLAN.md` (việc theo file, thứ tự, dạng dữ li
 **Quyết định của đợt kế hoạch** (đã chọn theo đề xuất, chủ dự án đổi được; chi tiết `R3_PLAN.md` §5): A1 "gặp" là từ ra thẻ sáng; A2 Từ Ôn quay lại 25–45 s bằng luồng `words`; A3 một Từ Ôn cho lời gọi kinh tế ≥ 4 từ; A4 Chuộc lại khi không lỗi hoặc hạng ≥ Tốt; A5 R3 chưa hỏi cổng cha; A6 sổ sim 20, sổ lưu 40; A7 túi cấp hiện tại giữ như nay; A8 sự kiện học và sổ ôn ở cả truyện và hộp cát; A9 chip ở lại cả Ngày, Đêm; A10 giữ mục "Học" của màn đầu; A11 Neo để chạy không phạt thêm; A12 vòm Troll chỉ giảm đạn bay; A13 `td-1b-story` tới Ngày 3 bằng nhật ký bot; A14 núm 1 của cân bằng là "Rễ hút sinh khí".
 
 **Số dòng:** 9.670 (không đổi; đợt này chỉ có tài liệu). Ước sau R3 ~10.270 (trần 10.500).
+
+**Phần A (bước 1–6, 25–26/10/2026; changelog `docs/changelog/2026-10-26-td-r3-part-a.md`).** Số Apple M4, bản dựng trên Mac. Bằng chứng (ngoài Git): `tmp/mac-2026-10-25/r3/` (nhật ký `pnpm check`, ảnh và nhật ký kịch bản, cây dựng thử `probe-*`).
+
+| Bước | Commit | "/" gzip (chừa) | Dòng `.ts` | Ghi chú |
+|---|---|---|---|---|
+| trước R3 | `89e2494` | 82,04 (2,96) | 9.670 | |
+| 1 tách chunk | `121ccae` | 80,84 (4,16) | — | `dev-tools` 1,40 kB, `retry` 0,86 kB nạp sau |
+| 2 Học trong sim | `ed594d0` | 81,78 (3,22) | 10.057 | file vàng làm lại (changelog) |
+| 3–4 Học ở app, thẻ chữ | `d39f5c1` | 80,64 (4,36) | 10.113 | `chunkOf`: cổng portal và sự kiện học của kit đi cùng chunk `learn` (3,22 kB) |
+| 5 bảng dạy | `aef8c16` | 80,81 (4,19) | — | chunk `tips` 1,11 kB |
+| 6 Chế độ, sao | `9767b19` | 81,25 (3,75) | 10.255 | `?title=0` 79,85 kB |
+
+- **Test:** 322 test / 29 file (bước 6). Mới: `td-learn-app` (9: kho, kế hoạch, khởi động lạnh, gộp sổ, `seen`, sự kiện học, luật nghĩa), `td-tips` (6: bảng §12, khung, ≤ 2 câu mỗi pha, hộp cát, dòng "làm gì"), `td-settings` (6: Chế độ, sao, `td.campaign`). `td-chunks` kiểm `chunkOf` trên một đồ thị mẫu và việc `main.ts` không nhập thẳng `app/learning.ts`.
+- **File vàng:** chỉ bước 2 đổi (lý do ở changelog); bước 3–6 `pnpm td:golden:check` ra `same: true` (19.147 và 5.306 tick, nội dung `d8a963d2`).
+- **Khung câu dạy:** ở giữa đỉnh màn nó che Khe Nứt cả pha (ảnh thử ở `tmp/mac-2026-10-25/r3/probe/`), nên khi chưa có boss nó nằm góc phải trên, ngoài sân: rộng 304 px ở 1280 × 720 và 444 px ở 1920 × 1080 (CSS lấy chỗ trống bên phải sân, không dưới 284 px × hud). Chip xuống dòng giữa hai phần, không giữa một phần. Từ lời báo Ngày 5, hai hàng boss ở thanh boss như R1 (`R3_PLAN.md` §5 A16, A17).
+- **Kịch bản trên mã `9767b19`** (26/10 00:40–01:09, Chrome 155 macOS có GPU, máy chủ dev cổng 3006, chạy dưới `heavy.sh --gpu` xen với lượt `dh-*` của làn Rồng): 18/18 lượt đạt (9 kịch bản), mỗi kịch bản ở 1280 × 720 và 1920 × 1080, 0 lỗi console ngoài lỗi cố ý của `td-1b-chunks`, 0 ngoại lệ, nhật ký chạy lại trên Node khớp ở mọi kịch bản có kiểm.
+  - Mới: `td-1b-learn` (14 kiểm), `td-1b-story` (17 kiểm), và lượt chặn `learn` + `tips` của `td-1b-chunks` (ván vẫn chạy tới tick 160 sau khi chunk Học bỏ cuộc, đầu ván không danh sách, khung câu trống, đúng hai lỗi console tên hai chunk đó).
+  - Chạy lại vì đợt này chạm tới: `td-theme` (Cài đặt có thêm dòng), `td-1b-build` (thẻ nhà ở truyện có dòng "làm gì"; mọi thẻ cấp 3 vẫn vừa), `td-1b-night5` (hai hàng boss ở hộp cát và sau "Chơi lại Ngày 5"), `td-1b-boss`, `td-1a-boot`, `td-balance` (Cài đặt, dòng nhịp).
+  - Ảnh đã xem; sửa từ ảnh: khung câu dời khỏi giữa đỉnh màn (che Khe Nứt), chip xuống dòng giữa hai phần, sao vàng trên dòng "Bắt đầu" đang chọn (đỏ trên đỏ không đọc được), nhãn "Chế độ (truyện)" để dòng phụ vừa một dòng.
+- **Còn mở trước phần B:** 11 kịch bản cũ chưa chạy lại trên Mac (bước 10); lượt cân bằng chưa chạy vì bot chưa chơi Học (bước 8) nên luật của bot không đổi.

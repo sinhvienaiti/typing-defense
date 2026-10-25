@@ -112,7 +112,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 | Hết ải | Thắng hoặc thua: sim dừng, màn kết | Như truyện |
 
 - Danh sách đợt của ải có 5 đợt. Truyện không có đêm vô tận. Hộp cát giữ đợt 6 hiện có (4 Thuồng Luồng, 20 Cương Thi, 4 Ma Trơi) và luật lặp đợt cuối tăng 15 % cho "Sinh đêm" thêm và thử tải; không boss ở đợt thêm.
-- Chế độ (Thư giãn, Cân bằng, Thử thách, Học) chọn ở Cài đặt (R3); trước R3 truyện chạy Cân bằng, `?learn=1` chạy Học.
+- Chế độ (Thư giãn, Cân bằng, Thử thách, Học) chọn ở Cài đặt (R3); trước R3 truyện chạy Cân bằng, `?learn=1` chạy Học. Đã làm (R3 phần A): dòng "Chế độ (truyện)" mặc định "Theo hồ sơ" (trẻ em Thư giãn, người lớn Cân bằng); hộp cát vẫn bắt đầu ở Cân bằng, đổi bằng bảng hộp cát.
 
 ### 4.2 Thành phần các Đêm
 
@@ -132,7 +132,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 
 - **Thắng:** Mộc Tinh rút lui (§5.4). Mọi quái còn trên sân tan thành mực (không vàng, không lọt). Pha `victory`, sim dừng.
 - **Thua:** mạng Lũy về 0 (như nay), pha `defeat`.
-- **Sao** (TK 20.2): thắng với 18–20 mạng: 3 sao; 6–17: 2 sao; 1–5: 1 sao. Màn kết in sao, mạng, quái hạ, từ gõ, lời gọi Hoàn hảo, Tri thức, và **"Từ cần ôn"**: tối đa 5 từ mới nhất trong sổ ôn, kèm nghĩa (chỉ view, đọc sổ ôn đã có). Lưu sao tốt nhất ở `td.campaign` (R3; R1 chỉ hiện).
+- **Sao** (TK 20.2): thắng với 18–20 mạng: 3 sao; 6–17: 2 sao; 1–5: 1 sao. Màn kết in sao, mạng, quái hạ, từ gõ, lời gọi Hoàn hảo, Tri thức, và **"Từ cần ôn"**: tối đa 5 từ mới nhất trong sổ ôn, kèm nghĩa (chỉ view, đọc sổ ôn đã có). Lưu sao tốt nhất ở `td.campaign` (R3; R1 chỉ hiện). Đã làm (R3 phần A): ghi khi truyện thắng, cả khi thắng sau "Chơi lại Ngày n"; "Bắt đầu" ở màn đầu hiện ★★☆, thẻ thắng hiện "Kỷ lục ★★" ("Kỷ lục mới" khi vừa lập).
 - Bot và FlowMeter: thắng là `won`, S = mạng còn / 20 lúc kết ải (thua tính 0), như BALANCE §3.
 - **Chơi lại từ Ngày n** (R1, TK 20.5 "ván dở"): màn thua có hai nút, "Chơi lại Ngày n" (n là ngày của đêm vừa thua; nút chính khi n ≥ 2) và "Chơi lại từ đầu".
   - App ghi tick bắt đầu và mã băm của mỗi Ngày. Chơi lại Ngày n: tạo thế giới mới cùng seed, cùng đầu ván (E, k, bộ điều nhịp, chế độ), chạy nhật ký lệnh tới tick đầu Ngày n (bỏ lệnh sau đó), so mã băm đã ghi. Khác thì báo lỗi và chơi lại từ đầu. Chạy ~27.000 tick mất < 1 s (bước sim p95 0,03 ms).
@@ -444,6 +444,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 
 - Một sự kiện mỗi từ gõ xong, gộp gửi mỗi 5 s qua `learningBridge()` (kit `learning`, `gameId` `typing-defense`): `buildCombatLearningEvent` cho từ lời gọi (đúng khi không Ẩu), `buildRecallLearningEvent` cho Hỏi bài. `activityType` theo kit (`typing`, `recall`); tên `defense-*` của TK §0.6 chỉ dùng khi cổng cha nhận (kiểm ở cổng cha, không sửa kit).
 - Gửi từ app, không từ sim; chạy lại không gửi.
+- **Đã làm (R3 bước 2–4, 25–26/10/2026; `R3_PLAN.md` §3.2–§3.4, `BUILD_NOTES.md` §7.7):** sim (`sim/systems/learn.ts`) và app (`app/learn.ts`, chunk riêng đi cùng cổng portal `app/learning.ts`) như §11.1–§11.5. Ván chờ chunk này ở tick 0 để đặt đầu ván; chunk không tải được thì ván chạy không có danh sách nào (túi cấp hiện tại như R2), không lưu sổ, không gửi sự kiện. Kịch bản `td-1b-learn`.
 
 ---
 
@@ -468,6 +469,7 @@ Một bảng duy nhất (TK 20.4 đổi theo Lời Gọi). Mỗi ý mới một 
 - Bot theo cùng lịch mở **từ R1** (§18.1): R1 cân bằng một lần với nó; R3 chỉ thêm câu chữ, không đổi luật, nên không phải chỉnh lại.
 - Hai hàng boss (Ngày 5, Đêm 5) làm ở R1 bằng dải mực HUD có sẵn: boss là ý mới khó nhất, chủ dự án chơi R1 phải được dạy. Mọi câu còn lại ở R3.
 - Câu chữ ở `src/ui/tips.ts` (chỉ view; R1 tạo file với hai hàng boss); lịch mở ở dữ liệu luật.
+- **Đã làm (R3 phần A, 26/10/2026; `R3_PLAN.md` §3.5, `BUILD_NOTES.md` §7.7):** `ui/tips.ts` là chunk riêng, có đủ 10 hàng và dòng "làm gì" của 5 nhà. Đầu mỗi Ngày, Đêm của truyện, từ bước đầu (màn đầu còn mở thì chưa), Bà Cú Mực nói hai câu, mỗi câu 3,8 s; chip ở lại tới hết pha. Khung câu nằm **góc phải trên, ngoài sân** khi chưa có boss: ở giữa đỉnh màn nó che Khe Nứt, chỗ quái ra (ảnh `td-1b-story`). Từ lời báo Ngày 5, hai hàng boss vẫn ở thanh boss như R1. Hộp cát vẫn hiện hai hàng boss khi lệnh `boss` hay `skipTo` báo Mộc Tinh (như R1; `td-1b-night5` kiểm), không hiện hàng nào khác. Câu và chip Ngày 1 rút còn 14 và 8 âm tiết ("Lúa chín, bác nông dân gọi.", "Gõ chữ đầu để chọn · Esc để thôi"). Dòng "làm gì" hiện trên thẻ nhà và dưới bảng Xây cho loại đang chọn, chỉ ở truyện, khi nhà đã mở và hàng dạy nó chưa tới.
 
 ---
 

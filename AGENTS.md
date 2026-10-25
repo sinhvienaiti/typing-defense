@@ -54,8 +54,14 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   thử" out of it frees 1.86 kB, measured on Mac builds), then Học, the teaching table, the mode
   setting and stars, the sandbox's R3 enemies, the balance pass (a boss-peak life drain, then
   `LENGTH_BY_E` with `kHp2`). Baseline on the Apple M4 (Chrome tracing at 60 Hz): the main thread
-  1.32 ms a frame (game frame 0.91, commit 0.21). Next: R3 step 1; the owner's playtest
-  of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
+  1.32 ms a frame (game frame 0.91, commit 0.21). **R3 part A built** (steps 1–6, §7.7,
+  `docs/changelog/2026-10-26-td-r3-part-a.md`): `__td` and "Chơi lại Ngày n" out of the entry chunk; Học in the sim
+  (Từ Ôn, the saved book at tick 0, the study plan) and at the page (`app/learn.ts`: planned before tick 0, words seen,
+  learning events every 5 s, the book kept in `typing-defense.learn`); the meaning rule and the jade Từ Ôn card; the
+  teaching table (`ui/tips.ts`: Bà Cú Mực's rows top right, off the field; "làm gì" lines on building cards); the
+  "Chế độ (truyện)" setting and the stars in `td.campaign`. "/" 81.25 kB gzip (3.75 kB headroom, Apple M4 build),
+  10,255 lines, 322 tests. Next: R3 part B (step 7 the sandbox's R3 enemies, step 8 the bots' Học, step 9 the balance
+  pass, steps 10–11); the owner's playtest of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
@@ -107,11 +113,19 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   boss's rise); the charge ring on Draconis' lantern
   (`team-bar.ts`), the action button (`hud.ts`). Sandbox ops `spawn`, `ult`.
   Bot habits `tests/td/policies/ult.ts` (`ultRule`, `dodgeRoots`).
+- 1B R3 part A (`R3_PLAN.md`): Học in the sim `src/sim/systems/learn.ts` (store `w.learn`, the book's due ticks and
+  returns in `w.typing`, hashed; the run header's `learn` lists), at the page `src/app/learn.ts` (`planFor`, `Learner`;
+  key `typing-defense.learn`; the portal bridge `app/learning.ts` rides in this chunk), the meaning rule `meaningShown`
+  in `view/words/cards.ts`; the teaching table `src/ui/tips.ts` (`TIPS`, `DOES`, `doesLine`) shown by `BossBanner`
+  (`teachHtml`: panel `td-tip`, top right) in `ui/hud.ts`; the mode setting and the stars in `app/prefs.ts`
+  (`storyMode`, `keepStars`, key `td.campaign`), `ui/settings.ts`, `ui/title.ts`, `ui/sheets.ts`.
 - Chunks (BUILD_1B §20, R2 review and its second fix): `vite.config.ts` keeps what the
   game needs to start as one chunk; the title (`ui/title.ts`), the settings card
   (`ui/settings.ts`, the stored settings in `app/prefs.ts`), Hồ sơ gõ (`ui/profile.ts`),
   the pause and results cards (`ui/sheets.ts`), the sandbox panel (`app/sandbox.ts`) and
-  sound (`view/audio-min.ts`, `folk.ts`, `music.ts`) load by `import()` in `main.ts`
+  sound (`view/audio-min.ts`, `folk.ts`, `music.ts`), and since R3 `__td` (`app/dev-tools.ts`), "Chơi lại Ngày n"
+  (`app/retry.ts`), Học (`app/learn.ts`, which the run waits for at tick 0) and the teaching table (`ui/tips.ts`)
+  load by `import()` in `main.ts`
   through `Chunk` (`app/chunks.ts`: 3 tries, then one console error and a fallback: the
   title is skipped, a missing pause or results card is told in the HUD; asked again after
   15 s). At `/` the page waits for the title only; Hồ sơ gõ loads when picked, the settings
@@ -121,7 +135,8 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   sound; R2 review fix 3). `__td.ready()` waits for the ones the page wants (loaded or given
   up); `__td.chunks()` says which are in. `scripts/bundle-budget.mjs` (run by
   `pnpm build`) reads Vite's manifest and fails the build when a start page's set (`/`:
-  the entry chunk and the title) passes 85 kB gzip; it prints the headroom.
+  the entry chunk and the title; `?title=0`: the entry and Học) passes 85 kB gzip; it prints the headroom.
+  `vite.config.ts` `chunkOf` keeps in the entry chunk only what main.ts imports statically without passing a lazy module.
   `td-1b-chunks` blocks a chunk in the browser and checks the fallbacks.
 - Balance (parent `docs/games/BALANCE.md` §9.2; `docs/td/BUILD_NOTES.md` §6): the typing profile
   `src/app/skill.ts` (kit key `typing-defense.skill`, folded after each day and night) gives the run header
@@ -155,6 +170,7 @@ pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B
                          #   --set=slice.enemies.3.hp=4300 --set=POWER.quick=0.8 … (numbers overridden in every worker, printed on top)
 node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable: --khp2, --modehp, --quick, --woodgold, --tl, …)
 node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json  # a long bot run kept as "Chơi lại Ngày n" keeps it (td-1b-night5 uses it)
+node --import tsx scripts/td/retry-log.ts --seed=7 --end --out=tmp/won.json  # R3: the bot's whole story kept at its end (td-1b-story: the won card, td.campaign)
 pnpm td:golden:check     # golden runs must match tests/golden/td-1a.json and td-1b-boss.json
 pnpm td:golden:update    # remake both goldens after an intended change
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
@@ -169,6 +185,9 @@ URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scr
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-ult.mjs --width=1280 --height=720     # =, feathers, Chữ Chiêu typed / left alone
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720  # Tanuki: Ngắt typed, let run (heal), ≤ 2 cards
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-chunks.mjs --width=1280 --height=720  # a chunk blocked: title skipped, pause told in the HUD; card, sandbox panel and sound asked again after the cool-down (back where the browser fetches a failed import again)
+# 1B R3 (dev server on 3006, as the lane's strict port on the Mac):
+URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-learn.mjs --width=1280 --height=720  # meanings by the rule, Từ Ôn back and redeemed, the book across a reload, learning events
+URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-story.mjs --width=1280 --height=720  # the teaching table (day 1, night 1, day 3 replayed), the mode setting, the stars of a won run
 # Perf numbers need a Chrome with a GPU (Chrome in WSL draws in software): on the Dell, Windows node + Windows Chrome,
 # then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2. On the Mac mini M4 the macOS
 # Chrome draws with the GPU: run cdp-run as above, under the parent's .local/bin/heavy.sh --gpu (BUILD_NOTES §7.6).
