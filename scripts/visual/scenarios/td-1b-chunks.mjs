@@ -11,6 +11,9 @@
 //   retry   (R3 step 1, docs/td/R3_PLAN.md §3.1) "?sandbox=1" with app/retry.ts blocked: __td still comes (its own chunk),
 //           a lost night 2 shows the results card without "Chơi lại Ngày 2" (its first button "Chơi lại"), the HUD tells
 //           the missing chunk with "F5 để thử lại", one console error names it
+//   learn, tips (R3 part A) the story at "?title=0" with Học (app/learn.ts, which the first step waits for) and the
+//           teaching table (ui/tips.ts) blocked: the run still steps once Học is given up, with no study lists and no
+//           row in the teaching frame; the console errors name those two chunks only
 // Whether a chunk can come back depends on the browser: Chrome for Testing 156 (the Dell) fetches a failed dynamic
 // import again, Chrome 155 (the Mac) keeps the failure until the page reloads. A probe import tells which; a browser
 // that fetches again must show the card, the panel and sound; one that keeps the failure must show that the page asked
@@ -101,6 +104,17 @@ export default async function (page) {
   const retryLogs = page.logs.slice(retryFrom).filter((line) => line.startsWith("error"));
   await page.send("Network.setBlockedURLs", { urls: [] });
 
+  // 5. Học and the teaching table blocked (R3 part A): the story still starts, with no lists and no row.
+  await page.send("Network.setBlockedURLs", { urls: ["*src/app/learn.ts*", "*src/ui/tips.ts*"] });
+  const learnFrom = page.logs.length;
+  await page.goto(base + "/?title=0", { settle: 300 });
+  const learnSteps = await until(page, "return t.ready() && t.state().tick > 60;", 25000, 250);
+  await page.sleep(1500);
+  const learnRun = await page.eval(td("return { learn: t.flags().learn, chunks: t.chunks(), frame: document.querySelector('.td-tip')?.textContent ?? '', tick: t.state().tick };"));
+  await shot("learn-tips");
+  const learnLogs = page.logs.slice(learnFrom).filter((line) => line.startsWith("error"));
+  await page.send("Network.setBlockedURLs", { urls: [] });
+
   const checks = {
     titleSkipped: skipped === true && titleSteps.b > titleSteps.a,
     titleNotice: /Màn đầu chưa tải được/.test(titleNotice ?? ""),
@@ -121,8 +135,11 @@ export default async function (page) {
     retryCardWithout: Array.isArray(lostCard) && !lostCard.includes("retry") && lostCard[0] === "again",
     retryNotice: /Chơi lại Ngày n chưa tải được · F5 để thử lại/.test(retryNotice ?? ""),
     retryError: retryLogs.filter(expected).length >= 1 && retryLogs.filter(expected).every((line) => line.includes("the retry chunk")),
+    learnBlockedRunSteps: learnSteps === true && learnRun?.chunks?.learn === false && learnRun.chunks.tips === false,
+    learnBlockedNoLists: learnRun !== null && ["book", "due", "fresh"].every((list) => learnRun.learn?.[list]?.length === 0) && learnRun.frame === "",
+    learnTipsErrors: ["learn", "tips"].every((name) => learnLogs.some((line) => expected(line) && line.includes(`the ${name} chunk`))) && learnLogs.filter(expected).every((line) => /the (learn|tips) chunk/.test(line)),
     noOtherErrors: page.logs.filter((line) => line.startsWith("error") && !expected(line)).length === 0,
     noExceptions: page.exceptions.length === 0,
   };
-  return finish(page, checks, { browserFetchesFailedImportAgain: refetches, titleNotice, dock: dock.slice(0, 80), pauseNotice, panelNotice, pauseAgain, blocked, waited, after, titleLogs, sheetLogs, lostCard, retryNotice, retryLogs });
+  return finish(page, checks, { browserFetchesFailedImportAgain: refetches, titleNotice, dock: dock.slice(0, 80), pauseNotice, panelNotice, pauseAgain, blocked, waited, after, titleLogs, sheetLogs, lostCard, retryNotice, retryLogs, learnRun, learnLogs });
 }
