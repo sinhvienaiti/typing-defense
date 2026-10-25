@@ -90,7 +90,7 @@ export function installDevTools(ctx: DevContext): void {
         // R2: Tối Thượng; the enemies with a mechanic (drumming until castEnd, stunned until stunUntil).
         ult: { ...world.ult, aimed: undefined },
         foes: world.enemies.live().filter((e) => world.c.enemies[world.enemies.def[e]!]!.ability !== null || world.c.enemies[world.enemies.def[e]!]!.def.split !== undefined).map((e) => ({
-          id: world.enemies.id(e), def: world.c.enemies[world.enemies.def[e]!]!.id, x: world.enemies.x[e]!, z: world.enemies.z[e]!, hp: world.enemies.hp[e]!, castEnd: world.enemies.castEnd[e]!, stunUntil: world.enemies.stunUntil[e]!,
+          id: world.enemies.id(e), def: world.c.enemies[world.enemies.def[e]!]!.id, x: world.enemies.x[e]!, z: world.enemies.z[e]!, hp: world.enemies.hp[e]!, castEnd: world.enemies.castEnd[e]!, stunUntil: world.enemies.stunUntil[e]!, takenUntil: world.enemies.takenUntil[e]!,
         })),
         agents: A.live().map((a) => ({
           x: A.x[a]!, z: A.z[a]!, mode: A.mode[a]!, goal: A.goal[a]! < 0 ? -1 : B.id(A.goal[a]!), panic: A.panic[a]!,

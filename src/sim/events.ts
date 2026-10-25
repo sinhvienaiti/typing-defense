@@ -49,7 +49,7 @@ export type RareEvent = { tick: number } & (
   | { t: "stun"; building: number; until: number }
   | { t: "ult"; x: number; z: number } // Tối Thượng cast (R2)
   | { t: "drum"; enemy: number; end: number } // a mechanic begins, its direct call's window to `end`
-  | { t: "direct"; enemy: number; ok: boolean; x: number; z: number } // broken by its word, or let run (healed)
+  | { t: "direct"; enemy: number; ok: boolean; x: number; z: number; verb: number } // broken by its word, or let run; verb: Ngắt, Neo, Phá Khiên (VERBS)
   | { t: "panic"; agent: number }
   | { t: "review"; item: number; redeemed: boolean } // a Từ Ôn typed (R3): item its deck index; redeemed out of the book
   | { t: "waveStart"; wave: number }

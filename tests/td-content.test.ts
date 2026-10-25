@@ -20,7 +20,7 @@ describe("1A content", () => {
     expect(validateContent(SLICE_1A)).toEqual([]);
     const c = compile(SLICE_1A);
     expect(c.buildings.map((building) => building.id)).toEqual(["keep", "archer", "cannon", "barracks", "gold-mine", "farm"]);
-    expect(c.enemies.map((enemy) => enemy.id)).toEqual(["cuong-thi", "ma-troi", "thuong-luong", "moc-tinh", "mam-go", "tanuki", "nuppeppo", "nuppeppo-con"]);
+    expect(c.enemies.map((enemy) => enemy.id)).toEqual(["cuong-thi", "ma-troi", "thuong-luong", "moc-tinh", "mam-go", "tanuki", "nuppeppo", "nuppeppo-con", "cuong-thi-lead", "troll"]);
     for (const wave of SLICE_1A.waves.list) for (const entry of wave) expect(c.enemyIndex(entry.enemy)).toBeGreaterThanOrEqual(0);
     expect(c.content.hero.affinity.every((id) => c.buildingIndex(id) > 0)).toBe(true);
   });

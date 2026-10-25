@@ -27,7 +27,7 @@ export function sandboxOp(op: string, value: string, w: World, focus: number): S
   if (op === "level") return { op, building: focus, value: Number(value) };
   if (op === "gold") return { op, value: Math.floor(w.gold / 1000) + Number(value) };
   if (op === "wood") return { op, value: w.wood + Number(value) };
-  if (op === "spawn") return { op, enemy: value, value: value === "tanuki" ? 1 : 3 };
+  if (op === "spawn") return { op, enemy: value, value: value === "nuppeppo" ? 3 : 1 };
   if (op === "ult") return { op };
   return { op, value: op === "mode" ? value : Number(value) } as SandboxOp;
 }
@@ -87,6 +87,8 @@ export class Selection {
   /** `name`, `name:value`, or `sb:<op>:<value>` for the sandbox. */
   act(action: string): void {
     const [name = "", arg = "", value = ""] = action.split(":");
+    // R3: a Đầu Đàn comes with a pack of 5 to lead (Neo needs 4 by it), on the same road at the same tick.
+    if (name === "sb" && value === "cuong-thi-lead") this.send({ t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } });
     if (name === "sb") this.send({ t: "sandbox", op: sandboxOp(arg, value, this.w, this.focus) });
     else this.actions[name]?.(Number(arg));
     this.update();

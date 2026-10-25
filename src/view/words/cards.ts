@@ -18,6 +18,7 @@ import { LEARN } from "../../content/rules";
 import type { Grade, Mode } from "../../content/types";
 import type { RareEvent } from "../../sim/events";
 import { CALL_KIND } from "../../sim/stores/calls";
+import { verbOf } from "../../sim/systems/direct";
 import type { World } from "../../sim/world";
 import { gloss, wordText } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
@@ -29,6 +30,12 @@ export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", pe
 export const CALL_COLOR = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD", "#F2994A", "#C23B22"] as const;
 export const CALL_ICON = ["🏹", "🔨", "🌾", "🪓", "⛏️", "📖", "🔥", "✋"] as const;
 export const CALL_NAME = ["Bắn mạnh", "Xây", "Gặt", "Chặt", "Đào", "Hỏi bài", "Chữ Chiêu", "Ngắt"] as const;
+/** Call c's icon and name; a direct call's by its enemy's verb (R3: Ngắt, Neo, Phá Khiên). */
+export function callLabel(w: World, c: number): [string, string] {
+  const kind = w.calls.kind[c]!;
+  const verb = kind === CALL_KIND.direct ? verbOf(w, c) : 0;
+  return verb > 0 ? [["", "⚓", "🛡️"][verb]!, ["", "Neo", "Phá Khiên"][verb]!] : [CALL_ICON[kind]!, CALL_NAME[kind]!];
+}
 /**
  * BUILD_1B §11.1 (R3): the meaning under a word before it is typed: always in Học and Thư giãn and for a child, else
  * while the word was seen at most twice (Cân bằng) or once (Thử thách), this sighting counted; `seen` null (Học's chunk
@@ -131,7 +138,7 @@ export class WordCards {
     });
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     card.el.style.setProperty("--agent", "transparent");
-    card.el.dataset.icon = CALL_ICON[kind];
+    card.el.dataset.icon = callLabel(w, c)[0];
     // A "Dồn lửa" call: amber (BUILD_1B §13.1); R2 (§13.3): Chữ Chiêu glows orange, a direct call is a scroll with its window's clock.
     card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (back ? " is-review" : "") + (w.calls.burst[c] === 1 ? " is-burst" : "") + (kind === CALL_KIND.ult ? " is-ult" : kind === CALL_KIND.direct ? " is-direct" : "");
     card.sub.textContent = card.learn && !card.quiz ? card.mean : "";

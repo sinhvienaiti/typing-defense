@@ -35,6 +35,8 @@ export class EnemyStore extends Slots {
   readonly abilityAt = new Int32Array(this.cap);
   readonly blast = new Uint8Array(this.cap);
   readonly burnBy = new Uint8Array(this.cap);
+  /** R3 (BUILD_1B §9.2 Neo): it takes ×takenMul until this tick. */
+  readonly takenUntil = new Int32Array(this.cap);
 
   add(def: number, hp: number, altitude: number, route: number, wave: number, lateral: number): number {
     const slot = this.take();

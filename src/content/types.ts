@@ -87,11 +87,16 @@ export type EnemyDef = {
 };
 
 /**
- * Ngắt (BUILD_1B §9.2, TK 9.2): with `need` other enemies within radiusM, its cooldown past and (reachM) the rim of an
- * attack building within reachM, it stands and drums for the direct call's window; broken, it is stunned stunS and drops
- * `gold`; let run, every enemy within radiusM heals healPct.
+ * The three verbs of BUILD_1B §9.2, each a mechanic a direct call breaks (window T). Ngắt (interrupt): it stands and
+ * drums; broken: stunned stunS, `gold`; let run: radiusM heals healPct. Neo (anchor, R3): broken, the pack within radiusM
+ * stands freezeS and the leader takes ×takenMul for takenS; its aura ×auraSpeed within radiusM is always on. Phá Khiên
+ * (shield, R3): a dome of domeM rides on it for T (shots from outside ×outsideMul); broken: stunned stunS, none for lockS.
+ * Each starts with `need` others within radiusM and an attack building's rim within reachM; cooldownS from its end.
  */
-export type AbilitySpec = { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number };
+export type AbilitySpec =
+  | { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number }
+  | { verb: "anchor"; cooldownS: number; radiusM: number; need: number; reachM: number; freezeS: number; takenMul: number; takenS: number; auraSpeed: number }
+  | { verb: "shield"; cooldownS: number; reachM: number; domeM: number; outsideMul: number; stunS: number; lockS: number };
 
 /** `affinity`: building ids where the hero's passive applies (its Word Shots set enemies burning). */
 export type HeroDef = { id: string; flySpeed: number; takeoffS: number; landS: number; attack: AttackSpec; affinity: readonly string[]; burn: { dps: number; durationS: number }; view: ViewBlock };

@@ -6,10 +6,12 @@
  * slice, `view` blocks left out (docs/td/TYPING_DEFENSE_DESIGN.md 25.4).
  */
 import * as RULES from "./rules";
-import type { AttackSpec, BuildingDef, Content, EnemyDef, WaveEntry } from "./types";
+import type { AbilitySpec, AttackSpec, BuildingDef, Content, EnemyDef, WaveEntry } from "./types";
 
 export const DAMAGE_TYPES = ["physical", "magic", "true"] as const;
 export const ALTITUDES = ["ground", "low", "high"] as const;
+/** BUILD_1B §9.2: the direct calls' verbs (Ngắt, Neo, Phá Khiên), by index. */
+export const VERBS = ["interrupt", "anchor", "shield"] as const;
 
 export const ticks = (seconds: number): number => Math.round(seconds * RULES.TICK_HZ);
 
@@ -74,6 +76,15 @@ function compileBuilding(def: BuildingDef, index: number) {
   };
 }
 
+/** One shape for the three verbs: what a verb does not use is 0 (×1 for multipliers). */
+function compileAbility(a: AbilitySpec) {
+  const o = a as unknown as Partial<Record<string, number>>;
+  return {
+    verb: VERBS.indexOf(a.verb), cooldown: ticks(a.cooldownS), radius: o.radiusM ?? 0, need: o.need ?? 0, reach: o.reachM ?? 0, heal: (o.healPct ?? 0) / 100, stun: ticks(o.stunS ?? 0), gold: o.gold ?? 0,
+    freeze: ticks(o.freezeS ?? 0), takenMul: o.takenMul ?? 1, taken: ticks(o.takenS ?? 0), aura: o.auraSpeed ?? 1, dome: o.domeM ?? 0, outside: o.outsideMul ?? 1, lock: ticks(o.lockS ?? 0),
+  };
+}
+
 function compileEnemy(def: EnemyDef, index: number) {
   return {
     index, id: def.id, tier: def.tier, hp: def.hp, armor: def.armorPct / 100, resist: def.resistPct / 100,
@@ -81,7 +92,7 @@ function compileEnemy(def: EnemyDef, index: number) {
     weight: def.blockWeight, radius: def.radiusM, packSize: def.packSize, splashMul: def.splashTakenMul ?? 1,
     boss: def.tier === "boss", unblockable: def.unblockable === true, burnTaken: def.burnTakenMul ?? 1,
     melee: def.melee ? { min: def.melee.damage[0], max: def.melee.damage[1], period: ticks(def.melee.periodS) } : null,
-    ability: def.ability ? { cooldown: ticks(def.ability.cooldownS), radius: def.ability.radiusM, need: def.ability.need, reach: def.ability.reachM ?? 0, heal: def.ability.healPct / 100, stun: ticks(def.ability.stunS), gold: def.ability.gold } : null,
+    ability: def.ability ? compileAbility(def.ability) : null,
     def,
   };
 }

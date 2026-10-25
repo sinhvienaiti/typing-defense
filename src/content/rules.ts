@@ -96,7 +96,7 @@ export const POWER = { max: 5, perWord: 2, perfect: 1, quick: 0.8, quickS: 5 } a
 export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 21, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
 export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, boss: 0, stagger: 6 } as const;
 /** BUILD_1B §9.1: direct calls open at once (3 with the boss up); a broken mechanic's gold and charge; its window clamp(base + directK·(len + 1)·12 / E; minS; maxS). */
-export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8 } as const;
+export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8, leadM: 1.5 } as const;
 /** BUILD_1B §5.5 (R2): a helper within m of a building's rim when Rễ Trồi strikes runs to the Bastion and stands there s seconds. */
 export const PANIC = { m: 6, s: 5 } as const;
 export const RICHNESS = [0.8, 1.0, 1.25] as const;

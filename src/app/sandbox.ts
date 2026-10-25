@@ -16,8 +16,9 @@ export function sandboxHtml(w: World): string {
     seg("Chế độ", "sb:mode", MODE_IDS, ["Thư giãn", "Cân bằng", "Thử thách", "Học"], w.mode, true) +
     seg("Từ vựng", "sb:vocab", ["1", "3", "5"], ["Cấp 1", "1–3", "1–5"], String(w.vocab)) +
     seg("Tốc game", "sb:speed", ["0.75", "1", "2"], ["0,75×", "1×", "2×"], String(w.speed)) +
-    `<div class="td-row">${button("sb:preset", "Đặt sẵn")}${button("sb:night", "Sinh đêm")}</div>` +
-    `<div class="td-row"><small>Gọi</small>${button("sb:spawn:tanuki", "Tanuki", "", ' title="+1 Lửng Tanuki"')}${button("sb:spawn:nuppeppo", "3 Nupp.", "", ' title="+3 Nuppeppō"')}${button("sb:ult", "Nạp =", "", ' title="Tối Thượng đầy"')}</div>` +
+    `<div class="td-row">${button("sb:preset", "Đặt sẵn")}${button("sb:night", "Sinh đêm")}${button("sb:ult", "Nạp =", "", ' title="Tối Thượng đầy"')}</div>` +
+    `<div class="td-row"><small>Gọi</small>${button("sb:spawn:tanuki", "Tanuki", "", ' title="+1 Lửng Tanuki (Ngắt)"')}${button("sb:spawn:nuppeppo", "3 Nupp.", "", ' title="+3 Nuppeppō"')}</div>` +
+    `<div class="td-row"><small>Gọi</small>${button("sb:spawn:cuong-thi-lead", "Đầu Đàn", "", ' title="+1 Cương Thi Đầu Đàn và 5 Cương Thi (Neo)"')}${button("sb:spawn:troll", "Troll", "", ' title="+1 Quỷ Núi Troll (Phá Khiên)"')}</div>` +
     `<div class="td-row"><small>Nhịp</small><span>k ×${w.pace.k.toFixed(2).replace(".", ",")} · tự điều ${w.pace.director ? "Bật" : "Tắt"}</span></div>`
   );
 }

@@ -651,13 +651,38 @@ export class DebugView {
         this.disc(x, z, def.radius + 0.45, "rgba(186, 160, 255, 0.35)", null);
       }
       if (E.elite[e] === 1) this.disc(x, z, def.radius + 0.35, null, COLOR.buildingHp, 2.5); // an elite (the pace director, BALANCE.md §4.2)
-      // R2 (BUILD_1B §13.3): a drumming Tanuki beats a red ring out; one whose drum was broken sees stars.
-      if (E.castEnd[e]! > w.tick) this.disc(x, z, def.radius + 0.5 + 0.35 * Math.abs(Math.sin(now * 0.012)), "rgba(194, 59, 34, 0.18)", COLOR.seal, 2.5);
-      else if (def.ability !== null && E.stunUntil[e]! > w.tick) this.text("★ ★", x, z - def.radius - 1.4, 13, "#ffb020", 900);
+      // R2 (BUILD_1B §13.3): a drumming Tanuki beats a red ring out; one whose drum was broken sees stars. R3 (§9.2): a
+      // Đầu Đàn's aura ring and pennant (both pulse while Neo is open); a Troll's stone dome, dashed; a pinned pack's slate rim.
+      const a = def.ability;
+      const cast = E.castEnd[e]! > w.tick;
+      const pulse = Math.abs(Math.sin(now * 0.012));
+      if (a !== null && a.verb === 1) this.lead(x, z, def.radius, a.radius, cast ? pulse : 0);
+      if (cast && a!.verb === 0) this.disc(x, z, def.radius + 0.5 + 0.35 * pulse, "rgba(194, 59, 34, 0.18)", COLOR.seal, 2.5);
+      else if (cast && a!.verb === 2) {
+        this.ctx.setLineDash([this.px(16), this.px(5)]); // stone blocks with seams, a pale inner rim
+        this.disc(x, z, a!.dome, "rgba(84, 92, 98, 0.38)", "#2f3539", 5);
+        this.ctx.setLineDash([]);
+        this.disc(x, z, a!.dome - 0.4, null, "rgba(255, 244, 214, 0.6)", 2);
+      } else if (E.stunUntil[e]! > w.tick) a !== null && a.verb !== 1 ? this.text("★ ★", x, z - def.radius - 1.4, 13, "#ffb020", 900) : this.disc(x, z, def.radius + 0.3, "rgba(150, 178, 204, 0.55)", "#4a6a8a", 2.5);
+      if (E.takenUntil[e]! > w.tick) this.text("×" + String(a!.takenMul).replace(".", ","), x, z - def.radius - 1.4, 13, COLOR.seal, 900);
       this.disc(x, z, def.radius, def.def.view.color, COLOR.ink, def.armor > 0 ? 3 : 1.2);
       if (def.def.split !== undefined) this.disc(x, z, def.radius * 0.45, "rgba(255, 244, 214, 0.7)", null); // Nuppeppō: two in one
       if (E.hp[e]! < def.hp) this.bar(x, z - def.radius - 0.7, Math.max(1.4, def.radius * 2), E.hp[e]! / def.hp, COLOR.enemyHp);
     }
+  }
+
+  /** A Đầu Đàn: its aura's faint ring and a red pennant over it; `pulse` (0–1) brightens both while Neo is open. */
+  private lead(x: number, z: number, r: number, aura: number, pulse: number): void {
+    const { ctx } = this;
+    this.disc(x, z, aura, "rgba(194, 59, 34, " + (0.05 + 0.1 * pulse).toFixed(2) + ")", "rgba(194, 59, 34, " + (0.3 + 0.5 * pulse).toFixed(2) + ")", 1.5 + 2 * pulse);
+    Object.assign(ctx, { strokeStyle: COLOR.ink, lineWidth: this.px(2), fillStyle: COLOR.seal });
+    ctx.beginPath();
+    ctx.moveTo(x + r * 0.5, z - r * 0.5);
+    ctx.lineTo(x + r * 0.5, z - r - 1.5);
+    ctx.lineTo(x + r * 0.5 + 1.1, z - r - 1.15);
+    ctx.lineTo(x + r * 0.5, z - r - 0.8);
+    ctx.stroke();
+    ctx.fill();
   }
 
   private polyline(points: ArrayLike<number>, color: string, dash: number, widthPx = 3): void {

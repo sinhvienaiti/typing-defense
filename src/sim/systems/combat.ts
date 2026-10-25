@@ -27,7 +27,8 @@ export function damageEnemy(w: World, e: number, power: number, damageType: numb
   const def = w.c.enemies[E.def[e]!]!;
   const armour = damageType === 0 ? def.armor : damageType === 1 ? def.resist : 0;
   const boss = def.boss ? w.c.content.boss! : null;
-  const mul = boss === null ? 1 : (source === SOURCE.hero ? boss.heroMul : source === SOURCE.ult ? ULT.bossMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
+  // R3 (BUILD_1B §9.2): a leader Neo pinned takes ×takenMul for a while.
+  const mul = boss === null ? (E.takenUntil[e]! > w.tick ? def.ability!.takenMul : 1) : (source === SOURCE.hero ? boss.heroMul : source === SOURCE.ult ? ULT.bossMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
   let dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour) * mul));
   if (boss !== null) {
     dmg = Math.min(dmg, E.hp[e]! - 1);

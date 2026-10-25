@@ -14,7 +14,7 @@ import { inRing } from "../sim/systems/agents";
 import { countNpcs, villagerCap } from "../sim/systems/economy";
 import { locked, opensOn } from "../sim/systems/waves";
 import type { World } from "../sim/world";
-import { CALL_ICON, CALL_NAME } from "../view/words/cards";
+import { callLabel } from "../view/words/cards";
 import { button, seg } from "./hud";
 import { agentView } from "./team-bar";
 
@@ -78,10 +78,9 @@ function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
  */
 function callHtml(w: World, sel: Selection, c: number): string {
   const C = w.calls;
-  const kind = C.kind[c]!;
   const why = inRing(w, C.x[c]!, C.z[c]!) ? "Trong vòng giúp: sáng khi bớt lời gọi đang sáng." : "Ngoài vòng giúp: đưa người tới gần để thẻ sáng và gõ được.";
   return (
-    head(CALL_ICON[kind] + " " + CALL_NAME[kind], C.words[c]! - C.done[c]! + " từ · đang mờ") +
+    head(callLabel(w, c).join(" "), C.words[c]! - C.done[c]! + " từ · đang mờ") +
     `<p>${why}</p><div class="td-row">${button("send", "Gửi " + agentView(w, sel.agent).name, "Enter")}</div>`
   );
 }

@@ -27,13 +27,16 @@ export class ProjectileStore extends Slots {
   /** A Word Shot's deck word (the letters trail behind it), −1 for other shots; it sets enemies burning. */
   readonly word = new Int32Array(this.cap);
   readonly burn = new Uint8Array(this.cap);
+  /** Where it was launched (R3, BUILD_1B §9.2: a Troll's dome lets a shot from outside through at ×outsideMul). */
+  readonly ox = new Float64Array(this.cap);
+  readonly oz = new Float64Array(this.cap);
 
   add(kind: number, x: number, z: number, target: number, tx: number, tz: number, speed: number, source: number): number {
     const slot = this.take();
     if (slot < 0) return -1;
     this.kind[slot] = kind;
-    this.x[slot] = x;
-    this.z[slot] = z;
+    this.x[slot] = this.ox[slot] = x;
+    this.z[slot] = this.oz[slot] = z;
     this.target[slot] = target;
     this.tx[slot] = tx;
     this.tz[slot] = tz;

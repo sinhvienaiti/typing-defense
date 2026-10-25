@@ -4,7 +4,8 @@
  * (inked chunks) and rootlets that whip out from where they start (the boss's rise: R2 review, seen at 1280 × 720).
  * Positions are metres; the pen draws in the map's transform. R2 (§13.3): FxView draws Tối Thượng (Draconis' portrait
  * sliding in from the left, a shadow under each falling feather, the ember pool of its burn) and the direct calls'
- * outcomes (a broken drum bursting into letters, a heal ring spreading 6 m), from the world and its events.
+ * outcomes (a broken drum bursting into letters, a heal ring spreading 6 m; R3: a pinned pack's ring closing in, a
+ * broken dome bursting into stones), from the world and its events.
  */
 import { ULT } from "../content/rules";
 import type { RareEvent } from "../sim/events";
@@ -109,7 +110,7 @@ export class Particles {
   }
 }
 
-/** A heal ring (0) or a drum broken into letters (1) at a world point, reused from a ring of 12. */
+/** A heal ring (0), a drum broken into letters (1), a pack pinned (2) or a dome broken (3) at a world point, from a ring of 12. */
 type Mark = { x: number; z: number; at: number; kind: number };
 const SCRAPS = "ngatchu";
 const ease = (t: number): number => 1 - (1 - t) * (1 - t);
@@ -129,9 +130,10 @@ export class FxView {
   read(events: readonly RareEvent[], w: World, now: number): void {
     for (const e of events) {
       if (e.t === "ult") this.castAt = now;
-      if (e.t !== "direct") continue;
-      Object.assign(this.marks[(this.next = (this.next + 1) % this.marks.length)]!, { x: e.x, z: e.z, at: now, kind: e.ok ? 1 : 0 });
-      if (e.ok) this.fx.burst(1, e.x, e.z, 8, 4, 500, now);
+      if (e.t !== "direct" || (e.verb > 0 && !e.ok)) continue; // a pack let run walks on, a dome let run just ends
+      Object.assign(this.marks[(this.next = (this.next + 1) % this.marks.length)]!, { x: e.x, z: e.z, at: now, kind: e.ok ? e.verb + 1 : 0 });
+      const dome = e.verb === 2;
+      if (e.ok) this.fx.burst(dome ? 6 : 1, e.x, e.z, dome ? 12 : 8, dome ? 6 : 4, dome ? 800 : 500, now);
     }
     if (this.raining && w.ult.on === 0) Object.assign(this.embers, { x: w.ult.x, z: w.ult.z, at: now });
     this.raining = w.ult.on === 1;
@@ -167,7 +169,7 @@ export class FxView {
     }
   }
 
-  /** Over the enemies: heal rings spreading 6 m, broken drums bursting into letters. */
+  /** Over the enemies: heal rings spreading 6 m, broken drums bursting into letters, pinned packs, broken domes. */
   over(pen: Pen, now: number): void {
     for (const m of this.marks) {
       const age = (now - m.at) / 700;
@@ -178,6 +180,14 @@ export class FxView {
         pen.ctx.arc(m.x, m.z, 0.8 + 5.2 * ease(age), 0, Math.PI * 2);
         pen.ctx.stroke();
         if (age < 0.6) pen.text("+25 %", m.x, m.z - 1.5 - age * 2, 14, "#3f7a1e", 900);
+      } else if (m.kind >= 2) {
+        // R3: a pinned pack's slate ring closes in from 6 m; a broken dome's grey ring flies out from 4 m.
+        const pin = m.kind === 2;
+        Object.assign(pen.ctx, { strokeStyle: (pin ? "rgba(74, 106, 138, " : "rgba(60, 67, 72, ") + (1 - age).toFixed(2) + ")", lineWidth: pen.px(5) });
+        pen.ctx.beginPath();
+        pen.ctx.arc(m.x, m.z, pin ? 6 - 5 * ease(age) : 4 + 2 * ease(age), 0, Math.PI * 2);
+        pen.ctx.stroke();
+        pen.text(pin ? "Đứng sững!" : "Vỡ vòm!", m.x, m.z + 2.4 + age, 16, pin ? "#2f4f6f" : "#2b2118", 900); // under it: its card hangs above
       } else for (let k = 0; k < SCRAPS.length; k += 1) pen.text(SCRAPS[k]!, m.x + Math.cos(k * 0.9) * 3 * ease(age), m.z + Math.sin(k * 0.9) * 3 * ease(age) - age, 16 - 6 * age, "#2b2118", 900);
     }
   }

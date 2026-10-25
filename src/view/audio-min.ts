@@ -11,7 +11,8 @@
  * villagers calling across the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's swelling
  * rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers; Rễ
  * Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
- * gong; the retreat's falling chord and leaves; the chest's coins up the scale.
+ * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
+ * drum's thump (Ngắt), a bronze stroke and knock (Neo), a stone dome cracking (Phá Khiên).
  */
 import { FX, type RareEvent } from "../sim/events";
 import { PROJECTILE } from "../sim/stores/projectiles";
@@ -201,6 +202,12 @@ export class TypingAudio {
           [0, 0.32, 0.5].forEach((at) => trong(world, t + at, 0.4, 110));
           chuong(world, t + 0.05, 98, 0.16, 3);
         } else if (event.phase === "dawn") [0, 0.2, 0.4].forEach((at, k) => sao(world, t + at, note(7 + 2 * k), 0.25, 0.05));
+      } else if (event.t === "direct" && event.ok) {
+        // A direct word lands (BUILD_1B §9.2): the drum breaks with a skin's thump; Neo pins the pack with a low bronze stroke
+        // and a knock; the Troll's dome cracks, stone grinding over a low wooden blow (R3).
+        if (event.verb === 0) trong(world, t, 0.35, 180);
+        else if (event.verb === 1) [chuong(world, t, 147, 0.14, 1.6), go(world, t + 0.04, 260, 0.22, 0.08)];
+        else [go(world, t, 95, 0.45, 0.14), giay(world, t + 0.02, 0.14, 0.45, 1400, 260), rumble(world, t + 0.05, 0.5, 0.25)];
       } else if (event.t.startsWith("boss")) this.boss(event, t);
       else if (event.t === "defeat") {
         chuong(world, t, 82.4, 0.2, 3.5);

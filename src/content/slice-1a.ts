@@ -128,6 +128,20 @@ export const SLICE_1A: Content = {
       blockWeight: 1, radiusM: 0.5, packSize: 2, melee: { damage: [1, 3], periodS: 1.0 },
       view: { name: "Nuppeppō con", short: "np", color: "#e8c3bc" },
     },
+    // BUILD_1B §9.2, §10 (R3; sandbox only, never in the story's waves): the Đầu Đàn hurries its pack (+20 % within 6 m;
+    // Neo pins it 3 s), the Troll carries a stone dome by the towers (Phá Khiên breaks it). Melee: starting numbers.
+    {
+      id: "cuong-thi-lead", tier: "medium", hp: 160, armorPct: 30, resistPct: 0, speed: 3.4, altitude: "ground", leak: 2, gold: 25,
+      blockWeight: 1, radiusM: 0.8, packSize: 1, melee: { damage: [4, 6], periodS: 1.0 },
+      ability: { verb: "anchor", cooldownS: 15, radiusM: 6, need: 4, reachM: 20, freezeS: 3, takenMul: 1.3, takenS: 6, auraSpeed: 1.2 },
+      view: { name: "Cương Thi Đầu Đàn", short: "ĐĐ", color: "#3d2466" },
+    },
+    {
+      id: "troll", tier: "heavy", hp: 600, armorPct: 30, resistPct: 30, speed: 2.0, altitude: "ground", leak: 3, gold: 30,
+      blockWeight: 2, radiusM: 1.6, packSize: 1, melee: { damage: [14, 20], periodS: 1.5 },
+      ability: { verb: "shield", cooldownS: 6, reachM: 25, domeM: 4, outsideMul: 0.3, stunS: 1.5, lockS: 10 },
+      view: { name: "Quỷ Núi Troll", short: "TR", color: "#5d6b70" },
+    },
   ],
   hero: {
     id: "draconis", flySpeed: 6, takeoffS: 0.6, landS: 0.6,
