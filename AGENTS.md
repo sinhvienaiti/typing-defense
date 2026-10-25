@@ -39,6 +39,13 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   start set is the entry and the title, 82.56 kB gzip (2.44 kB headroom; "start set"
   in place of "whole bundle" is đề xuất của vòng này); `td-1b-perf` is paced to 60 Hz
   and the main thread is at the 4 ms line there (3.9–4.6 ms at 50–57 fps on the Dell).
+  **Third review fix** (§7.6, on the Mac mini M4): a failed sound or sandbox-panel chunk is
+  asked again when wanted (Chrome 155 keeps a failed `import()` until the page reloads, so
+  there only F5 brings it back; `td-1b-chunks` probes the browser and grades by it), the
+  title's two cards load when picked (start set 82.04 kB gzip on the Mac, 2.96 kB headroom),
+  `td-1b-perf` grades each rise frame by its total, an A/B on the Mac shows fix 2 did not slow
+  a frame (1.027 against 1.042 ms, Apple M4), and `td-1b-build` reads every building card at
+  level 3 with its real sale label. On the Apple M4 `td-1b-perf` runs at 1.0 ms a frame.
   B3 passes, the pooled tight targets 4/6. Next: R3 "Học và dạy"; the owner's playtest
   of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
 - `docs/art-requests/td/`: asset prompt pack (text only).
@@ -99,9 +106,12 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   sound (`view/audio-min.ts`, `folk.ts`, `music.ts`) load by `import()` in `main.ts`
   through `Chunk` (`app/chunks.ts`: 3 tries, then one console error and a fallback: the
   title is skipped, a missing pause or results card is told in the HUD; asked again after
-  15 s). At `/` the page waits for the title only; its two cards load when picked, sound,
-  the cards' chunk and the sandbox panel once the page is usable. `__td.ready()` waits for
-  the ones the page wants (loaded or given up). `scripts/bundle-budget.mjs` (run by
+  15 s). At `/` the page waits for the title only; Hồ sơ gõ loads when picked, the settings
+  card when picked or with the cards' chunk (the pause card holds one), whichever comes
+  first; sound, the cards' chunk and the sandbox panel load once the page is usable, and a
+  failed one is asked again when wanted (a card shown, the panel open, the next key for
+  sound; R2 review fix 3). `__td.ready()` waits for the ones the page wants (loaded or given
+  up); `__td.chunks()` says which are in. `scripts/bundle-budget.mjs` (run by
   `pnpm build`) reads Vite's manifest and fails the build when a start page's set (`/`:
   the entry chunk and the title) passes 85 kB gzip; it prints the headroom.
   `td-1b-chunks` blocks a chunk in the browser and checks the fallbacks.
@@ -145,14 +155,15 @@ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-ba
 # 1B R1 (dev server: pnpm exec vite --host 127.0.0.1 --port 3046 --strictPort; URL=http://127.0.0.1:3046/):
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-boss.mjs --width=1280 --height=720    # boss peak, frame sets
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-night5.mjs --width=1280 --height=720  # day 5 warning, blows, Chơi lại Ngày 5
-URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720   # story locks and a story card, sell, Bastion
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-build.mjs --width=1280 --height=720   # story locks and a story card, sell, Bastion, every card at level 3 (real sale labels)
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-perf.mjs --width=1280 --height=720    # boss + flood(300, topped up) + Tối Thượng ×2, frames paced to 60 Hz (PERF_HZ=0: the browser's own rate)
 # 1B R2:
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-ult.mjs --width=1280 --height=720     # =, feathers, Chữ Chiêu typed / left alone
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720  # Tanuki: Ngắt typed, let run (heal), ≤ 2 cards
-URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-chunks.mjs --width=1280 --height=720  # a chunk blocked: title skipped, pause told in the HUD, card after the cool-down
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-chunks.mjs --width=1280 --height=720  # a chunk blocked: title skipped, pause told in the HUD; card, sandbox panel and sound asked again after the cool-down (back where the browser fetches a failed import again)
 # Perf numbers need a Chrome with a GPU (Chrome in WSL draws in software): on the Dell, Windows node + Windows Chrome,
-# then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2.
+# then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2. On the Mac mini M4 the macOS
+# Chrome draws with the GPU: run cdp-run as above, under the parent's .local/bin/heavy.sh --gpu (BUILD_NOTES §7.6).
 ```
 
 The dev server serves `/vocabulary/` and `/typing-texts/` read-only from the
