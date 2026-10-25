@@ -61,7 +61,8 @@ node --import tsx scripts/td/b9.ts ~/Downloads/loi-goi-choi-thu-*.json --seeds=4
 - Bảng in: kết quả, mạng, S, P, I, O, N, Q của người; thắng, S, P, I, O, N, Q của bot; rồi cổng B9 của kit (lệch ≤ 15 % của max(|người|, sàn); sàn 20 % cho tỉ lệ, 1 cho N). File không chạy lại khớp thì không vào B9 và lệnh trả mã 1.
 - Ghi số vào `BUILD_NOTES.md` (mục R3 hay mục kế) cùng câu trả lời của phiếu; câu nào chỉ ra lỗi thì thành việc của vòng sau.
 - File cũ (trước R3 phần B, chỉ có số) vẫn đọc được: không có nhật ký thì cột chạy lại ghi "không có nhật ký", vẫn chấm.
+- File của ván hộp cát (bước 5 ở §3, hay bấm nút ở hộp cát) vẫn được chạy lại, nhưng cột bot ghi "hộp cát: không chấm B9" và file không vào cổng. Lý do: ván hộp cát có "Đặt sẵn", gọi quái, đổi tốc, nên không có ải nào để bot chơi cùng; đem so thì B9 trượt oan (thử trên Mac với file `td-1b-tour` bắt được: Biên S 100 % / 78 %, P 5,4 % / 18 %).
 
 ## 6. Ảnh tham khảo (không cần chụp lại)
 
-`scripts/visual/scenarios/td-1b-tour.mjs` chụp 19 ảnh theo thứ tự người chơi gặp: Ngày 5 có báo boss, lặng trước bão, trồi, Rễ Trồi báo và trúng, Tối Thượng, choáng, Mầm Gỗ, rút, thẻ thắng; Ngắt, Neo, bầy đứng sững, Phá Khiên, vòm vỡ; Từ Ôn, "Chuộc lại"; câu Bà Cú Mực và chip. Ảnh ở `tmp/mac-2026-10-25/r3b/td-1b-tour-*` của game (ngoài Git).
+`scripts/visual/scenarios/td-1b-tour.mjs` chụp 19 ảnh theo thứ tự người chơi gặp: Ngày 5 có báo boss, lặng trước bão, trồi, Rễ Trồi báo và trúng, Tối Thượng, choáng, Mầm Gỗ, rút, thẻ thắng; Ngắt, Neo, bầy đứng sững, Phá Khiên, vòm vỡ; Từ Ôn, "Chuộc lại"; câu Bà Cú Mực và chip. Ảnh ở `tmp/mac-2026-10-25/r3b2/td-1b-tour-*` của game (ngoài Git).

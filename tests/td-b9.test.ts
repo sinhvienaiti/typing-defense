@@ -39,4 +39,14 @@ describe("the play-test file and B9 (BUILD_1B §22, BALANCE.md §7 B9)", () => {
     expect([gate.checks.length, gate.missing]).toEqual([2, []]);
     expect(lines.join("\n")).toMatch(/\| ván 1 \| khớp [0-9a-f]{8} \| dừng, \d+ mạng, /);
   });
+
+  it("lists a sandbox run but keeps it out of B9 (no stage the bot can play)", () => {
+    const sandboxed = { ...file, run: { ...file.run!, sandbox: true } };
+    const row = b9Row("hộp cát", sandboxed, 2);
+    expect([row.sandbox, row.bot, row.match]).toEqual([true, null, null]);
+    const lines: string[] = [];
+    const gate = b9Report([row], (text) => lines.push(text));
+    expect(gate.checks.length).toBe(0);
+    expect(lines.join("\n")).toMatch(/\| hộp cát \| .* \| hộp cát: không chấm B9 \|/);
+  });
 });

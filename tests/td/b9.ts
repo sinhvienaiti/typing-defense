@@ -50,18 +50,22 @@ export function ownerBot(profile: SkillProfile): MatrixBot {
   return { id: "owner", spec: { ...standard, wpm: Math.round(view.e), accuracy: view.a, cv: view.cv }, tactics: "fair" };
 }
 
-export type B9Row = { label: string; replay: ReturnType<typeof replayPlaytest>; human: FlowSummary; lives: number; bot: BotModeSummary; match: HumanMatch };
+/** `bot` and `match` are null for a sandbox run: it is listed and replayed, never graded (B9 compares the story's stage). */
+export type B9Row = { label: string; replay: ReturnType<typeof replayPlaytest>; human: FlowSummary; lives: number; sandbox: boolean; bot: BotModeSummary | null; match: HumanMatch | null };
 
 /** One file against its bot over seeds 1..`seeds` (the run's mode as a band, Học's mode read as Thư giãn's band). */
 export function b9Row(label: string, file: PlaytestFile, seeds: number): B9Row {
   const run = file.run;
+  const human = file.numbers.flow;
+  const replay = replayPlaytest(file);
+  // A sandbox run (its presets, spawns and speeds) is no stage the bot can play: kept out of B9 (R3 part B review).
+  if (run?.sandbox === true) return { label, replay, human, lives: file.numbers.lives, sandbox: true, bot: null, match: null };
   const mode: BandMode = run === undefined || run.mode === "learn" ? "relax" : run.mode;
   const bot = ownerBot(file.numbers.profile);
   const runs = Array.from({ length: seeds }, (_, k) => playStage(bot, mode, k + 1, realDeck(), run?.pace.director ?? true));
   const summary = summarizeRuns(bot.id, mode, runs.map(record), run?.pace.director ?? true);
-  const human = file.numbers.flow;
   const values = (x: { s: number; p: number; i: number; o: number; n: number; q: number | null }) => ({ s: x.s, p: x.p, i: x.i, o: x.o, n: x.n, q: x.q });
-  return { label, replay: replayPlaytest(file), human, lives: file.numbers.lives, bot: summary, match: { label, human: values(human), bot: values(summary) } };
+  return { label, replay, human, lives: file.numbers.lives, sandbox: false, bot: summary, match: { label, human: values(human), bot: values(summary) } };
 }
 
 /** The report (Markdown, Vietnamese): each file's replay, the human's run and the bot's §3 row, then the gate B9. */
@@ -73,9 +77,11 @@ export function b9Report(rows: readonly B9Row[], print: (text: string) => void):
     const b = r.bot;
     const replay = r.replay === null ? "không có nhật ký" : r.replay.match ? "khớp " + r.replay.node : "**lệch** " + r.replay.node + " ≠ " + r.replay.browser;
     const outcome = { won: "thắng", lost: "thua", quit: "dừng" }[h.outcome];
-    print(`| ${r.label} | ${replay} | ${outcome}, ${r.lives} mạng, ${pct(h.s)}, ${pct(h.p)}, ${pct(h.i)}, ${pct(h.o)}, ${h.n.toFixed(1)}, ${pct(h.q)} | ${pct(b.win)}, ${pct(b.s)}, ${pct(b.p)}, ${pct(b.i)}, ${pct(b.o)}, ${b.n.toFixed(2)}, ${pct(b.q)} (${b.runs} ván) |`);
+    const botCell = b === null ? "hộp cát: không chấm B9" : `${pct(b.win)}, ${pct(b.s)}, ${pct(b.p)}, ${pct(b.i)}, ${pct(b.o)}, ${b.n.toFixed(2)}, ${pct(b.q)} (${b.runs} ván)`;
+    print(`| ${r.label} | ${replay} | ${outcome}, ${r.lives} mạng, ${pct(h.s)}, ${pct(h.p)}, ${pct(h.i)}, ${pct(h.o)}, ${h.n.toFixed(1)}, ${pct(h.q)} | ${botCell} |`);
   }
-  const gate = runGates({ summaries: [], options: { human: rows.filter((r) => r.replay === null || r.replay.match).map((r) => r.match) } }).find((g) => g.id === "B9")!;
+  const graded = rows.flatMap((r) => (r.match !== null && (r.replay === null || r.replay.match) ? [r.match] : []));
+  const gate = runGates({ summaries: [], options: { human: graded } }).find((g) => g.id === "B9")!;
   print("\n" + formatGates([gate]));
   return gate;
 }
