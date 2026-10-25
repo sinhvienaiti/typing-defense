@@ -1,13 +1,14 @@
 /**
  * A long run for "Chơi lại Ngày n" (docs/td/BUILD_1B.md §4.3, §19 td-1b-night5; 1B R1 review): the standard bot plays
  * the story (Cân bằng, or --mode) to the start of day n, and the run is written as main.ts keeps it in sessionStorage
- * ("td.retry": seed, header, log to that day, the day hashes). The scenario puts it in the page, which must replay its
+ * ("td.retry": seed, header, study lists, log to that day, the day hashes). The scenario puts it in the page, which must replay its
  * hundreds of commands over some 40,000 ticks (Thư giãn to day 5) to the same hash.
  *   node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json
  */
 import { writeFileSync } from "node:fs";
 import { paceHeader } from "../../src/app/skill";
 import { hashHex } from "../../src/sim/hash";
+import { NO_LEARN } from "../../src/sim/systems/learn";
 import { botById, botProfile, playStage } from "../../tests/td/flow";
 import { realDeck } from "../../tests/td/typing";
 
@@ -24,6 +25,7 @@ const tick = run.world.dayStarts[day];
 if (tick === undefined || hashes[day] === undefined) throw new Error("the run did not reach day " + day);
 const header = paceHeader(botProfile(bot, mode), true);
 const log = run.log.filter((command) => command.tick < tick);
-const retry = { seed, sandbox: false, deck: deck.hash, content: run.world.c.hash, mode, header, day, tick, hashes: Array.from(hashes, (h) => h ?? ""), log };
+// The run's study lists (R3): the bots play none until R3 step 8 gives them a book (R3_PLAN §3.8).
+const retry = { seed, sandbox: false, deck: deck.hash, content: run.world.c.hash, mode, header, learn: NO_LEARN, day, tick, hashes: Array.from(hashes, (h) => h ?? ""), log };
 writeFileSync(arg("out", "tmp/retry.json"), JSON.stringify(retry));
 console.log(JSON.stringify({ seed, day, tick, commands: log.length, hash: hashes[day] }));

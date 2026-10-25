@@ -9,6 +9,7 @@ import type { SkillProfile } from "../kit/balance";
 import type { Command } from "../sim/commands";
 import { hashHex } from "../sim/hash";
 import { statsObject } from "../sim/stats";
+import { NO_LEARN, setLearn, type LearnHeader } from "../sim/systems/learn";
 import type { PaceHeader } from "../sim/systems/pace";
 import { runLog, type World } from "../sim/world";
 import type { Deck } from "../typing/decks";
@@ -16,12 +17,12 @@ import type { Session } from "./session";
 
 export const RETRY_KEY = "td.retry";
 
-/** What one page load reads: the run's header, its log up to day n's start, the hash there. */
-export type Retry = { seed: number; sandbox: boolean; deck: string; content: string; mode: Mode; header: PaceHeader & { expected: number }; day: number; tick: number; hashes: string[]; log: Command[] };
+/** What one page load reads: the run's header (R3: its study lists), its log up to day n's start, the hash there. */
+export type Retry = { seed: number; sandbox: boolean; deck: string; content: string; mode: Mode; header: PaceHeader & { expected: number }; learn?: LearnHeader; day: number; tick: number; hashes: string[]; log: Command[] };
 /** The replay's end, hashed before the first live step (review R1: the scenarios check this, not the kept hashes). */
 export type Replayed = { day: number; tick: number; hash: string; matched: boolean };
 /** The run the results card ends: what retryDay keeps, and the link of a fresh run of the page (`learn`: in Học). */
-export type RunOf = { world: World; session: Session; seed: number; sandbox: boolean; deck: Deck; mode: Mode; header: PaceHeader & { expected: number }; fresh(learn: boolean): string };
+export type RunOf = { world: World; session: Session; seed: number; sandbox: boolean; deck: Deck; mode: Mode; header: PaceHeader & { expected: number }; learn: LearnHeader; fresh(learn: boolean): string };
 
 /** The kept run when it is this page's (same seed, same story or sandbox), else null. */
 export function readRetry(raw: string, seed: number, sandbox: boolean): Retry | null {
@@ -38,6 +39,7 @@ export function readRetry(raw: string, seed: number, sandbox: boolean): Retry | 
  * not be the run that was lost). The run's log and day hashes carry on from the kept ones; the replay's events are dropped.
  */
 export function replayRetry(world: World, session: Session, deck: Deck, retry: Retry, restart: () => void): Replayed {
+  setLearn(world, retry.learn ?? NO_LEARN);
   runLog(world, retry.log, retry.tick);
   const replayed = { day: retry.day, tick: world.tick, hash: hashHex(world), matched: false };
   replayed.matched = world.c.hash === retry.content && deck.hash === retry.deck && replayed.hash === retry.hashes[retry.day];
@@ -72,7 +74,7 @@ export function retryDay(run: RunOf): void {
   const day = world.day;
   const at = world.dayStarts[day];
   if (at === undefined || session.dayHashes[day] === undefined) return void (window.location.search = run.fresh(false));
-  const kept: Retry = { seed: run.seed, sandbox: run.sandbox, deck: run.deck.hash, content: world.c.hash, mode: run.mode, header: run.header, day, tick: at, hashes: session.dayHashes.slice(0, day + 1), log: session.log.filter((command) => command.tick < at) };
+  const kept: Retry = { seed: run.seed, sandbox: run.sandbox, deck: run.deck.hash, content: world.c.hash, mode: run.mode, header: run.header, learn: run.learn, day, tick: at, hashes: session.dayHashes.slice(0, day + 1), log: session.log.filter((command) => command.tick < at) };
   try {
     sessionStorage.setItem(RETRY_KEY, JSON.stringify(kept));
   } catch {

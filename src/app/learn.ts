@@ -4,7 +4,8 @@
  * only: never in the sim, never hashed (§11.1). Before a run planFor turns it into the run header's lists (a pure
  * function: the bots on Node call it too). During the run each word that shows bright counts as seen (the cards read it
  * for the meaning rule), and each word typed is one learning event, sent in batches every 5 s through the portal bridge;
- * a replayed day's events were dropped before anyone read them, so it sends none. At each day, night and the run's end
+ * a replayed day's events were dropped before anyone read them, so it sends none (the page asks the portal for focus once
+ * this chunk is in). At each day, night and the run's end
  * (won, lost, the page left) the run's book is folded into the store: the words redeemed or quizzed right leave it.
  */
 import { buildCombatLearningEvent, buildRecallLearningEvent, type LearningEvent } from "../kit/learning";
@@ -17,6 +18,9 @@ import type { LearnHeader } from "../sim/systems/learn";
 import type { World } from "../sim/world";
 import { wordText, type Deck } from "../typing/decks";
 import { GAME_ID } from "./learning";
+
+// The portal bridge (app/learning.ts) comes with this chunk: the entry chunk does not carry it (BUILD_1B §20, R3).
+export { learningBridge } from "./learning";
 
 export const LEARN_KEY = "typing-defense.learn";
 export type LearnStore = { v: 1; book: string[]; seen: Record<string, number> };

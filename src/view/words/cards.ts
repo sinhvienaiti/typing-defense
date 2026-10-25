@@ -3,8 +3,9 @@
  * of 20 DOM cards over the canvas. A frame changes only transform and
  * opacity; text and classes change when a word's state does. A bright call's
  * word is its bubble over its NPC (or building): the kind's icon and colour,
- * the word, dots for the words the call still asks (●●○), in the learn mode
- * the meaning under it; a quiz shows the meaning and the first letter with
+ * the word, dots for the words the call still asks (●●○), the meaning under it
+ * by the rule of BUILD_1B §11.1 (R3: meaningShown); a Từ Ôn is jade with its
+ * "Ôn" tag, its meaning always, "Chuộc lại" stamped when redeemed; a quiz shows the meaning and the first letter with
  * blanks ("tốt; hay · g _ _ _"). It grows when locked with the typed part in
  * jade, shakes on a wrong key; typed, it shows its meaning for 1 s (the
  * grade's own name, TK 0.6, stamped over it) or, with none, flies home; it
@@ -13,11 +14,13 @@
  * overlapping. A card on its way out has the class is-gone (is-mean while it
  * shows a meaning), so the browser checks can tell it from a live one.
  */
-import type { Grade } from "../../content/types";
+import { LEARN } from "../../content/rules";
+import type { Grade, Mode } from "../../content/types";
 import type { RareEvent } from "../../sim/events";
 import { CALL_KIND } from "../../sim/stores/calls";
 import type { World } from "../../sim/world";
 import { gloss, wordText } from "../../typing/decks";
+import { KIND } from "../../typing/letters";
 import { KEY } from "../../typing/router";
 import { besidePanels, COLUMN, columnHeights, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
@@ -26,6 +29,14 @@ export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", pe
 export const CALL_COLOR = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD", "#F2994A", "#C23B22"] as const;
 export const CALL_ICON = ["🏹", "🔨", "🌾", "🪓", "⛏️", "📖", "🔥", "✋"] as const;
 export const CALL_NAME = ["Bắn mạnh", "Xây", "Gặt", "Chặt", "Đào", "Hỏi bài", "Chữ Chiêu", "Ngắt"] as const;
+/**
+ * BUILD_1B §11.1 (R3): the meaning under a word before it is typed: always in Học and Thư giãn and for a child, else
+ * while the word was seen at most twice (Cân bằng) or once (Thử thách), this sighting counted; `seen` null (Học's chunk
+ * not in) shows it. A quiz and a Từ Ôn always show it; 3 errors on a word show it again (the cards).
+ */
+export const meaningShown = (mode: Mode, child: boolean, seen: number | null): boolean =>
+  child || mode === "learn" || mode === "relax" || seen === null || seen <= LEARN.seen[mode];
+
 /** Cards hang 1.6 m over the one who calls (a building's call over its middle). */
 export const ROOF_M = 1.6;
 
@@ -66,6 +77,9 @@ export class WordCards {
   private readonly offsets = new Map<number, number>();
   private last = 0;
   private frame = 0;
+  /** Học (R3): a child's profile, and the times a deck word was seen (app/learn.ts; null until it is in). */
+  child = false;
+  seen: ((item: number) => number) | null = null;
 
   constructor(root: HTMLElement, private readonly project: (x: number, z: number) => { x: number; y: number }) {
     this.cards = Array.from({ length: POOL }, () => {
@@ -78,6 +92,8 @@ export class WordCards {
 
   /** This frame's events: a wrong key shakes its card; a typed word sends the card off and stamps its grade. */
   read(events: readonly RareEvent[], w: World, now: number): void {
+    // A Từ Ôn redeemed (its review event comes just before its wordHit) is stamped "Chuộc lại" in place of its grade (R3).
+    const redeemed = events.filter((e) => e.t === "review" && e.redeemed).map((e) => (e.t === "review" ? e.item : -1));
     for (const event of events) {
       const card = "word" in event ? this.byId.get(event.word) : undefined;
       if (card === undefined) continue;
@@ -97,8 +113,8 @@ export class WordCards {
           Object.assign(card, { half: card.el.offsetWidth / 2, height: card.el.offsetHeight });
         }
         const stamp = this.stamps.reduce((oldest, next) => (next.at < oldest.at ? next : oldest));
-        stamp.el.textContent = GRADE_NAME[event.grade];
-        stamp.el.className = "td-stamp is-" + event.grade;
+        stamp.el.textContent = redeemed.includes(event.item) ? "Chuộc lại" : GRADE_NAME[event.grade];
+        stamp.el.className = "td-stamp is-" + (redeemed.includes(event.item) ? "redeem" : event.grade);
         Object.assign(stamp, { at: now, x: card.x, y: card.y - 30, half: stamp.el.offsetWidth / 2, card: card.leave === "mean" ? card : null });
       }
     }
@@ -108,15 +124,16 @@ export class WordCards {
     const c = w.words.call[s]!;
     const kind = w.calls.kind[c]!;
     const word = w.words.word[s]!;
+    const back = w.words.kind[s] === KIND.review;
     Object.assign(card, {
-      id, b: c, call: w.calls.id(c), word: wordText(w.typing.deck, word), mean: gloss(w.typing.deck, word), quiz: kind === CALL_KIND.quiz, learn: w.mode === "learn",
-      dots: "", typed: -1, late: false, lockedAt: -1, leave: "", shakeUntil: 0, pinkUntil: 0,
+      id, b: c, call: w.calls.id(c), word: wordText(w.typing.deck, word), mean: gloss(w.typing.deck, word), quiz: kind === CALL_KIND.quiz,
+      learn: back || meaningShown(w.mode, this.child, this.seen === null ? null : this.seen(word)), dots: "", typed: -1, late: false, lockedAt: -1, leave: "", shakeUntil: 0, pinkUntil: 0,
     });
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     card.el.style.setProperty("--agent", "transparent");
     card.el.dataset.icon = CALL_ICON[kind];
     // A "Dồn lửa" call: amber (BUILD_1B §13.1); R2 (§13.3): Chữ Chiêu glows orange, a direct call is a scroll with its window's clock.
-    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (w.calls.burst[c] === 1 ? " is-burst" : "") + (kind === CALL_KIND.ult ? " is-ult" : kind === CALL_KIND.direct ? " is-direct" : "");
+    card.el.className = "td-card" + (card.quiz ? " is-quiz" : "") + (back ? " is-review" : "") + (w.calls.burst[c] === 1 ? " is-burst" : "") + (kind === CALL_KIND.ult ? " is-ult" : kind === CALL_KIND.direct ? " is-direct" : "");
     card.sub.textContent = card.learn && !card.quiz ? card.mean : "";
     this.byId.set(id, card);
   }
@@ -163,7 +180,9 @@ export class WordCards {
       const tier = w.typing.letters.partner[w.typing.deck.letters[w.typing.deck.start[W.word[s]!]!]!]! >= 0 ? 2 : W.tier[s]!;
       const c = W.call[s]!;
       const dots = pips(w, c);
-      if (W.typed[s] !== card.typed || pink !== card.pink || tier !== card.tier || dots !== card.dots) this.render(card, W.typed[s]!, pink, tier, dots);
+      const again = !card.learn && W.errors[s]! >= LEARN.meaningErrors; // 3 slips: the meaning shows again (§11.1)
+      if (again) [card.learn, card.sub.textContent] = [true, card.quiz ? "" : card.mean];
+      if (again || W.typed[s] !== card.typed || pink !== card.pink || tier !== card.tier || dots !== card.dots) this.render(card, W.typed[s]!, pink, tier, dots);
       card.lockedAt = lock !== s ? -1 : card.lockedAt < 0 ? w.tick : card.lockedAt;
       const late = w.calls.expire[c]! >= 0 && w.calls.expire[c]! - w.tick < 1.5 * 60;
       if (late !== card.late) card.el.classList.toggle("is-late", (card.late = late));

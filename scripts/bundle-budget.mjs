@@ -9,8 +9,11 @@ import { existsSync, readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
 const BUDGET_KB = 85;
-/** As src/main.ts loads them: "/" shows the title before the run; a link with ?title=0 or ?sandbox= goes straight in. */
-const PAGES = { "/": ["index.html", "src/ui/title.ts"], "/?title=0": ["index.html"] };
+/**
+ * As src/main.ts loads them: "/" shows the title before the run; a link with ?title=0 or ?sandbox= goes straight in and its
+ * first step waits for Học's chunk (R3: the run's study lists), which "/" fetches beside the title and waits for at "Bắt đầu".
+ */
+const PAGES = { "/": ["index.html", "src/ui/title.ts"], "/?title=0": ["index.html", "src/app/learn.ts"] };
 const MANIFEST = "dist/.vite/manifest.json";
 
 const fail = (text) => {

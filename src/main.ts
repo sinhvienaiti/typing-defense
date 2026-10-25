@@ -17,13 +17,15 @@
  * page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest comes once
  * the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review fix 2) and
  * asks again when it is wanted (R2 review fix 3). R3 step 1 (docs/td/R3_PLAN.md §3.1) took window.__td (app/dev-tools.ts)
- * and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too.
+ * and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too. Học (R3, BUILD_1B §11; app/learn.ts, a
+ * chunk asked for at once, with the portal bridge) plans the run's study lists before its first step, counts the words
+ * seen, sends the learning events and keeps the review book across runs; one that cannot load plays with no lists.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
+import type { Learner } from "./app/learn";
 import { installKeys, installPointer } from "./app/input";
-import { learningBridge } from "./app/learning";
 import { loadSettings } from "./app/prefs";
 import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
 import { updateSkill } from "./kit/balance";
@@ -32,6 +34,7 @@ import { Session } from "./app/session";
 import { loadDeck } from "./app/vocab";
 import type { Mode } from "./content/types";
 import type { RareEvent } from "./sim/events";
+import { NO_LEARN, setLearn } from "./sim/systems/learn";
 import { setMode, setPace } from "./sim/systems/pace";
 import type { World } from "./sim/world";
 import { dockHtml } from "./ui/build-menu";
@@ -68,6 +71,10 @@ const wakeSound = (): void => (audio === null ? wantSound(true) : audio.resume()
 let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
 /** The run header from the profile and the "Nhịp tự điều" setting. */
 const header = () => paceHeader(profile, settings.pace);
+/** Học (app/learn.ts): the run waits for it at tick 0 (its study lists go in the header); one that cannot load plays with none. */
+const learnChunk = new Chunk("learn", () => import("./app/learn"));
+void learnChunk.get();
+let learner: Learner | null = null;
 /** A chunk the page could not load, told in the HUD for a while (`until`, ms of performance.now()). */
 let lost = { text: "", until: 0 };
 const tellLost = (text: string): void => void (lost = { text, until: performance.now() + 10_000 });
@@ -131,7 +138,6 @@ const freshRun = (learn: boolean): string => {
 
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
-learningBridge().requestFocus(); // inside the portal only
 const replay = retryLoad === null ? null : await retryLoad;
 if (kept !== null && replay === null) tellLost("Chơi lại Ngày n chưa tải được: ván mới từ đầu · F5 để thử lại");
 const retry = kept === null || replay === null ? null : replay.readRetry(kept, seed, sandbox);
@@ -143,10 +149,24 @@ const world = session.world;
 /** The replay's end (__td.retry()); another rule or vocabulary since the run was kept: the run starts over. */
 const replayed = retry === null ? null : replay!.replayRetry(world, session, deck, retry, () => (window.location.search = freshRun(params.get("learn") === "1")));
 const tally = new SkillTally(world);
-// A run left mid-cycle counts as a quit (the trend keeps it; the measures do not); the title alone is no run.
-window.addEventListener("pagehide", () => world.tick > 0 && saveSkill(updateSkill(profile, tally.sample(world, "quit")).profile));
+// A run left mid-cycle counts as a quit (the trend keeps it; the measures do not); the title alone is no run. Học keeps its book.
+window.addEventListener("pagehide", () => {
+  if (world.tick > 0) saveSkill(updateSkill(profile, tally.sample(world, "quit")).profile);
+  if (world.tick > 0) learner?.save(world);
+  learner?.flush(performance.now());
+});
 const selection = new Selection(world, (command) => session.send(command));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
+cards.child = profile.audience === "child";
+/** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
+let runLearn = retry?.learn ?? NO_LEARN;
+void learnChunk.get().then((m) => {
+  if (m === null) return;
+  m.learningBridge().requestFocus(); // inside the portal only
+  learner = new m.Learner(deck, world.vocab, seed, (event) => m.learningBridge().sendAttempt(event), retry?.learn);
+  cards.seen = (item) => learner!.seen(item);
+  if (retry === null && world.tick === 0) setLearn(world, (runLearn = learner.header));
+});
 let imeWarning = false;
 const learnMode = (): void => setMode(world, (startMode = "learn"));
 /** A run has begun: the title was passed (or never shown); a new choice then opens a fresh page. */
@@ -191,7 +211,7 @@ const sheets = new Chunk("sheets", async () => {
     else if (action === "retry" || action === "copy") void retryChunk.get().then((m) => {
       if (m === null) tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
       else if (action === "copy") m.copyNumbers(world, profile);
-      else m.retryDay({ world, session, seed, sandbox, deck, mode: startMode, header: runHeader, fresh: freshRun });
+      else m.retryDay({ world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun });
     });
     else if (action === "title") showTitle(world.phase !== "defeat");
   });
@@ -208,9 +228,10 @@ function prefetch(): void {
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && sound.settled && sheets.settled && retryChunk.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
-    chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null }),
-    header: () => runHeader, mode: () => startMode, replayed: () => replayed, balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
+    ready: () => painted && sound.settled && sheets.settled && retryChunk.settled && learnChunk.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null }),
+    header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
+    learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
   }));
 }
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
@@ -309,10 +330,11 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted || titleUp;
+      session.paused = selection.halted || titleUp || (world.tick === 0 && !learnChunk.settled);
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       const fresh = world.events.rare.splice(0);
+      learner?.read(fresh, world, now);
       const sample = tally.read(fresh, world);
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));
       cards.read(fresh, world, now);
