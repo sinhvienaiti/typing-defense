@@ -10,8 +10,10 @@
  * spawn to kill and the learning gate fold into the kit's BotModeSummary; runGates scores B1–B9.
  */
 import { BANDS, MODE_LABELS, blendSkill, botParams, formatGates, newSkillProfile, pct, runGates, skillAdvice, STANDARD_BOTS, summarizeRuns, updateSkill, type BandMode, type BotModeSummary, type BotSpec as KitBot, type GateResult, type RunRecord, type SkillProfile, type Tactics } from "../../src/kit/balance";
+import { planFor, readLearn, type LearnStore } from "../../src/app/learn";
 import { paceHeader, SkillTally } from "../../src/app/skill";
-import { CALL, MODES } from "../../src/content/rules";
+import { CALL, LEARN, MODES } from "../../src/content/rules";
+import { createLearn, type LearnHeader } from "../../src/sim/systems/learn";
 import { CALL_KIND } from "../../src/sim/stores/calls";
 import type { Deck } from "../../src/typing/decks";
 import type { World } from "../../src/sim/world";
@@ -44,15 +46,33 @@ export function tacticsPlan(tactics: Tactics, kite = false): () => Plan {
   return () => new Plan(layout, rules);
 }
 
-/** A row of the matrix: a standard bot, or a variant ("standard@good"; "no-type@kite", B5's strongest no-type play). */
-export type MatrixBot = { id: string; spec: KitBot; tactics: Tactics; kite?: boolean };
+/**
+ * R3 (BUILD_1B §18.1, R3_PLAN §3.8): a bot's study store, turned into its run header by the page's own planFor (the story's
+ * vocabulary is levels 1–3): `empty` is the cold start (nothing due, fresh words of level 3), every row's; `book20` a book of
+ * 20 fixed words of levels 1–3 (every (count / 20)th of them in deck order) with every word of levels 1–2 and the book seen
+ * (the standard bot's extra row in Cân bằng, printed to compare; the gates read the cold start).
+ */
+export type LearnProfile = "empty" | "book20";
+export function learnStore(profile: LearnProfile, deck: Deck): LearnStore {
+  if (profile === "empty") return readLearn(null);
+  const pool = deck.ids.filter((_, k) => deck.level[k]! <= 3);
+  const book = Array.from({ length: CALL.review }, (_, k) => pool[Math.floor((k * pool.length) / CALL.review)]!);
+  const seen = Object.fromEntries(deck.ids.flatMap((id, k) => (deck.level[k]! <= 2 || book.includes(id) ? [[id, LEARN.seenCap]] : [])));
+  return { v: 1, book, seen };
+}
+export const learnHeader = (profile: LearnProfile, deck: Deck, seed: number): LearnHeader => planFor(deck, learnStore(profile, deck), 3, seed);
+
+/** A row of the matrix: a standard bot, or a variant ("standard@good"; "no-type@kite", B5's strongest no-type play; R3's "standard@book20"). */
+export type MatrixBot = { id: string; spec: KitBot; tactics: Tactics; kite?: boolean; learn?: LearnProfile };
 
 export const KITE = "no-type@kite";
+export const BOOK20 = "standard@book20";
 
 export const MATRIX_BOTS: readonly MatrixBot[] = [
   ...STANDARD_BOTS.map((spec) => ({ id: spec.id, spec, tactics: spec.tactics })),
   ...(["good", "poor"] as const).map((tactics) => ({ id: "standard@" + tactics, spec: STANDARD_BOTS.find((bot) => bot.id === "standard")!, tactics })),
   { id: KITE, spec: STANDARD_BOTS.find((bot) => bot.id === "no-type")!, tactics: "good", kite: true },
+  { id: BOOK20, spec: STANDARD_BOTS.find((bot) => bot.id === "standard")!, tactics: "fair", learn: "book20" },
 ];
 
 /** The profile the game would hold for a bot: its E, a and CV measured with full trust; none for a bot that never types. */
@@ -69,21 +89,41 @@ export function botProfile(bot: MatrixBot, mode: BandMode): SkillProfile {
  * every 20; a single slow word may run a window over, the director cannot know it in advance), and no call
  * invariant broke (one bright word a call, first letters apart, the review book's quiz words), no command refused.
  */
-export function learnOk(run: BotRun): boolean {
+export function learnOk(run: BotRun & { timedFresh?: number }): boolean {
   const share = (run.typedTicks[0] + run.typedTicks[1]) / Math.max(1, run.phaseTicks[0] + run.phaseTicks[1]);
-  return share <= MODES[run.world.mode].typeS / CALL.windowS && run.problems.length === 0 && run.rejected.length === 0;
+  // R3 (§18.3 B8): at most 8 fresh words a run, none in a call that runs out (or on the boss night).
+  const fresh = run.stats.freshWords <= LEARN.freshMax && (run.timedFresh ?? 0) === 0;
+  return share <= MODES[run.world.mode].typeS / CALL.windowS && run.problems.length === 0 && run.rejected.length === 0 && fresh;
 }
 
 export type MatrixOptions = { seeds: number; nights?: number; modes?: readonly BandMode[]; bots?: readonly MatrixBot[]; deck: Deck };
 
-/** One stage: bot × mode × seed, the director on or off. */
-export function playStage(bot: MatrixBot, mode: BandMode, seed: number, deck: Deck, director = true, nights = STAGE_NIGHTS, onTick?: (w: World) => void): BotRun {
+/** A stage run with its study lists (R3) and the fresh words dealt where B8 R3 forbids them: a call that runs out (power, Chữ Chiêu, direct, Dồn lửa) or the boss night. */
+export type StageRun = BotRun & { learn: LearnHeader; timedFresh: number; freshSeen: number };
+
+/** One stage: bot × mode × seed, the director on or off; the bot's study store planned by the page's planFor (R3). */
+export function playStage(bot: MatrixBot, mode: BandMode, seed: number, deck: Deck, director = true, nights = STAGE_NIGHTS, onTick?: (w: World) => void): StageRun {
   const header = paceHeader(botProfile(bot, mode), director);
-  return runBot({
-    onTick, sandbox: false,
+  const learn = learnHeader(bot.learn ?? "empty", deck, seed);
+  let [timedFresh, freshSeen] = [0, 0];
+  let plan = Array.from(createLearn(deck, learn).fresh); // the list at tick 0
+  // A word the plan dealt fresh this tick leaves its list (sim/systems/learn.ts deal: −1); its card's call is read here.
+  const watch = (w: World): void => {
+    const dealt = new Set(plan.filter((word, k) => word >= 0 && w.learn.fresh[k]! < 0));
+    plan = Array.from(w.learn.fresh);
+    for (const e of w.events.rare) {
+      const c = e.t === "wordSpawn" && dealt.has(e.item) ? w.calls.slotOf(e.call) : -1;
+      if (c >= 0) freshSeen += 1;
+      if (c >= 0 && (w.calls.burst[c] === 1 || [CALL_KIND.power, CALL_KIND.ult, CALL_KIND.direct].includes(w.calls.kind[c] as never) || (w.day >= STAGE_NIGHTS && w.phase !== "day"))) timedFresh += 1;
+    }
+    onTick?.(w);
+  };
+  const run = runBot({
+    onTick: watch, sandbox: false, learn,
     seed, deck, mode, nights, check: true, hands: null, human: botParams(bot.spec, { tactics: bot.tactics }), botSeed: seed * 7919 + 13,
     expected: bot.spec.wpm > 0 ? header.expected : undefined, pace: { k: header.k, director }, plan: tacticsPlan(bot.tactics, bot.kite),
   });
+  return Object.assign(run, { learn, timedFresh, freshSeen });
 }
 
 export const record = (run: BotRun): RunRecord => ({ flow: run.flow, pace: run.pace, killSeconds: run.killSeconds ?? undefined, learnOk: learnOk(run) });
@@ -99,10 +139,12 @@ export type CellSpec = { bot: string; mode: BandMode; director: boolean };
 export type RunExtra = {
   empty: number; window: number; casts: number; ultBoss: number; ultAll: number; boss: number; all: number; direct: number; missed: number; words: number;
   calls: number; directMax: number; directMaxBoss: number; n14: [number, number]; n4: [number, number]; n5: [number, number];
+  /** R3 (§18.2): Từ Ôn typed, redeemed, fresh words dealt, fresh words where B8 R3 forbids them. */
+  review: number; redeemed: number; fresh: number; timedFresh: number;
 };
 
 /** The R2 part of a run's extra. */
-function r2Extra(run: BotRun): Omit<RunExtra, "empty" | "window"> {
+function r2Extra(run: BotRun): Omit<RunExtra, "empty" | "window" | "review" | "redeemed" | "fresh" | "timedFresh"> {
   const s = run.stats;
   const nights = (from: number, to: number): [number, number] => [sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTyped ?? 0)), sum(run.byDay.slice(from, to + 1).map((d) => d?.nightTicks ?? 0))];
   return {
@@ -116,9 +158,10 @@ export type Cell = CellSpec & { k: number; summary: BotModeSummary; records: Run
 
 export const botById = (id: string): MatrixBot => MATRIX_BOTS.find((bot) => bot.id === id)!;
 
-/** Every bot in every mode with the director on (the kite in Cân bằng and Thử thách: BUILD_1B §18.1), and the standard bot in Cân bằng with it off (B7). */
+/** Every bot in every mode with the director on (the kite in Cân bằng and Thử thách: BUILD_1B §18.1; the 20-word book in Cân bằng), and the standard bot in Cân bằng with it off (B7). */
 export function matrixCells(modes: readonly BandMode[] = STAGE_MODES, bots: readonly MatrixBot[] = MATRIX_BOTS): CellSpec[] {
-  const cells: CellSpec[] = modes.flatMap((mode) => bots.filter((bot) => !bot.kite || mode !== "relax").map((bot) => ({ bot: bot.id, mode, director: true })));
+  // R3: the 20-word book's row plays Cân bằng only (R3_PLAN §3.8).
+  const cells: CellSpec[] = modes.flatMap((mode) => bots.filter((bot) => (!bot.kite || mode !== "relax") && (bot.learn !== "book20" || mode === "balanced")).map((bot) => ({ bot: bot.id, mode, director: true })));
   if (modes.includes("balanced") && bots.some((bot) => bot.id === "standard")) cells.push({ bot: "standard", mode: "balanced", director: false });
   return cells;
 }
@@ -128,7 +171,10 @@ export function playCell(spec: CellSpec, seeds: number, deck: Deck, nights = STA
   const bot = botById(spec.bot);
   const runs = Array.from({ length: seeds }, (_, k) => playStage(bot, spec.mode, from + k + 1, deck, spec.director, nights));
   const records = runs.map(record);
-  const extra = runs.map((run) => ({ empty: run.emptyTicks[1] / Math.max(1, run.phaseTicks[1]), window: run.windowMax / 60, ...r2Extra(run) }));
+  const extra = runs.map((run) => ({
+    empty: run.emptyTicks[1] / Math.max(1, run.phaseTicks[1]), window: run.windowMax / 60, ...r2Extra(run),
+    review: run.stats.reviewBack, redeemed: run.stats.reviewRedeemed, fresh: run.stats.freshWords, timedFresh: run.timedFresh,
+  }));
   return { ...spec, k: paceHeader(botProfile(bot, spec.mode), spec.director).k, summary: summarizeRuns(bot.id, spec.mode, records, spec.director), records, boss: runs.map((run) => run.boss), extra };
 }
 
@@ -414,6 +460,25 @@ export function bossGates(cells: readonly Cell[], sets: readonly (readonly Cell[
 
 const LABEL: Record<string, string> = Object.fromEntries(STANDARD_BOTS.map((bot) => [bot.id, bot.label]));
 
+/**
+ * R3 (BUILD_1B §18.2, R3_PLAN §3.8): Từ Ôn typed and redeemed a run, fresh words a run (mean and most), fresh words in
+ * a call that runs out or on the boss night (B8 R3: 0), the share of runs where a word came back at least once (R3_PLAN
+ * §5 A3: ≥ 70 % for the standard bot), typing on nights 1–4 and 5 (G2, Từ Ôn adds letters by day), the fullest 20 s window.
+ */
+export function r3Table(cells: readonly Cell[]): string[] {
+  const lines = [
+    "| Chế độ | Bot | Sổ | Từ Ôn / ván | Chuộc lại / ván | Từ mới / ván (lớn nhất) | Từ mới ở lời gọi có hạn, Đêm 5 | Ván có từ quay lại | Gõ Đêm 1–4 | Gõ Đêm 5 | Cửa sổ 20 s lớn nhất |",
+    "|---|---|---|---|---|---|---|---|---|---|---|",
+  ];
+  for (const c of cells.filter((x) => x.director && x.extra.length > 0 && x.bot !== KITE && botById(x.bot).spec.wpm > 0)) {
+    const n = c.extra.length;
+    const t = (pick: (x: RunExtra) => number): number => sum(c.extra.map(pick));
+    const night = (pick: (x: RunExtra) => [number, number]): string => share1((1000 * t((x) => pick(x)[0])) / Math.max(1, t((x) => pick(x)[1])), 1000);
+    lines.push(`| ${MODE_LABELS[c.mode]} | ${LABEL[c.bot] ?? c.bot} | ${botById(c.bot).learn === "book20" ? "20 từ" : "trống"} | ${(t((x) => x.review) / n).toFixed(1)} | ${(t((x) => x.redeemed) / n).toFixed(1)} | ${(t((x) => x.fresh) / n).toFixed(1)} (${Math.max(...c.extra.map((x) => x.fresh))}) | ${t((x) => x.timedFresh)} | ${share(c.extra.filter((x) => x.review > 0).length, n)} | ${night((x) => x.n14)} | ${night((x) => x.n5)} | ${Math.max(...c.extra.map((x) => x.window)).toFixed(1)} s |`);
+  }
+  return lines;
+}
+
 /** The stage part of `pnpm td:balance` (BALANCE.md §3, §7; Markdown, Vietnamese): the bots, the §3 table, B1–B9, the measured profiles. */
 export function stageReport(cells: readonly Cell[], measured: readonly { bot: string; profile: SkillProfile }[], seeds: number, print: (text: string) => void, from = 0): GateResult[] {
   const gates = stageGates(cells);
@@ -431,6 +496,8 @@ export function stageReport(cells: readonly Cell[], measured: readonly { bot: st
   print("\n### R2: Tối Thượng, gõ trực tiếp, tỉ lệ gõ theo đêm (BUILD_1B §18.2)\n");
   print(r2Table(cells).join("\n"));
   print("\n" + r2Gates(cells));
+  print("\n### R3: Học, Từ Ôn, từ mới (BUILD_1B §18.2; B8 R3: ≤ 8 từ mới mỗi ván, 0 ở lời gọi có hạn và Đêm 5)\n");
+  print(r3Table(cells).join("\n"));
   if (measured.length === 0) return gates;
   print("\n### Hồ sơ game đo được (một ải Cân bằng, tắt nhịp, `SkillTally` sau mỗi ngày đêm)\n");
   print("| Bot | E (đặt / đo) | a (đặt / đo) | CV (đặt / đo) | Nhận từ mới (s) | Lời khuyên |");

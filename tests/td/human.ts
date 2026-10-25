@@ -14,15 +14,16 @@ import type { Familiarity } from "../../src/kit/balance/profile";
 import type { RngStream } from "../../src/kit/platform/rng";
 import type { CommandBody } from "../../src/sim/commands";
 import { CALL_KIND } from "../../src/sim/stores/calls";
+import { KIND } from "../../src/typing/letters";
 import type { World } from "../../src/sim/world";
 
 const MS = 1000 / 60;
 /** Words that run out and answer an attack (BUILD_1B §18.1 R2): power, Chữ Chiêu and direct calls, by the same reflex. */
 const urgent = (kind: number): boolean => kind === CALL_KIND.power || kind === CALL_KIND.ult || kind === CALL_KIND.direct;
 
-/** The word's familiarity as the sim tells it in `wordHit` (calls.ts): a quiz is being learned, the run's top level is new. */
+/** The word's familiarity as the sim tells it in `wordHit` (calls.ts): a quiz or a Từ Ôn (R3, R3_PLAN §3.8) is being learned, the run's top level is new. */
 export function familiarity(w: World, s: number): Familiarity {
-  if (w.calls.kind[w.words.call[s]!] === CALL_KIND.quiz) return "learning";
+  if (w.calls.kind[w.words.call[s]!] === CALL_KIND.quiz || w.words.kind[s] === KIND.review) return "learning";
   return w.vocab > 1 && w.typing.deck.level[w.words.word[s]!] === w.vocab ? "new" : "known";
 }
 

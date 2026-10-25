@@ -3,7 +3,7 @@ import { GATE_IDS, STANDARD_BOTS, type BotModeSummary } from "../src/kit/balance
 import { STAT } from "../src/sim/stats";
 import { paceSummary } from "./td/bot";
 import { emptyBossRun, type BossRun } from "./td/boss-probe";
-import { bossGates, bossGateValues, botById, learnOk, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS, TIGHT_BANDS, type Cell } from "./td/flow";
+import { bossGates, bossGateValues, botById, learnHeader, learnOk, learnStore, MATRIX_BOTS, matrixCells, measuredProfile, metricsTable, playCell, playStage, stageGates, stageReport, STAGE_NIGHTS, TIGHT_BANDS, type Cell } from "./td/flow";
 import { realDeck } from "./td/typing";
 
 /**
@@ -15,11 +15,12 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
   const deck = realDeck();
 
   it("has every standard bot, the tactics pair for B6, every mode, and the director off once for B7", () => {
-    expect(MATRIX_BOTS.map((bot) => bot.id)).toEqual([...STANDARD_BOTS.map((bot) => bot.id), "standard@good", "standard@poor", "no-type@kite"]);
+    expect(MATRIX_BOTS.map((bot) => bot.id)).toEqual([...STANDARD_BOTS.map((bot) => bot.id), "standard@good", "standard@poor", "no-type@kite", "standard@book20"]);
     const cells = matrixCells();
-    // The kite (B5, BUILD_1B §18.1) plays Cân bằng and Thử thách only.
-    expect(cells.length).toBe(3 * MATRIX_BOTS.length + 1 - 1);
+    // The kite (B5, BUILD_1B §18.1) plays Cân bằng and Thử thách only; R3's 20-word book Cân bằng only.
+    expect(cells.length).toBe(3 * MATRIX_BOTS.length + 1 - 1 - 2);
     expect(cells.filter((cell) => cell.bot === "no-type@kite").map((cell) => cell.mode)).toEqual(["balanced", "challenge"]);
+    expect(cells.filter((cell) => cell.bot === "standard@book20").map((cell) => cell.mode)).toEqual(["balanced"]);
     expect(cells.filter((cell) => !cell.director)).toEqual([{ bot: "standard", mode: "balanced", director: false }]);
   });
 
@@ -42,6 +43,25 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(fast.world.pace.k).toBe(1.3);
     expect(none.world.pace.k).toBe(1);
     expect(fast.world.stats[STAT.killTicks]).toBeGreaterThan(0);
+  });
+
+  it("plays Học as the page plans it (R3, BUILD_1B §18.1): the cold start deals fresh words, the 20-word book brings Từ Ôn back; B8 R3 holds (≤ 8 fresh, none in a call that runs out or on the boss night)", { timeout: 30_000 }, () => {
+    const cold = learnHeader("empty", deck, 1);
+    expect([cold.book.length, cold.due.length, cold.fresh.length]).toEqual([0, 0, 24]);
+    expect(cold.fresh.every((id) => deck.level[deck.ids.indexOf(id)] === 3)).toBe(true);
+    const store = learnStore("book20", deck);
+    const book = learnHeader("book20", deck, 1);
+    expect([store.book.length, book.book.length, book.due.length, new Set(store.book).size]).toEqual([20, 20, 20, 20]);
+    expect(store.book.every((id) => deck.level[deck.ids.indexOf(id)]! <= 3)).toBe(true);
+    expect(book.fresh.some((id) => store.seen[id] !== undefined)).toBe(false);
+    const runs = [playStage(botById("standard"), "balanced", 1, deck, true, 2), playStage(botById("standard@book20"), "balanced", 1, deck, true, 2)];
+    expect(runs.map((run) => run.learn)).toEqual([cold, book]);
+    expect(runs[0]!.stats.freshWords).toBeGreaterThan(0);
+    expect(runs[1]!.stats.reviewBack).toBeGreaterThan(0);
+    for (const run of runs) expect([run.stats.freshWords <= 8, run.timedFresh, learnOk(run)]).toEqual([true, 0, true]);
+    // The check sees a word the plan dealt: every fresh word dealt left the plan's list at the tick its card came.
+    for (const run of runs) expect([Array.from(run.world.learn.fresh).filter((word) => word < 0).length, run.freshSeen]).toEqual([run.stats.freshWords, run.stats.freshWords]);
+    expect(learnOk({ ...runs[0]!, timedFresh: 1 })).toBe(false);
   });
 
   it("folds a cell into the kit's summary and prints the §3 table and every gate (missing cells are THIẾU SỐ, never ĐẠT)", { timeout: 20_000 }, () => {
