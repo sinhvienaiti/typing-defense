@@ -4,7 +4,8 @@
 // among them by the `=` key, Draconis by the fork, the flood topped up to 300 after each rain (R2 review); for ~10 s the
 // page's frame costs (__td.costs: the 2D view with the
 // boss layer and the cards; the steps with the HUD and sound) and Chrome's main thread: the view ≤ 8 ms a frame (p95),
-// the main thread ≤ 4 ms a frame on average, no frame over 16.7 ms as it rises. Picture td-1b-perf.
+// the main thread ≤ 4 ms a frame on average, no frame over 16.7 ms as it rises (each frame's steps and view together:
+// R2 review fix 3, F5). Picture td-1b-perf.
 // R2 review fix 2: the page's frames are paced to a fixed 60 Hz (PERF_HZ, 0 for the browser's own rate) by a
 // requestAnimationFrame wrapper installed before the page loads, so the per-frame cost does not depend on the rate a
 // headless Chrome happens to run at (119–156 fps uncapped); the busy share and the frame rate are printed beside it.
@@ -66,7 +67,11 @@ export default async function (page) {
   await page.eval(`window.__perfFrames = 0; (function count() { window.__perfFrames += 1; requestAnimationFrame(count); })(); true`);
   await page.sleep(2500); // the rise
   const riseFrames = await page.eval("window.__perfFrames");
-  const rise = await page.eval(td(`const c = t.costs(); return { draw: c.draw.slice(-${riseFrames}), update: c.update.slice(-${riseFrames}) };`));
+  // Each frame runs its steps then its view in one callback (runFrameLoop), so the two lists line up from their ends; a
+  // frame's cost is their sum (R2 review fix 3, F5: the max of each part alone missed a frame long only in total).
+  const rise = await page.eval(td(`const c = t.costs(); const n = Math.min(${riseFrames}, c.draw.length, c.update.length);
+    const draw = c.draw.slice(-n), update = c.update.slice(-n);
+    return { aligned: c.draw.length === c.update.length, draw, update, total: draw.map((ms, k) => ms + update[k]) };`));
   await page.eval(td("t.flood(300); return true;"));
   await page.sleep(500);
   await page.send("Performance.enable");
@@ -110,9 +115,9 @@ export default async function (page) {
     // §20 at the paced rate: the page held it (within 5 %) and its main thread stayed ≤ 4 ms a frame.
     pacedRate: HZ === 0 || Math.abs(fps - HZ) <= HZ * 0.05,
     mainThread: busy / Math.max(1, frames) <= 4,
-    riseNoLongFrame: Math.max(...rise.draw, ...rise.update) <= 16.7,
+    riseNoLongFrame: rise.aligned && rise.total.length > 0 && Math.max(...rise.total) <= 16.7,
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { hz: HZ, draw, update, mainMsPerFrame: busy / Math.max(1, frames), mainBusyShare: busy / (seconds * 1000), frames, fps, riseFrames, riseMax: Math.max(...rise.draw, ...rise.update), enemies: s.enemies, beforeTopUp: live, ult: { casts: ultStats.ultCasts, feathers: ultStats.ultFeathers, damage: ultStats.damageUlt }, shot, replay });
+  return finish(page, checks, { hz: HZ, draw, update, mainMsPerFrame: busy / Math.max(1, frames), mainBusyShare: busy / (seconds * 1000), frames, fps, riseFrames, riseMax: Math.max(...rise.total), riseParts: { draw: Math.max(...rise.draw), update: Math.max(...rise.update) }, enemies: s.enemies, beforeTopUp: live, ult: { casts: ultStats.ultCasts, feathers: ultStats.ultFeathers, damage: ultStats.damageUlt }, shot, replay });
 }
