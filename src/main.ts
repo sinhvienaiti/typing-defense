@@ -217,9 +217,10 @@ const sheets = new Chunk("sheets", async () => {
     else if (action === "map") mapOnly = true;
     else if (action === "again") window.location.search = freshRun(false);
     else if (action === "retry" || action === "copy") void retryChunk.get().then((m) => {
-      if (m === null) tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
-      else if (action === "copy") m.copyNumbers(world, profile);
-      else m.retryDay({ world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun });
+      if (m === null) return tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
+      const run = { world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun };
+      if (action === "copy") m.copyNumbers(run, profile, source);
+      else m.retryDay(run);
     });
     else if (action === "title") showTitle(world.phase !== "defeat");
   });

@@ -56,16 +56,22 @@ export function balanceOf(world: World, profile: SkillProfile) {
   return { flow: world.pace.meter.summary(outcome), night: world.pace.night.summary(), day: world.pace.day.summary(), profile, stats: statsObject(world.stats), lives: world.lives, dayNumber: world.day };
 }
 
-/** "Chép số chơi thử" (BUILD_1B §14): the numbers to the clipboard, else a .json file to save. */
-export function copyNumbers(world: World, profile: SkillProfile): void {
-  const text = JSON.stringify(balanceOf(world, profile));
-  const save = (): void => {
-    const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: "loi-goi-choi-thu.json" });
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
-  if (navigator.clipboard === undefined) save();
-  else navigator.clipboard.writeText(text).catch(save);
+/**
+ * The play-test file (BUILD_1B §22, R3 part B): the numbers for B9 and the run itself, its header and whole log in the shape
+ * scripts/td/replay.ts reads, so scripts/td/b9.ts replays it on Node to the same hash before it grades B9.
+ */
+export function playtestFile(run: RunOf, profile: SkillProfile, vocabulary: string) {
+  const { world, header } = run;
+  return { v: 1, game: "typing-defense", numbers: balanceOf(world, profile), run: { seed: run.seed, sandbox: run.sandbox, content: world.c.hash, deck: run.deck.hash, vocabulary, expected: header.expected, pace: { k: header.k, director: header.director }, mode: run.mode, learn: run.learn, tick: world.tick, hash: hashHex(world), log: run.session.log } };
+}
+
+/** "Chép số chơi thử" (BUILD_1B §14, §22): the play-test file saved (loi-goi-choi-thu-….json) and copied to the clipboard. */
+export function copyNumbers(run: RunOf, profile: SkillProfile, vocabulary: string): void {
+  const text = JSON.stringify(playtestFile(run, profile, vocabulary));
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: `loi-goi-choi-thu-s${run.seed}-n${run.world.day}-${run.world.tick}.json` });
+  a.click();
+  URL.revokeObjectURL(a.href);
+  void navigator.clipboard?.writeText(text).catch(() => undefined);
 }
 
 /** "Chơi lại Ngày n": the log up to the start of the lost night's day, and the hashes kept, for the next page load. */
