@@ -51,6 +51,7 @@ export type RareEvent = { tick: number } & (
   | { t: "drum"; enemy: number; end: number } // a mechanic begins, its direct call's window to `end`
   | { t: "direct"; enemy: number; ok: boolean; x: number; z: number } // broken by its word, or let run (healed)
   | { t: "panic"; agent: number }
+  | { t: "review"; item: number; redeemed: boolean } // a Từ Ôn typed (R3): item its deck index; redeemed out of the book
   | { t: "waveStart"; wave: number }
   | { t: "waveEnd"; wave: number; bonus: number }
   | { t: "nightCalled"; day: number; bonus: number }
@@ -61,9 +62,10 @@ export type RareEvent = { tick: number } & (
   | { t: "felled"; tree: number }
   | { t: "call"; call: number; kind: number; state: "made" | "open" | "bright" | "dim" }
   | { t: "callEnd"; call: number; kind: number; perfect: boolean; finished: boolean }
-  | { t: "wordSpawn"; word: number; call: number }
+  | { t: "wordSpawn"; word: number; call: number; item: number }
   | { t: "wordKey"; word: number; result: number }
-  | { t: "wordHit"; word: number; call: number; grade: Grade; errors: number; quality: number; len: number; ms: number; wait: number; fam: number }
+  // item: the deck word, kind: its call's CALL_KIND (R3: the learning events, src/app/learn.ts, read them after the call ended)
+  | { t: "wordHit"; word: number; call: number; grade: Grade; errors: number; quality: number; len: number; ms: number; wait: number; fam: number; item: number; kind: number }
   | { t: "pace"; night: boolean; lever: string; dir: number; amount: number; level: number }
   | { t: "chain"; chain: number; tier: number; callout: boolean }
 );

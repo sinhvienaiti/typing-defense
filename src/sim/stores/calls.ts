@@ -37,6 +37,8 @@ export class CallStore extends Slots {
   readonly burst = new Uint8Array(this.cap);
   /** A direct call's enemy, by id (−1 none): the call follows it (BUILD_1B §9.1). */
   readonly foe = new Int32Array(this.cap);
+  /** It had its Từ Ôn (R3, BUILD_1B §11.2: one a call). */
+  readonly review = new Uint8Array(this.cap);
 
   add(kind: number, words: number, npc: number, b: number, tree: number, plot: number, tick: number, expire: number, agent = -1): number {
     const slot = this.take();

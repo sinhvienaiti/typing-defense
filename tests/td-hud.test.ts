@@ -6,7 +6,7 @@ import { PLACE_CHECKS } from "../src/sim/placement";
 import { CALL_KIND } from "../src/sim/stores/calls";
 import { makeCall } from "../src/sim/systems/calls";
 import { Selection } from "../src/app/selection";
-import { review } from "../src/sim/systems/calls";
+import { review } from "../src/sim/systems/learn";
 import { compileDeck } from "../src/typing/decks";
 import { dockHtml } from "../src/ui/build-menu";
 import { BOSS } from "../src/sim/stores/boss";

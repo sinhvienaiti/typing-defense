@@ -13,6 +13,8 @@ export const STATS = [
   "bossDamage", "bossTyped", "bossHero", "bossRetreats", "livesBoss", "rootsHits", "goldChest", "burstTyped", "burstWords",
   // R2: Tối Thượng's casts, feathers, damage on the boss; Mảnh Chữ; direct words typed and mechanics let run; helpers panicked.
   "ultCasts", "ultFeathers", "bossUlt", "shards", "directOk", "directMissed", "panics",
+  // R3 (BUILD_1B §11): Từ Ôn typed back, redeemed of them, fresh words of the study plan dealt.
+  "reviewBack", "reviewRedeemed", "freshWords",
 ] as const;
 
 export type StatName = (typeof STATS)[number];

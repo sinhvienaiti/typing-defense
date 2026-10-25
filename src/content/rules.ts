@@ -63,6 +63,18 @@ export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
   sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.15,
 } as const;
+/**
+ * BUILD_1B §11 (R3, docs/td/R3_PLAN.md §3.2–§3.4): a word of the review book comes back returnS after it went in as the next
+ * word of an economy call of ≥ minCallWords words (one Từ Ôn a call, so ≤ 25 % of its words), one live at a time, typed back
+ * `returns` times a run at most. The study plan's shares of an economy call's words (`plan`; no due list: `cold`), freshMax
+ * fresh words a run. The store keeps bookSaved words, the run's book takes the newest CALL.review; a meaning shows while a
+ * word was seen fewer than `seen` times (by mode), the count stops at seenCap, seenIds ids kept; meaningErrors errors on a
+ * word show it again; learning events go out every sendS.
+ */
+export const LEARN = {
+  returnS: [25, 45], minCallWords: 4, returns: 2, plan: { due: 0.6, current: 0.25, fresh: 0.15 }, cold: { current: 0.85, fresh: 0.15 }, freshMax: 8,
+  bookSaved: 40, freshPlanned: 24, seen: { balanced: 2, challenge: 1 }, seenCap: 3, seenIds: 3000, meaningErrors: 3, sendS: 5,
+} as const;
 /** A power word's Word Shot (TK 6.11): D̄ × (0.8 + 1.2·Q) × lenF, lenF = clamp((len + 1)/6; 0.8; 1.2). */
 export const REWARD = { lenDiv: 6, lenMin: 0.8, lenMax: 1.2, shotQ: [1.6, 0.4] } as const;
 /**

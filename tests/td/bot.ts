@@ -19,6 +19,7 @@ import type { Command, CommandBody } from "../../src/sim/commands";
 import { hashHex } from "../../src/sim/hash";
 import { STAT, statsObject, type StatName } from "../../src/sim/stats";
 import { CALL_KIND, CALL_STATE } from "../../src/sim/stores/calls";
+import type { LearnHeader } from "../../src/sim/systems/learn";
 import type { PaceHeader } from "../../src/sim/systems/pace";
 import { createWorld, step, type World } from "../../src/sim/world";
 import { wordText, type Deck } from "../../src/typing/decks";
@@ -40,6 +41,8 @@ export type BotSpec = {
   human?: TypistParams;
   /** The run header: pace k and the director (none: k 1, off). */
   pace?: PaceHeader;
+  /** The run header's study lists (R3, BUILD_1B §11.3–§11.4; none: no plan, an empty book). */
+  learn?: LearnHeader;
   /** Made fresh for each run: a plan keeps state. */
   plan: () => Plan;
   /** Stop when this night has ended (or the Bastion falls); the boss night ends with its retreat (victory). */
@@ -175,8 +178,8 @@ export function callProblems(w: World): string[] {
   return out;
 }
 
-const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "human" | "pace" | "sandbox">): World =>
-  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? (spec.human?.wpm || 35), vocab: spec.vocab, mode: spec.mode, pace: spec.pace, sandbox: spec.sandbox });
+const worldOf = (spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "human" | "pace" | "sandbox" | "learn">): World =>
+  createWorld({ seed: spec.seed, deck: spec.deck, expected: spec.expected ?? spec.hands?.wpm ?? (spec.human?.wpm || 35), vocab: spec.vocab, mode: spec.mode, pace: spec.pace, sandbox: spec.sandbox, learn: spec.learn });
 
 /** The run is over: the Bastion fell, the boss retreated, or the last night asked for ended (a boss night holds until its retreat). */
 const over = (w: World, nights: number): boolean => w.phase === "defeat" || w.phase === "victory" || (w.wave >= nights && w.waveEnded[nights] === 1 && w.phase !== "night");
@@ -304,7 +307,7 @@ export function runBot(spec: BotSpec): BotRun {
 }
 
 /** Steps a fresh world through a run's log, hashing every `every` ticks: a replay must give the run's hashes. */
-export function replayHashes(spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "sandbox">, log: readonly Command[], ticks: number, every: number): string[] {
+export function replayHashes(spec: Pick<BotSpec, "seed" | "deck" | "expected" | "vocab" | "mode" | "hands" | "sandbox" | "learn">, log: readonly Command[], ticks: number, every: number): string[] {
   const world = worldOf(spec);
   const hashes: string[] = [];
   let next = 0;

@@ -40,6 +40,7 @@ import { directStep } from "./systems/direct";
 import { addVillager, economyStep, staffBuilders } from "./systems/economy";
 import { moveEnemies } from "./systems/move";
 import { projectilesStep } from "./systems/projectile";
+import { createLearn, loadBook, type LearnHeader, type LearnStore } from "./systems/learn";
 import { fireWordShots } from "./systems/rewards";
 import { spawnEnemies } from "./systems/spawn";
 import { createPace, PACE_OFF, paceStep, type Pace, type PaceHeader } from "./systems/pace";
@@ -57,12 +58,14 @@ export type PendingShot = { b: number; power: number; crit: boolean; word: numbe
  * The typing state of a run (TK 25.8): bags by the band's top length (a power
  * word takes a shorter band); the chain; the shots words asked for this tick;
  * a ring of the last 20 s, 1 for each tick with a lock, with its sum
- * (BUILD_1A6 §5.3); the review book, deck words oldest first (§7).
+ * (BUILD_1A6 §5.3); the review book, deck words oldest first (§7), with the tick each comes back and the times it
+ * came back typed (R3, BUILD_1B §11.2).
  */
 function createTyping(deck: Deck) {
   return {
     deck, letters: new Letters(), router: { lock: -1, group: -1 } as Router, bags: [] as (Bag | undefined)[],
     chain: 0, shots: [] as PendingShot[], typed: new Uint8Array(ticks(CALL.windowS)), typedSum: 0, review: new Int32Array(CALL.review), reviewN: 0,
+    reviewAt: new Int32Array(CALL.review), reviewBack: new Uint8Array(CALL.review),
   };
 }
 
@@ -126,16 +129,19 @@ export type World = {
   readonly boss: BossStore;
   /** Tối Thượng (BUILD_1B §8, R2). */
   readonly ult: UltStore;
+  /** Học (BUILD_1B §11, R3): the study plan from the run header, the live Từ Ôn. */
+  readonly learn: LearnStore;
 };
 
-/** `deck`: the compiled vocabulary (levels 1–5); none deals no word. `pace`: the run header (none: k 1, director off). */
-export type WorldOptions = { seed: number; sandbox?: boolean; content?: Content; deck?: Deck; gold?: number; wood?: number; mode?: Mode; expected?: number; vocab?: number; pace?: PaceHeader };
+/** `deck`: the compiled vocabulary (levels 1–5); none deals no word. `pace`, `learn`: the run header (none: k 1, director off; no study lists). */
+export type WorldOptions = { seed: number; sandbox?: boolean; content?: Content; deck?: Deck; gold?: number; wood?: number; mode?: Mode; expected?: number; vocab?: number; pace?: PaceHeader; learn?: LearnHeader };
 
 export function createWorld(options: WorldOptions): World {
   const c = compile(options.content ?? SLICE_1A);
   const map = c.content.map;
   const grid = new WalkGrid(map);
   const mode = options.mode ?? "balanced";
+  const deck = options.deck ?? compileDeck([]);
   const w: World = {
     c,
     map,
@@ -175,13 +181,15 @@ export function createWorld(options: WorldOptions): World {
     npcs: new NpcStore(STORE.npcs),
     trees: new TreeStore(map.trees.length),
     calls: new CallStore(STORE.calls),
-    typing: createTyping(options.deck ?? compileDeck([])),
+    typing: createTyping(deck),
     stats: createStats(),
     events: new Events(),
     pace: createPace(mode, options.pace ?? PACE_OFF),
     boss: new BossStore(),
     ult: new UltStore(),
+    learn: createLearn(deck, options.learn),
   };
+  loadBook(w, options.learn);
   placeBuilding(w, 0, map.keep[0], map.keep[1], -1, true);
   for (let agent = 0; agent <= c.content.helpers.length; agent += 1) w.agents.add(home(w, agent));
   for (let k = 0; k < VILLAGERS.start; k += 1) addVillager(w);

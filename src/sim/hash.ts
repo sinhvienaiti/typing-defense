@@ -53,7 +53,7 @@ export function hashWorld(w: World): number {
   for (const value of rngState(w.rng)) h = mix(h, value);
   for (const list of [w.waveLeft, w.waveAlive, w.waveEnded]) for (let index = 1; index <= w.wave; index += 1) h = mixNumber(h, list[index] ?? -1);
   for (const spawn of w.spawnQueue) h = mix(mix(mix(mix(h, spawn.tick), spawn.enemy), spawn.route), spawn.wave);
-  for (const store of [w.enemies, w.units, w.buildings, w.projectiles, w.words, w.agents, w.npcs, w.calls, w.trees, w.boss, w.ult]) h = mixStore(h, store);
+  for (const store of [w.enemies, w.units, w.buildings, w.projectiles, w.words, w.agents, w.npcs, w.calls, w.trees, w.boss, w.ult, w.learn]) h = mixStore(h, store);
   const T = w.typing;
   h = mixStore(mixStore(mixStore(h, T), T.letters), T.router);
   T.bags.forEach((bag, hi) => (h = mixColumn(mixNumber(mixNumber(h, hi), bag!.next), bag!.order, bag!.order.length)));

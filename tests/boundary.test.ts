@@ -232,9 +232,9 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
     expect(found).toEqual([]);
   });
 
-  it("the game's own storage keys start with td. or typing-defense:, or are the kit's skill profile key typing-defense.skill (BALANCE.md §2)", () => {
+  it("the game's own storage keys start with td. or typing-defense:, or are the kit's skill profile key typing-defense.skill (BALANCE.md §2) or Học's typing-defense.learn (BUILD_1B §11.1)", () => {
     const keys = game.flatMap((source) => storageKeys(source.text).map(({ method, key }) => ({ at: source.path + " " + method, key })));
-    expect(keys.filter(({ key }) => key === null || !/^(td\.|typing-defense:|typing-defense\.skill$)/.test(key))).toEqual([]);
+    expect(keys.filter(({ key }) => key === null || !/^(td\.|typing-defense:|typing-defense\.(skill|learn)$)/.test(key))).toEqual([]);
   });
 
   it("learning events and the portal know this game as typing-defense", () => {

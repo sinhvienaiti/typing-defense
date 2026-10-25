@@ -9,6 +9,7 @@
  * change of behaviour. `pnpm td:golden:update` remakes it after a change that was meant.
  */
 import { readFileSync } from "node:fs";
+import { planFor, readLearn } from "../../src/app/learn";
 import { BOSS } from "../../src/sim/stores/boss";
 import { compileDeck, wordText, type Deck } from "../../src/typing/decks";
 import { runBot, type BotRun, type BotSpec } from "./bot";
@@ -89,10 +90,17 @@ function r2Moves(): Rule {
 }
 
 /** The standard bot at 35 WPM, 95 % (BUILD_1A6 §12 gate 2), its hero where the calls gather, three days and nights, every invariant checked; R2's moves. */
+/**
+ * R3 (R3_PLAN §6): the golden plays a store with six saved words (the first six of level 1) and nothing seen, so its
+ * hashes hold the book loaded at tick 0, Từ Ôn, the plan's due and fresh parts; the cold start is unit-tested.
+ */
+export const goldenLearn = (deck: Deck) => planFor(deck, readLearn({ v: 1, book: deck.ids.slice(0, 6), seen: {} }), GOLDEN_LEVELS, 1);
+
 export function goldenSpec(deck: Deck): BotSpec {
   return {
     seed: 1,
     deck,
+    learn: goldenLearn(deck),
     hands: { wpm: 35, accuracy: 0.95, backspace: 0.3 },
     plan: () => new Plan({ ...STANDARD, callAfterS: 60 }, [undoOnce, heroDay(), heroNight(), r2Moves(), ultRule()]),
     nights: 3,
@@ -143,6 +151,7 @@ export function goldenOf(run: BotRun, deck: Deck, words: string[][]): Golden {
       kills: s.kills, livesLost: s.livesLost, wavesCleared: s.wavesCleared, calls: s.calls, callWords: s.callWords, callsPerfect: s.callsPerfect, keys: s.keys, keyErrors: s.keyErrors,
       gold: run.world.gold / 1000, wood: run.world.wood, food: run.world.food, bossDamage: s.bossDamage, bossRetreats: s.bossRetreats, lives: run.world.lives,
       ultCasts: s.ultCasts, ultFeathers: s.ultFeathers, directOk: s.directOk, directMissed: s.directMissed,
+      reviewBack: s.reviewBack, reviewRedeemed: s.reviewRedeemed, freshWords: s.freshWords,
     },
     words,
   };

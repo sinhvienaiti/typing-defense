@@ -38,7 +38,7 @@ describe("the skill profile (BALANCE.md §2)", () => {
     const w = createWorld({ seed: 1, deck });
     const tally = new SkillTally(w);
     const hit = (len: number, ms: number, errors: number, fam: number, wait: number): RareEvent =>
-      ({ t: "wordHit", tick: 0, word: 0, call: 0, grade: errors > 1 ? "sloppy" : errors === 1 ? "ok" : "perfect", errors, quality: 1, len, ms, wait, fam });
+      ({ t: "wordHit", tick: 0, word: 0, call: 0, grade: errors > 1 ? "sloppy" : errors === 1 ? "ok" : "perfect", errors, quality: 1, len, ms, wait, fam, item: 0, kind: 2 });
     // Eight five-letter words at 240 ms a letter (50 WPM), one with a slip; then dawn on day 2.
     const words = Array.from({ length: 8 }, (_, k) => hit(5, k === 0 ? 1200 : 960, k === 0 ? 1 : 0, k < 2 ? 2 : 0, 60));
     w.stats[STAT.keys] = 41;

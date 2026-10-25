@@ -33,7 +33,8 @@
 | Bước | Trạng thái | Commit | Số đo (Apple M4) |
 |---|---|---|---|
 | 1 | xong | (bước 1) | "/" 80,84 kB gzip, chừa 4,16 kB (ước 80,4); `dev-tools` 1,40 kB, `retry` 0,86 kB nạp sau; `td-1a-boot`, `td-1b-chunks` (thêm lượt chặn `retry`), `td-1b-night5` đạt ở 1280 × 720 |
-| 2–6 | đang làm | | |
+| 2 | xong | (bước 2) | "/" 81,78 kB (+0,94; ước +0,9). Dòng `.ts` 10.057 (trần 10.500). File vàng làm lại: `td-1b-boss` chỉ đổi mã băm (hai cột sổ ôn, kho `learn`, cột `review` của lời gọi; số liệu ván y hệt), `td-1a` chơi sổ 6 từ (§6): Từ Ôn gõ lại 7, Chuộc lại 5, từ đến hạn 6, từ mới 8 |
+| 3–6 | đang làm | | |
 | 7–11 | chưa | | |
 
 ---
@@ -268,6 +269,7 @@ Luật của chủ dự án (process §2): chỗ cần chọn thì làm theo đ�
 | A11 | §9.2 Neo: để chạy thì sao | (a) không phạt thêm (hào quang +20 % luôn có), gõ được mới có thưởng; (b) để chạy thì hào quang ×2 trong T | (a), **đã chọn theo đề xuất** | Đúng chữ của bảng §9.2 và luật §3 "bỏ qua không mất gì ngoài phần thưởng" |
 | A12 | §9.2 Phá Khiên: "đạn" gồm gì | (a) mọi đạn bay (tháp, Phát Chữ, cầu lửa) bắn từ ngoài vòm; lông Tối Thượng và cận chiến không đổi; (b) cả lông | (a), **đã chọn theo đề xuất** | Lông rơi từ trên trời là vùng nổ, không là đạn; lính vào vòm là cách đáp có sẵn |
 | A13 | `td-1b-story` tới Ngày 3 thế nào (truyện từ chối lệnh hộp cát) | (a) "Chơi lại Ngày n" với nhật ký bot (`scripts/td/retry-log.ts --day=3`), như `td-1b-night5`; (b) cờ thử riêng | (a), **đã chọn theo đề xuất** | Không thêm đường tắt nào vào game |
+| A15 | §11.4 từ "đến hạn" ra mấy lần một ván | (a) mỗi từ đến hạn một lần mỗi ván, hết danh sách thì phần đó về cấp hiện tại; (b) quay vòng cả ván | (a), **đã chọn theo đề xuất** (thêm lúc làm bước 2) | Ôn xong một lần là hết hạn tới lần sau; (b) với sổ 6 từ ra mỗi từ 9 lần trong 3 ngày của file vàng (đã đo), lặp quá nhiều. Từ gõ Ẩu lại vào sổ của ván và quay lại bằng Từ Ôn |
 | A14 | Núm 1 của cân bằng (thiết kế) | (a) "Rễ hút sinh khí": từ lúc trồi, mỗi `everyS` rễ chạm Lũy, −1 mạng, báo 1,2 s, cú choáng 70 % tính lại đồng hồ; (b) một đòn cố định lúc trồi; (c) đòn chỉ khi boss qua khúc nhập | (a), **đã chọn theo đề xuất** | §7 |
 
 ---
@@ -286,7 +288,7 @@ Luật của chủ dự án (process §2): chỗ cần chọn thì làm theo đ�
 | `tests/td-boss.test.ts` (thêm, bước 9) | "Rễ hút sinh khí": báo ≥ thời gian báo của chế độ (G4), cú choáng tính lại đồng hồ, `everyS` 0 là tắt |
 | `tests/td-balance-gates.test.ts` | B8 R3 trên seed cố định |
 | `tests/boundary.test.ts` | giữ xanh |
-| File vàng | `td-1a.json` chạy với đầu ván khởi động lạnh (có `fresh`) để phủ phần kế hoạch và Từ Ôn; `td-1b-boss.json` giữ đầu ván rỗng |
+| File vàng | `td-1a.json` chạy với kho có 6 từ trong sổ (6 từ đầu cấp 1, chưa gặp từ nào) để phủ sổ nạp lúc tick 0, Từ Ôn, phần đến hạn và phần mới (bước 2: khởi động lạnh không ra Từ Ôn nào vì từ Ẩu duy nhất bị Hỏi bài lấy mất; khởi động lạnh có test riêng); `td-1b-boss.json` giữ đầu ván rỗng |
 
 **Kịch bản (CDP, 1280 × 720 và 1920 × 1080, dưới `heavy.sh --gpu`):**
 

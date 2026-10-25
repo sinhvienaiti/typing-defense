@@ -20,6 +20,7 @@ import { CALL_KIND } from "../stores/calls";
 import { addAt, DONE } from "../stores/slots";
 import type { World } from "../world";
 import { inRing } from "./agents";
+import { planNext, review, reviewNext, reviewTyped } from "./learn";
 import { chainMul, chainStep } from "./chain";
 import { breakDirect } from "./direct";
 import { shotPower } from "./rewards";
@@ -87,14 +88,19 @@ function quizWord(w: World): number {
 /**
  * Gives bright call c its next word (tier 1 only: one first letter a live word), on the `call` kind's letters (Chữ Chiêu's and a
  * direct call's on their own kinds, which may take the letters the others leave: TK 6.5); a quiz waits for a word of the book quietly.
+ * An economy call's (build, harvest, chop, mine) may be a Từ Ôn, else a word of the study plan (R3, BUILD_1B §11.2, §11.4: learn.ts).
  */
 export function giveWord(w: World, c: number): void {
   const T = w.typing;
   const C = w.calls;
   const quiz = C.kind[c] === CALL_KIND.quiz;
   const known = C.kind[c] === CALL_KIND.ult || C.kind[c] === CALL_KIND.direct;
-  const kind = C.kind[c] === CALL_KIND.ult ? KIND.ultWord : C.kind[c] === CALL_KIND.direct ? KIND.direct : KIND.call;
-  const pick = quiz ? quizWord(w) : pickWord(bagFor(w, known || C.kind[c] === CALL_KIND.power, known), T.deck, T.letters, w.words, kind, w.tick, w.vocab, C.last[c]!, w.rng.words);
+  const economy = C.kind[c]! >= CALL_KIND.build && C.kind[c]! <= CALL_KIND.mine;
+  let kind = C.kind[c] === CALL_KIND.ult ? KIND.ultWord : C.kind[c] === CALL_KIND.direct ? KIND.direct : KIND.call;
+  let pick = quiz ? quizWord(w) : economy ? reviewNext(w, c) : -1;
+  if (pick >= 0 && !quiz) kind = KIND.review;
+  else if (economy) pick = planNext(w, c, ...lengthBand(expectedE(w)));
+  if (pick < 0 && !quiz) pick = pickWord(bagFor(w, known || C.kind[c] === CALL_KIND.power, known), T.deck, T.letters, w.words, kind, w.tick, w.vocab, C.last[c]!, w.rng.words);
   if (pick < 0 || (pick & 3) !== 1) {
     if (!quiz) bump(w.stats, STAT.jams);
     return;
@@ -102,10 +108,11 @@ export function giveWord(w: World, c: number): void {
   const word = pick >> 2;
   const s = w.words.add(word, c, kind, 1, w.tick, lifeTicks(T.deck.len[word]!, expectedE(w), WORD_D.known, w.mode));
   if (s < 0) return;
+  if (kind === KIND.review) [w.learn.live, C.review[c]] = [s, 1];
   T.letters.take(s, firstLetter(w, s), 1);
   C.word[c] = s;
   C.last[c] = firstLetter(w, s);
-  w.events.rare.push({ t: "wordSpawn", tick: w.tick, word: w.words.id(s), call: C.id(c) });
+  w.events.rare.push({ t: "wordSpawn", tick: w.tick, word: w.words.id(s), call: C.id(c), item: word });
 }
 
 /** Word s goes back, with its letter and the lock: no loss (its call dimmed or closed, or it was typed). */
@@ -115,6 +122,7 @@ export function dropWord(w: World, s: number): void {
   T.letters.release(s, c, w.tick);
   if (T.letters.owner[c]! >= 0) w.words.tier[T.letters.owner[c]!] = 1; // a tier-2 partner left is told by one key now
   if (T.router.lock === s) T.router.lock = -1;
+  if (w.learn.live === s) w.learn.live = -1;
   w.calls.word[w.words.call[s]!] = -1;
   w.words.release(s);
 }
@@ -240,19 +248,9 @@ function work(w: World, c: number, share: number, word: number, len: number, qua
 }
 
 /**
- * The review book (§7), oldest first: a word typed sloppy or with 2 errors goes in (to the end if it was there),
- * at most 20, the oldest out; a quiz typed right takes its word out.
+ * Word s is typed: scored, the chain moved, the review book kept (§7: a word typed sloppy or with 2 errors goes in, to its
+ * end if it was there; a quiz typed right takes its word out; a Từ Ôn by learn.ts), the work pushed; the call goes on locked, or ends.
  */
-export function review(w: World, word: number, add: boolean): void {
-  const T = w.typing;
-  const at = T.review.subarray(0, T.reviewN).indexOf(word);
-  if (at >= 0) T.review.copyWithin(at, at + 1, T.reviewN--);
-  if (!add) return;
-  if (T.reviewN === T.review.length) T.review.copyWithin(0, 1, T.reviewN--);
-  T.review[T.reviewN++] = word;
-}
-
-/** Word s is typed: scored, the chain moved, the review book kept, the work pushed; the call goes on locked, or ends. */
 function finishWord(w: World, s: number): void {
   const W = w.words;
   const C = w.calls;
@@ -262,7 +260,9 @@ function finishWord(w: World, s: number): void {
   const score = scoreWord(len, W.errors[s]!, W.life[s]!, w.tick - W.born[s]!, expectedE(w), WORD_D.known);
   const top = score.grade === "flash" || score.grade === "perfect";
   const missed = score.grade === "sloppy" || W.errors[s]! >= CALL.reviewErrors;
-  if (missed || C.kind[c] === CALL_KIND.quiz) review(w, word, missed);
+  const back = W.kind[s] === KIND.review;
+  if (back) reviewTyped(w, word, W.errors[s] === 0 || score.grade === "good" || top, missed);
+  else if (missed || C.kind[c] === CALL_KIND.quiz) review(w, word, missed);
   chainStep(w, score.grade);
   if (!top) C.perfect[c] = 0;
   C.done[c] = C.done[c]! + 1;
@@ -273,8 +273,8 @@ function finishWord(w: World, s: number): void {
   if (score.grade === "sloppy") bump(w.stats, STAT.wordsSloppy);
   bump(w.stats, STAT.rawWpmSum, rawWpm(len, W.firstMs[s]!, W.lastMs[s]!));
   // What the skill profile reads (BALANCE.md §2): letters, first to last key, ticks to the first; familiarity 0 known, 1 learning (a quiz), 2 new (the top level).
-  const fam = C.kind[c] === CALL_KIND.quiz ? 1 : w.vocab > 1 && w.typing.deck.level[word] === w.vocab ? 2 : 0;
-  w.events.rare.push({ t: "wordHit", tick: w.tick, word: W.id(s), call: C.id(c), grade: score.grade, errors: W.errors[s]!, quality: score.quality, len, ms: W.lastMs[s]! - W.firstMs[s]!, wait: W.firstTick[s]! - W.born[s]!, fam });
+  const fam = C.kind[c] === CALL_KIND.quiz || back ? 1 : w.vocab > 1 && w.typing.deck.level[word] === w.vocab ? 2 : 0;
+  w.events.rare.push({ t: "wordHit", tick: w.tick, word: W.id(s), call: C.id(c), grade: score.grade, errors: W.errors[s]!, quality: score.quality, len, ms: W.lastMs[s]! - W.firstMs[s]!, wait: W.firstTick[s]! - W.born[s]!, fam, item: word, kind: C.kind[c]! });
   dropWord(w, s);
   // A job this word finished ends at its worker's step this tick (economy.ts), with its yield and the bonus.
   const soon = Math.max(0, 1 - (w.tick - W.born[s]!) / ticks(POWER.quickS)); // 1 at once, 0 after quickS
