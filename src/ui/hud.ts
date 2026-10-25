@@ -13,10 +13,13 @@ import { earlyCallBonus, locked, opensOn } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { Rect } from "../view/words/lanes";
-import { BOSS_LINES, TIPS } from "./tips";
+import type { Tip } from "./tips";
 
-/** In update() order; td-chip is the status panel the scenarios look for; td-boss the boss bar (BUILD_1B §13.1). */
-export const PANELS = ["chip", "sandbox", "team", "strip", "dock", "actions", "boss"] as const;
+/** Mộc Tinh's own lines (TK 22.7); Bà Cú Mực's teaching table is ui/tips.ts, a chunk of its own (R3). */
+export const BOSS_LINES = { rise: "Tên ta ở đâu?", roots: "Rễ ơi, mọc lên!", stagger: "Cái tên đó... quen quá...", retreat: "À... ta nhớ rồi." } as const;
+
+/** In update() order; td-chip is the status panel the scenarios look for; td-boss the boss bar (BUILD_1B §13.1); td-tip the teaching frame (R3). */
+export const PANELS = ["chip", "sandbox", "team", "strip", "dock", "actions", "boss", "tip"] as const;
 
 export const REASON: Readonly<Record<string, string>> = {
   phase: "Ván đã kết thúc", capTotal: "Đã đủ 16 nhà", capType: "Đã đủ nhà loại này", bounds: "Ngoài sân", node: "Mỏ chỉ đặt trên quặng trống",
@@ -91,15 +94,21 @@ export function actionsHtml(w: World, tactical: boolean): string {
 }
 
 /**
- * The boss bar's one line under it (BUILD_1B §13.1: never in the middle of the screen, one at a time): Bà Cú Mực's
- * rows of day 5 and night 5, Mộc Tinh's lines, the stagger's call; the blow on the Bastion; the "ghost" health that
- * follows a hit down 0.4 s late.
+ * Bà Cú Mực's teaching rows and the boss bar (BUILD_1B §13.1: never in the middle of the screen, one line at a time): at
+ * the start of each story day and night her row of the table (§12, R3; ui/tips.ts once its chunk is in), one sentence a
+ * line, and its chip till the phase ends, in the teaching frame at the top right, off the field (teachHtml: at the top
+ * middle it hid the rift the enemies come from, R3 pictures); from day 5's warning in the boss bar at the top middle, with
+ * Mộc Tinh's lines and the stagger's call; the blow on the Bastion; the "ghost" health that follows a hit down 0.4 s late.
+ * The sandbox skips the table but the boss's rows.
  */
 export class BossBanner {
   private lines: [string, number][] = [];
   private line = "";
   private until = 0;
   chip = "";
+  /** The table (ui/tips.ts), set when its chunk is in; the phase whose row was last shown ("": none). */
+  tips: Readonly<Record<string, Tip>> | null = null;
+  private taught = "";
   private rooted = false;
   private hitAt = -1e9;
   private hitLives = 0;
@@ -120,12 +129,19 @@ export class BossBanner {
   }
 
   read(events: readonly RareEvent[], w: World, now: number): void {
-    // A replayed day (Chơi lại Ngày n) drops its events: the warning's chip and line come back from the world (review R1).
-    if (this.chip === "" && w.boss.stage >= BOSS.warned) this.tip(w.phase === "day" ? TIPS.day5! : TIPS.night5!, now);
+    // The row of each story day and night from its first step (the title up at tick 0: not yet), read off the world, so a
+    // replayed day (Chơi lại Ngày n drops its events) gets its row too (review R1); dawn and the end clear the chip. The
+    // sandbox keeps only the boss's two rows (R1), once its `boss` or `skipTo` has warned it.
+    const quiet = w.tick === 0 || (w.phase !== "day" && w.phase !== "night") || (w.sandbox && w.boss.stage < BOSS.warned);
+    const key = quiet ? "" : w.phase + (w.sandbox ? w.c.content.stage!.boss.night : w.day);
+    if (key !== this.taught && (this.tips !== null || key === "")) {
+      this.taught = key;
+      const row = this.tips?.[key];
+      this.chip = row?.chip ?? "";
+      if (row !== undefined) this.tip(row, now);
+    }
     for (const e of events) {
-      const tip = e.t === "bossWarn" ? TIPS.day5! : e.t === "phase" && e.phase === "night" && w.boss.stage === BOSS.warned ? TIPS.night5! : null;
-      if (tip !== null) this.tip(tip, now);
-      else if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
+      if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
       else if (e.t === "bossStrike" && e.move === "roots" && !e.hit && !this.rooted) {
         this.rooted = true;
         this.say(now, ["Mộc Tinh: " + BOSS_LINES.roots, 2500]);
@@ -136,10 +152,9 @@ export class BossBanner {
     if (now >= this.until) this.next(now);
   }
 
-  /** Bà Cú Mực's line, one sentence a line so it stays one line at 1280 × 720 (review R1), and the chip. */
-  private tip(tip: { line: string; chip: string }, now: number): void {
-    this.chip = tip.chip;
-    this.say(now, ...tip.line.split(". ").map((part, k, all): [string, number] => ["Bà Cú Mực: " + part + (k < all.length - 1 ? "." : ""), 3800]));
+  /** Bà Cú Mực's line, one sentence a line so it stays one line at 1280 × 720 (review R1); two at most (tests/td-tips.test.ts). */
+  private tip(tip: Tip, now: number): void {
+    this.say(now, ...tip.line.split(/(?<=[.!?])\s+/).map((part): [string, number] => ["Bà Cú Mực: " + part, 3800]));
   }
 
   /** Lives a blow on the Bastion took, for 0.9 s after it (0: none). */
@@ -155,15 +170,24 @@ export class BossBanner {
     return this.ghost;
   }
 
+  /** The teaching frame while there is no boss (R3): the chip, then Bà Cú Mực's line. */
+  teachHtml(w: World): string {
+    if (w.boss.stage !== BOSS.idle && w.c.content.stage !== undefined) return "";
+    // A chip wraps between its parts ("Gõ chữ đầu để chọn · Esc để thôi"), never inside one.
+    const chip = this.chip.split(" · ").map((part) => `<span>${part}</span>`).join(" · ");
+    return (this.chip === "" ? "" : `<div class="td-tip-chip"><small>Mẹo</small> <b>${chip}</b></div>`) + (this.line === "" ? "" : `<p class="td-say">${this.line}</p>`);
+  }
+
   /** The boss panel: day 5's warning, the sleeping bar, the lull's countdown, the bar (health, 70 % and 50 % marks, phase, metres to the Bastion). */
   html(w: World, now: number): string {
     const S = w.boss;
     const stage = w.c.content.stage;
-    if (S.stage === BOSS.idle || stage === undefined) return "";
     const say = this.line === "" ? "" : `<p class="td-say">${this.line}</p>`;
+    const chip = this.chip === "" ? "" : " · " + this.chip;
+    if (S.stage === BOSS.idle || stage === undefined) return "";
     const e = bossSlot(w);
     let main: string;
-    if (S.stage === BOSS.warned) main = w.phase === "night" ? `<b>Mộc Tinh</b> <small>đang ngủ</small>` : `<b>Đêm ${stage.boss.night} · Boss</b> <small>Mộc Tinh thức dậy · ${this.chip}</small>`;
+    if (S.stage === BOSS.warned) main = w.phase === "night" ? `<b>Mộc Tinh</b> <small>đang ngủ${chip}</small>` : `<b>Đêm ${stage.boss.night} · Boss</b> <small>Mộc Tinh thức dậy${chip}</small>`;
     else if (S.stage === BOSS.lull) main = `<b>Mộc Tinh tới sau ${Math.max(0, Math.ceil((S.lullEnd - w.tick) / TICK_HZ))} s</b>`;
     else if (S.stage === BOSS.emerge) main = `<b>Mộc Tinh đang trồi lên</b>`;
     else if (e < 0) main = `<b>Mộc Tinh rút lui</b> <small>+${w.c.content.boss!.chestGold} vàng</small>`;

@@ -19,7 +19,8 @@
  * asks again when it is wanted (R2 review fix 3). R3 step 1 (docs/td/R3_PLAN.md §3.1) took window.__td (app/dev-tools.ts)
  * and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too. Học (R3, BUILD_1B §11; app/learn.ts, a
  * chunk asked for at once, with the portal bridge) plans the run's study lists before its first step, counts the words
- * seen, sends the learning events and keeps the review book across runs; one that cannot load plays with no lists.
+ * seen, sends the learning events and keeps the review book across runs; one that cannot load plays with no lists. The
+ * teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top, what a building does on its card.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
@@ -194,6 +195,9 @@ function act(action: string): void {
 
 const hud = new Hud(byId("tdHud"), act);
 const banner = new BossBanner();
+/** The teaching table (ui/tips.ts, BUILD_1B §12, R3): a chunk fetched once the page is usable, asked again at the next phase while missing; nothing is taught before it is in. */
+const tips = new Chunk("tips", () => import("./ui/tips"));
+const wantTips = (): void => void tips.get().then((m) => m !== null && (banner.tips = m.TIPS));
 for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, wakeSound);
 /**
  * Esc's pause card and the results card, with their settings card: a chunk fetched once the page is usable, asked again
@@ -223,13 +227,14 @@ const dev = new Chunk("dev", () => import("./app/dev-tools"));
 function prefetch(): void {
   wantSound(false);
   wantSheet();
+  wantTips();
   void retryChunk.get();
   if (sandbox) void panel.get();
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && sound.settled && sheets.settled && retryChunk.settled && learnChunk.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
-    chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null }),
+    ready: () => painted && sound.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
   }));
@@ -292,9 +297,10 @@ function showHud(): void {
     sandbox && selection.panel && panel.value !== null ? panel.value(world) : "",
     teamHtml(world, selection.agent),
     stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical),
-    dockHtml(world, selection),
+    dockHtml(world, selection, tips.value?.doesLine),
     actionsHtml(world, selection.tactical),
     banner.html(world, now),
+    banner.teachHtml(world),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
   sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null });
@@ -334,6 +340,7 @@ runFrameLoop({
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       const fresh = world.events.rare.splice(0);
+      if (banner.tips === null && fresh.some((event) => event.t === "phase")) wantTips();
       learner?.read(fresh, world, now);
       const sample = tally.read(fresh, world);
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));

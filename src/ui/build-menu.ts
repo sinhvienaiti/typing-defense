@@ -4,7 +4,8 @@
  * the farm's seeds and plots; the Bastion's villagers, builders, food sale and
  * its next level with the helper it lets out), the card of the dim call Tab is
  * on (send the agent there), or the build menu with gold and wood prices; what is
- * not open yet in the story says the day it opens.
+ * not open yet in the story says the day it opens. R3 (§12): in the story, what a building opened by day does, on its
+ * card and under the menu for the kind picked, until its row of the teaching table has come (`does`: ui/tips.ts doesLine).
  */
 import type { Selection } from "../app/selection";
 import { ECONOMY, FARM, POWER, SELL, TICK_HZ, VILLAGERS } from "../content/rules";
@@ -20,6 +21,9 @@ import { agentView } from "./team-bar";
 const head = (title: string, sub: string): string => `<div class="td-row"><span><b>${title}</b> <small>${sub}</small></span>${button("close", "×", "", ' class="td-x" title="Esc"')}</div>`;
 const price = (gold: number, wood: number): string => `${gold} vàng · ${wood} gỗ`;
 const opens = (w: World, key: string): string => "Mở ở Ngày " + opensOn(w, key);
+/** A building's "làm gì" line from the teaching table's chunk (none before it is in). */
+export type Does = (w: World, id: string) => string;
+const doesHtml = (line: string | undefined): string => (line === undefined || line === "" ? "" : `<p class="td-does">${line}</p>`);
 
 /** The Bastion's next level: its price and the helper it lets out, or the day it opens, or its top (BUILD_1B §7). */
 function keepRow(w: World): string {
@@ -41,7 +45,7 @@ function plotsLine(w: World, b: number): string {
   return ["Trống", "Lớn", "Chín"].map((name, stage) => `${name} <b>${count[stage]}</b>`).reverse().join(" · ");
 }
 
-function cardHtml(w: World, sel: Selection, b: number): string {
+function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
   const B = w.buildings;
   const spec = w.c.buildings[B.def[b]!]!;
   const level = B.level[b]!;
@@ -58,7 +62,7 @@ function cardHtml(w: World, sel: Selection, b: number): string {
     : spec.attack !== null && B.ready[b] === 1 ? `<p>Lượt mạnh <b>${B.charges[b]}/${POWER.max}</b> · ban đêm gõ lời gọi Bắn mạnh để nạp</p>`
     : "";
   return (
-    head(spec.def.view.name, "Cấp " + level + (B.sturdy[b] === 1 ? " · nền chắc" : "")) + site + extra +
+    head(spec.def.view.name, "Cấp " + level + (B.sturdy[b] === 1 ? " · nền chắc" : "")) + doesHtml(does?.(w, spec.id)) + site + extra +
     `<div class="td-row">` +
     (w.agents.goal[sel.agent] === b ? "" : button("send", "Gửi " + agentView(w, sel.agent).name, "Enter")) +
     (b > 0 && undoLeft > 0 && sel.undoable() ? button("undo", "Hoàn tác · " + undoLeft + " s", "Del") : "") + sell +
@@ -82,15 +86,15 @@ function callHtml(w: World, sel: Selection, c: number): string {
   );
 }
 
-export function dockHtml(w: World, sel: Selection): string {
+export function dockHtml(w: World, sel: Selection, does?: Does): string {
   const b = w.buildings.slotOf(sel.focus);
   const c = w.calls.slotOf(sel.call);
-  if (!sel.building) return b >= 0 ? cardHtml(w, sel, b) : c >= 0 ? callHtml(w, sel, c) : "";
+  if (!sel.building) return b >= 0 ? cardHtml(w, sel, b, does) : c >= 0 ? callHtml(w, sel, c) : "";
   const rows = w.c.buildings.slice(1).map((spec, k) => {
     const shut = locked(w, spec.id);
     const attrs = ' class="td-kind' + (sel.kind === k + 1 ? " is-on" : "") + (shut || w.gold < spec.gold[0]! * 1000 || w.wood < spec.wood[0]! ? " is-poor" : "") + '"';
     return button("pick:" + (k + 1), `<kbd>${k + 1}</kbd>${spec.def.view.name}<span>${shut ? opens(w, spec.id) : price(spec.gold[0]!, spec.wood[0]!)}</span>`, "", attrs);
   });
   const sub = w.c.buildings[sel.kind]!.placement === "node" ? "Mỏ chỉ đặt trên quặng" : "";
-  return head("Xây nhà", sub) + rows.join("") + `<p><small>Tab: chỗ kế · Enter: xây · Esc: hủy</small></p>`;
+  return head("Xây nhà", sub) + rows.join("") + doesHtml(does?.(w, w.c.buildings[sel.kind]!.id)) + `<p><small>Tab: chỗ kế · Enter: xây · Esc: hủy</small></p>`;
 }

@@ -160,6 +160,7 @@ describe("the boss bar and the results card (1B R1 review)", () => {
     run(w, 2);
     expect(w.boss.stage).toBe(BOSS.warned);
     const banner = new BossBanner();
+    banner.tips = TIPS; // ui/tips.ts, its chunk in (R3)
     banner.read([], w, 0); // as main.ts after the replay: no bossWarn left
     const html = banner.html(w, 0);
     expect(html).toContain(TIPS.day5!.chip);

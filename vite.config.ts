@@ -11,7 +11,7 @@ const env = (name: string): string | undefined => process.env[name]?.trim() || u
  * BUILD_1B §20: the modules src/main.ts loads with import(), each its own chunk (R3 step 1, docs/td/R3_PLAN.md §3.1:
  * tests/td-chunks.test.ts checks every import() of main.ts against it).
  */
-export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets)|app[\\/](sandbox|dev-tools|retry|learn)|view[\\/](audio-min|folk|music))\.ts$/;
+export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets|tips)|app[\\/](sandbox|dev-tools|retry|learn)|view[\\/](audio-min|folk|music))\.ts$/;
 
 type ModuleInfo = { importedIds: readonly string[] } | null;
 /**

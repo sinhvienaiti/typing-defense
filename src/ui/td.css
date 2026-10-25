@@ -115,6 +115,14 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--vd-ink); }
 .td-bar .td-retreat { background: var(--vd-seal); }
 .td-bar .td-retreat small { position: absolute; top: calc(100% + 2px); left: -1.4em; color: var(--vd-seal); font-size: 0.8em; line-height: 1; white-space: nowrap; } /* in the bar's own margin, clear of the line under it */
+/* R3 (BUILD_1B §12): the teaching frame before the boss, top right off the field: the phase's chip over Bà Cú Mực's line; a building's "làm gì" line. */
+/* As wide as the room right of the field allows (16:9: 304 px at 1280 × 720, 444 px at 1920 × 1080), never under 284 px × hud. */
+.td-tip { right: 12px; top: 12px; width: max(calc(284px * var(--hud, 1)), min(calc((100vw - 100vh) / 2 + 24px), calc(400px * var(--hud, 1)))); }
+.td-tip-chip span { white-space: nowrap; }
+.td-tip-chip { display: flex; gap: 6px; align-items: baseline; }
+.td-tip-chip b { color: var(--vd-jade-ink); font-size: max(15px, 1.05em); }
+.td-tip > .td-say:first-child { margin-top: 0 !important; }
+.td-panel .td-does { padding: 2px 8px; border-left: 3px solid var(--vd-jade); background: var(--vd-jade-wash); color: var(--vd-jade-ink); font-weight: 700; }
 .td-say { margin: 6px 0 0 !important; padding: 2px 10px; border-radius: 6px; background: var(--vd-ink); color: var(--vd-paper-light); font-weight: 700; font-size: max(16px, 1.05em); line-height: 1.3; }
 .td-hit { margin-left: 4px; color: var(--vd-seal); font-style: normal; animation: td-hit 0.9s ease-out; }
 @keyframes td-hit { from { opacity: 1; } to { opacity: 0.2; } }
