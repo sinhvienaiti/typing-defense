@@ -32,9 +32,10 @@
 
 | Bước | Trạng thái | Commit | Số đo (Apple M4) |
 |---|---|---|---|
-| 1 | xong | (bước 1) | "/" 80,84 kB gzip, chừa 4,16 kB (ước 80,4); `dev-tools` 1,40 kB, `retry` 0,86 kB nạp sau; `td-1a-boot`, `td-1b-chunks` (thêm lượt chặn `retry`), `td-1b-night5` đạt ở 1280 × 720 |
-| 2 | xong | (bước 2) | "/" 81,78 kB (+0,94; ước +0,9). Dòng `.ts` 10.057 (trần 10.500). File vàng làm lại: `td-1b-boss` chỉ đổi mã băm (hai cột sổ ôn, kho `learn`, cột `review` của lời gọi; số liệu ván y hệt), `td-1a` chơi sổ 6 từ (§6): Từ Ôn gõ lại 7, Chuộc lại 5, từ đến hạn 6, từ mới 8 |
-| 3–6 | đang làm | | |
+| 1 | xong | `121ccae` | "/" 80,84 kB gzip, chừa 4,16 kB (ước 80,4); `dev-tools` 1,40 kB, `retry` 0,86 kB nạp sau; `td-1a-boot`, `td-1b-chunks` (thêm lượt chặn `retry`), `td-1b-night5` đạt ở 1280 × 720 |
+| 2 | xong | `ed594d0` | "/" 81,78 kB (+0,94; ước +0,9). Dòng `.ts` 10.057 (trần 10.500). File vàng làm lại: `td-1b-boss` chỉ đổi mã băm (hai cột sổ ôn, kho `learn`, cột `review` của lời gọi; số liệu ván y hệt), `td-1a` chơi sổ 6 từ (§6): Từ Ôn gõ lại 7, Chuộc lại 5, từ đến hạn 6, từ mới 8 |
+| 3–4 | xong | `d39f5c1` | "/" 80,64 kB gzip, chừa 4,36 kB (bước 2: 81,78). Nối `app/learn.ts` vào trang lần đầu thêm 0,78 kB vào chunk vào, vì `manualChunks` cũ đẩy mọi mô-đun không có tên trong `LAZY` vào chunk vào, kể cả bộ dựng sự kiện học của kit mà chỉ chunk Học dùng. Sửa: `vite.config.ts` `chunkOf` chỉ giữ ở chunk vào những gì trang nhập tĩnh không qua chunk nạp sau; cổng portal (`app/learning.ts`) chuyển vào chunk Học (`learn` 3,22 kB, xin ngay khi trang mở; `?title=0` chờ nó: 79,34 kB). Dòng `.ts` 10.113. File vàng không đổi. `td-1b-learn` (kịch bản mới) đạt ở 1280 × 720 và 1920 × 1080: nghĩa đúng luật ở cả 18 lần thấy đầu mỗi cỡ (11 có nghĩa, 7 không), từ đã lưu quay lại thành Từ Ôn trong lời gọi Chặt 4 từ rồi "Chuộc lại", một từ gõ Ẩu quay lại, sổ còn sau khi tải lại trang ("Sổ ôn 1"), sự kiện học `gameId` `typing-defense`, nhật ký chạy lại trên Node ra cùng mã băm. Hai lượt đầu trượt vì kịch bản: hộp cát bấm Đặt sẵn và hạ Lũy ở hai tick khác nhau, nên Thư Đồng kịp ra và Hỏi bài lấy mất từ đã lưu (luật đúng của 1A.6); kịch bản giờ gửi cả bốn lệnh trong một tick |
+| 5–6 | đang làm | | |
 | 7–11 | chưa | | |
 
 ---
@@ -155,7 +156,7 @@ Sim giữ mọi thứ quyết định từ nào ra (tất định, vào mã băm
 
 ### 3.3 Học ở app (bước 3; §11.1, §11.3–§11.5): `app/learn.ts`
 
-Một chunk riêng (~150 dòng, trần §16 là 200). Ở "/" nó tải cùng lúc với màn đầu; "Bắt đầu" chờ nó (thường đã xong) rồi đặt đầu ván ở tick 0 bằng `setLearn`, như `setPace`, `setMode` (`main.ts:165-174`, `pace.ts:52-66`); ở `?title=0`, `?sandbox=` trang chờ nó trước bước đầu, nên `scripts/bundle-budget.mjs` tính nó vào phần khởi động của `?title=0` (chỗ trống ở đó 7,47 kB). Chunk không tải được: ván chạy khởi động lạnh, không lưu sổ, một lỗi console.
+Một chunk riêng (~150 dòng, trần §16 là 200). Ở "/" nó tải cùng lúc với màn đầu; "Bắt đầu" chờ nó (thường đã xong) rồi đặt đầu ván ở tick 0 bằng `setLearn`, như `setPace`, `setMode` (`main.ts:165-174`, `pace.ts:52-66`); ở `?title=0`, `?sandbox=` trang chờ nó trước bước đầu, nên `scripts/bundle-budget.mjs` tính nó vào phần khởi động của `?title=0` (chỗ trống ở đó 7,47 kB). Chunk không tải được: ván chạy không có danh sách nào (túi cấp hiện tại như R2; khởi động lạnh cần `planFor`, mà hàm này ở trong chunk), không lưu sổ, không gửi sự kiện học, một lỗi console. Lúc làm (bước 3–4): cổng portal `app/learning.ts` đi cùng chunk này, nên trang chỉ xin portal trao focus khi chunk về (thường cùng lúc với bộ từ).
 
 | Việc | Luật |
 |---|---|
