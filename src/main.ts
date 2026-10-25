@@ -15,7 +15,8 @@
  * director by the settings) and takes each day and night's typing after it. The title, its settings and Hồ sơ gõ
  * cards, the pause and results cards, sound and the sandbox panel are chunks of their own (BUILD_1B §20): at "/" the
  * page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest comes once
- * the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review fix 2).
+ * the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review fix 2) and
+ * asks again when it is wanted (R2 review fix 3).
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
@@ -67,6 +68,10 @@ const settings = loadSettings();
 /** Sound and music, a chunk fetched once the page is usable (prefetch): nothing sounds before a key or a click anyway (TypingAudio.resume). */
 const sound = new Chunk("sound", async () => new (await import("./view/audio-min")).TypingAudio(settings));
 let audio: TypingAudio | null = null;
+/** Asks for sound while it is not in: once the page is usable, then on each key or click until it loads (the chunk keeps its 15 s cool-down after a failure; R2 review fix 3). */
+const wantSound = (wake: boolean): void => void sound.get().then((m) => ((audio = m), wake && m?.resume()));
+/** A key or a click (the title's too): sound starts, or is asked for again while it is not in. */
+const wakeSound = (): void => (audio === null ? wantSound(true) : audio.resume());
 let profile = loadSkill(params.get("learn") === "1" ? "learn" : "balanced");
 /** The run header from the profile and the "Nhịp tự điều" setting. */
 const header = () => paceHeader(profile, settings.pace);
@@ -92,7 +97,7 @@ const titleCards = {
   },
 };
 const titleChunk = new Chunk("title", async () => {
-  const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: (ui: UiSound) => audio?.ui(ui), wake: () => audio?.resume(), profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
+  const hooks = { choose: (choice: TitleChoice) => choose(choice), sound: (ui: UiSound) => audio?.ui(ui), wake: wakeSound, profile: (shown: ProfileCard) => shown.open(profile, settings.pace ? header().k : null) };
   return new (await import("./ui/title")).TitleScreen(document.body, hooks, titleCards, true);
 });
 function showTitle(canContinue: boolean): void {
@@ -181,7 +186,7 @@ function act(action: string): void {
 
 const hud = new Hud(byId("tdHud"), act);
 const banner = new BossBanner();
-for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, () => audio?.resume());
+for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, wakeSound);
 /**
  * Esc's pause card and the results card, with their settings card: a chunk fetched once the page is usable, asked again
  * when a card is wanted; without it the HUD says the pause or the end (R2 review fix 2). "Xem bản đồ" puts the results away.
@@ -203,7 +208,7 @@ const sheets = new Chunk("sheets", async () => {
 const wantSheet = (): void => void sheets.get().then((m) => (sheet = m));
 /** Once the page is usable: sound, the cards' chunk and the sandbox panel, so none of them holds up the start. */
 function prefetch(): void {
-  void sound.get().then((m) => (audio = m));
+  wantSound(false);
   wantSheet();
   if (sandbox) void panel.get();
 }
@@ -234,15 +239,21 @@ installPointer(canvas, view, {
 });
 
 let sheetAsked = -Infinity;
+let panelAsked = -Infinity;
 function showHud(): void {
   const refused = [...recent].reverse().find((event) => event.t === "rejected" && world.tick - event.tick < 150);
   const now = performance.now();
   const over = world.phase === "defeat" || world.phase === "victory";
   const card = titleUp ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "";
-  // A card wanted before its chunk is in: asked again (at most once a second); a chunk given up is told here instead.
+  // A card or the sandbox panel wanted before its chunk is in: asked again (at most once a second); a chunk given up is
+  // told here instead (R2 review fix 3: the panel too, not only the cards).
   if (card !== "" && sheet === null && now - sheetAsked > 1000) {
     sheetAsked = now;
     wantSheet();
+  }
+  if (sandbox && selection.panel && panel.value === null && now - panelAsked > 1000) {
+    panelAsked = now;
+    void panel.get();
   }
   const noCard = card !== "" && sheet === null && sheets.failed;
   const notices = [
@@ -360,6 +371,8 @@ function retryDay(): void {
 installDevHandle({
   // Painted, and the chunks this page wants are in or given up (sound, the cards, the title when it is up, the sandbox panel).
   ready: () => painted && sound.settled && sheets.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+  // Which lazy chunks are in (td-1b-chunks: a failed one comes in when wanted again).
+  chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null }),
   // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
   flags: () => ({ sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: source, expected: runHeader.expected, pace: { k: runHeader.k, director: runHeader.director }, mode: startMode }),
   send: (command: CommandBody) => session.send(command),
