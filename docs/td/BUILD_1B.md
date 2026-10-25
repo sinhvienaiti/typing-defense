@@ -643,6 +643,8 @@ Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số
 
 ### R3 "Học và dạy"
 
+Kế hoạch làm (file, thứ tự, dạng dữ liệu, chỗ chưa rõ đã chọn theo đề xuất, cân bằng): `R3_PLAN.md` (25/10/2026).
+
 1. Luật nghĩa, Từ Ôn, sổ ôn lưu, kế hoạch học, khởi động lạnh, sự kiện học (§11).
 2. Bảng dạy, lịch mở, câu Bà Cú Mực và chip (§12); dòng Chế độ trong Cài đặt; lưu sao.
 3. Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát (cắt đầu tiên nếu vượt trần).
