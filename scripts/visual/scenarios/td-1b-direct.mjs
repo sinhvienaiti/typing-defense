@@ -5,7 +5,9 @@
 // breaks (stunned under its stars, +5 + 2 gold). A second Tanuki, the card left alone: at the window's end the heal ring
 // spreads 6 m. Three Tanuki at once: three drums, at most 2 cards. Checks: the events, the gold the word brought, the
 // cards (none over another or the HUD, ≥ 18 px), the page's log replayed on Node to its hash. Slow frame sets: the
-// break, the heal.
+// break, the heal. R3 (§9.2, R3_PLAN §3.7): a Cương Thi Đầu Đàn leading 5 Cương Thi (one sandbox click, one tick): its
+// aura ring and pennant, Neo's card (⚓) typed: the pack stands 3 s, the leader ×1.3 for 6 s; a Quỷ Núi Troll's stone
+// dome riding on it, Phá Khiên's card (🛡️) typed: the dome breaks, stunned 1.5 s; a second Troll's dome left to hold T.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720
 import { KIND, Seen, boot, cardStats, cardSummary, cardsClean, consoleChecks, finish, look, out, replayOnNode, sandbox, send, sizeOf, td, typeFor, until } from "./td-1a6-common.mjs";
 
@@ -53,11 +55,13 @@ export default async function (page) {
   await look(page, cards);
   const s0 = await stats();
   await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
+  await seen.poll(page);
+  // Read the stun at once (the frame set below takes about a second on the Mac, R3 part B).
+  const broken = seen.of("direct").find((e) => e.ok);
+  const stunned = broken === undefined ? null : await page.eval(td(`const f = t.state().foes.find((e) => e.id === ${broken.enemy}); return f ? f.stunUntil - t.state().tick : null;`));
   await film("break", 5, 120);
   await seen.poll(page);
   const s1 = await stats();
-  const broken = seen.of("direct").find((e) => e.ok);
-  const stunned = broken === undefined ? null : await page.eval(td(`const f = t.state().foes.find((e) => e.id === ${broken.enemy}); return f ? f.stunUntil - t.state().tick : null;`));
   // Left alone: the heal ring.
   await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 30000);
   await wave(1);
@@ -84,6 +88,49 @@ export default async function (page) {
     if (threeAt === 0 && seen.of("drum").length - drums0 >= 3) threeAt = Date.now();
   }
   shots.push(await page.shot(out("td-1b-direct-three-" + size + ".png")));
+  // R3: Neo, then Phá Khiên typed, then a dome left alone.
+  const icon = (verb) => page.eval(`[...document.querySelectorAll(".td-card.is-direct")].filter((c) => Number(c.style.opacity) > 0.05 && !c.classList.contains("is-gone")).map((c) => c.dataset.icon).includes(${JSON.stringify(verb)})`);
+  const foe = (id) => page.eval(td(`const s = t.state(); const f = s.foes.find((e) => e.id === ${id}); return f ? { stun: f.stunUntil - s.tick, taken: f.takenUntil - s.tick, cast: f.castEnd - s.tick } : null;`));
+  await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 40000);
+  await send(page, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } }, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi-lead", value: 1 } });
+  // A call lit late in its window (the mechanic began outside every help ring) is let go; the next one comes nearer.
+  const litWith = (def) => `const s = t.state(); return s.calls.find((c) => c.kind === 7 && c.bright && c.expire - s.tick >= 150 && s.foes.some((f) => f.id === c.foe && f.def === '${def}')) ?? null;`;
+  const neo = await watch(litWith("cuong-thi-lead"), 60000);
+  await page.sleep(150);
+  const neoIcon = await icon("⚓");
+  shots.push(await page.shot(out("td-1b-direct-neo-" + size + ".png")));
+  await look(page, cards);
+  await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
+  await seen.poll(page);
+  const pin = seen.of("direct").find((e) => e.ok && e.verb === 1);
+  const pinned = pin === undefined ? null : await foe(pin.enemy);
+  await film("neo", 5, 120);
+  await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 40000);
+  await spawn(page, "troll", 1);
+  const lit3 = await watch(litWith("troll"), 60000);
+  await page.sleep(150);
+  const domeIcon = await icon("🛡️");
+  shots.push(await page.shot(out("td-1b-direct-dome-" + size + ".png")));
+  await look(page, cards);
+  await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
+  await seen.poll(page);
+  const cracked = seen.of("direct").find((e) => e.ok && e.verb === 2);
+  const crackedFoe = cracked === undefined ? null : await foe(cracked.enemy);
+  await film("crack", 5, 120);
+  await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 40000);
+  await spawn(page, "troll", 1);
+  await watch("const s = t.state(); return s.foes.some((f) => f.def === 'troll' && f.castEnd > s.tick);", 60000);
+  await film("dome", 4, 400);
+  const domeEnd = await (async () => {
+    const started = Date.now();
+    while (Date.now() - started < 15000) {
+      await seen.poll(page);
+      const e = seen.of("direct").find((d) => !d.ok && d.verb === 2);
+      if (e !== undefined) return e;
+      await page.sleep(150);
+    }
+    return null;
+  })();
   const replay = await replayOnNode(page, "td-1b-direct");
   const checks = {
     ready,
@@ -93,9 +140,14 @@ export default async function (page) {
     stunnedTwoSeconds: stunned !== null && stunned > 0 && stunned <= 120,
     leftAloneHeals: healed !== undefined && (await stats()).directMissed >= 1,
     threeDrumsTwoCards: seen.of("drum").length - drums0 >= 3 && most <= 2 && mostCards <= 2,
+    neoCardLit: neo !== null && neoIcon,
+    neoTypedPinsThePack: pinned !== null && pinned.stun > 0 && pinned.stun <= 180 && pinned.taken > pinned.stun && pinned.taken <= 360,
+    domeCardLit: lit3 !== null && domeIcon,
+    domeTypedBreaksIt: crackedFoe !== null && crackedFoe.stun > 0 && crackedFoe.stun <= 90 && crackedFoe.cast < 0,
+    domeLeftAloneHoldsT: domeEnd !== null,
     cardsClean: cardsClean(cards),
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { card, stunned, drums: seen.of("drum").map((e) => e.tick), most, mostCards, frames, shots, cards: cardSummary(cards), replay });
+  return finish(page, checks, { card, stunned, drums: seen.of("drum").map((e) => e.tick), most, mostCards, pinned, crackedFoe, domeEnd, frames, shots, cards: cardSummary(cards), replay });
 }
