@@ -89,7 +89,8 @@ export default async function (page) {
   // "Chép số chơi thử": the file the page saves is caught from its link (and the clipboard left alone).
   // The page revokes the link's blob right after its click, so the blob is kept as it is made.
   await page.eval(`(() => { window.__tdSaved = null; const make = URL.createObjectURL; URL.createObjectURL = (blob) => ((window.__tdBlob = blob), make(blob)); const click = HTMLAnchorElement.prototype.click; HTMLAnchorElement.prototype.click = function () { if (this.download) window.__tdBlob.text().then((text) => (window.__tdSaved = { name: this.download, text })); else click.call(this); }; return true; })()`);
-  await page.eval(`document.querySelector('.td-sheet.is-results button[data-sheet="copy"]')?.click() ?? null`);
+  // A real press: the card's buttons answer pointerdown (ui/sheets.ts), which an element's click() never sends.
+  await page.click('.td-sheet.is-results button[data-sheet="copy"]', { fallback: false });
   let saved = null;
   for (let k = 0; k < 40 && saved === null; k += 1) [saved] = [await page.eval("window.__tdSaved"), await page.sleep(150)];
   let playtest = null;

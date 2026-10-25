@@ -95,26 +95,37 @@ export default async function (page) {
   await send(page, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } }, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi-lead", value: 1 } });
   // A call lit late in its window (the mechanic began outside every help ring) is let go; the next one comes nearer.
   const litWith = (def) => `const s = t.state(); return s.calls.find((c) => c.kind === 7 && c.bright && c.expire - s.tick >= 150 && s.foes.some((f) => f.id === c.foe && f.def === '${def}')) ?? null;`;
-  const neo = await watch(litWith("cuong-thi-lead"), 60000);
-  await page.sleep(150);
-  const neoIcon = await icon("⚓");
-  shots.push(await page.shot(out("td-1b-direct-neo-" + size + ".png")));
-  await look(page, cards);
-  await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
-  await seen.poll(page);
-  const pin = seen.of("direct").find((e) => e.ok && e.verb === 1);
+  /**
+   * The call of `def` lit, pictured (the first time), then typed; tried again on its next mechanic when the word was not
+   * typed in time (on a loaded Mac the picture alone can take the rest of the window: R3 part B, a Troll never typed).
+   */
+  const typeVerb = async (def, verb, mark, name) => {
+    let [lit, marked, tries] = [null, false, 0];
+    for (; tries < 3; tries += 1) {
+      const call = await watch(litWith(def), 60000);
+      if (call === null) break;
+      lit ??= call;
+      await page.sleep(150);
+      if (tries === 0) {
+        marked = await icon(mark);
+        shots.push(await page.shot(out("td-1b-direct-" + name + "-" + size + ".png")));
+        await look(page, cards);
+      }
+      await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
+      await seen.poll(page);
+      const ok = seen.of("direct").find((e) => e.ok && e.verb === verb);
+      if (ok !== undefined) return { lit, marked, ok, tries: tries + 1 };
+    }
+    return { lit, marked, ok: undefined, tries };
+  };
+  const neoTyped = await typeVerb("cuong-thi-lead", 1, "⚓", "neo");
+  const [neo, neoIcon, pin] = [neoTyped.lit, neoTyped.marked, neoTyped.ok];
   const pinned = pin === undefined ? null : await foe(pin.enemy);
   await film("neo", 5, 120);
   await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 40000);
   await spawn(page, "troll", 1);
-  const lit3 = await watch(litWith("troll"), 60000);
-  await page.sleep(150);
-  const domeIcon = await icon("🛡️");
-  shots.push(await page.shot(out("td-1b-direct-dome-" + size + ".png")));
-  await look(page, cards);
-  await typeFor(page, 4000, { wpm: 50, kinds: [KIND.direct], seen, stop: async () => ((await page.eval(directCalls)) ?? []).length === 0 });
-  await seen.poll(page);
-  const cracked = seen.of("direct").find((e) => e.ok && e.verb === 2);
+  const domeTyped = await typeVerb("troll", 2, "🛡️", "dome");
+  const [lit3, domeIcon, cracked] = [domeTyped.lit, domeTyped.marked, domeTyped.ok];
   const crackedFoe = cracked === undefined ? null : await foe(cracked.enemy);
   await film("crack", 5, 120);
   await watch("return t.state().foes.length === 0 && t.state().enemies === 0;", 40000);
@@ -149,5 +160,5 @@ export default async function (page) {
     nodeReplaysToBrowserHash: replay.match === true,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { card, stunned, drums: seen.of("drum").map((e) => e.tick), most, mostCards, pinned, crackedFoe, domeEnd, frames, shots, cards: cardSummary(cards), replay });
+  return finish(page, checks, { card, stunned, drums: seen.of("drum").map((e) => e.tick), most, mostCards, pinned, crackedFoe, domeEnd, tries: { neo: neoTyped.tries, dome: domeTyped.tries }, frames, shots, cards: cardSummary(cards), replay });
 }
