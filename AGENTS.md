@@ -21,6 +21,9 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/BUILD_1B.md` (1B, written after the split, so its paths are current):
   map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
   ceiling 10,500, balance targets and gates.
+- `docs/td/R3_PLAN.md`: the plan of 1B R3 "Học và dạy" (work items by file, order with the
+  bundle budget first, data shapes, the spec points chosen as proposed, tests, scenarios, the
+  balance plan, line budget and cut order) and the pre-R3 baseline on the Apple M4.
 - **State (25/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
   §7.2); 1B R2 built (§7.3: Tối Thượng, Chữ Chiêu, Mảnh Chữ, Ngắt on Lửng Tanuki,
   Nuppeppō, Thư Đồng's panic, R2's 2D layers, design call (b) applied) and **reviewed
@@ -46,7 +49,12 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   `td-1b-perf` grades each rise frame by its total, an A/B on the Mac shows fix 2 did not slow
   a frame (1.027 against 1.042 ms, Apple M4), and `td-1b-build` reads every building card at
   level 3 with its real sale label. On the Apple M4 `td-1b-perf` runs at 1.0 ms a frame.
-  B3 passes, the pooled tight targets 4/6. Next: R3 "Học và dạy"; the owner's playtest
+  B3 passes, the pooled tight targets 4/6. **R3 "Học và dạy" planned** (§7.7,
+  `docs/td/R3_PLAN.md`): first the entry chunk (`__td`, "Chơi lại Ngày n" and "Chép số chơi
+  thử" out of it frees 1.86 kB, measured on Mac builds), then Học, the teaching table, the mode
+  setting and stars, the sandbox's R3 enemies, the balance pass (a boss-peak life drain, then
+  `LENGTH_BY_E` with `kHp2`). Baseline on the Apple M4 (Chrome tracing at 60 Hz): the main thread
+  1.32 ms a frame (game frame 0.91, commit 0.21). Next: R3 step 1; the owner's playtest
   of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.

@@ -1268,3 +1268,17 @@ Changelog: `docs/changelog/2026-10-25-td-1b-r2-fix3.md`. Làm trên Mac mini M4 
 
 - Chrome 155 không tải lại chunk đã hỏng: thẻ tạm dừng, thẻ kết, bảng hộp cát, tiếng chỉ về sau F5. Câu báo của thẻ tạm dừng chưa nói F5; núm rẻ nhất là thêm "F5 để thử lại". Đưa chunk thẻ (1,99 kB) cùng thẻ Cài đặt (1,08 kB) về phần khởi động thì quá 2,96 kB còn trống.
 - Như §7.5: B1 (Ẩu cả hai bộ, Chậm chắc bộ 2), G3 bộ 2 (44,7 s); ba quyết định chờ chủ dự án xác nhận; R3 cần chỗ trong chunk vào (tách `__td`, "Chơi lại Ngày n" trước); chủ dự án chơi thử cho B9.
+
+### 7.7 R3 "Học và dạy" (bắt đầu 25/10/2026, Mac mini M4)
+
+Kế hoạch: `docs/td/R3_PLAN.md` (việc theo file, thứ tự, dạng dữ liệu, 14 chỗ đặc tả chưa rõ đã chọn theo đề xuất, test, kịch bản, kế hoạch cân bằng, ngân sách dòng và thứ tự cắt). Changelog: `docs/changelog/2026-10-25-td-r3-plan.md`. Số đo dưới là số **Apple M4**. Bằng chứng (ngoài Git): `tmp/mac-2026-10-25/r3-plan/` (ba cây dựng thử), `tmp/mac-2026-10-25/r3-baseline/` (vết Chrome, hồ sơ CPU, script đo và phân tích).
+
+**Mốc trước R3, mã `89e2494`:**
+
+- **Gói (dựng trên Mac):** "/" 82,04 kB gzip (chừa 2,96 kB). Bỏ `__td` (`main.ts:370-433`): 80,91 kB (−1,13). Bỏ thêm phần "Chơi lại Ngày n" và "Chép số chơi thử" (`main.ts:112-155`, `:339-368`): 80,18 kB (−0,73). Tách hai phần này ra chunk nạp sau là bước 1 của R3 (ước "/" ~80,4 kB, chừa ~4,6 kB); phần R3 ở chunk vào ước ~2,9 kB.
+- **Một khung ở 60 Hz (Chrome tracing qua CDP; việc còn mở của §7.5):** cảnh `td-1b-perf` (boss + ~304 quái + Mầm Gỗ), 1280 × 720: luồng chính 1,32 ms mỗi khung (có Tối Thượng: 1,62); 1920 × 1080: 1,33 (1,51). Trong 1,32 ms: hàm khung của game 0,91 (vẽ 2D ~0,49, trong đó thân quái 0,18; bước sim 0,06; HUD 0,05; thẻ chữ 0,03), Chrome gửi lệnh vẽ sang GPU (`Commit`) 0,21, lifecycle ngoài hàm khung 0,04, GC 0,03, lịch và IPC 0,13. Tiến trình GPU 1,47 ms mỗi khung, ở luồng khác. Khung p50 1,24 ms, dài nhất 6,25 ms (một lần GC lớn); có Tối Thượng dài nhất 9,93 ms (khung dùng chiêu). Vết không làm chậm khung đo được (1,35 ms không vết, 1,32 ms có vết). Bảng đủ và một khung dạng cây: `R3_PLAN.md` §1.2.
+- Đọc số: trên Apple M4, §20 còn rộng (1,3–1,6 ms so với 4 ms). Không suy được nguyên nhân 3,9–4,6 ms của Dell (§7.5) từ số Mac; lần đo trên Dell nên dùng cùng script để so từng dòng.
+
+**Quyết định của đợt kế hoạch** (đã chọn theo đề xuất, chủ dự án đổi được; chi tiết `R3_PLAN.md` §5): A1 "gặp" là từ ra thẻ sáng; A2 Từ Ôn quay lại 25–45 s bằng luồng `words`; A3 một Từ Ôn cho lời gọi kinh tế ≥ 4 từ; A4 Chuộc lại khi không lỗi hoặc hạng ≥ Tốt; A5 R3 chưa hỏi cổng cha; A6 sổ sim 20, sổ lưu 40; A7 túi cấp hiện tại giữ như nay; A8 sự kiện học và sổ ôn ở cả truyện và hộp cát; A9 chip ở lại cả Ngày, Đêm; A10 giữ mục "Học" của màn đầu; A11 Neo để chạy không phạt thêm; A12 vòm Troll chỉ giảm đạn bay; A13 `td-1b-story` tới Ngày 3 bằng nhật ký bot; A14 núm 1 của cân bằng là "Rễ hút sinh khí".
+
+**Số dòng:** 9.670 (không đổi; đợt này chỉ có tài liệu). Ước sau R3 ~10.270 (trần 10.500).

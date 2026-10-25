@@ -4,6 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 25/10/2026 | 1B R3 "Học và dạy": kế hoạch (`docs/td/R3_PLAN.md`), mốc gói và hồ sơ một khung ở 60 Hz trên Mac | [2026-10-25-td-r3-plan](./2026-10-25-td-r3-plan.md) |
 | 25/10/2026 | 1B R2: sửa sau phản biện lần 3 trên Mac (F3 chunk hỏng được hỏi lại, F4 thẻ màn đầu tải khi chọn, F5 chấm tổng mỗi khung, F6 A/B trên Mac; thẻ nhà cấp 3 vừa ở 1280 × 720) | [2026-10-25-td-1b-r2-fix3](./2026-10-25-td-1b-r2-fix3.md) |
 | 25/10/2026 | 1B R2: sửa sau phản biện lần 2 (đo mọi núm §6.5, G3 và G8 trong báo cáo, chunk có đường lỗi, phần khởi động của "/", luồng chính ở 60 Hz) | [2026-10-25-td-1b-r2-fix2](./2026-10-25-td-1b-r2-fix2.md) |
 | 25/10/2026 | 1B R2: sửa sau phản biện (G5 mọi bot, cân bằng lại, gói JS dưới 85 kB) | [2026-10-25-td-1b-r2-fix](./2026-10-25-td-1b-r2-fix.md) |
