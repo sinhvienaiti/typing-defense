@@ -8,6 +8,7 @@
 // Checks: the card shows the profile's numbers and its advice line; ← → switch the pace row and td.settings keeps it;
 // the run started from the title takes the profile's header (E 45, k from it, the director on) and the sandbox panel
 // shows it; both nights run with the director on, their logs replay on Node to the page's hash; no console error.
+// R2 review fix 3 (F4): the card's chunk is fetched only when "Hồ sơ gõ" is picked, not with the title.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-balance.mjs --width=1280 --height=720
 import { DEV_URL } from "./common.mjs";
 import { KIND, boot, consoleChecks, finish, out, replayOnNode, sandbox, send, sizeOf, state, td, typeFor } from "./td-1a6-common.mjs";
@@ -30,6 +31,8 @@ const SEED_PROFILE = `(async () => {
   return true;
 })()`;
 
+/** The page has fetched the Hồ sơ gõ card's module (the dev server's /src path, or a built chunk). */
+const PROFILE_FETCHED = `performance.getEntriesByType("resource").some((e) => /\\/src\\/ui\\/profile\\.ts|\\/assets\\/profile-/.test(e.name))`;
 const CARD = `(() => { const c = document.querySelector(".td-profile"); return c && !c.hidden ? { text: c.textContent, advice: c.querySelector(".td-profile-advice")?.textContent ?? "" } : null; })()`;
 const PACE_ROW = `(() => { const r = document.querySelector('.td-set-row[data-key="pace"]'); return r ? { text: r.textContent, focus: r.classList.contains("is-focus"), on: r.querySelector(".td-set-switch")?.classList.contains("is-on") === true } : null; })()`;
 
@@ -45,8 +48,10 @@ export default async function (page) {
   await page.goto(base + "/", { settle: 300 });
   await page.eval("document.fonts.ready.then(() => true)");
   await page.sleep(2500);
+  const fetchedBefore = await page.eval(PROFILE_FETCHED);
   await nav(page, "Digit5", 400);
   const fresh = await page.eval(CARD);
+  shown.profileLoadsWhenPicked = fetchedBefore === false && (await page.eval(PROFILE_FETCHED)) === true && fresh !== null;
   await shot("profile-new");
   shown.profileNew = fresh !== null && /Chưa đo/.test(fresh.text) && /35 WPM/.test(fresh.text) && /×1,00/.test(fresh.text);
   await nav(page, "Escape", 300);

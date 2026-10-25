@@ -80,8 +80,9 @@ let lost = { text: "", until: 0 };
 const tellLost = (text: string): void => void (lost = { text, until: performance.now() + 10_000 });
 
 // The title, its chunk loaded on first use (a run opened by a scenario's link never loads it, nor its painting), its
-// settings and Hồ sơ gõ cards when picked; its choice waits for the run. `titleUp`: the title is up or on its way, so
-// the world waits and keys wait too. A title that cannot load is skipped: the run goes on (R2 review fix 2).
+// Hồ sơ gõ card when picked, its settings card when picked or with the pause card's chunk, which holds one, once the page
+// is usable (R2 review fix 3: no fetch of either at the title's start); its choice waits for the run. `titleUp`: the
+// title is up or on its way, so the world waits and keys wait too. A title that cannot load is skipped: the run goes on.
 let title: TitleScreen | null = null;
 let titleUp = false;
 let choose: (choice: TitleChoice) => void = () => {};
@@ -106,8 +107,6 @@ function showTitle(canContinue: boolean): void {
     title = shown;
     if (shown === null) return void ((titleUp = false), tellLost("Màn đầu chưa tải được: vào thẳng ván · F5 để thử lại"));
     if (titleUp) shown.show(canContinue);
-    void cardChunks.settings.get(); // its cards, ready before they are picked
-    void cardChunks.profile.get();
   });
 }
 /** "Chơi lại Ngày n" (BUILD_1B §4.3): the run's header, its log up to day n's start, the hash there; one page load reads it. */
