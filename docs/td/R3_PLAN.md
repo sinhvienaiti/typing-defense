@@ -28,6 +28,14 @@
 - Chunk vào ở "/": 82,04 kB → khoảng 80,4 kB sau bước 1 → khoảng 83,3 kB sau R3 (trần 85 kB; §1.1, §8).
 - Bước 1 làm **trước mọi thứ**: không tách thì 2,96 kB còn trống chỉ vừa ~2,9 kB phần R3 ở chunk vào, chưa tính `app/learn.ts` (~1,3 kB nếu không tách), tức không còn chỗ nào.
 
+### Tiến độ (cập nhật theo từng commit)
+
+| Bước | Trạng thái | Commit | Số đo (Apple M4) |
+|---|---|---|---|
+| 1 | xong | (bước 1) | "/" 80,84 kB gzip, chừa 4,16 kB (ước 80,4); `dev-tools` 1,40 kB, `retry` 0,86 kB nạp sau; `td-1a-boot`, `td-1b-chunks` (thêm lượt chặn `retry`), `td-1b-night5` đạt ở 1280 × 720 |
+| 2–6 | đang làm | | |
+| 7–11 | chưa | | |
+
 ---
 
 ## 1. Mốc đo trước R3 (Apple M4)

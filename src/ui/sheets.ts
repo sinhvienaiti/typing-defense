@@ -15,8 +15,8 @@ import type { SettingsCard } from "./settings";
 
 export type SheetAction = "resume" | "settings" | "title" | "again" | "retry" | "copy" | "map";
 type Button = readonly [action: SheetAction, label: string, key: string];
-/** The results card's run: a story or the sandbox, and a "Chơi lại Ngày n" this run came from (0: none). */
-export type ResultsOf = { story: boolean; retried: number };
+/** The results card's run: a story or the sandbox, a "Chơi lại Ngày n" this run came from (0: none), and whether its chunk is in (R3 step 1). */
+export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean };
 
 const PAUSE: readonly Button[] = [["resume", "Chơi tiếp", "Esc"], ["settings", "Cài đặt", ""], ["title", "Về màn đầu", ""]];
 
@@ -66,7 +66,8 @@ export class Sheet {
     this.settings.close();
     if (kind === "") return;
     const won = w.phase === "victory";
-    const retry = !won && w.day >= 2; // the sandbox too: its skipTo runs replay alike (BUILD_1B §19 td-1b-night5)
+    // The sandbox too: its skipTo runs replay alike (BUILD_1B §19 td-1b-night5); not while app/retry.ts is missing (R3 step 1).
+    const retry = !won && w.day >= 2 && run.canRetry !== false;
     this.buttons = kind === "pause" ? PAUSE : [
       ...(retry ? [["retry", "Chơi lại Ngày " + w.day, "Enter"] as const] : []),
       ["again", retry ? "Chơi lại từ đầu" : "Chơi lại", retry ? "" : "Enter"], ["copy", "Chép số chơi thử", ""], ["map", "Xem bản đồ", "Esc"], ["title", "Về màn đầu", ""],

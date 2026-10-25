@@ -7,6 +7,13 @@ const root = fileURLToPath(new URL(".", import.meta.url));
 
 const env = (name: string): string | undefined => process.env[name]?.trim() || undefined;
 
+/**
+ * BUILD_1B §20: the modules src/main.ts loads with import(), each its own chunk (and what only they import). Any other
+ * module goes in "game", the entry chunk; a lazy module left out of this pattern would be pulled back into it (R3 step 1,
+ * docs/td/R3_PLAN.md §3.1: tests/td-chunks.test.ts checks every import() of main.ts against it).
+ */
+export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets)|app[\\/](sandbox|dev-tools|retry)|view[\\/](audio-min|folk|music))\.ts$/;
+
 // The parent repo's dev script sets these for the nginx host (td.typing-game.local).
 // A plain `pnpm dev` on 127.0.0.1:3006 keeps Vite's own HMR socket.
 const hmrHost = env("DEV_HMR_HOST");
@@ -38,9 +45,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
-        // pause and results cards and the sandbox panel load apart (src/main.ts). At "/" the start set is that chunk and
-        // the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
-        manualChunks: (id) => (/[\\/]src[\\/](ui[\\/](title|settings|profile|sheets)|app[\\/]sandbox|view[\\/](audio-min|folk|music))\.ts$/.test(id) ? undefined : "game"),
+        // pause and results cards, the sandbox panel, __td and "Chơi lại Ngày n" (R3 step 1) load apart (src/main.ts, LAZY).
+        // At "/" the start set is that chunk and the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
+        manualChunks: (id) => (LAZY.test(id) ? undefined : "game"),
       },
     },
   },

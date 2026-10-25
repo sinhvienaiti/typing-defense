@@ -8,6 +8,9 @@
 //           fetches a failed dynamic import again; a browser that keeps the failure keeps the HUD's line)
 //   sound, panel (R2 review fix 3, F3) blocked with the cards: the HUD tells the panel is missing; unblocked and past
 //           the cool-down, the open panel is asked for again by itself and sound with the next key
+//   retry   (R3 step 1, docs/td/R3_PLAN.md §3.1) "?sandbox=1" with app/retry.ts blocked: __td still comes (its own chunk),
+//           a lost night 2 shows the results card without "Chơi lại Ngày 2" (its first button "Chơi lại"), the HUD tells
+//           the missing chunk with "F5 để thử lại", one console error names it
 // Whether a chunk can come back depends on the browser: Chrome for Testing 156 (the Dell) fetches a failed dynamic
 // import again, Chrome 155 (the Mac) keeps the failure until the page reloads. A probe import tells which; a browser
 // that fetches again must show the card, the panel and sound; one that keeps the failure must show that the page asked
@@ -80,6 +83,24 @@ export default async function (page) {
   await key(page, "Escape", { pause: 300 });
   const after = { ...(await page.eval(td("return { ...t.chunks(), panelShown: !!document.querySelector('.td-sandbox:not(:empty)') };"))), failed: failedSince(beforeKey), notices: await page.eval(NOTICES) };
 
+  // 4. "Chơi lại Ngày n" and "Chép số chơi thử" blocked (R3 step 1): night 2 lost on purpose (no tower, a flood).
+  await page.send("Network.setBlockedURLs", { urls: ["*src/app/retry.ts*"] });
+  const retryFrom = page.logs.length;
+  const retryReady = await boot(page);
+  await page.eval(td(`t.send({ t: "sandbox", op: { op: "skipTo", value: 2 } }); return true;`));
+  await page.sleep(400);
+  await page.eval(td(`t.send({ t: "callNight" }); return true;`));
+  await page.sleep(400);
+  await page.eval(td(`t.flood(400); t.send({ t: "sandbox", op: { op: "speed", value: 2 } }); return true;`));
+  const lost = await until(page, "return t.state().phase === 'defeat';", 120000, 250);
+  await page.sleep(1500);
+  const lostCard = await page.eval(`(() => { const el = document.querySelector(".td-sheet.is-results"); return el && !el.hidden ? [...el.querySelectorAll("button[data-sheet]")].map((b) => b.dataset.sheet) : null; })()`);
+  const retryNotice = await page.eval(NOTICES);
+  const retryChunks = await page.eval(td("return t.chunks();"));
+  await shot("retry");
+  const retryLogs = page.logs.slice(retryFrom).filter((line) => line.startsWith("error"));
+  await page.send("Network.setBlockedURLs", { urls: [] });
+
   const checks = {
     titleSkipped: skipped === true && titleSteps.b > titleSteps.a,
     titleNotice: /Màn đầu chưa tải được/.test(titleNotice ?? ""),
@@ -96,8 +117,12 @@ export default async function (page) {
     panelNotice: /Bảng hộp cát chưa tải được/.test(panelNotice ?? ""),
     panelAfterCoolDown: refetches ? waited.panel === true && after.panelShown === true : waited.failed.includes("sandbox") && /Bảng hộp cát chưa tải được/.test(after.notices ?? ""),
     soundWithTheNextKey: refetches ? waited.sound === false && after.sound === true : !waited.failed.includes("sound") && after.failed.includes("sound"),
+    retryReady: retryReady && lost === true && retryChunks?.retry === false,
+    retryCardWithout: Array.isArray(lostCard) && !lostCard.includes("retry") && lostCard[0] === "again",
+    retryNotice: /Chơi lại Ngày n chưa tải được · F5 để thử lại/.test(retryNotice ?? ""),
+    retryError: retryLogs.filter(expected).length >= 1 && retryLogs.filter(expected).every((line) => line.includes("the retry chunk")),
     noOtherErrors: page.logs.filter((line) => line.startsWith("error") && !expected(line)).length === 0,
     noExceptions: page.exceptions.length === 0,
   };
-  return finish(page, checks, { browserFetchesFailedImportAgain: refetches, titleNotice, dock: dock.slice(0, 80), pauseNotice, panelNotice, pauseAgain, blocked, waited, after, titleLogs, sheetLogs });
+  return finish(page, checks, { browserFetchesFailedImportAgain: refetches, titleNotice, dock: dock.slice(0, 80), pauseNotice, panelNotice, pauseAgain, blocked, waited, after, titleLogs, sheetLogs, lostCard, retryNotice, retryLogs });
 }

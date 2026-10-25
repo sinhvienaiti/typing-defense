@@ -48,3 +48,21 @@ describe("lazy chunks: retry and fallback (src/app/chunks.ts)", () => {
     expect(calls()).toBe(4);
   });
 });
+
+/**
+ * R3 step 1 (docs/td/R3_PLAN.md §3.1): a module main.ts loads with import() is a chunk of its own only when vite.config.ts's
+ * manualChunks leaves it out of "game"; one left out of LAZY would be pulled back into the entry chunk.
+ */
+describe("lazy chunks: every import() of main.ts stays out of the entry chunk (vite.config.ts LAZY)", () => {
+  it("names each dynamically imported module, and the entry's own modules are not lazy", async () => {
+    const { readFileSync } = await import("node:fs");
+    const { default: config, LAZY } = await import("../vite.config");
+    const main = readFileSync(new URL("../src/main.ts", import.meta.url), "utf8");
+    const lazy = [...main.matchAll(/import\("\.\/([^"]+)"\)/g)].map((m) => "/repo/src/" + m[1] + ".ts");
+    expect(lazy.length).toBeGreaterThanOrEqual(8);
+    const chunk = (config as { build: { rollupOptions: { output: { manualChunks: (id: string) => string | undefined } } } }).build.rollupOptions.output.manualChunks;
+    for (const id of lazy) expect([id, LAZY.test(id), chunk(id)]).toEqual([id, true, undefined]);
+    for (const id of ["/repo/src/main.ts", "/repo/src/ui/hud.ts", "/repo/src/app/chunks.ts", "/repo/src/sim/world.ts"]) expect([id, chunk(id)]).toEqual([id, "game"]);
+    expect(lazy).toEqual(expect.arrayContaining(["/repo/src/app/dev-tools.ts", "/repo/src/app/retry.ts"]));
+  });
+});
