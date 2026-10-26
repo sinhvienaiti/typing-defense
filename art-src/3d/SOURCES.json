@@ -2,6 +2,24 @@
  "version": 1,
  "rule": "art-src/<path>/<name>.png -> art-src/3d/<path>/<name>.glb (ships: art-src/ships/ship-NN-<id>-2d.png -> art-src/3d/ships/ship-NN-<id>.glb; skills/ and items/ hold Text to 3D models with no 2D image). Owner originals from Tripo/Meshy, never edited; pipelines read them and write processed copies elsewhere. Regenerate: pnpm models:index --root games/typing-defense",
  "files": {
+  "animals/chuon-chuon-tre.glb": {
+   "md5": "0d0789b67e24418232361bf2d2f1622a",
+   "bytes": 2252172,
+   "image": "art-src/animals/chuon-chuon-tre.png",
+   "usedBy": []
+  },
+  "animals/piggy.glb": {
+   "md5": "b01c9d4fefc303c2861164c5360739d3",
+   "bytes": 2117008,
+   "image": "art-src/animals/piggy.png",
+   "usedBy": []
+  },
+  "animals/trau.glb": {
+   "md5": "706d4e0f3f564fbae5da655225746f6b",
+   "bytes": 2861556,
+   "image": "art-src/animals/trau.png",
+   "usedBy": []
+  },
   "bosses/moc-tinh.glb": {
    "md5": "c991772e8358877d296e45b156217eb8",
    "bytes": 4541332,
@@ -110,6 +128,30 @@
     "child+scholar+3d+model.glb"
    ]
   },
+  "enemies/dokkaebi-club.glb": {
+   "md5": "a69a5b9149533fd1c94f857943b0401c",
+   "bytes": 2479772,
+   "image": "art-src/enemies/dokkaebi-club.png",
+   "usedBy": []
+  },
+  "enemies/dokkaebi.glb": {
+   "md5": "23edf11446980ea855a066e55d1e9e47",
+   "bytes": 3066532,
+   "image": "art-src/enemies/dokkaebi.png",
+   "usedBy": []
+  },
+  "enemies/kamaitachi.glb": {
+   "md5": "950e8f99dfc5a64d34eae0312e61b67d",
+   "bytes": 2629684,
+   "image": "art-src/enemies/kamaitachi.png",
+   "usedBy": []
+  },
+  "enemies/ma-da.glb": {
+   "md5": "9541ee41b6f801e7c03a77144b75ea57",
+   "bytes": 2405304,
+   "image": "art-src/enemies/ma-da.png",
+   "usedBy": []
+  },
   "enemies/mam-go.glb": {
    "md5": "6ac3622290bbaf35dc4b9ec0f5938a80",
    "bytes": 3126604,
@@ -128,6 +170,18 @@
     "cute+blob+3d+model.glb"
    ]
   },
+  "enemies/oni-club.glb": {
+   "md5": "9e4d6d4048b9f27293fc49db85f3b021",
+   "bytes": 3143808,
+   "image": "art-src/enemies/oni-club.png",
+   "usedBy": []
+  },
+  "enemies/oni.glb": {
+   "md5": "21789640fc0ac50c3160893656a067f7",
+   "bytes": 3160360,
+   "image": "art-src/enemies/oni.png",
+   "usedBy": []
+  },
   "enemies/tanuki.glb": {
    "md5": "a038c089198ed966465cffcee89d6329",
    "bytes": 2259052,
@@ -136,6 +190,12 @@
    "downloadedAs": [
     "raccoon+3d+model.glb"
    ]
+  },
+  "enemies/tat-phuong.glb": {
+   "md5": "e2890453958ca1579d103a4483f71766",
+   "bytes": 3044164,
+   "image": "art-src/enemies/tat-phuong.png",
+   "usedBy": []
   },
   "enemies/thuong-luong.glb": {
    "md5": "e8cb30c478c0f97f78b488abddae4d7f",
@@ -154,6 +214,12 @@
    "downloadedAs": [
     "ogre+3d+model.glb"
    ]
+  },
+  "helpers/helper-book.glb": {
+   "md5": "f6c24ea21bd7c23e90a58878b385d135",
+   "bytes": 1989584,
+   "image": "art-src/helpers/helper-book.png",
+   "usedBy": []
   },
   "helpers/helper-brush.glb": {
    "md5": "b9952a91c6eac5cd8f1cb001f02f0b96",
@@ -190,6 +256,12 @@
    "downloadedAs": [
     "wooden+drum+3d+model.glb"
    ]
+  },
+  "helpers/helper-fan.glb": {
+   "md5": "7e59c9901c6f5534a204534b859fb055",
+   "bytes": 3007092,
+   "image": "art-src/helpers/helper-fan.png",
+   "usedBy": []
   },
   "helpers/helper-gach-wingband.glb": {
    "md5": "f6355a5494ab8d1e34e17f36d9d566f9",
@@ -235,6 +307,18 @@
    "downloadedAs": [
     "anthropomorphic+cat+3d+model.glb"
    ]
+  },
+  "heroes/tre-mallet.glb": {
+   "md5": "25fff82637185a091fb7a07393ad25b3",
+   "bytes": 3022944,
+   "image": "art-src/heroes/tre-mallet.png",
+   "usedBy": []
+  },
+  "heroes/tre-slingshot.glb": {
+   "md5": "7a65303632b6a77cdf3249d10477cce0",
+   "bytes": 2316404,
+   "image": "art-src/heroes/tre-slingshot.png",
+   "usedBy": []
   },
   "loot/bag-basket.glb": {
    "md5": "fda7dd2dc77cf173c6477696a3802aa6",
@@ -350,6 +434,12 @@
     "wooden+post+3d+model.glb"
    ]
   },
+  "units/linh-giao-dai.glb": {
+   "md5": "652540a6ddbcac5d4ff2124c5614ab34",
+   "bytes": 3679968,
+   "image": "art-src/units/linh-giao-dai.png",
+   "usedBy": []
+  },
   "units/linh-giao-spear.glb": {
    "md5": "62d906f2c3d2a2b06e5164ed238e8200",
    "bytes": 2624372,
@@ -367,6 +457,96 @@
    "downloadedAs": [
     "character+3d+model.glb"
    ]
+  },
+  "units/linh-khien-shield.glb": {
+   "md5": "88c12012e275c6733aeb086cd83fcfc2",
+   "bytes": 2971888,
+   "image": "art-src/units/linh-khien-shield.png",
+   "usedBy": []
+  },
+  "units/linh-khien.glb": {
+   "md5": "90a43d8e7b3271b94634279d1a6f8ba3",
+   "bytes": 3456556,
+   "image": "art-src/units/linh-khien.png",
+   "usedBy": []
+  },
+  "workers/worker-base.glb": {
+   "md5": "b6536a4dd870f318fbf02e975cf4764a",
+   "bytes": 2695036,
+   "image": "art-src/workers/worker-base.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-dong-head.glb": {
+   "md5": "3474a6221935979881ed3437701c371b",
+   "bytes": 2617980,
+   "image": "art-src/workers/worker-kit-dong-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-dong-rammer.glb": {
+   "md5": "8d5d9bc03bbcfbe6e25bde2173692935",
+   "bytes": 3094440,
+   "image": "art-src/workers/worker-kit-dong-rammer.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-en-head.glb": {
+   "md5": "17171573bed7106c18a36b065ec8c508",
+   "bytes": 2256312,
+   "image": "art-src/workers/worker-kit-en-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-gatekeeper-crossbow.glb": {
+   "md5": "43313a258daacf0376495cbe88c02b0a",
+   "bytes": 3311912,
+   "image": "art-src/workers/worker-kit-gatekeeper-crossbow.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-gatekeeper-head.glb": {
+   "md5": "31140070f4239ded98139b7c0d0122ab",
+   "bytes": 2724536,
+   "image": "art-src/workers/worker-kit-gatekeeper-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-lua-head.glb": {
+   "md5": "db3fa30c47212aaea82b19dc5bb84731",
+   "bytes": 2299744,
+   "image": "art-src/workers/worker-kit-lua-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-miner-head.glb": {
+   "md5": "9f2212082a10e1af8d122522f5dfdc1c",
+   "bytes": 2622060,
+   "image": "art-src/workers/worker-kit-miner-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-miner-pickaxe.glb": {
+   "md5": "a854999fa9d80c61f6baf212c7792bdd",
+   "bytes": 2887364,
+   "image": "art-src/workers/worker-kit-miner-pickaxe.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-sam-head.glb": {
+   "md5": "622507165466c731d22eb1533c70e8b1",
+   "bytes": 2051388,
+   "image": "art-src/workers/worker-kit-sam-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-scholar-head.glb": {
+   "md5": "a2c8cafc114103ed78accaa67d85e1c0",
+   "bytes": 1514572,
+   "image": "art-src/workers/worker-kit-scholar-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-se-head.glb": {
+   "md5": "40129e843c9980e90df1aa4fa64d4898",
+   "bytes": 2466508,
+   "image": "art-src/workers/worker-kit-se-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-se-quiver.glb": {
+   "md5": "ebc49ad8d4a5f33c0b92b01695ca5de0",
+   "bytes": 2523788,
+   "image": "art-src/workers/worker-kit-se-quiver.png",
+   "usedBy": []
   }
  },
  "notMadeYet": {},
