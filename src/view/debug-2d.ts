@@ -46,8 +46,11 @@ const wob = (k: number): number => {
   const x = Math.sin(k * 12.9898) * 43758.5453;
   return x - Math.floor(x);
 };
-/** NPC letters (§9): N farmer, D villager, X builder; M the miner by a mine. */
-const NPC_LETTER = ["N", "D", "X"];
+/**
+ * NPC marks: the icon of the call each makes (farmer, villager, builder; the miner by a mine ⛏️). §9's letters N, D, X
+ * are gone: two villagers' "D" read as two Draconis (the owner's play-test, 26/10/2026), whose lantern says "D".
+ */
+const NPC_LETTER = ["🌾", "🪓", "🔨"];
 const NPC_FILL = ["#f4d35e", "#c8b6a6", "#d9a066"];
 
 const FONT = '"Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif';
@@ -522,7 +525,7 @@ export class DebugView {
       // Five power charges under a tower (§4.5), at least 7 px across at any zoom.
       const [pip, step] = [Math.max(0.35, this.px(3.5)), Math.max(0.95, this.px(9))];
       for (let k = 0; spec.attack !== null && !site && k < 5; k += 1) this.disc(x + (k - 2) * step, z + r + pip + 0.4, pip, k < B.charges[b]! ? COLOR.jade : COLOR.paper, COLOR.ink, 1);
-      if (spec.mine !== null && !site) this.worker(x - r - 0.2, z + r * 0.5, "M", "#e0b33a", B.call[b]!, w); // the miner never stops
+      if (spec.mine !== null && !site) this.worker(x - r - 0.2, z + r * 0.5, "⛏️", "#e0b33a", B.call[b]!, w); // the miner never stops
       else if (B.call[b]! >= 0) this.text(w.calls.state[B.call[b]!] === CALL_STATE.queued ? "…" : "!", x, z - r - 1.2, 14, COLOR.ink);
       if (spec.hp[0] > 0 && B.hp[b]! < spec.hp[level - 1]!) this.bar(x, z + r + 0.5, r * 2, B.hp[b]! / spec.hp[level - 1]!, COLOR.buildingHp);
       if (spec.barracks !== null) this.shape(FLAG, B.rallyX[b]!, B.rallyZ[b]!, COLOR.soldier);
