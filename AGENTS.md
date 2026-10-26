@@ -24,7 +24,7 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/R3_PLAN.md`: the plan of 1B R3 "Học và dạy" (work items by file, order with the
   bundle budget first, data shapes, the spec points chosen as proposed, tests, scenarios, the
   balance plan, line budget and cut order) and the pre-R3 baseline on the Apple M4.
-- **State (26/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
+- **State (27/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
   §7.2); 1B R2 built (§7.3: Tối Thượng, Chữ Chiêu, Mảnh Chữ, Ngắt on Lửng Tanuki,
   Nuppeppō, Thư Đồng's panic, R2's 2D layers, design call (b) applied) and **reviewed
   and fixed** (§7.4): G5 graded for every bot (Tối Thượng 25 → 21), G6 counted by
@@ -76,9 +76,20 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   cap 30; time left, a draining bar, a pulse and a knock in the last 10 s, "Đã dừng" while paused). The "two dragons"
   were the villagers' "D" discs read as Draconis' "D" lantern: NPC discs show their call's icon now (`td-1b-wood` counts
   one dragon and no "D" on the field every frame). "/" 83.31 kB gzip (1.69 kB headroom), 10,486 lines (14 under the
-  ceiling: step 9 must cut first, `R3_PLAN.md` §8), 337 tests. Next: step 9 the R3 balance pass on this rule (the first
-  full `td:balance` on it is in §7.8), then §20 on the Mac; the owner's playtest (B9 numbers) stays open. Play-tests use a
-  build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
+  ceiling), 337 tests. **R3 balance and gates** (26/10/2026, §7.9, `docs/changelog/2026-10-26-td-r3-balance.md`):
+  27 lines back by rewrapping nine 80-column headers (no rule cut); Rễ hút sinh khí, the boss's roots take a life every
+  30 s from its rise (`boss.drain`; the stagger restarts the clock; an ink-edged root to the Bastion, "−1 mạng", an amber
+  pulse back to the canopy), E 45–64 words 4–8 letters, this game's pace floor 0.70 (`PACE.k`, passed to the kit's
+  `paceK`), the boss's k factor 0.4 / 5.5, cap 1.42. Six measured rounds on seeds 1–240 (the gate set) and 241–480 (a
+  probe set); round 6 kept nothing. Pooled tight targets 5/6: Ẩu 77 % (needs 78 %) and B4 on set 1 (Chậm chắc's Biên
+  S ties Ẩu's at 60 %) still fail; G1–G8 pass (G3 47.5 s); next lever the kit's accuracy weight in `effectiveE`
+  (coordinator's, three games). Thử thách is easier than Cân bằng (boss ×0.93: `modeHp.challenge` 0.78). §21 on the
+  Apple M4 (27/10): gates 1–4 and 6–11 pass: 44/44 scenario runs at both sizes (`td-balance` read a fixed "×1,0x" that
+  the 4–8 letter band made 0.96: fixed in `5c3b939`), §20 at 60 Hz (`td-1b-perf` main thread 1.7–2.0 ms a frame against 1.7–2.2 for `89e2494` interleaved, the
+  boss layer p95 0.3 ms, the Node step at the boss peak p95 0.39 ms of 0.5: each enemy scans every Đầu Đàn aura in
+  `move.ts`); gate 5 fails as above, gate 12 waits for the owner.
+  "/" 83.75 kB gzip (1.25 kB headroom), 10,492 lines, 338 tests. The owner's playtest (B9 numbers) stays open.
+  Play-tests use a build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
@@ -142,6 +153,9 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   `view/debug-2d.ts` (`lead`, the dome), outcomes in `view/fx-2d.ts`, sounds in `view/audio-min.ts`, the call's icon and name
   by verb (`callLabel` in `view/words/cards.ts`). Bots' Học: `learnStore`, `learnHeader`, `StageRun` (`timedFresh`) and the
   `standard@book20` row in `tests/td/flow.ts`. Play-test file: `playtestFile` in `app/retry.ts`; B9: `tests/td/b9.ts`.
+- 1B R3 balance: Rễ hút sinh khí is `keepBlow(w, "drain")` in `sim/systems/boss.ts` (numbers `boss.drain` in `slice-1a.ts`;
+  `drainAt`, `drainEnd` in the boss store, hashed), drawn in `view/boss-2d.ts`, said by `BossBanner` (`BOSS_LINES.drain`), heard in
+  `view/audio-min.ts`; the pace floor is `PACE.k` in `rules.ts`.
 - Chunks (BUILD_1B §20, R2 review and its second fix): `vite.config.ts` keeps what the
   game needs to start as one chunk; the title (`ui/title.ts`), the settings card
   (`ui/settings.ts`, the stored settings in `app/prefs.ts`), Hồ sơ gõ (`ui/profile.ts`),

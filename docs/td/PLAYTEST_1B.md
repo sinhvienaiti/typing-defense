@@ -40,6 +40,7 @@ Ván 1: thắng / thua · còn ___ mạng · ___ sao
 2. Ngày 5: thấy báo Mộc Tinh và mạch rễ trên nhánh nó đi? ___ Có làm gì khác vì lời báo? ___
 3. Đêm 5: thấy 12 s lặng, đếm ngược, vết nứt bò tới ngã ba? ___ Lúc boss đi tới tháp đầu có thấy chờ lâu? ___
 4. Rễ Trồi: vòng đỏ có hiểu là "nhà này sắp bị tê"? ___ Đủ thời gian nhận ra? ___
+   (R3) Rễ hút sinh khí: thấy rễ bò về Lũy và "−1 mạng" mỗi 30 s? ___ Có hiểu là phải hạ boss nhanh? ___ Thấy bị phạt oan? ___
 5. Boss choáng (70 %): thấy dải chữ và lời gọi Dồn lửa? ___ Gõ kịp? ___ Hiệu ứng nào che chữ? ___
 6. Nếu thua: hiểu vì sao thua (dòng gợi ý đúng?) ___ Thua công bằng? ___ "Chơi lại Ngày 5" có muốn chơi tiếp? ___
 7. Để boss tới Lũy: cảm giác lúc Lũy bị đập? ___

@@ -1475,3 +1475,314 @@ Chỉ có một Draconis (một thực thể, một hình). Cái đọc thành c
 - Đọc: Gỗ không cạn làm ván dễ hơn với bot Chuẩn và Ẩu (thắng +12 và +13 điểm gộp, Biên S chạm 65–70 %). Gỗ dư đổi ra Vàng sớm hơn và Lũy lên sớm hơn (bot không gõ của cổng 1A.6: lần bán Gỗ đầu ở giây 195 thay 243, Lũy cấp 2 ở giây 349–355 thay 360–367; `wood2/lives-*.txt`). Sai số 40 seed khoảng ±7 điểm, nên hàng Khá (55 % ở bộ 1) cần đo lại ở 120 seed (bảng 120 seed trên: 70 / 73 %).
 
 **Núm cho bước 9 từ đợt này:** tốc chặt (`TREE.wood` / `chopS`) và giá Gỗ của nhà (`ECONOMY.woodShare`), cùng các núm sẵn của `R3_PLAN.md` §7 (Rễ hút sinh khí, `LENGTH_BY_E` với `kHp2`). Lời gọi Chặt (4 từ mỗi 45 s mỗi dân) là núm thứ ba nếu bước 9 muốn trả lại Bắn mạnh bị bỏ (11 → 20 với `slipS` 1,35): 3 từ, hoặc một lời gọi mỗi hai lần chặt.
+
+### 7.9 R3: cân bằng cuối (bước 9) và cổng cứng §21 (bước 10) (26/10/2026, Mac mini M4)
+
+Bước 9 và phần còn lại của bước 10 trong `R3_PLAN.md`, đo trên luật gỗ của chủ dự án (§7.8) và có Học (§7.7 phần B). Changelog: `docs/changelog/2026-10-26-td-r3-balance.md`. Số đo là số **Apple M4** (Mac mini M4 10 lõi, 16 GB; Chrome 155 macOS có GPU; Node v24.22.0), máy dùng chung với ba làn khác (tải trung bình ghi cạnh từng lượt). Tên mục là 7.9 vì 7.6 đã là sửa phản biện R2 lần 3. Bằng chứng (ngoài Git): `tmp/mac-2026-10-25/r3bal/` (lượt 1–5 của lượt làm bị ngắt), `r3gate/` (bảng `td:balance` đủ trên `b655de2`, ảnh `td-1b-boss` có Rễ hút), `r3final/` (lượt 6, bảng chốt, kịch bản của lượt làm 2, hai cây A/B), `r3close/` (kịch bản của lượt làm 3, 4, đo §20, đầu dò lớp boss, hai đầu dò Thử thách), `r3done/` (lượt làm 4: kiểm, bước sim trên Node, hồ sơ CPU).
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Dòng `.ts` |
+|---|---|---|---|---|
+| `7ff2603` | trước (luật gỗ, §7.8) | 83,31 (1,69) | 81,91 | 10.486 |
+| `1f77e48` | gói lại chín đầu file viết ở 80 cột về 120 cột (chỉ chú thích, không đổi chữ) | 83,31 (1,69) | 81,91 | 10.459 |
+| `b655de2` | bước 9: Rễ hút sinh khí, số cân bằng, file vàng | 83,68 (1,32) | 82,28 | 10.485 |
+| `106db85` | Rễ hút đọc được trên đường; `td-1b-boss` quay đòn này; chú thích 20 → 30 s | 83,75 (1,25) | 82,36 | 10.492 |
+| `a23c910`, `5c3b939` | chỉ kịch bản: `td-1b-learn` chờ Từ Ôn kế khi thẻ tắt trước phím; `td-balance` đọc k của hồ sơ từ đầu ván | 83,75 (1,25) | 82,36 | 10.492 |
+
+Mỗi commit dựng lại trên Mac trong cây tạm (`git archive`, cùng `node_modules`): `tsc --noEmit` và `vite build` qua ở `1f77e48`, `b655de2`; 338 test đạt ở `b655de2`; `106db85` là `pnpm check` đầy đủ. Không cắt luật nào theo §8: 27 dòng lấy lại từ chú thích đầu file đủ cho bước 9 (+26 dòng, ước +33).
+
+**Lượt làm bị ngắt** (khoảng 12:00) để lại `1f77e48`, `b655de2` chưa push và phần hình của Rễ hút chưa commit. Lượt này kiểm lại trên mã đã commit, không làm lại: `pnpm check` 338 test / 31 file đạt; `pnpm td:golden:check` `same: true`; bảng `td:balance` đủ của lượt trước trên `b655de2` (`r3gate/balance-full.md`, 761,7 s) khớp từng ô với lượt dò cuối có cùng số ghi đè (`r3bal/r2-gate.md`). Phần hình (`106db85`): ảnh `td-1b-boss` ở 1280 × 720 cho thấy rễ màu rễ chìm vào đường đất, nên rễ có viền mực 11 px dưới nét 6 px, và lúc hút một đốm hổ phách chạy ngược rễ về tán trong 0,7 s (than hồng thay lá xanh); chạy lại 1280 × 720 trên mã này: 20/20 kiểm đạt (`drainWarned72`, `drainTakesOneLife`, `drainSaidOnTheBar`, `drainFilmed`), rồi commit.
+
+**Lượt 2 cũng bị ngắt** (khoảng 17:00, sau lượt đo 6, bảng chốt và 34 lượt kịch bản; giấy tờ viết mà chưa commit, §20 chưa đo). **Lượt 3** (20:14–22:00, bị ngắt lần ba sau các kịch bản, trước khi đo §20 và commit giấy tờ) kiểm lại trên mã đã commit, không làm lại: `pnpm check` 338 test / 31 file, kit sha256 khớp 31 file, "/" 83,75 kB; `pnpm td:golden:check` `same: true` cả hai file (`r3close/check.log`, `golden.log`). `src` không đổi từ `106db85` (`1b90fed` của điều phối viên chỉ đổi `media.md5`, `art-src/3d/SOURCES.json`), nên bảng chốt của lượt 2 (`r3final/balance-full.md`, mã `106db85`) là bảng của mã cuối; đã đối từng ô với các bảng dưới. `td-1b-learn` trượt ở lượt 2 (1920 × 1080: 10/14; 1280 × 720 bị ngắt): chạy lại nhật ký trang trên Node (`r3close/dim-probe.ts`), Từ Ôn đầu nằm trong một lời gọi Chặt sáng lúc Draconis cách 13,22 m (1920 × 1080: 13,02 m) và đang đi xa, tắt 8 (10) tick sau khi Draconis ra quá vòng 14 m (`AGENT.heroRingM`; luật "rời mọi vòng giúp thì tắt" của `attentionStep`), nên phím của kịch bản tới khi không còn thẻ. Kịch bản sửa ở `a23c910` (lần đó ghi vào `dimmed`, chờ Từ Ôn kế), 14/14 ở hai cỡ. Bằng chứng lượt 3: `tmp/mac-2026-10-25/r3close/` (kiểm, kịch bản còn lại, hai đầu dò Thử thách).
+
+**Lượt 4** (27/10 01:17–01:45, Apple M4, tải trung bình 2–9; ba làn khác chạy song song) chỉ làm phần lượt 3 để lại, không chạy lại lượt cân bằng nào:
+
+- Kiểm trên mã đã commit (`7f54641`; `src` như `106db85`): `pnpm check` 338 test / 31 file, kit sha256 khớp 31 file, "/" 83,75 kB (chừa 1,25 kB), `?title=0` 82,36 kB, tổng 100,20 kB; `pnpm td:golden:check` `same: true` cả hai file (nội dung `cd59313e`); 10.492 dòng `.ts` (`r3done/check.log`, `golden.log`).
+- Số trong giấy tờ đối lại với file bằng chứng, từng ô: bảng chốt (`r3final/balance-full.md`), sáu lượt đo (`r3bal/*.md`, `r3final/r6*.md`: dòng gộp Cân bằng và G3 của từng nhánh), hai đầu dò Thử thách (`r3close/challenge-modehp*.md`), đầu dò không Học (`r3final/nolearn-*.md`). Mọi số tìm được nguồn; không số nào phải đo lại.
+- **`td-balance` trượt ở hai cỡ** (lần đầu chạy trên mã R3): `profile`, `nightRelax`, `nightChallenge`. Kịch bản chờ "×1,0x" cho hồ sơ 45 WPM, 91 %, CV 0,30. Từ `b655de2`, E 45–64 nhận từ 4–8 chữ, nên sức chứa tính theo độ dài từ trung bình thấp hơn và k của hồ sơ này là 0,958: thẻ Hồ sơ gõ ghi "×0,96 chậm hơn chuẩn" cùng lời khuyên "chậm lại một nhịp", bảng hộp cát ghi "k ×0,96" (đã xem ảnh). Đây là số cứng cũ của kịch bản, không phải lỗi game. `5c3b939`: kịch bản so k trên thẻ với k của đầu ván (kiểm mới `profileKIsTheRunK`) và bảng hộp cát phải ghi đúng k đó. Chạy lại: 12/12 ở hai cỡ, hai đêm chạy lại trên Node khớp mã băm (`r3close/fail-l4/` giữ lượt trượt).
+- Đo §20 (dưới): `td-1b-perf` A/B xen kẽ với mốc §1.2, vết Chrome A/B, `td-1a6-perf`, đầu dò lớp boss, bước sim trên Node A/B và hồ sơ CPU của nó.
+
+**Rễ hút sinh khí** (`sim/systems/boss.ts` `keepBlow(w, "drain")`, `content/slice-1a.ts` `boss.drain`, store `drainAt`, `drainEnd` băm cùng kho boss; hình `view/boss-2d.ts`, câu `ui/hud.ts` `BOSS_LINES.drain`, tiếng `view/audio-min.ts`; luật và bảng "việc làm được" ở `BUILD_1B.md` §5.2, §5.5, §13.1): từ lúc trồi, mỗi 30 s, boss ở đâu cũng vậy, rễ chạm Lũy sau 1,2 s × `warnK` báo, −1 mạng; cú choáng 70 % xóa lần báo đang có và tính lại đồng hồ từ lúc hết choáng; rút lui xóa mọi lần báo. Tính vào "mạng mất ở đỉnh boss" và "đòn lớn đang báo" của FlowMeter. Test mới ở `tests/td-boss.test.ts` (mỗi 30 s, báo đúng tick ở Cân bằng và Thư giãn, −1 mạng, choáng tính lại).
+
+**Các lượt đo** (mỗi lượt: `td:balance --modes=balanced --quick --stage-sets=2 --stage-seeds=120 --threads=3 --bots=novice,steady,standard,skilled,sloppy,fast --set=…` dưới `heavy.sh`, trong cây dò tách khỏi cây làm việc; số ghi đè chỉ trong worker, mã không đổi. Hai bộ seed: **bộ cổng** 1–240, đúng seed của `pnpm td:balance`, và **bộ dò** 241–480, để không chỉnh khớp seed. Thắng / Biên S gộp 240 ván, Cân bằng; in đậm: ngoài đích chặt §6.4):
+
+| Lượt | Nhánh (số ghi đè) | Seed | Mới | Chậm chắc | Chuẩn | Khá | Ẩu | Nhanh | G3 gộp |
+|---|---|---|---|---|---|---|---|---|---|
+| 0 | `b58bd54` luật gỗ, chưa núm (§7.8, `wood/balance-full.md`) | 1–240 | **62** / **25** | 84 / **70** | 87 / **65** | **71** / 60 | **74** / 55 | 82 / 65 | 48,1 s |
+| 1 (40 seed × 2) | không Rễ hút | 241–320 | **56** / **15** | 88 / **70** | 88 / **65** | **73** / 60 | **64** / 40 | **78**† / 65 | 56,4 s |
+| 1 | Rễ hút 20 s | 241–320 | **43** / **0** | **76** / 50 | 84 / 50 | **71** / 45 | **54** / **18** | **76** / 50 | 56,2 s |
+| 1 | Rễ hút 20 s, Chặt 3 từ | 241–320 | **55** / **13** | 81 / 55 | 81 / 50 | **70** / 50 | **59** / **10** | 80 / 50 | 47,9 s |
+| 2 (sàng một núm) | không Rễ hút (gốc của lượt) | 241–480 | **62** / **30** | 83 / **70** | 85 / **65** | **69** / 55 | **65** / **30** | **77** / 65 | 54,2 s |
+| 2 | Rễ hút 20 s | 241–480 | **50** / **2,5** | **73** / 50 | **78**† / 50 | **67** / 40 | **55** / **15** | **73** / 50 | 51,4 s |
+| 2 | Rễ hút 30 s | 241–480 | **55** / **15** | **78**† / 60 | 81 / 55 | **68** / 50 | **60** / **20** | **75** / 55 | 52,9 s |
+| 2 | Chặt 3 từ (`CALL.words.chop`) | 241–480 | **68** / 40 | 86 / **75** | **88**† / **65** | **73** / 60 | **75** / 50 | 84 / 65 | 50,6 s |
+| 2 | Mầm Gỗ 2 mỗi lần | 241–480 | **66** / 35 | 87 / **70** | **88**† / **65** | **71** / 60 | **70** / 45 | 79 / 65 | 54,7 s |
+| 2 | `kHp` 0,6, `kHp2` 4,5 | 241–480 | 80 / 45 | **94** / **75** | 85 / **65** | **75** / 60 | **61** / **30** | **77** / 65 | 54,2 s |
+| 2 | `LENGTH_BY_E` E 45–64: 4–8 chữ | 241–480 | **62** / **30** | 83 / **70** | 85 / **65** | 82 / 55 | **78**† / 65 | **77** / 65 | 54,2 s |
+| 2 | Mỏ 3, Ruộng 2 mỗi từ Hoàn hảo | 241–480 | **56** / **18** | 84 / **70** | 82 / **65** | **71** / 60 | **67** / 40 | 79 / 65 | 54,4 s |
+| 2 | `POWER.quick` 0,9 | 241–480 | **66** / **28** | 84 / **70** | 87 / **65** | **74** / 60 | **74** / 50 | 83 / 65 | 54,1 s |
+| 3 | Rễ hút 30 s + 4–8 chữ + `kHp` 0,5, `kHp2` 5,5 | 1–240 | **65** / **30** | **90** / 65 | 83 / 55 | 82 / 50 | **77** / 55 | 80 / 60 | 47,5 s |
+| 3 | như trên | 241–480 | **65** / **33** | 88 / 65 | 81 / 55 | **75** / 45 | **75** / 55 | **75** / 55 | 52,9 s |
+| 4 | lượt 3 + sàn k 0,70 | 241–480 | 84 / 55 | 88 / 65 | 81 / 55 | **75** / 45 | **75** / 55 | **75** / 55 | 52,9 s |
+| 4 | + bản lề `kLow` 0,8 (mã thử trong cây dò, không vào mã) | 241–480 | **94** / **70** | **90** / 65 | 81 / 55 | **75** / 45 | **75** / 55 | **75** / 55 | 52,9 s |
+| 4 | + `kHp` 0,4, `kHp2` 6, `kLow` 1,0 (như trên) | 241–480 | **94** / **70** | 85 / 60 | 81 / 55 | **76** / 45 | **73** / 55 | **75** / 55 | 52,9 s |
+| 5 | Rễ hút 30 s + 4–8 chữ + sàn k 0,70 + `kHp` 0,4, `kHp2` 5,5, `kHpMax` 1,42 → **`b655de2`** | 1–240 | 78 / 55 | 86 / 65 | 83 / 55 | 84 / 50 | **77** / 55 | 83 / 60 | 47,5 s |
+| 5 | như trên | 241–480 | 79 / 50 | 84 / 60 | 81 / 55 | **77** / 45 | **73** / 55 | 80 / 55 | 52,9 s |
+| 6 | lượt 5 + máu boss 4.200 → 4.100 (§6.5 bước 1) | 1–240 | 81 / 55 | **90** / 65 | 86 / 60 | 84 / 50 | 81 / 55 | 86 / 60 | 48,4 s |
+| 6 | như trên | 241–480 | 82 / 60 | 87 / 65 | 84 / 55 | 80 / 45 | **78**† / 55 | 84 / 55 | 51,8 s |
+| 6 | lượt 5 + `POWER.quick` 0,8 → 0,85 | 1–240 | 80 / 50 | **88**† / 65 | **88**† / 60 | 84 / 50 | **73** / 55 | 86 / 55 | 48,5 s |
+| 6 | như trên | 241–480 | **78**† / 55 | 84 / 60 | 82 / 60 | 80 / 45 | **75** / 55 | **78**† / 60 | 51,5 s |
+| 6 | lượt 5 + E 45–64 từ 5–8 chữ, `kHp2` 7 (núm 2 tiếp) | 1–240 | 78 / 55 | 86 / 65 | 83 / 55 | 87 / 50 | **68** / 40 | 83 / 60 | 47,5 s |
+| 6 | như trên | 241–480 | 79 / 50 | 84 / 60 | 81 / 55 | 83 / 50 | **71** / 45 | 80 / 55 | 52,9 s |
+| 6 | lượt 5 + núm 3 (đầu dò, kit không sửa: E_eff = E·(0,2 + 0,8·a²)·(1 − 0,5·CV), sàn 0,6·E) | 1–240 | 78 / 55 | 82 / 55 | 83 / 55 | **77** / 45 | 87 / 55 | 83 / 60 | 47,5 s |
+| 6 | như trên | 241–480 | 79 / 50 | **75** / 45 | 81 / 55 | **76** / 45 | 87 / 55 | 80 / 55 | 52,9 s |
+
+
+† Báo cáo in thắng làm tròn tới 1 %; ô này là 77,5–77,9 % (hay 88,1–88,4 %) nên trượt đích 78–88 %.
+
+**Lượt 6** (26/10 15:19–15:37, tải trung bình 11–22; bốn nhánh trên lượt 5, mỗi nhánh hai bộ seed; `r3final/r6*.md`). Luật giữ số (bước 1 của §6.5, "chỉ lấy bộ số cải thiện B1, đích chặt hay G3 mà không làm hỏng cổng đang đạt"):
+
+| Nhánh | Kết quả trên bộ cổng | Bộ dò | Lấy? |
+|---|---|---|---|
+| Máu boss 4.100 (§6.5 bước 1) | Ẩu 77 → 81 % nhưng Chậm chắc 86 → **90 %** (bộ 2 91 %: B1 của bộ trượt) và hàng tắt nhịp (bot Chuẩn, bộ điều nhịp tắt) 85 / 87 → **91** / 90 % (B7 trượt ở bộ 1 và gộp) | Ẩu **77,9 %**, mọi bot khác trong đích | Không: làm hỏng B1 bộ 2 và B7 |
+| `POWER.quick` 0,85 (Bắn mạnh gõ sớm gọi lời gọi kế sớm hơn; lượt 2 ở 0,9: Ẩu +9) | Ẩu **73 %**, Chuẩn và Chậm chắc **88,x %** | Mới, Nhanh **77,x %**, Ẩu **75 %**, B7 bộ 2 trượt | Không |
+| E 45–64 từ 5–8 chữ, `kHp2` 7 | Ẩu **68 %** (Biên S 40 %), Khá 87 % | Ẩu **71 %** | Không: từ tối thiểu dài hơn làm Ẩu sai nhiều hơn mỗi từ |
+| Núm 3: trọng số độ chính xác của E_eff 0,4 → 0,8, sàn 0,7 → 0,6 (đầu dò trong cây tạm, kit không sửa; `R3_PLAN.md` §7.3) | Ẩu 87 %, nhưng Khá **77 %**, B4 gộp trượt (Biên S Chậm chắc 55 % bằng Ẩu 55 %) | Chậm chắc **75 %**, Khá **76 %**, B4 trượt hai mặt (Biên S 45 so với 55 %; sát thương lên boss Chuẩn 34,9/s so với Ẩu 38,3/s) | Không (và không phải số của làn này) |
+
+- Nhịp k theo núm 3 (tính ở `tdbal/kvals.mts`): Ẩu 0,982 → 0,909, Chậm chắc 0,790 → 0,812, Khá 1,133 → 1,142, Mới và Trẻ em ở sàn 0,70, Chuẩn 1,000, Nhanh 1,300. Đúng hướng (Ẩu chơi nhịp của người gõ đúng 85 % phím), nhưng 0,8 quá tay: Ẩu vượt tâm, Chậm chắc tụt.
+- Chậm chắc là trần của mọi núm làm ván dễ hơn đều tay (máu boss, `POWER.quick`): nó thắng 86 % ở bộ cổng (88 % ở bộ 2) với Biên S 65 %, sát mép trên của cả hai đích. Núm nâng Ẩu mà không nâng Chậm chắc phải là núm theo độ chính xác.
+
+**Vì sao từng số** (mỗi số có một lý do đo được; bảng lượt ở trên):
+
+- **Rễ hút sinh khí, 1 mạng mỗi 30 s từ lúc trồi** (A14, A27: **đã chọn theo đề xuất**). Trên luật gỗ, bot mạnh chỉ mất 0–3 mạng ở đỉnh boss: Tối Thượng và Bắn mạnh dọn toán đi trước và Mầm Gỗ, nên Biên S của Chuẩn, Chậm chắc, Nhanh là 65–70 % (đích 40–60 % cho Chuẩn). Đòn này lấy mạng theo thời gian boss sống, không theo quái lọt, nên ai cũng trả; người hạ nhanh trả ít hơn (bot Chuẩn giao chiến p50 47,5 s: 1–2 lần; Mới 56,5 s, Chậm chắc 57,9 s: 2–3 lần). Lượt 2: 30 s đưa Biên S của Chuẩn 65 → 55 %, Chậm chắc 70 → 60 %, Nhanh 65 → 55 %; 20 s lấy thêm 4–5 điểm thắng của bot chậm mà không cần (Biên S đã vào dải ở 30 s). Việc người chơi làm được: dồn tháp lên nhánh boss từ lời báo Ngày 5, gõ Dồn lửa lúc choáng (cú choáng tính lại đồng hồ). Có báo trước như mọi đòn (G4), có hình, tiếng, câu (BUILD_1B §5.5, §13.1).
+- **E 45–64: từ 4–8 chữ** (núm 2, `R3_PLAN.md` §7.2 lượt k2a). Ẩu và Khá (E 50) là hai bot có E trong dải này; từ dài hơn cho Phát Chữ mạnh hơn (`REWARD.lenDiv` 6: chữ 7 trở lên ×1,2 thay ×1,0–1,17) và nhịp k thấp hơn chút (sức chứa tính theo độ dài từ trung bình). Lượt 2: cùng seed, Khá 69 → 82 %, Ẩu 65 → 78 %, bot khác không đổi (họ ở dải khác). Ngân sách chú ý giữ: cổng 5a 7,90 s (≤ 8 s), G2 Đêm 1–4 22,6 % gộp (15–25 %).
+- **Sàn nhịp k 0,70** (A28: **đã chọn theo đề xuất**; điều phối viên xem có ghi vào BALANCE §4.1 cho cả ba game không). Bot Mới có k của chính nó 0,698; sàn 0,75 của BALANCE §4.1 bắt nó chơi nhịp của người gõ nhanh hơn nó 7 %. Lượt 4: Mới 65 → 84 % (bộ dò), bot khác không đổi. Đây là chỗ duy nhất lượt này lệch khỏi kit dùng chung: số nằm ở `PACE.k` của game và truyền vào `paceK(…, range)` của kit, kit không sửa.
+- **Hệ số k của máu boss 0,4 / 5,5, trần 1,42** (§6.5 bước 4). So với R2 (0,3 / 6,5, trần 1,46): máu của bot k < 1 thấp hơn (k 0,70: ×0,88; R2 ở sàn cũ k 0,75: ×0,925), của Khá gần như cũ (k 1,133: ×1,150 so với ×1,155), của Nhanh thấp hơn 2,7 % (trần). Lượt 3 thử `kHp` 0,5 để kéo Mới lên (Mới vẫn 65 %: sàn k cũ 0,75 là chỗ chặn, lượt 4); có sàn 0,70 thì 0,5 cho Mới quá tâm, nên về 0,4. Trần 1,42 vì Nhanh ở bộ dò 75 % (lượt 3, 4) lên 80 % (lượt 5).
+- **Núm đã đo mà không lấy:** Chặt 3 từ (nâng mọi bot, Biên S Chuẩn 65 %, Chậm chắc 75 %), Mầm Gỗ 2 mỗi lần (Mới, Ẩu +4–5 điểm, Biên S bot mạnh vẫn 65–70 %), `kHp` 0,6 / `kHp2` 4,5 (Chậm chắc 94 %), Mỏ 3 / Ruộng 2 (kinh tế giàu thêm, không giúp ai), `POWER.quick` 0,9 (lượt 2: Ẩu +9; lượt 6: 0,85 hạ Ẩu xuống 73 %, xem dưới), bản lề `kLow` (Mới 94 %).
+
+**Kết quả cuối** (`pnpm td:balance --threads=4`, đủ ba chế độ, seed 1–120 và 121–240, mã `106db85`, 26/10 15:34–15:48, 842,5 s, 4 luồng, tải 5,7–11,8; `r3final/balance-full.md`; bảng của lượt làm trên `b655de2`, `r3gate/balance-full.md`, ra cùng từng ô, chỉ khác giờ chạy). In đậm: ngoài dải BALANCE §3 của chế độ (báo cáo tự in).
+
+Cân bằng, bộ 1 / bộ 2:
+
+| Bot | k | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q |
+|---|---|---|---|---|---|---|---|---|
+| Trẻ em | 0,700 | **0 %** / **1,7 %** | **0 %** / **0 %** | 27 / 27 % | 2,8 / 3 % | 0 / 0 % | 0,00 / 0,02 | 68 / 68 % |
+| Mới | 0,700 | 79 / 78 % | 55 / 50 % | 22 / 22 % | 2,1 / 2 % | 0 / 0,1 % | 0,08 / 0,13 | 67 / 67 % |
+| Chậm chắc | 0,790 | 83 / 88 % | 60 / 65 % | 21 / 22 % | 2,8 / 2,8 % | 0 / 0 % | 0,13 / 0,10 | 67 / 67 % |
+| Chuẩn | 1,000 | 82 / 84 % | 60 / 55 % | 21 / 22 % | 4,7 / 5 % | 0,1 / 0,1 % | 0,08 / 0,10 | 66 / 67 % |
+| Khá | 1,133 | 85 / 83 % | 50 / 45 % | 22 / 22 % | 3,9 / 3,8 % | 0,1 / 0,1 % | 0,05 / 0,07 | 67 / 67 % |
+| Ẩu | 0,982 | 78 / 76 % | 60 / 55 % | 22 / 23 % | 5,1 / 5,3 % | 0,2 / 0,2 % | 0,09 / 0,13 | 67 / 67 % |
+| Nhanh | 1,300 | 86 / 81 % | 55 / 60 % | 21 / 21 % | 3 / 3,5 % | 0,1 / 0,1 % | 0,06 / 0,03 | 67 / 67 % |
+| Không gõ | 1,000 | **0 %** / **0 %** | **0 %** / **0 %** | 32 / 32 % | 1 / 1,1 % | 0,1 / 0,1 % | 0,00 / 0,00 | 68 / 68 % |
+| Chỉ gõ | 1,000 | **0 %** / **0 %** | **0 %** / **0 %** | **49 %** / **50 %** | 0 / 0 % | 0 / 0 % | 0,00 / 0,00 | **97 %** / **97 %** |
+| Chuẩn, chiến thuật Tốt | 1,000 | **92 %** / 87 % | 65 / 65 % | 20 / 20 % | 4,3 / 4,7 % | 0,1 / 0,1 % | 0,07 / 0,04 | 66 / 67 % |
+| Chuẩn, chiến thuật Kém | 1,000 | **21 %** / **26 %** | **0 %** / **0 %** | 28 / 28 % | 1,7 / 2,1 % | 0 / 0 % | 0,06 / 0,06 | 67 / 67 % |
+| Không gõ, Tướng đuổi boss | 1,000 | **0 %** / **0 %** | **0 %** / **0 %** | 32 / 32 % | 1 / 1,1 % | 0,1 / 0,1 % | 0,00 / 0,00 | 68 / 68 % |
+| Chuẩn, sổ 20 từ | 1,000 | 79 / 84 % | 60 / 60 % | 22 / 21 % | 5,1 / 5 % | 0 / 0 % | 0,04 / 0,06 | 67 / 67 % |
+| Chuẩn, tắt nhịp | 1,000 | 85 / 87 % | 55 / 55 % | 22 / 22 % | 4,9 / 4,9 % | 0,1 / 0,1 % | 0,09 / 0,10 | 67 / 67 % |
+
+Thư giãn, bộ 1 / bộ 2:
+
+| Bot | k | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q |
+|---|---|---|---|---|---|---|---|---|
+| Trẻ em | 0,700 | 94 / 96 % | **45 %** / **48 %** | **20 %** / **20 %** | 3,6 / 4 % | 0 / 0 % | 0,19 / 0,23 | **65 %** / **65 %** |
+| Mới | 0,700 | 100 / 100 % | 95 / 95 % | 11 / 11 % | 0,8 / 1,1 % | 0,2 / 0,2 % | 0,00 / 0,00 | **61 %** / **61 %** |
+| Chậm chắc | 0,790 | 100 / 100 % | 95 / 95 % | 10 / 10 % | 1,7 / 2,1 % | 0,2 / 0,2 % | 0,00 / 0,00 | **61 %** / **61 %** |
+| Chuẩn | 1,000 | 100 / 100 % | 95 / 95 % | 9,1 / 9,5 % | 1 / 1 % | 0,2 / 0,2 % | 0,00 / 0,00 | **63 %** / **62 %** |
+| Khá | 1,133 | 100 / 100 % | 95 / 90 % | 11 / 11 % | 1,6 / 1,9 % | 0,3 / 0,3 % | 0,00 / 0,00 | **64 %** / **64 %** |
+| Ẩu | 0,982 | 100 / 100 % | 95 / 95 % | 9,6 / 9,9 % | 1,1 / 1,3 % | 0,3 / 0,3 % | 0,00 / 0,00 | **62 %** / **63 %** |
+| Nhanh | 1,300 | 100 / 100 % | 85 / 85 % | 12 / 12 % | 1,5 / 1,4 % | 0,3 / 0,3 % | 0,00 / 0,00 | **63 %** / **63 %** |
+| Không gõ | 0,750 | 100 / 100 % | **60 %** / **45 %** | **16 %** / **15 %** | 1 / 1 % | **4,4 %** / **4,5 %** | 0,06 / 0,04 | **66 %** / **66 %** |
+| Chỉ gõ | 1,000 | **0 %** / **0 %** | **0 %** / **0 %** | **49 %** / **49 %** | 0 / 0 % | 0 / 0 % | 0,00 / 0,00 | **97 %** / **97 %** |
+| Chuẩn, chiến thuật Tốt | 1,000 | 100 / 100 % | 95 / 95 % | 9,3 / 9,2 % | 0,8 / 0,7 % | 0,2 / 0,2 % | 0,00 / 0,00 | **63 %** / **63 %** |
+| Chuẩn, chiến thuật Kém | 1,000 | 97 / 98 % | 70 / 80 % | **17 %** / **16 %** | 3,8 / 3,8 % | 0,1 / 0,2 % | 0,13 / 0,14 | **64 %** / **64 %** |
+
+Thử thách, bộ 1 / bộ 2:
+
+| Bot | k | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q |
+|---|---|---|---|---|---|---|---|---|
+| Trẻ em | 0,700 | **6,7 %** / **2,5 %** | **0 %** / **0 %** | 32 / 32 % | 2,4 / 2,6 % | 0 / 0 % | 0,03 / 0,01 | 68 / 68 % |
+| Mới | 0,700 | **90 %** / **94 %** | **50 %** / **55 %** | **23 %** / **22 %** | 4,6 / 4,6 % | 0 / 0 % | 0,19 / 0,20 | 67 / 67 % |
+| Chậm chắc | 0,790 | **94 %** / **95 %** | **55 %** / **50 %** | **22 %** / **22 %** | 2,9 / 3,1 % | 0 / 0 % | 0,10 / 0,13 | 67 / 67 % |
+| Chuẩn | 1,000 | **88 %** / **88 %** | 45 / 45 % | **23 %** / **23 %** | 3,8 / 3,6 % | 0 / 0 % | 0,12 / 0,17 | 67 / 67 % |
+| Khá | 1,133 | **91 %** / **91 %** | **50 %** / 45 % | **21 %** / **22 %** | 3 / 3,1 % | 0 / 0 % | 0,14 / 0,14 | 67 / 67 % |
+| Ẩu | 0,982 | 67 / 60 % | 30 / 20 % | **26 %** / **26 %** | 3 / 3 % | 0,1 / 0,2 % | 0,16 / 0,20 | 67 / 67 % |
+| Nhanh | 1,300 | **93 %** / **88 %** | **50 %** / 45 % | **21 %** / **21 %** | 4,5 / 4,4 % | 0 / 0 % | 0,17 / 0,16 | 67 / 67 % |
+| Không gõ | 1,008 | **0 %** / **0 %** | **0 %** / **0 %** | 37 / 37 % | 1,6 / 1,3 % | 0 / 0 % | 0,00 / 0,00 | 68 / 68 % |
+| Chỉ gõ | 1,000 | **0 %** / **0 %** | **0 %** / **0 %** | 48 / 48 % | 0 / 0 % | 0 / 0 % | 0,00 / 0,00 | **97 %** / **97 %** |
+| Chuẩn, chiến thuật Tốt | 1,000 | **90 %** / **92 %** | 45 / 45 % | **22 %** / **22 %** | 3,2 / 3,1 % | 0 / 0 % | 0,13 / 0,13 | 67 / 67 % |
+| Chuẩn, chiến thuật Kém | 1,000 | **13 %** / **15 %** | **0 %** / **0 %** | 31 / 33 % | 2,3 / 2,8 % | 0 / 0 % | 0,07 / 0,07 | 68 / 68 % |
+| Không gõ, Tướng đuổi boss | 1,008 | **0 %** / **0 %** | **0 %** / **0 %** | 37 / 37 % | 1,6 / 1,3 % | 0 / 0 % | 0,00 / 0,00 | 68 / 68 % |
+
+**Gộp hai bộ (240 ván mỗi ô), đích chặt §6.4, Cân bằng:**
+
+| Bot | Thắng bộ 1 / 2 / gộp | Biên S bộ 1 / 2 / gộp | Gần thua N gộp | Đích chặt gộp |
+|---|---|---|---|---|
+| Mới | 79 / 78 / 78 % | 55 / 50 / 55 % | 0,10 | đạt |
+| Chậm chắc | 83 / 88 / 86 % | 60 / 65 / 65 % | 0,11 | đạt |
+| Chuẩn | 82 / 84 / 83 % | 60 / 55 / 55 % (40–60 %) | 0,09 | đạt |
+| Khá | 85 / 83 / 84 % | 50 / 45 / 50 % | 0,06 | đạt |
+| Ẩu | 78 / 76 / **77 %** | 60 / 55 / 55 % | 0,11 | **trượt** (thắng) |
+| Nhanh | 86 / 81 / 83 % | 55 / 60 / 60 % | 0,04 | đạt |
+| Chuẩn, sổ 20 từ | 79 / 84 / 82 % | 60 / 60 / 60 % | 0,05 | (báo cáo) |
+| Chuẩn, tắt nhịp | 85 / 87 / 86 % | 55 / 55 / 55 % | — | đạt (B7) |
+
+Đích chặt gộp: **5/6** (luật gỗ chưa núm: 1/6; R2 lần 3: 4/6). Chuẩn chiến thuật Tốt 89 %, Kém 23 % (B6: 66 điểm). Không gõ 0 %, Không gõ thả Tướng đuổi boss 0 % và boss rút 0/240 (B5).
+
+**Cổng B1–B9** (bộ 1 / bộ 2 / gộp; gộp chấm B1 và hàng tắt nhịp của B7 theo đích chặt):
+
+| # | Bộ 1 | Bộ 2 | Gộp | Số đo |
+|---|---|---|---|---|
+| B1 | đạt | đạt | **trượt** | Mỗi bộ trong dải BALANCE §3 (thắng 75–90 %, Biên S 35–65 %, P, I, O); gộp: Ẩu 77 % < 78 % |
+| B2 | đạt | đạt | đạt | Không bot nào S ≥ 90 % kèm I ≥ 20 % (I cao nhất 5,3 %, Ẩu) |
+| B3 | đạt | đạt | đạt | Mới ở Cân bằng 79 / 78 / 78 % (≥ 70 %); Trẻ em ở Thư giãn 94 / 96 / 95 % (≥ 85 %) |
+| B4 | **trượt** | đạt | đạt | Biên S Chậm chắc so với Ẩu: 60 = 60 % (cần lớn hơn) / 65 > 55 % / 65 > 55 %; hạ quái (bộ 1 / 2 / gộp) Chuẩn 2,91 / 2,85 / 2,88 s, Ẩu 3,08 / 3,11 / 3,10 s; sát thương lên boss p50 Chuẩn 39,5 / 40,6 / 40,0 mỗi giây, Ẩu 37,2 / 36,6 / 36,8 |
+| B5 | đạt | đạt | đạt | Không gõ thua ở Cân bằng và Thử thách; `heroKite` 0 lần boss rút |
+| B6 | đạt | đạt | đạt | Tốt hơn Kém ≥ 10 điểm: Cân bằng 89 so với 23 %, Thử thách 91 so với 14 % (gộp) |
+| B7 | đạt | đạt | đạt | ≤ 3 bậc mỗi đợt (cao nhất 2,50, Mới), khoảng sinh 86–114 %; tắt nhịp: Chuẩn 85 / 87 / 86 %, Biên S 55 % |
+| B8 | đạt | đạt | đạt | Cổng học của game mọi ô; B8 R3: 8,0 từ mới mỗi ván (tối đa 8), 0 ở lời gọi có hạn và Đêm 5 |
+| B9 | thiếu số | thiếu số | thiếu số | Chờ file chơi thử của chủ dự án (`PLAYTEST_1B.md`) |
+
+**Cổng riêng G1–G8** (bot Chuẩn ở Cân bằng trừ chỗ ghi khác):
+
+| # | Kết quả | Số đo |
+|---|---|---|
+| G1 | đạt | Cổng 1A.6 §12 trên ải truyện (5 seed, 4 Đêm): 4 không gõ qua Đêm 1–4 (mạng 7 / 13 / 9 / 10 / 8); 5a cửa sổ 20 s 7,90 s (≤ 8 s); 5b Ngày 30,2 % (30–45 %); 5c Đêm 21,8 % (15–25 %); 6 bất biến và lệnh bị từ chối 0; 7 gõ / không gõ +38,2 % (≥ +25 %) |
+| G2 | đạt | Gõ Đêm 1–4 22,6 % (15–25 %), Đêm 5 24,5 % (≤ 35 %), gộp |
+| G3 | đạt | Giao chiến boss p50 47,5 / 47,7 / 47,5 s (45–75 s) |
+| G4 | đạt | Test `tests/td-boss.test.ts` (mọi đòn có sự kiện báo ≥ thời gian báo của chế độ, cả Rễ hút); `td-1b-boss`: Rễ Trồi 90, Quật cành 72, Rễ hút 72 tick |
+| G5 | đạt | Tối Thượng lên boss / cả ải, mọi bot gõ, gộp: Mới 1,7 / 7,9 %, Chậm chắc 0,4 / 12,6 %, Chuẩn 0,4 / 14,1 %, Khá 0,1 / 13,9 %, Ẩu 1,4 / 9,0 %, Nhanh 0,4 / 14,2 % (≤ 15 %, ≤ 15 %) |
+| G6 | đạt | Một lời gọi trực tiếp mỗi 30,2 s ở Đêm 4 (25–40 s), mở cùng lúc tối đa 2 không boss; từ trực tiếp 0,2 % số từ cả ải (5–10 % của TK 9.1 chỉ in báo cáo tới khi đủ ba động từ ở ải truyện) |
+| G7 | đạt | Test tiền trong `pnpm check` (xây, nâng, bán, hoàn tác không sinh Vàng, Gỗ; rương ghi một lần) |
+| G8 | đạt | Trồi → trúng đầu p50 24,1 s (≤ 35 s), Nhàn I đỉnh boss 2,7 / 3,2 / 3,0 % (≤ 10 %) |
+
+**Đỉnh boss, gộp** (Cân bằng): boss rút Mới 78 %, Chậm chắc 86 %, Chuẩn 83 %, Khá 84 %, Ẩu 77 %, Nhanh 83 %; giao chiến p50 56,5 / 57,9 / 47,5 / 43,6 / 48,7 / 41,6 s; mạng mất ở đỉnh p50 7 / 3 / 2 / 2 / 3 / 2 (có Rễ hút); phần gõ lên boss 46–72 %, phần Draconis 8–17 %. Mạng trước đỉnh boss p50: Mới 18, Chậm chắc 16–17, Chuẩn 14,5–15, Khá 12, Ẩu 15, Nhanh 14. **Mọi ván thua ở Cân bằng là thua ở đỉnh boss** (thua trước boss 0 % ở mọi bot gõ): Mới 21–23 %, Chậm chắc 12–17 %, Chuẩn 16–18 %, Khá 15–18 %, Ẩu 23–24 %, Nhanh 14–19 %.
+
+**Học (R3), bộ 1 / bộ 2:** Từ Ôn mỗi ván Chuẩn 1,3 / 1,3, Ẩu 13,5 / 13,6, Mới 3,2 / 3,0, Chậm chắc 0,0 / 0,1; Chuộc lại Ẩu 8,8 / 9,1; từ mới 8,0 mỗi ván (tối đa 8) ở mọi bot, 0 ở lời gọi có hạn và Đêm 5; ván có từ quay lại: Chuẩn 76 / 73 % (A3: ≥ 70 %). Hàng sổ 20 từ: 17,8 Từ Ôn, 15,7 Chuộc lại mỗi ván, thắng 82 % gộp.
+
+**Thư giãn và Thử thách** (báo cáo, không là cổng của §21; cùng số, không núm riêng, `R3_PLAN.md` §7.4):
+
+- Thư giãn: Mới tới Nhanh thắng 100 %, Biên S 85–95 % (≥ 70 %); Trẻ em 95 % gộp (B3), Biên S 45 % (đích ≥ 70 % chỉ báo cáo). Quãng Q 61–66 % ngoài dải ≤ 45 % của Thư giãn (như mọi lượt từ 1A.7).
+- **Thử thách dễ hơn Cân bằng**: Mới 92 %, Chậm chắc 95 %, Chuẩn 88 %, Khá 91 %, Nhanh 90 % gộp (dải 50–75 %); chỉ Ẩu 63 % trong dải. Biên S 45–55 % (15–45 %). Đã vậy từ trước bước 9 (luật gỗ: Chuẩn 92 / 89 %). Vì sao: mọi ván thua ở Cân bằng là thua ở boss, mà máu boss ở Thử thách là 4.200 × `hpMul` 1,19 × `modeHp` 0,78 = ×0,93 của Cân bằng (R1 đặt 0,78 cho Thử thách như Thư giãn); Đêm khó hơn (máu quái ×1,19) chỉ lấy mạng (Biên S thấp hơn), không lấy ván. **Hai đầu dò ở lượt 3** (chỉ Thử thách, số ghi đè, mã không đổi; seed 1–240, `r3close/challenge-modehp*.md`), thắng gộp / Biên S gộp:
+
+  | `modeHp.challenge` | Mới | Chậm chắc | Chuẩn | Khá | Ẩu | Nhanh | Chuẩn Tốt / Kém | Không gõ | Áp lực P |
+  |---|---|---|---|---|---|---|---|---|---|
+  | 0,78 (mã) | 92 / 50 % | 95 / 55 % | 88 / 45 % | 91 / 48 % | 63 / 20 % | 90 / 50 % | 91 / 14 % | 0 % | 21–26 % |
+  | 0,9 (boss ×1,07 của Cân bằng) | 75 / 43 % | 86 / 48 % | 69 / 30 % | 79 / 45 % | 50 / 2,5 % | 75 / 40 % | 85 / 10 % | 0 % | 23–27 % |
+  | 1,0 (×1,19) | 52 / 5 % | 62 / 25 % | 48 / 0 % | 65 / 35 % | 39 / 0 % | 53 / 10 % | 75 / 7,5 % | 0 % | 24–28 % |
+
+  0,9 đưa 4/6 bot vào dải thắng 50–75 % (Chậm chắc 86 %, Khá 79 % còn trên), B5, B6 giữ; 1,0 quá tay (Chuẩn 48 %, Biên S 0 %). Áp lực P vẫn dưới dải 30–50 % của Thử thách ở cả ba số: Đêm của Thử thách không ép hơn Cân bằng bao nhiêu, chỉ boss quyết. Núm kế (một lượt riêng, không phải số của bước này: §6.4 chấm cổng ở Cân bằng): `modeHp.challenge` 0,9, rồi một núm Đêm riêng của Thử thách cho P (số quái hay tốc theo chế độ).
+- Gần thua N ở Cân bằng 0,03–0,13 mỗi ải (dải BALANCE §3 0,3–1; B1 không chấm N), như các đợt trước.
+- **Học lấy bao nhiêu** (đầu dò `r3final/nolearn240.ts`: cùng 240 seed, cùng bot, không danh sách học, như đầu ván R2): Ẩu 80 % không Học, 77 % có Học (−3 điểm; 13,5 Từ Ôn mỗi ván, gõ như từ đang học, d 0,85); Chuẩn 83 / 83 %; Chậm chắc 83 % không Học, 86 % có Học. Ở R3 phần B (trước luật gỗ, 40 seed) Học lấy của Chuẩn 12 điểm; kinh tế giàu hơn của luật gỗ làm phần đó gần hết. Nên phần thiếu của Ẩu chủ yếu không do Học.
+
+**Cổng cứng §21 cuối R3** (mã `106db85` trừ chỗ ghi khác; kiểm theo `R3_PLAN.md` §9):
+
+| # | Cổng | Kết quả | Số đo, bằng chứng |
+|---|---|---|---|
+| 1 | `pnpm check` xanh, `tests/boundary.test.ts` | đạt | Kit sha256 khớp (31 file), 338 test / 31 file (gồm `boundary.test.ts`), `tsc`, `vite build`, ngân sách gói: "/" 83,75 kB ≤ 85 kB (chừa 1,25 kB), `?title=0` 82,36 kB, tổng 100,20 kB (`r3final/check-*.log`) |
+| 2 | Tất định | đạt | `pnpm td:golden:check` `same: true` (`td-1a` 19.660 tick, `td-1b-boss` 5.306 tick, nội dung `cd59313e`); nhật ký trang của mọi kịch bản có kiểm chạy lại trên Node ra cùng mã băm (15 kịch bản × 2 cỡ: `td-1a6-day`, `-keyboard`, `-learn`, `-night`, `-perf`, `td-1b-boss`, `-build`, `-direct`, `-ult`, `-wood`, `-learn`, `-perf`, `-night5` cùng nhật ký dài của "Chơi lại Ngày 5", `-tour` cùng file chơi thử, `td-balance` hai đêm); `td-1a6-perf`: Chrome bước nhật ký vàng của Node ra cùng 327 mã băm (mỗi 60 tick) ở hai cỡ, file vàng còn đúng |
+| 3 | Bất biến | đạt | Test thuộc tính và bất biến trong `pnpm check` (`td-calls`, `td-learn`, `td-r2`, `td-sim-economy`: lời gọi SÁNG ≤ trần, một khóa, chữ đầu, bỏ qua mọi lời gọi kể cả `ult`, `direct`, Từ Ôn không mất gì, tiền G7); bot kiểm bất biến mỗi tick ở mọi ván của `td:balance`: "Bất biến vỡ và lệnh bị từ chối (mọi chế độ): không có" |
+| 4 | Ngân sách chú ý | đạt | Cổng 5a 7,90 s ≤ 8 s; bot Chuẩn kiểu người: cửa sổ 20 s đầy nhất p50 7,67 s, lớn nhất 9,08 / 9,45 s, ván quá 8 s 10 / 16 trong 120 (đích mềm ≤ 20 % ván, không ván nào quá 10 s); G2 đạt |
+| 5 | B1–B8 hai bộ × 120; đích chặt gộp | **trượt** | B4 bộ 1 (hòa Biên S 60 = 60 %); đích chặt gộp 5/6 (Ẩu 77 %). Mọi cổng khác của B1–B8 đạt ở cả hai bộ và gộp (bảng trên) |
+| 6 | G1, G3, G4, G8; G5, G6; B8 R3 | đạt | Bảng G1–G8 ở trên; B8 R3: 8 từ mới mỗi ván, 0 ở lời gọi có hạn và Đêm 5 |
+| 7 | Boss đọc được | đạt (một điểm yếu ghi lại) | `td-1b-boss` 20/20 kiểm ở hai cỡ (Rễ Trồi báo 90 tick, Quật cành 72, Rễ hút 72; dải choáng dưới thanh boss; Dồn lửa ≤ trần; Mầm Gỗ; thẻ không bị hiệu ứng che), `td-1b-night5` 12/12 ở hai cỡ (báo Ngày 5, Quật Lũy, thua, "Chơi lại Ngày 5"). Ảnh chậm mỗi cỡ: trồi 8 khung, Rễ Trồi báo 6 và trúng 5, Quật cành 7, Mầm Gỗ 6, choáng 6, Rễ hút 8, rút 6, lặng 4; đã xem ở 1280 × 720 (và Rễ hút, Mầm Gỗ ở 1920 × 1080): vòng đỏ và "Tê 3 s", cung đỏ của Quật cành, dải "Mộc Tinh choáng! Gõ Bắn mạnh!" và "Cháy ×1,25", rễ viền mực tới Lũy với "−1 mạng" và đốm hổ phách, "−3 mạng" của Quật Lũy. Điểm yếu: 4 mầm của Mầm Gỗ (báo 0,8 s) chỉ ~7 px, xanh trên thân boss xanh và cỏ xanh, phải phóng ảnh mới thấy (mục "Còn trượt") |
+| 8 | Hiệu năng §20 | đạt (Apple M4) | 60 Hz, mã cuối: `td-1b-perf` luồng chính 1,85–2,04 ms (1280 × 720) và 1,73–1,75 ms (1920 × 1080) mỗi khung (≤ 4 ms), vẽ 2D + thẻ p95 1,4–1,5 ms (≤ 8 ms), khung dài nhất lúc trồi 4,1–4,5 ms (≤ 16,7 ms); `td-1a6-perf` 1,83 / 1,87 ms, bước sim trong Chrome trung vị 0,02 / 0,03 ms (≤ 0,05 ms); lớp boss p95 0,3 ms (≤ 0,6 ms); bước sim trên Node, cảnh boss + lũ 300 + Tối Thượng, p95 0,36–0,39 ms (≤ 0,5 ms). Số Dell (3,9–4,6 ms, §7.5) vẫn là máy yếu nhất phải đạt. Bảng ở dưới |
+| 9 | Mọi kịch bản §19 và kịch bản cũ, hai cỡ, 0 lỗi console | đạt | 22 kịch bản × 2 cỡ, 44/44 lượt đạt trên mã R3 cuối (bảng dưới); lỗi console chỉ có 10 lỗi cố ý mỗi lượt của `td-1b-chunks` (kiểm `noOtherErrors` đạt); 0 ngoại lệ. `td-balance` trượt lượt đầu vì số cứng cũ của kịch bản, sửa ở `5c3b939` |
+| 10 | Số dòng ≤ 10.500 | đạt | 10.492 |
+| 11 | Changelog, `BUILD_NOTES` §7, `AGENTS.md` | đạt | `docs/changelog/2026-10-26-td-r3-balance.md`, mục này, dòng trạng thái của `AGENTS.md` |
+| 12 | Chủ dự án chơi thử, có số cho B9 | **chờ** | Gói chơi thử sẵn (`PLAYTEST_1B.md`, thêm câu hỏi về Rễ hút sinh khí); B9 thiếu số |
+
+**R3 chưa qua hết §21:** cổng 5 trượt (B4 bộ 1, đích chặt của Ẩu), cổng 12 chờ chủ dự án. Mười cổng còn lại (1–4, 6–11) đạt trên Apple M4.
+
+**Hiệu năng §20 trên Mac** (27/10 01:22–01:33, Apple M4, Chrome 155 macOS có GPU, ANGLE Metal; cả lượt giữ ba chỗ trình duyệt của `heavy.sh --perf`, nên không trình duyệt nào khác chạy cùng; tải trung bình 1,8–4,7; `r3close/perf.txt`). Hai cây như mốc §1.2: `89e2494` (trước R3, "mốc") và mã cuối (`106db85`, "R3"), mỗi cây ở `tmp/mac-2026-10-25/r3final/ab/` (đã đối `src` từng file với `git archive`), mỗi lượt chỉ một máy chủ dev ở cổng 3006. Cùng kịch bản `td-1b-perf` (không đổi từ `89e2494`), 60 Hz, xen kẽ ABBA ở mỗi cỡ. Cảnh lũ của R3 có 10 loại quái, của mốc 8 loại (A23: Đầu Đàn với hào quang, Troll với vòm là việc mỗi tick mới, phải nằm trong lần đo).
+
+| Cỡ | Lượt (tải) | Cây | Luồng chính ms/khung | Khung/s | Bận | Vẽ 2D + thẻ: TB / p95 | Bước + HUD TB | Khung dài nhất lúc trồi | Quái |
+|---|---|---|---|---|---|---|---|---|---|
+| 1280 × 720 | 1 (4,7) | mốc | 2,191 | 60,0 | 13,1 % | 1,136 / 1,7 | 0,287 | 5,2 | 295 |
+| 1280 × 720 | 2 (3,5) | R3 | 2,040 | 59,9 | 12,2 % | 1,026 / 1,5 | 0,331 | 4,1 | 300 |
+| 1280 × 720 | 3 (2,8) | R3 | 1,846 | 59,9 | 11,1 % | 0,927 / 1,4 | 0,290 | 4,5 | 300 |
+| 1280 × 720 | 4 (2,6) | mốc | 1,744 | 59,9 | 10,4 % | 0,915 / 1,4 | 0,231 | 3,3 | 296 |
+| 1920 × 1080 | 1 (2,8) | mốc | 1,648 | 59,9 | 9,9 % | 0,857 / 1,3 | 0,210 | 4,3 | 296 |
+| 1920 × 1080 | 2 (3,1) | R3 | 1,727 | 59,9 | 10,3 % | 0,873 / 1,3 | 0,274 | 2,7 | 300 |
+| 1920 × 1080 | 3 (2,5) | R3 | 1,754 | 59,9 | 10,5 % | 0,890 / 1,4 | 0,279 | 4,1 | 300 |
+| 1920 × 1080 | 4 (2,4) | mốc | 1,674 | 59,9 | 10,0 % | 0,864 / 1,3 | 0,218 | 4,1 | 295 |
+
+- ABBA khử phần trôi theo tải (máy nhẹ dần từ 4,7 xuống 2,4): R3 trừ mốc, luồng chính −0,025 ms (1280 × 720) và +0,080 ms (1920 × 1080) mỗi khung; bước + HUD +0,05 / +0,06 ms; vẽ −0,05 / +0,02 ms.
+- Bốn lượt R3 đạt mọi kiểm (10/10). Bốn lượt mốc đều trượt; hai lượt còn file kết quả (lượt sau ghi đè lượt trước cùng tên) trượt đúng một kiểm, `nodeReplaysToBrowserHash`: phần Node của kịch bản là `scripts/td/replay.ts` của cây làm việc (luật R3), nên nhật ký của trang mốc không ra cùng mã băm. Đó là giới hạn của cách đo A/B, không phải lỗi; phần đo khung không dính tới nó.
+
+**Vết Chrome A/B** (cách của §1.2: `perf-trace.mjs`, cửa sổ 3 s "đều" và "mưa", 60 Hz; mỗi cỡ một lượt mốc rồi một lượt R3, tải 1,9–2,6; `r3close/trace/`). Luồng chính trang, ms mỗi khung:
+
+| Cỡ, cửa sổ | Cây | Bận cả khung | Hàm khung của game | Gửi lớp sang GPU (`Commit`) | Style, layout, paint | GC ngoài hàm khung | Còn lại |
+|---|---|---|---|---|---|---|---|
+| 1280 × 720, đều | mốc | 1,768 | 1,157 | 0,294 | 0,047 | 0,054 | 0,217 |
+| 1280 × 720, đều | R3 | 1,969 | 1,319 | 0,271 | 0,057 | 0,110 | 0,212 |
+| 1280 × 720, mưa | mốc | 1,700 | 1,074 | 0,242 | 0,171 | 0,050 | 0,163 |
+| 1280 × 720, mưa | R3 | 1,946 | 1,238 | 0,244 | 0,184 | 0,111 | 0,170 |
+| 1920 × 1080, đều | mốc | 1,813 | 1,212 | 0,309 | 0,049 | 0,029 | 0,215 |
+| 1920 × 1080, đều | R3 | 1,962 | 1,312 | 0,277 | 0,059 | 0,091 | 0,223 |
+| 1920 × 1080, mưa | mốc | 1,793 | 1,134 | 0,254 | 0,182 | 0,049 | 0,175 |
+| 1920 × 1080, mưa | R3 | 2,054 | 1,296 | 0,252 | 0,173 | 0,118 | 0,214 |
+
+- Theo vết, R3 thêm 0,15–0,26 ms mỗi khung: hàm khung của game +0,10–0,16 ms (bộ đếm trong trang: bước + HUD 0,19–0,22 → 0,28–0,33 ms, vẽ +0,01–0,08 ms) và GC +0,04–0,07 ms. Phần Chrome tự làm (gửi lớp, lifecycle, lịch) không đổi.
+- Hai cách đo lệch nhau (A/B `td-1b-perf`: 0–0,08 ms; vết: 0,15–0,26 ms) vì vết chỉ có một lượt mỗi bên và cửa sổ 3 s. Cả hai cùng hướng: phần tăng nằm ở bước sim, không ở vẽ.
+- So với mốc §1.2 (25/10: "đều" 1280 × 720 bận 1,32 ms): cùng mã `89e2494` hôm nay ra 1,77 ms. Cùng máy, khác phiên (làn khác chạy việc CPU), lệch +0,45 ms, lớn hơn mọi chênh của R3. Vì vậy chỉ so mốc và R3 trong cùng phiên, xen kẽ.
+
+**`td-1a6-perf`** (mã cuối, 60 Hz; `r3close/shots/td-1a6-perf-*.log`): 1280 × 720: 60,1 khung/s, luồng chính 1,83 ms mỗi khung (p95 các đoạn 0,5 s 2,84 ms; ≤ 8 ms), vẽ 2D + thẻ p95 1,5 ms, bước + HUD p95 0,6 ms, bước sim trong Chrome trung vị 0,02 ms, p95 0,06 ms (600 bước, 300 quái); 1920 × 1080: 60,1 khung/s, 1,87 ms (p95 2,55 ms), vẽ p95 1,5 ms, bước sim trung vị 0,03 ms, p95 0,06 ms. 32 phím gõ trong cửa sổ, 302–310 quái. Chrome bước nhật ký vàng của Node ra cùng 327 mã băm, file vàng còn đúng; nhật ký trang chạy lại trên Node khớp. 14/14 kiểm ở hai cỡ. Số §7.6 (25/10, Mac, mã trước R3) là 1,16 / 1,11 ms; không đo xen kẽ nên phần chênh gồm cả lệch phiên ở trên.
+
+**Lớp boss** (đầu dò `r3close/boss-layer.mjs`, chỉ trong `tmp`: cảnh `td-1b-perf`, 60 Hz, `BossView` của chính trang được đo từng khung trong `DebugView.draw`; đồng hồ trang thô ~0,1 ms). §20: p95 ≤ 0,6 ms.
+
+| Cỡ | Lúc trồi (150 khung): TB / p95 / lớn nhất | Giao chiến, lũ 300, Tối Thượng ×2 (630 khung): TB / p95 / lớn nhất | Cả hàm vẽ p95 (trồi / giao chiến) |
+|---|---|---|---|
+| 1280 × 720 | 0,085 / 0,3 / 0,5 ms | 0,104 / 0,2 / 0,4 ms | 0,8 / 1,2 ms |
+| 1920 × 1080 | 0,065 / 0,2 / 0,5 ms | 0,074 / 0,2 / 0,3 ms | 0,7 / 0,9 ms |
+
+**Bước sim trên Node** (§20: p95 ≤ 0,5 ms với 300 quái + boss + Mầm Gỗ + Tối Thượng). `tests/td-sim-perf.test.ts` chạy riêng (một file, `heavy.sh`, tải 7–8), mã cuối 3 lần, mốc `89e2494` 2 lần, xen nhau (`r3done/sim-perf*.log`):
+
+| Cảnh | Mốc: trung vị / p95 | R3: trung vị / p95 |
+|---|---|---|
+| Boss, lũ 300, mưa Tối Thượng | 0,045 / 0,135–0,157 ms | 0,111–0,117 / 0,360–0,391 ms |
+| 300 quái, 200 đạn, làng đầy (cổng 3 của 1A.6) | 0,031 / 0,106–0,123 ms | 0,038–0,041 / 0,170–0,203 ms |
+| Tải đầy TK 25.12 (640 quái) | 0,047–0,048 / 0,138–0,190 ms | 0,054–0,056 / 0,127–0,137 ms |
+
+- Cảnh boss đạt (p95 0,39 ≤ 0,5 ms), nhưng chỗ trống từ ×3 còn ×1,3. Trong `pnpm check` (vitest 4 luồng cùng lúc) cùng cảnh ra p95 0,99 ms; số đó là số máy bận, test chỉ chặn ở 2 ms.
+- **Vì sao tăng** (hồ sơ CPU, 8 cảnh × 300 bước, `r3done/boss-step-prof.ts`, `prof/`): `moveEnemies` (`sim/systems/move.ts`) chiếm 57 % thời gian bước. Từ bước 7, mỗi quái duyệt mọi hào quang của tick (`move.ts:29–40`: tốc của bầy, và không đi quá Đầu Đàn trên cùng đường), nên giá là số quái × số Đầu Đàn. Lũ 300 của R3 có 33 Đầu Đàn và 33 Troll (10 loại, A23), nên khoảng 10.000 lần so mỗi tick. Ải truyện của bản đồ 1 không có Đầu Đàn (chỉ hộp cát), nên ván thật không trả phần này.
+- Núm kế nếu cần chỗ: gom hào quang theo đường (`RUSH` theo `route`), để mỗi quái chỉ duyệt Đầu Đàn trên đường của nó. Chưa làm: cổng đạt, và bước này chỉ làm giấy tờ.
+
+Hạt 2D: pool cố định 300 hạt, tối đa 40 mới mỗi khung (`view/fx-2d.ts:16–17`), không đổi ở R3. Âm (≤ 12 nốt): không đo ở đợt này.
+
+**Kịch bản** (cổng 9; Chrome 155 macOS có GPU, máy chủ dev cổng 3006, mỗi lượt dưới `heavy.sh --gpu` xen với lượt của ba làn khác). Lượt làm 2 (26/10 15:34–16:56, `src` `106db85`, chạy cùng lúc với bảng `td:balance` chốt, tải 5–12; `r3final/shots/`), lượt làm 3 (20:16–21:08, `106db85` cùng kịch bản của `a23c910`, tải tới 24; `r3close/shots/`), lượt làm 4 (27/10, `5c3b939` và đo §20 ở trên). **44/44 lượt đạt** ở 22 kịch bản × 1280 × 720 và 1920 × 1080; mỗi ô là lượt cuối trên mã R3 cuối:
+
+| Kịch bản | Kiểm | 1280 × 720 | 1920 × 1080 | Lượt | Chạy lại trên Node, ghi chú |
+|---|---|---|---|---|---|
+| `td-1a-boot` | 11 | đạt | đạt | 2 | |
+| `td-1a-ime` | 15 | đạt | đạt | 2 | |
+| `td-1a6-attention` | 11 | đạt | đạt | 2 | |
+| `td-1a6-day` | 19 | đạt | đạt | 2 | khớp |
+| `td-1a6-keyboard` | 21 | đạt | đạt | 2 | khớp |
+| `td-1a6-learn` | 18 | đạt | đạt | 2 | khớp |
+| `td-1a6-night` | 11 | đạt | đạt | 2 | khớp |
+| `td-1a6-tour` | 19 | đạt | đạt | 2 | |
+| `td-1a6-perf` | 14 | đạt | đạt | 4 | khớp; 327 mã băm của nhật ký vàng |
+| `td-1b-boss` | 20 | đạt | đạt | 2 | khớp; Rễ hút báo 72 tick, −1 mạng mỗi lần, câu trên thanh boss, 8 khung |
+| `td-1b-build` | 18 | đạt | đạt | 2 | khớp |
+| `td-1b-chunks` | 24 | đạt | đạt | 2 | 10 lỗi console cố ý mỗi lượt (màn đầu, hộp cát ×2, tiếng ×2, thẻ ×2, Chơi lại, Học, bảng dạy), `noOtherErrors` đạt |
+| `td-1b-direct` | 16 | đạt | đạt | 2 | khớp |
+| `td-1b-learn` | 14 | đạt | đạt | 3 | khớp; lượt 2 trượt (1920 × 1080 10/14), sửa kịch bản ở `a23c910` (trên) |
+| `td-1b-night5` | 12 | đạt (2) | đạt (3) | 2, 3 | khớp, cả nhật ký dài; lượt 2 ở 1920 × 1080 bị tắt giữa chừng (mã thoát 143) |
+| `td-1b-perf` | 10 | đạt | đạt | 4 | khớp; hai lượt R3 mỗi cỡ (bảng A/B) |
+| `td-1b-story` | 17 | đạt | đạt | 2 | chơi lại Ngày 3 ra đúng hàng dạy |
+| `td-1b-tour` | 17 | đạt | đạt | 2 | file chơi thử và các trang khớp; 2 cảnh báo của Three.js (không phải lỗi) |
+| `td-1b-ult` | 13 | đạt | đạt | 2 | khớp |
+| `td-1b-wood` | 21 | đạt | đạt | 3 | khớp |
+| `td-balance` | 12 | đạt | đạt | 4 | khớp (hai đêm); lượt đầu trượt, sửa kịch bản ở `5c3b939` (trên) |
+| `td-theme` | 17 | đạt | đạt | 3 | |
+
+- **Ảnh đã xem** (lượt 4): `td-balance` (Hồ sơ gõ "×0,96 chậm hơn chuẩn" đọc rõ ở 1280 × 720; Đêm Thử thách), `td-1b-boss` Rễ hút (1280 × 720 khung 4 và 7, 1920 × 1080 khung 2: rễ viền mực bò tới Lũy, vòng son, "−1 mạng" dưới Lũy, chip Mạng "18 −1"). Lượt 2, 3 đã xem các ảnh của cổng 7 (bảng trên) và `td-1b-wood`, `td-theme`.
+- Ghi lại từ ảnh, chưa sửa: ở hộp cát "Đặt sẵn", ba nhãn kho "995/1000" (hay "980/1000") của ba cụm cây sát nhau vẫn chồng một phần lên nhau và bị biểu tượng 🪓 của dân che giữa chữ (1280 × 720 và 1920 × 1080). Luật "một nhãn mỗi cụm" (`83c5de6`) không gộp các cụm cách nhau một khoảng ngắn. Chưa xem ải truyện có chỗ như vậy không.
+
+**Còn trượt sau sáu lượt (đã dừng chỉnh theo luật 6 lượt), vì sao, núm kế:**
+
+1. **Đích chặt của Ẩu: 77 % gộp** (cần 78–88 %; mỗi bộ 78 / 76 % vẫn trong dải BALANCE §3). Mọi ván thua của Ẩu là thua ở boss (23–24 %); sát thương lên boss của nó 36,8/s so với Chuẩn 40,0/s, mà nhịp k của nó 0,982 gần bằng Chuẩn: E_eff của kit (trọng số độ chính xác 0,4, sàn 0,7·E) gần như không tính 15 % phím sai, và từ dài của dải E 45–64 làm sức chứa của nó thấp đi chút. Học chỉ lấy 3 điểm (đầu dò ở trên). Núm theo nhịp chung (máu boss, `POWER.quick`) đều đẩy Chậm chắc lên quá 88 % trước khi Ẩu tới 78 % (lượt 6). **Núm kế: núm 3 nhẹ hơn đầu dò** (trọng số độ chính xác 0,6, sàn 0,7: Ẩu k 0,961, Chậm chắc 0,801, Khá 1,137; đầu dò 0,8 / 0,6 kéo Ẩu tới 87 % là quá tay), đi cùng máu boss 4.100 nếu Chậm chắc còn chỗ. Núm 3 ở `src/kit/balance/pace.ts` (`effectiveE`) là kit dùng chung ba game và BALANCE §4.1: **việc của điều phối viên** (sửa `shared/game-kit` có test, đồng bộ ba game); làn này không tự sửa (`R3_PLAN.md` §7.3).
+2. **B4 ở bộ 1: Biên S Chậm chắc 60 % bằng Ẩu 60 %** (cần lớn hơn). Bộ 2 và gộp đạt (65 so với 55 %). Biên S là trung vị số mạng (bước 5 %), nên đây là hòa một mạng ở trung vị của 120 ván, không phải Ẩu giữ mạng tốt hơn: hạ quái và sát thương lên boss của Chuẩn vẫn hơn Ẩu ở cả hai bộ. Núm 3 ở trên làm hòa nặng hơn (đầu dò: 55 = 55 % gộp), nên khi đo núm 3 phải đọc B4 cùng lúc; nếu B4 trượt thì cần một núm làm Ẩu mất mạng ở các Đêm (BUILD_1B §6.5 bước 5: máu Thuồng Luồng 385, giáp 60 % là chỗ Phát Chữ của từ chuẩn quyết).
+3. Báo cáo, không là cổng: Thử thách quá dễ (núm `boss.modeHp.challenge`), Quãng Q của Thư giãn, Gần thua N của Cân bằng (ở trên).
+4. Đạt nhưng sát mép, ghi để lượt sau biết: bước sim trên Node ở cảnh boss + lũ 300 p95 0,39 ms (§20 ≤ 0,5 ms; mốc 0,16 ms), vì hào quang của Đầu Đàn duyệt theo số quái × số Đầu Đàn (núm: gom theo đường); 4 mầm báo Mầm Gỗ (0,8 s) chỉ ~7 px, xanh trên nền xanh (cổng 7); nhãn kho chồng nhau ở hộp cát (kịch bản ở trên).
+5. Ba quyết định R2 vẫn chờ chủ dự án xác nhận (`PACE.speedK` 0,3 và trần boss; giữ số sau §7.5; "phần khởi động" thay "cả gói" ở §20). A27, A28 của đợt này đã chọn theo đề xuất (`R3_PLAN.md` §5); điều phối viên xem có đưa sàn k 0,70 vào BALANCE §4.1 không.

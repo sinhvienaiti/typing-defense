@@ -176,6 +176,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 | Pha 1 | 100 → 70 % | **Rễ Trồi** mỗi 12 s (lần đầu 6 s sau khi có nhà trong tầm): mọi nhà (trừ Lũy) có mép trong 8 m quanh tâm boss bị nhắm (vị trí khóa lúc bắt đầu báo); báo **1,5 s** (Thư giãn, Học 2,0 s; Thử thách 1,2 s); hết báo: nhà **tê 3 s**, không mất máu (§2). Không có nhà trong 8 m thì bỏ lượt, đồng hồ vẫn chạy. **Quật cành** mỗi 2,5 s khi có lính trong 3 m quanh mép boss: báo 1,2 s (Thư giãn, Học 1,6 s; Thử thách 1,0 s), 40–60 sát thương vật lý lên mọi lính trong vùng (giáp lính tính), đẩy lùi 1,5 m; không chạm nhà |
 | Chuyển pha | 70 % | **Choáng 5 s:** boss đứng yên, không đòn, không Rễ Trồi; **rễ rút về**: mọi nhà đang tê hết tê ngay. **Dễ Tổn Thương:** nhận ×1,25 sát thương trong 5 s (đếm lùi trên thanh boss). **Dồn lửa** (sửa review R1): nhà đánh (tháp, Lũy) có boss trong tầm + 2 m, gần boss nhất trước, tối đa bằng trần SÁNG của chế độ (Cân bằng 3), có ngay một lời gọi Bắn mạnh **round(E / 20) từ (1–3)**, bỏ qua thời gian hồi và mức nạp đầy, sống 5 s, **sáng dù ngoài vòng giúp**. Nhà đã có lời gọi Bắn mạnh thì lời gọi đó thành lời gọi Dồn lửa (thêm từ, hạn mới 5 s, nhắm boss). Lời gọi này đi qua trần và ngân sách như mọi lời gọi (không vượt), nhưng ngân sách thường còn trống nhờ lặng và hàng ưu tiên (Bắn mạnh bậc 0). Không cửa sổ ấn ở bản đồ 1 (TK 18.7) |
 | Pha 2 | 70 → 50 % | Như pha 1, thêm **Gọi Mầm Gỗ:** mỗi 15 s (lần đầu 3 s sau choáng) 4 Mầm Gỗ mọc ở chân boss, báo 0,8 s (4 mầm xanh nhú), rồi đi tiếp đường của boss từ chỗ đó |
+| Cả hai pha (R3) | 100 → 50 % | **Rễ hút sinh khí** (núm 1 của cân bằng R3, `R3_PLAN.md` §7.1, A14): từ lúc trồi, mỗi **30 s** boss đứng ở đâu cũng vậy, rễ chạm Lũy: báo 1,2 s × `warnK` của chế độ (Thư giãn, Học 1,6 s; Thử thách 0,96 s), rồi **−1 mạng**. Cú choáng 70 % xóa lần báo đang có và tính lại đồng hồ từ lúc hết choáng. Số trong `slice-1a.ts` `boss.drain` (`lives` 1, `everyS` 30, `warnS` 1,2); 30 s **đã chọn theo đề xuất** (BUILD_NOTES §7.9: 20 s lấy của bot chậm 10–12 điểm thắng) |
 | Rút lui | ≤ 50 % | Boss ngừng mọi thứ, không nhận đòn, chìm xuống đất trong 2 s. Rương 150 Vàng ghi ngay. Hết 2 s: quái còn lại tan, pha `victory` |
 
 - Sát thương dồn qua mốc: một đòn đưa máu qua 70 % thì choáng ngay; qua cả 50 % thì rút lui ngay (không choáng).
@@ -190,7 +191,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 
 - Rút lui đếm là một lần hạ boss (`STAT.bossRetreats`), sự kiện `bossRetreat`, rồi `victory`.
 - Rương: +150 Vàng vào kho ngay tick rút (TK 17.4: ghi sổ ngay, đồng bay chỉ là hình). Mảnh Chữ: +10 nếu Draconis trong 12 m (R2).
-- Thoại (hiện chữ, chưa có giọng): vào trận "Tên ta ở đâu?"; Rễ Trồi lần đầu "Rễ ơi, mọc lên!"; choáng "Cái tên đó... quen quá..."; rút "À... ta nhớ rồi." (TK 22.7).
+- Thoại (hiện chữ, chưa có giọng): vào trận "Tên ta ở đâu?"; Rễ Trồi lần đầu "Rễ ơi, mọc lên!"; choáng "Cái tên đó... quen quá..."; rút "À... ta nhớ rồi." (TK 22.7). R3: Rễ hút sinh khí lần đầu "Sinh khí làng này... ngọt quá.", rồi dòng dạy "Rễ hút 1 mạng mỗi 30 s: hạ nó nhanh!" trên thanh boss (một lần mỗi ván).
 
 ### 5.5 Đòn nào, làm gì; gắn với luật cũ
 
@@ -204,6 +205,7 @@ Mỗi đòn có báo trước **và** một việc người chơi làm được.
 | Choáng 70 % | Vạch 70 % trên thanh boss, cả trận | Đưa Draconis tới Pháo gần boss trước mốc 70 % (Dồn lửa của Pháo có Cháy); gõ lời gọi Dồn lửa trong 5 s (Dễ Tổn Thương ×1,25) |
 | Mầm Gỗ | 4 mầm nhú 0,8 s | Pháo, lính ở khúc nhập; Bắn mạnh của Pháo |
 | Quật Lũy | Cung đỏ 1,2 s trên Lũy; "còn N m tới Lũy" cả trận | Gõ Bắn mạnh của Lũy và tháp gần Lũy. Đây là thua có báo trước; bài học ghi ở màn thua |
+| Rễ hút sinh khí (R3) | Một rễ viền mực bò từ chân boss tới Lũy trong 1,2 s, vòng son khép quanh Lũy và chữ "−1 mạng" dưới Lũy, tiếng rền và kẽo kẹt; trúng: chip Mạng nháy, một đốm hổ phách (sinh khí) chạy ngược rễ về tán boss, tiếng gõ gỗ và chuông trầm | **Hạ nhanh thì trả ít:** mỗi 30 s boss sống là một mạng, nên dồn tháp lên nhánh boss từ Ngày 5 và gõ Dồn lửa lúc choáng (cú choáng tính lại đồng hồ). Vì sao có: từ R2 bot mạnh dọn được toán đi trước và Mầm Gỗ bằng Tối Thượng và Bắn mạnh, nên mạng mất ở đỉnh boss chỉ còn đi theo quái lọt và Biên S của họ lên 65–70 %; một khoản theo thời gian boss sống thì ai cũng trả, người hạ nhanh trả ít hơn (BUILD_NOTES §7.9) |
 
 - **Kiểm dữ liệu** (test nội dung): `roots.radiusM` + bán kính chân nhà S < tầm Tháp Cung cấp 2, để cách "đặt xa đường" luôn còn khi bot chỉnh số.
 
@@ -214,7 +216,7 @@ Mỗi đòn có báo trước **và** một việc người chơi làm được.
 | Bộ điều nhịp (BALANCE §4.2) | Đứng yên từ lúc lặng trước bão tới hết ải (đỉnh boss là kịch bản, không cao su). FlowMeter vẫn đo |
 | Tinh anh | Không bao giờ gắn vào boss, Mầm Gỗ, toán đi trước |
 | Rơi hỗ trợ +2 mạng | Không ở đỉnh boss (bộ điều nhịp đã dừng) |
-| FlowMeter: nguy hiểm | Thêm: đang có một vòng báo Rễ Trồi, Quật cành hay Quật Lũy ("đòn lớn đang báo", BALANCE §3 P) |
+| FlowMeter: nguy hiểm | Thêm: đang có một vòng báo Rễ Trồi, Quật cành, Quật Lũy hay (R3) Rễ hút sinh khí ("đòn lớn đang báo", BALANCE §3 P) |
 | Ngân sách chú ý | Lặng 12 s: không lời gọi kinh tế, Hỏi bài mới nào SÁNG; Bắn mạnh như thường. Dồn lửa và Bắn mạnh vẫn qua trần SÁNG và kiểm "vừa ngân sách" từng từ |
 | Phát Chữ, Cháy, Tướng | Cháy lên boss ×1,25. Cầu lửa tự đánh của Draconis ×0,5. Dễ Tổn Thương nhân mọi sát thương (cả Phát Chữ và Cháy) |
 | Thư Đồng | R2: Thư Đồng đứng trong 6 m quanh một nhà trúng Rễ Trồi thì **hoảng**: chạy về Lũy, đứng 5 s, rồi làm tiếp lệnh cũ; khi hoảng vòng giúp không thắp lời gọi |
@@ -224,12 +226,13 @@ Mỗi đòn có báo trước **và** một việc người chơi làm được.
 ```
 d = k − 1
 máu = round(4200 × hpMul(chế độ) × modeHp(chế độ) × min(kHpMax; 1 + kHp × d + kHp2 × max(0; d)²))
-kHp = 0,3 · kHp2 = 6,5 · kHpMax = 1,46 · modeHp: Thư giãn, Học, Thử thách 0,78
+kHp = 0,4 · kHp2 = 5,5 · kHpMax = 1,42 · modeHp: Thư giãn, Học, Thử thách 0,78   (R3; R2: 0,3 · 6,5 · 1,46)
 ```
 
 - Số đo §6.3: bot Nhanh (k 1,3) gây lên boss nhiều hơn bot Chuẩn ~15 %; bot Mới (k 0,75) gây gần bằng bot Chuẩn vì boss của nó đi chậm hơn. Vì vậy R1 vòng 1 chỉ nâng máu khi k > 1 (0,4, trần ×1,12).
 - **Sửa review R1:** Bắn mạnh nối và Dồn lửa theo E cho tốc gõ đòn bẩy trong ván, nên bot Nhanh (k bị kit chặn ở 1,30) gây gấp ~1,4 lần bot Chuẩn, còn bot Mới, Chậm chắc (k < 1) gây ít hơn. Vì vậy hệ số k đi hai chiều (−5 % máu ở k 0,75) và có số hạng bậc hai ở trên 1 (k 1,2: ×1,21; k 1,3: ×1,45). Vẫn không có luật riêng cho từng bot.
 - **R2** (BUILD_NOTES §7.3): 3.800 → 4.200, `kHp` 0,2 → 0,3, `kHp2` 4,3 → 6,5 (k 0,75: ×0,925; k 1,2: ×1,33; k 1,3: chạm trần). **Sửa phản biện R2** (§7.4): trần 1,5 → 1,46, vì `PACE.speedK` 0,3 cho boss của bot Nhanh đi nhanh ×1,09 (trước ×1,06).
+- **Cân bằng R3** (BUILD_NOTES §7.9): `kHp` 0,3 → 0,4, `kHp2` 6,5 → 5,5, trần 1,46 → 1,42 (k 0,70: ×0,88; k 1,133: ×1,15; k 1,3: chạm trần 1,42), đo cùng Rễ hút sinh khí, dải từ 4–8 chữ cho E 45–64 và sàn nhịp k 0,70.
 - Máu tính **một lần lúc sinh** từ đầu ván (BALANCE §4.1: tham số đầu ải), không đổi khi boss đang sống.
 
 ---
@@ -302,6 +305,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 6. Sau mỗi lần đổi: `pnpm td:balance` đủ hai bộ seed × 120. Không đạt sau 6 vòng chỉnh thì ghi lại bảng và quyết định thiết kế cần có vào `BUILD_NOTES.md` §7, không ép bằng một số toàn cục.
 7. **Sửa phản biện R2** (BUILD_NOTES §7.4): Biên S tách theo sức gõ, không theo E riêng: Thuồng Luồng lọt sau khi lặng bắt đầu (trung bình mỗi ván, 60 seed, số R2 sửa, BUILD_NOTES §7.5) là Mới 4,8, Ẩu 4,3, Chậm chắc 3,5, Chuẩn 3,0 mạng, còn Nhanh 1,7, Khá 1,2 (sửa phản biện R2 lần 2: câu cũ "bot E ≥ 35 không" sai với Ẩu E 50). Núm là phần của nhịp k trong tốc quái (`PACE.speedK` 0,2 → 0,3: quái của bot k 0,75 đi ×0,925, của bot k 1,3 ×1,09), rồi trần hệ số máu boss (`kHpMax`) cho bot Nhanh. Núm độ chính xác (`CALL.sloppy`, `SCORE.qA`) đã đo, không nâng được bot Ẩu. Tanuki cần ≥ 4 quái quanh nó (G6) cũng hạ Biên S của bot Chuẩn (ít trống được Ngắt hơn: ít vàng, ít nạp Tối Thượng).
 8. **Sửa phản biện R2 lần 2** (BUILD_NOTES §7.5): đã đo bước 1 (tốc boss 0,78 m/s), bước 2 (phần đầu Đêm 5 có 5 Thuồng Luồng), bước 3 cùng bước 4 (5 Mầm Gỗ mỗi 12 s, `kHp` 0,15), bước 5 (Thuồng Luồng 385 máu; Cháy 62/s), mỗi lượt hai bộ × 120. Không lượt nào giữ B1 và đích chặt gộp bằng hay tốt hơn số hiện tại, nên số không đổi. Lý do đo được: từ R2 bot mạnh mất 0–3 mạng ở đỉnh boss (R1: 6–8 cho mọi bot; Thuồng Luồng lọt ở bot mạnh 1–3 mạng, ở Mới, Ẩu 4–5), bot yếu mất 6–9; Mầm Gỗ thêm rơi vào ván dài của bot yếu. Núm nào nâng Ẩu cũng nâng Biên S của Chuẩn, Chậm chắc, Nhanh quá 60–65 %. Núm kế cho lượt cân bằng của R3: một khoản mạng ở đỉnh boss mà bot mạnh không dọn được (thiết kế), và bảng độ dài từ theo E (`LENGTH_BY_E`, núm theo tốc gõ mạnh nhất đã đo); trọng số độ chính xác của kit (BALANCE §4.1) chỉ sau hai núm đó.
+9. **Cân bằng R3** (BUILD_NOTES §7.9, `R3_PLAN.md` §7.5; trên luật gỗ của chủ dự án và có Học): sáu lượt, mỗi lượt trên seed 1–240 (bộ cổng) và 241–480 (bộ dò). Lấy: Rễ hút sinh khí 1 mạng mỗi 30 s (§5.2), E 45–64 từ 4–8 chữ, sàn nhịp k 0,70 của game, hệ số k máu boss 0,4 / 5,5 / 1,42 (§5.6). Đích chặt gộp 5/6, G3 47,5 s. Còn trượt: Ẩu 77 % gộp và B4 bộ 1 (Biên S Chậm chắc bằng Ẩu, 60 %). Máu boss 4.100, `POWER.quick` 0,85, E 45–64 từ 5–8 chữ đều làm hỏng cổng khác; núm kế là trọng số độ chính xác của kit (việc của điều phối viên).
 
 ---
 
@@ -502,6 +506,7 @@ Chủ dự án chơi bản R1 (§17), và đã từng loại một bản vì hi�
 | Gọi Mầm Gỗ | 4 mầm xanh nhú 0,8 s rồi bật thành Mầm Gỗ | Đất tơi bắn lên |
 | Trúng đòn | Lóe trắng 60 ms; vụn gỗ (4–6 hạt); thanh máu có phần "máu ma" trắng tụt theo sau 0,4 s; Phát Chữ hiện số lớn xanh ngọc; đang Cháy thì lửa nhỏ trên tán và nhãn "Cháy ×1,25"; cầu lửa tự đánh của Draconis hiện số nhỏ xám với vệt xém (đọc ra "Vỏ dày" mà không cần chữ) | Lóe theo cỡ đòn; rung boss 1–2 px |
 | Quật Lũy | Cung đỏ trên Lũy 1,2 s; trúng: Lũy rung, chip Mạng nháy đỏ "−3" | Mảnh đá Lũy văng |
+| Rễ hút sinh khí (R3) | Báo: rễ bò từ chân boss tới Lũy đúng thời gian báo (nét rễ 6 px trên viền mực 11 px để nổi trên đường đất), vòng son khép quanh Lũy, "−1 mạng" dưới Lũy (chung chỗ với Quật Lũy, không thẻ nào ở đó); trúng: chip Mạng nháy, đốm hổ phách chạy ngược rễ về tán trong 0,7 s, 14 than hồng bay theo rễ (`boss-2d.ts`); câu của boss và dòng dạy trên thanh boss lần đầu | Ảnh chậm `td-1b-boss-drain-*` (8 khung) |
 | Rút lui | Chìm dần 2 s, vòng bụi, lá rơi, câu "À... ta nhớ rồi."; rương bật, đồng bay về ô Vàng "+150" | Ánh sáng tán tắt từ ngoài vào |
 | HUD | Thanh boss ở đỉnh giữa: máu, vạch 70 % và 50 % ("rút lui"), pha hiện tại, "còn N m tới Lũy"; khi lặng: đếm ngược | Thanh máu rung khi trúng đòn lớn |
 
@@ -629,7 +634,7 @@ Cách đếm như BUILD_1A6 §0: `.ts` trong `src`, trừ `src/kit`; test, bot, 
 
 ## 17. Thứ tự làm
 
-Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số thật vào `BUILD_NOTES.md` mục mới **§7 "1B"** (§7.1 R1, §7.2 sửa review R1, §7.3 R2, §7.4 sửa phản biện R2, §7.5 sửa phản biện R2 lần 2, §7.6 sửa phản biện R2 lần 3, §7.7 R3) và một changelog mỗi đợt.
+Mỗi đợt: làm → phản biện độc lập → sửa, như 1A.6. Ghi số thật vào `BUILD_NOTES.md` mục mới **§7 "1B"** (§7.1 R1, §7.2 sửa review R1, §7.3 R2, §7.4 sửa phản biện R2, §7.5 sửa phản biện R2 lần 2, §7.6 sửa phản biện R2 lần 3, §7.7 R3, §7.8 luật gỗ của chủ dự án, §7.9 cân bằng cuối và cổng cứng của R3) và một changelog mỗi đợt.
 
 ### R1 "Mộc Tinh tới" (chơi được một mình)
 
@@ -659,7 +664,7 @@ Kế hoạch làm (file, thứ tự, dạng dữ liệu, chỗ chưa rõ đã ch
 1. Luật nghĩa, Từ Ôn, sổ ôn lưu, kế hoạch học, khởi động lạnh, sự kiện học (§11).
 2. Bảng dạy, lịch mở, câu Bà Cú Mực và chip (§12); dòng Chế độ trong Cài đặt; lưu sao.
 3. Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát (cắt đầu tiên nếu vượt trần). **Xong** (R3 phần B, `b8d78d3`; không cắt: 10.413 dòng).
-4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`. **Bot Học và ba kịch bản xong** (phần A, phần B); quyết định gỗ của chủ dự án (26/10/2026) đã làm (BUILD_NOTES §7.8); cân bằng lần cuối là bước kế, đo trên luật gỗ mới.
+4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`. **Bot Học và ba kịch bản xong** (phần A, phần B); quyết định gỗ của chủ dự án (26/10/2026) đã làm (BUILD_NOTES §7.8); **cân bằng lần cuối xong** (§6.5 mục 9, BUILD_NOTES §7.9): đích chặt gộp 5/6, còn trượt Ẩu và B4 bộ 1.
 5. Gói chơi thử cho chủ dự án (§22), xuất nhật ký cho B9. **Gói xong** (`docs/td/PLAYTEST_1B.md`, `scripts/td/b9.ts`); số B9 chờ chủ dự án chơi.
 
 ---
@@ -759,7 +764,7 @@ Chạy với máy chủ dev cổng 3046: `pnpm exec vite --host 127.0.0.1 --port
 | Lớp boss (`boss-2d.ts`) | p95 ≤ 0,6 ms |
 | Hạt 2D | ≤ 300 sống, ≤ 40 mới mỗi khung, pool (không cấp phát mỗi khung); gai rễ ≤ 7 mỗi nhà |
 | Luồng chính Chrome | ≤ 4 ms mỗi khung trung bình **ở 60 khung/s** (sửa phản biện R2 lần 2: `td-1b-perf` giữ nhịp khung 60 Hz, vì Chrome không đầu chạy 50–156 khung/s tùy máy và số mỗi khung đổi theo; kết quả in thêm phần thời gian bận và khung/s); không khung > 16,7 ms lúc boss vào, chuyển pha, rút (chỉ đọc các khung của lúc đó; mỗi khung chấm bằng tổng bước + HUD và vẽ 2D + thẻ của chính khung đó, sửa phản biện R2 lần 3, BUILD_NOTES §7.6) |
-| Gói JS | **Phần khởi động của mỗi trang** gzip ≤ 85 kB: những gì trang phải tải xong mới dùng được (vẽ khung đầu, nhận phím, chạy vòng chơi). Ở "/" là chunk vào và màn đầu; link `?title=0`, `?sandbox=` chỉ chunk vào. `pnpm build` kiểm từ manifest của Vite (`scripts/bundle-budget.mjs`), in phần còn trống, các chunk nạp sau và tổng. Thẻ Hồ sơ gõ của màn đầu tải khi được chọn. Thẻ Cài đặt tải khi được chọn, hoặc cùng chunk thẻ tạm dừng và kết (thẻ đó chứa một thẻ Cài đặt) khi trang đã dùng được, cái nào tới trước; lúc màn đầu hiện không tải thẻ nào (sửa phản biện R2 lần 3). Tiếng, thẻ tạm dừng và kết, bảng hộp cát tải khi trang đã dùng được. Mỗi chunk thử 3 lần rồi có đường dự phòng (`app/chunks.ts`); chunk hỏng được hỏi lại khi trang cần nó, sau 15 s nghỉ: thẻ khi cần hiện, bảng hộp cát khi đang mở, tiếng ở phím hay cú bấm kế (sửa phản biện R2 lần 3). Chrome 155 giữ lỗi của một `import()` hỏng tới khi tải lại trang, nên ở đó lần hỏi lại cũng hỏng và chỉ F5 gỡ được; Chrome for Testing 156 tải lại được. Số: trước 1B 68,9 kB cả gói; R2 một chunk 87,2 kB; sửa phản biện R2: chunk vào 77,2 kB, nhưng "/" thật cần 83,7 kB; sửa phản biện R2 lần 2: "/" 82,6 kB (chừa 2,4 kB), `?title=0` 78,0 kB, cả gói 91,6 kB; sửa phản biện R2 lần 3, dựng trên Mac: "/" 82,0 kB (chừa 3,0 kB), `?title=0` 77,5 kB, cả gói 91,0 kB (cùng mã lần 2 dựng trên Mac ra 81,95 kB: hai máy lệch 0,6 kB, BUILD_NOTES §7.6). Đổi nghĩa từ "cả gói" sang "phần khởi động": **đề xuất của vòng này, chờ chủ dự án xác nhận** (BUILD_NOTES §7.5) |
+| Gói JS | **Phần khởi động của mỗi trang** gzip ≤ 85 kB: những gì trang phải tải xong mới dùng được (vẽ khung đầu, nhận phím, chạy vòng chơi). Ở "/" là chunk vào và màn đầu; link `?title=0`, `?sandbox=` chỉ chunk vào. `pnpm build` kiểm từ manifest của Vite (`scripts/bundle-budget.mjs`), in phần còn trống, các chunk nạp sau và tổng. Thẻ Hồ sơ gõ của màn đầu tải khi được chọn. Thẻ Cài đặt tải khi được chọn, hoặc cùng chunk thẻ tạm dừng và kết (thẻ đó chứa một thẻ Cài đặt) khi trang đã dùng được, cái nào tới trước; lúc màn đầu hiện không tải thẻ nào (sửa phản biện R2 lần 3). Tiếng, thẻ tạm dừng và kết, bảng hộp cát tải khi trang đã dùng được. Mỗi chunk thử 3 lần rồi có đường dự phòng (`app/chunks.ts`); chunk hỏng được hỏi lại khi trang cần nó, sau 15 s nghỉ: thẻ khi cần hiện, bảng hộp cát khi đang mở, tiếng ở phím hay cú bấm kế (sửa phản biện R2 lần 3). Chrome 155 giữ lỗi của một `import()` hỏng tới khi tải lại trang, nên ở đó lần hỏi lại cũng hỏng và chỉ F5 gỡ được; Chrome for Testing 156 tải lại được. Số: trước 1B 68,9 kB cả gói; R2 một chunk 87,2 kB; sửa phản biện R2: chunk vào 77,2 kB, nhưng "/" thật cần 83,7 kB; sửa phản biện R2 lần 2: "/" 82,6 kB (chừa 2,4 kB), `?title=0` 78,0 kB, cả gói 91,6 kB; sửa phản biện R2 lần 3, dựng trên Mac: "/" 82,0 kB (chừa 3,0 kB), `?title=0` 77,5 kB, cả gói 91,0 kB (cùng mã lần 2 dựng trên Mac ra 81,95 kB: hai máy lệch 0,6 kB, BUILD_NOTES §7.6); cuối R3, dựng trên Mac (`106db85`): "/" 83,75 kB (chừa 1,25 kB), `?title=0` 82,36 kB, tổng 100,20 kB (BUILD_NOTES §7.9). Đổi nghĩa từ "cả gói" sang "phần khởi động": **đề xuất của vòng này, chờ chủ dự án xác nhận** (BUILD_NOTES §7.5) |
 | Âm | ≤ 12 nốt tổng hợp cùng lúc; tiếng báo đòn không bị tiếng khác nuốt (ưu tiên cao nhất) |
 
 ---
@@ -788,7 +793,7 @@ Trước khi chơi: Cài đặt → Nhịp tự điều **Bật**, chế độ C
 1. **Một ván đủ bản đồ 1** (khoảng 12 phút). Cuối ván ghi: thắng hay thua, còn bao nhiêu mạng, mấy sao.
 2. Ngày 5: có thấy báo Mộc Tinh và mạch rễ trên nhánh nó đi không? Có làm gì khác đi vì lời báo không (thêm tháp trên nhánh đó, bán tháp bên kia, nâng nhà, dời Tướng)?
 3. Đêm 5: có thấy 12 s lặng, đếm ngược và vết nứt bò tới ngã ba không? Lúc boss đi tới tháp đầu tiên có thấy chờ lâu không?
-4. Rễ Trồi: nhìn vòng đỏ có hiểu "nhà này sắp bị tê" không? Đủ thời gian để nhận ra không?
+4. Rễ Trồi: nhìn vòng đỏ có hiểu "nhà này sắp bị tê" không? Đủ thời gian để nhận ra không? (R3) Rễ hút sinh khí: có thấy rễ bò về Lũy và "−1 mạng" mỗi 30 s không, có hiểu là phải hạ boss nhanh không?
 5. Lúc boss choáng (70 %): có thấy dải chữ và các lời gọi Dồn lửa không? Có gõ kịp không? Có hiệu ứng nào che chữ không?
 6. Nếu thua: có hiểu vì sao thua không (dòng gợi ý có đúng không)? Thua có công bằng không? Bấm "Chơi lại Ngày 5" có muốn chơi tiếp không?
 7. **Chơi lại Ngày 5, cố ý để boss tới Lũy** (bán bớt tháp ở khúc nhập): cảm giác lúc Lũy bị đập thế nào?
@@ -823,7 +828,7 @@ Trước khi chơi: Cài đặt → Nhịp tự điều **Bật**, chế độ C
 ## 24. Mặc định đã chọn (chủ dự án đổi được)
 
 1. Bản đồ 1 có 5 Ngày, 5 Đêm (không 8 đợt); Mộc Tinh ở cuối Đêm 5.
-2. Máu Mộc Tinh khởi điểm 3.200 (có thể về ~2.900 sau khi đo với Vỏ dày), rút ở 50 %, nâng theo k khi k > 1. Sau R1 (sửa review): 3.800, hệ số k hai chiều có số hạng bậc hai và hệ số riêng theo chế độ (§5.6). Sau R2: 4.200, hệ số k 0,3 / 6,5, trần 1,46 (sửa phản biện R2).
+2. Máu Mộc Tinh khởi điểm 3.200 (có thể về ~2.900 sau khi đo với Vỏ dày), rút ở 50 %, nâng theo k khi k > 1. Sau R1 (sửa review): 3.800, hệ số k hai chiều có số hạng bậc hai và hệ số riêng theo chế độ (§5.6). Sau R2: 4.200, hệ số k 0,3 / 6,5, trần 1,46 (sửa phản biện R2). Sau R3: hệ số k 0,4 / 5,5, trần 1,42; thêm Rễ hút sinh khí, 1 mạng mỗi 30 s từ lúc trồi (§5.2).
 3. Boss tới Lũy thì đập 3 mạng mỗi 2,5 s (không thua ngay).
 4. Thắng thì quái còn lại tan; truyện không có đêm vô tận.
 5. Lũy tối đa cấp 3 ở bản đồ 1 truyện.
