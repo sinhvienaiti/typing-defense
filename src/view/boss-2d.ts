@@ -9,8 +9,8 @@
  * leave; stunned buildings' marks over all of it (1B R1 review). At the Bastion the body fades so the Bastion and the
  * blow's arc under it read. R2's polish: the vein swells with each drum of the lull, leaves fall as it walks, wood chips
  * fly off a rooted building, soil at the sprouts, bark at the stagger, stone at the Bastion's blow, a big hit shakes it.
- * Particles come from the fixed pool of fx-2d.ts; nothing is allocated a frame. With reduced motion nothing shakes;
- * every warning stays.
+ * R3: Rễ hút sinh khí's root crawling to the Bastion, its ring, the leaves drawn off. Particles come from the fixed pool
+ * of fx-2d.ts; nothing is allocated a frame. With reduced motion nothing shakes; every warning stays.
  */
 import { MODES, TICK_HZ } from "../content/rules";
 import { FX, type RareEvent } from "../sim/events";
@@ -87,6 +87,11 @@ export class BossView {
         for (let k = 0; k < 8; k += 1) fx.emit(7, p.x + Math.cos(k * 0.785) * 2.2, p.z + Math.sin(k * 0.785) * 2.2, Math.cos(k * 0.785), Math.sin(k * 0.785), 1200, now, 3.6);
       } else if (event.t === "bossStrike" && event.hit && event.move === "summon" && bossSlot(w) >= 0) fx.burst(0, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 10, 3, 600, now); // R2: soil
       else if (event.t === "bossStrike" && event.hit && event.move === "keep") fx.burst(0, w.map.keep[0], w.map.keep[1] - 2, 10, 4.5, 650, now); // R2: stone chips
+      else if (event.t === "bossStrike" && event.hit && event.move === "drain" && bossSlot(w) >= 0) {
+        // R3, Rễ hút sinh khí: the life drawn off the Bastion, green leaves flying along the root to its canopy.
+        const [x, z, e] = [w.map.keep[0], w.map.keep[1], bossSlot(w)];
+        for (let k = 0; k < 14; k += 1) fx.emit(3, x, z - 1, (w.enemies.x[e]! - x) / (1 + k * 0.06), (w.enemies.z[e]! - z - 2) / (1 + k * 0.06), 1000, now);
+      }
       else if (event.t === "bossPhase") {
         this.staggerAt = now;
         if (bossSlot(w) >= 0) fx.burst(1, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 14, 6, 700, now); // R2: bark bursts off
@@ -178,6 +183,15 @@ export class BossView {
         ctx.stroke();
       }
     }
+    // R3, Rễ hút sinh khí's warning: a root crawls from its feet to the Bastion, reaching it as the life is drawn.
+    if (S.drainEnd >= 0 && e >= 0) {
+      const t = ease(span(w.tick, S.drainEnd - Math.round(w.c.content.boss!.drain.warnS * MODES[w.mode].warnK * TICK_HZ), S.drainEnd));
+      const [x, z, kx, kz] = [w.enemies.x[e]!, w.enemies.z[e]!, w.map.keep[0], w.map.keep[1]];
+      Object.assign(ctx, { strokeStyle: C.root, lineWidth: pen.px(7), lineCap: "round" });
+      ctx.beginPath();
+      for (let s = 0; s <= 1; s += 0.04) ctx.lineTo(x + (kx - x) * s * t + Math.sin(s * 23) * 0.7, z + (kz - z) * s * t + Math.cos(s * 19) * 0.7);
+      ctx.stroke();
+    }
     this.fx.draw(pen, now, C.root, C.ink);
   }
 
@@ -262,15 +276,16 @@ export class BossView {
       ctx.arc(w.enemies.x[e]!, w.enemies.z[e]!, w.c.enemies[w.enemies.def[e]!]!.radius + 2, a - Math.PI / 3, a - Math.PI / 3 + (Math.PI * 2 * ease(sweep)) / 3);
       ctx.stroke();
     }
-    if (S.keepEnd >= 0) {
-      // Under the Bastion, where no call's bubble sits (review R1): a ring closing round it and the lives it will cost.
-      const t = span(w.tick, S.keepEnd - Math.round(spec.keep.warnS * k * TICK_HZ), S.keepEnd);
+    const blow = S.keepEnd >= 0 ? "keep" : S.drainEnd >= 0 ? "drain" : null;
+    if (blow !== null) {
+      // Under the Bastion, where no call's bubble sits (review R1): a ring closing round it and the lives it will cost (R3: the drain's too).
+      const t = span(w.tick, S[`${blow}End`] - Math.round(spec[blow].warnS * k * TICK_HZ), S[`${blow}End`]);
       const [x, z, r] = [w.map.keep[0], w.map.keep[1], w.c.buildings[0]!.radius + 1];
       Object.assign(ctx, { strokeStyle: "rgba(194, 59, 34, " + (0.4 + 0.6 * t).toFixed(2) + ")", lineWidth: pen.px(8) });
       ctx.beginPath();
       ctx.arc(x, z, r, Math.PI * (0.5 - t), Math.PI * (0.5 + t));
       ctx.stroke();
-      pen.text("−" + spec.keep.lives + " mạng", x, z + r + 2, 16, C.warn, 900, C.warn);
+      pen.text("−" + spec[blow].lives + " mạng", x, z + r + 2, 16, C.warn, 900, C.warn);
     }
     if (e >= 0 && S.summonEnd >= 0) {
       const t = span(w.tick, S.summonEnd - Math.round(spec.summon.warnS * TICK_HZ), S.summonEnd);

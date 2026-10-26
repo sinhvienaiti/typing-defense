@@ -172,6 +172,7 @@ export class TypingAudio {
     } else if (event.t === "bossStrike" && !event.hit && event.move === "roots") giay(world, t, 0.12, (event.end - event.tick) / 60, 500, 180);
     else if (event.t === "bossStrike" && event.hit && event.move === "roots") [go(world, t, 160, 0.4, 0.09), giay(world, t + 0.03, 0.08, 0.3, 900, 300)];
     else if (event.t === "bossStrike" && event.hit && (event.move === "slam" || event.move === "keep")) [giay(world, t, 0.14, 0.18, 2600, 500), trong(world, t + 0.12, 0.45, 60)];
+    else if (event.t === "bossStrike" && event.move === "drain") event.hit ? [go(world, t, 90, 0.45, 0.2), chuong(world, t + 0.05, 146.8, 0.08, 2.2)] : [rumble(world, t, (event.end - event.tick) / TICK_HZ, 0.25), giay(world, t, 0.1, (event.end - event.tick) / TICK_HZ, 180, 520)]; // R3: Rễ hút sinh khí draws in, then a knock and a low bell
     else if (event.t === "bossRetreat") {
       [0, 0.25, 0.5, 0.75].forEach((at, k) => tranh(world, t + at, note(7 - 2 * k), 0.12));
       giay(world, t + 0.3, 0.06, 1.2, 1800, 700);

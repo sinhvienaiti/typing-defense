@@ -43,7 +43,7 @@ export type RareEvent = { tick: number } & (
   | { t: "bossLull"; end: number }
   | { t: "bossEmerge"; route: number; hp: number }
   | { t: "bossPhase"; phase: number }
-  | { t: "bossStrike"; move: "roots" | "slam" | "summon" | "keep"; hit: boolean; end: number; count: number }
+  | { t: "bossStrike"; move: "roots" | "slam" | "summon" | "keep" | "drain"; hit: boolean; end: number; count: number }
   | { t: "bossRetreat"; gold: number }
   | { t: "victory" }
   | { t: "stun"; building: number; until: number }

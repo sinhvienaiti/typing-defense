@@ -16,7 +16,7 @@ import type { Rect } from "../view/words/lanes";
 import type { Tip } from "./tips";
 
 /** Mộc Tinh's own lines (TK 22.7); Bà Cú Mực's teaching table is ui/tips.ts, a chunk of its own (R3). */
-export const BOSS_LINES = { rise: "Tên ta ở đâu?", roots: "Rễ ơi, mọc lên!", stagger: "Cái tên đó... quen quá...", retreat: "À... ta nhớ rồi." } as const;
+export const BOSS_LINES = { rise: "Tên ta ở đâu?", roots: "Rễ ơi, mọc lên!", drain: "Sinh khí làng này... ngọt quá.", stagger: "Cái tên đó... quen quá...", retreat: "À... ta nhớ rồi." } as const;
 
 /** In update() order; td-chip is the status panel the scenarios look for; td-boss the boss bar (BUILD_1B §13.1); td-tip the teaching frame (R3). */
 export const PANELS = ["chip", "sandbox", "team", "strip", "dock", "actions", "boss", "tip"] as const;
@@ -106,7 +106,7 @@ export function actionsHtml(w: World, tactical: boolean): string {
  * the start of each story day and night her row of the table (§12, R3; ui/tips.ts once its chunk is in), one sentence a
  * line, and its chip till the phase ends, in the teaching frame at the top right, off the field (teachHtml: at the top
  * middle it hid the rift the enemies come from, R3 pictures); from day 5's warning in the boss bar at the top middle, with
- * Mộc Tinh's lines and the stagger's call; the blow on the Bastion; the "ghost" health that follows a hit down 0.4 s late.
+ * Mộc Tinh's lines and the stagger's call; a blow on the Bastion (R3: and each drain); the "ghost" health that follows a hit down 0.4 s late.
  * The sandbox skips the table but the boss's rows.
  */
 export class BossBanner {
@@ -117,7 +117,7 @@ export class BossBanner {
   /** The table (ui/tips.ts), set when its chunk is in; the phase whose row was last shown ("": none). */
   tips: Readonly<Record<string, Tip>> | null = null;
   private taught = "";
-  private rooted = false;
+  private readonly said = new Set<string>(); // the moves whose line it has said (Rễ Trồi; R3: Rễ hút sinh khí)
   private hitAt = -1e9;
   private hitLives = 0;
   private ghost = 1;
@@ -150,12 +150,12 @@ export class BossBanner {
     }
     for (const e of events) {
       if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
-      else if (e.t === "bossStrike" && e.move === "roots" && !e.hit && !this.rooted) {
-        this.rooted = true;
-        this.say(now, ["Mộc Tinh: " + BOSS_LINES.roots, 2500]);
+      else if (e.t === "bossStrike" && (e.move === "roots" || e.move === "drain") && !e.hit && !this.said.has(e.move)) {
+        this.said.add(e.move);
+        this.say(now, ["Mộc Tinh: " + BOSS_LINES[e.move], 2500], ...(e.move === "drain" ? [[`Rễ hút ${e.count} mạng mỗi ${w.c.content.boss!.drain.everyS} s: hạ nó nhanh!`, 3000] as [string, number]] : []));
       } else if (e.t === "bossPhase") this.say(now, ["Mộc Tinh choáng! Gõ Bắn mạnh!", 1200], ["Mộc Tinh: " + BOSS_LINES.stagger, 2500]);
       else if (e.t === "bossRetreat") this.say(now, ["Mộc Tinh: " + BOSS_LINES.retreat, 5000]);
-      else if (e.t === "bossStrike" && e.move === "keep" && e.hit) [this.hitAt, this.hitLives] = [now, e.count];
+      else if (e.t === "bossStrike" && (e.move === "keep" || e.move === "drain") && e.hit) [this.hitAt, this.hitLives] = [now, e.count];
     }
     if (now >= this.until) this.next(now);
   }

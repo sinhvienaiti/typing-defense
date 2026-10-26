@@ -4,8 +4,8 @@
  * two escort packs leave the rift and, 6 s later, the boss comes up at the fork. It walks on, never blocked, and
  * strikes after a warning: Rễ Trồi stuns the buildings within 8 m (no damage), Quật cành hits and knocks back the
  * soldiers in front, at 70 % it staggers (5 s still and vulnerable, every stun lifted, "Dồn lửa" power calls on the
- * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow. At
- * 50 % it retreats: the chest is paid, 2 s later every enemy left melts and the stage is won.
+ * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow; from its
+ * rise its roots drain a life every 20 s (R3). At 50 % it retreats: the chest is paid, 2 s later every enemy left melts.
  */
 import { ticks } from "../../content/compile";
 import { MODES, SHARDS } from "../../content/rules";
@@ -34,7 +34,7 @@ const warn = (w: World, seconds: number): number => ticks(seconds * MODES[w.mode
 export const bossSlot = (w: World): number => (w.boss.e < 0 ? -1 : w.enemies.slotOf(w.boss.e));
 
 /** A move is being warned: the flow meter's danger (§5.5). */
-export const bossWarning = (w: World): boolean => w.boss.rootsEnd >= 0 || w.boss.slamEnd >= 0 || w.boss.keepEnd >= 0;
+export const bossWarning = (w: World): boolean => w.boss.rootsEnd >= 0 || w.boss.slamEnd >= 0 || w.boss.keepEnd >= 0 || w.boss.drainEnd >= 0;
 
 /** Its hit points at spawn: the enemy's × the mode's (×its own mode factor) × (1 + kHp·d + kHp2·max(0, d)²), d = k − 1, at most ×kHpMax (§5.6; 1B R1 review). */
 export function bossHp(w: World): number {
@@ -83,7 +83,7 @@ function rise(w: World): void {
   const hp = bossHp(w);
   const slot = putEnemy(w, w.c.enemyIndex(w.c.content.boss!.enemy), hp, S.route, w.wave, w.c.content.stage!.boss.emergeM, 0);
   if (slot < 0) return;
-  Object.assign(S, { e: w.enemies.id(slot), hpMax: hp, stage: BOSS.fight, phase: 1, rootsAt: -1, slamAt: w.tick, keepAt: w.tick });
+  Object.assign(S, { e: w.enemies.id(slot), hpMax: hp, stage: BOSS.fight, phase: 1, rootsAt: -1, slamAt: w.tick, keepAt: w.tick, drainAt: w.tick + ticks(w.c.content.boss!.drain.everyS) });
   w.events.rare.push({ t: "bossEmerge", tick: w.tick, route: S.route, hp });
 }
 
@@ -192,26 +192,30 @@ function summon(w: World, e: number): void {
   w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "summon", hit: false, end: S.summonEnd, count: spec.count });
 }
 
-/** At the Bastion it stops and strikes it: −3 lives a blow, after a warning. */
-function keepSlam(w: World, e: number): void {
+/**
+ * A blow on the Bastion after a warning: Quật Lũy once it stands at it (−3 lives a blow); Rễ hút sinh khí from anywhere, every
+ * 20 s from its rise, its clock started again by the stagger (R3, docs/td/R3_PLAN.md §7.1: a cost of the boss's time alive that
+ * no clearing of the escort takes away; a quick kill pays less).
+ */
+function keepBlow(w: World, move: "keep" | "drain"): void {
   const S = w.boss;
-  const spec = w.c.content.boss!.keep;
-  if (w.enemies.dist[e]! < w.lanes[w.enemies.route[e]!]!.length - spec.stopM - 1e-9) return;
-  if (S.keepEnd >= 0) {
-    if (w.tick < S.keepEnd) return;
+  const spec = w.c.content.boss![move];
+  const [at, end] = move === "keep" ? (["keepAt", "keepEnd"] as const) : (["drainAt", "drainEnd"] as const);
+  if (S[end] >= 0) {
+    if (w.tick < S[end]) return;
     const lost = Math.min(w.lives, spec.lives);
     w.lives -= lost;
     bump(w.stats, STAT.livesLost, lost);
     bump(w.stats, STAT.livesBoss, lost);
-    S.keepEnd = -1;
+    S[end] = -1;
     w.events.ring.push(FX.leak, w.map.keep[0], w.map.keep[1], lost, w.tick);
-    w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "keep", hit: true, end: w.tick, count: lost });
+    w.events.rare.push({ t: "bossStrike", tick: w.tick, move, hit: true, end: w.tick, count: lost });
     return;
   }
-  if (w.tick < S.keepAt) return;
-  S.keepAt = w.tick + ticks(spec.everyS);
-  S.keepEnd = w.tick + warn(w, spec.warnS);
-  w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "keep", hit: false, end: S.keepEnd, count: spec.lives });
+  if (w.tick < S[at]) return;
+  S[at] = w.tick + ticks(spec.everyS);
+  S[end] = w.tick + warn(w, spec.warnS);
+  w.events.rare.push({ t: "bossStrike", tick: w.tick, move, hit: false, end: S[end], count: spec.lives });
 }
 
 /**
@@ -225,7 +229,7 @@ function stagger(w: World, e: number): void {
   const E = w.enemies;
   const spec = w.c.content.boss!.stagger;
   const end = w.tick + ticks(spec.stunS);
-  Object.assign(S, { phase: 2, staggerUntil: end, vulnUntil: end, rootsEnd: -1, slamEnd: -1, keepEnd: -1, targetN: 0 });
+  Object.assign(S, { phase: 2, staggerUntil: end, vulnUntil: end, rootsEnd: -1, slamEnd: -1, keepEnd: -1, drainEnd: -1, targetN: 0, drainAt: end + ticks(w.c.content.boss!.drain.everyS) });
   Object.assign(S, { rootsAt: S.rootsAt < 0 ? -1 : Math.max(S.rootsAt, end), slamAt: Math.max(S.slamAt, end), keepAt: Math.max(S.keepAt, end) });
   S.summonAt = end + ticks(w.c.content.boss!.summon.firstS);
   E.stunUntil[e] = end;
@@ -252,7 +256,7 @@ function stagger(w: World, e: number): void {
 /** At 50 %: it sinks away (2 s), the chest's gold paid now. */
 function retreat(w: World, e: number): void {
   const gold = w.c.content.boss!.chestGold;
-  Object.assign(w.boss, { stage: BOSS.retreat, sinkEnd: w.tick + ticks(w.c.content.boss!.retreatS), rootsEnd: -1, slamEnd: -1, keepEnd: -1, summonEnd: -1, targetN: 0 });
+  Object.assign(w.boss, { stage: BOSS.retreat, sinkEnd: w.tick + ticks(w.c.content.boss!.retreatS), rootsEnd: -1, slamEnd: -1, keepEnd: -1, drainEnd: -1, summonEnd: -1, targetN: 0 });
   w.enemies.dying[e] = SINKING;
   w.gold += gold * 1000;
   bump(w.stats, STAT.goldChest, gold * 1000);
@@ -287,7 +291,8 @@ function fight(w: World): void {
   roots(w, e);
   slam(w, e);
   if (S.phase === 2) summon(w, e);
-  keepSlam(w, e);
+  if (w.enemies.dist[e]! >= w.lanes[w.enemies.route[e]!]!.length - spec.keep.stopM - 1e-9) keepBlow(w, "keep");
+  keepBlow(w, "drain");
 }
 
 export function bossStep(w: World): void {

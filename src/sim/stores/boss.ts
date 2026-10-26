@@ -27,6 +27,8 @@ export class BossStore {
   summonEnd = -1;
   keepAt = 0;
   keepEnd = -1;
+  drainAt = -1;
+  drainEnd = -1;
   sinkEnd = -1;
   /** Where the branches meet on its route (m), and its hit points passing there (−1: not yet): the loss card's hint (§13.1). */
   mergeM = 0;

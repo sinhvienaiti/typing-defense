@@ -8,7 +8,7 @@
  */
 import { blendSkill, capacity, effectiveE, paceK, parseSkill, serializeSkill, STANDARD_BOTS, updateSkill, type Familiarity, type SkillMode, type SkillProfile, type SkillSample } from "../kit/balance";
 import { safeLocalStorage } from "../kit/platform/safe-storage";
-import { ECONOMY, EXPECTED } from "../content/rules";
+import { ECONOMY, EXPECTED, PACE } from "../content/rules";
 import type { RareEvent } from "../sim/events";
 import { STAT } from "../sim/stats";
 import { lengthBand } from "../sim/systems/calls";
@@ -30,7 +30,7 @@ export const C_REF = capacity(effectiveE({ e: STANDARD.wpm, a: STANDARD.accuracy
 /** The run header from a profile: E (B of the sandbox) and pace k, two-way, from E_eff (BALANCE.md §4.1). */
 export function paceHeader(profile: SkillProfile, director: boolean): PaceHeader & { expected: number } {
   const view = blendSkill(profile);
-  const k = paceK(effectiveE(view), { len: meanLength(view.e), d: 1, ref: C_REF });
+  const k = paceK(effectiveE(view), { len: meanLength(view.e), d: 1, ref: C_REF }, PACE.k);
   return { k, director, expected: Math.max(EXPECTED.min, Math.min(EXPECTED.max, Math.round(view.e))) };
 }
 

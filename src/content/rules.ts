@@ -28,7 +28,7 @@ export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
 export const LENGTH_BY_E = [
   { minE: 0, len: [3, 5] },
   { minE: 25, len: [3, 6] },
-  { minE: 45, len: [4, 7] },
+  { minE: 45, len: [4, 8] }, // R3 balance (BUILD_NOTES §7.9): [4, 7] → [4, 8], the Khá and Ẩu bots +13 points of wins
   { minE: 65, len: [4, 8] },
 ] as const;
 
@@ -151,7 +151,8 @@ export const RALLY = { radiusM: 12, roadMaxM: 3 } as const;
 export const PRESET = { keepLevel: 3, villagers: 5, marks: 8, plots: [[2, 0], [1, 0.7], [1, 0.3], [0, 0]] } as const;
 
 /**
- * Balance step 4 (docs/games/BALANCE.md §4, §9.2). Pace k (the run header, 0.75–1.30) divides the night's pack gaps,
+ * Balance step 4 (docs/games/BALANCE.md §4, §9.2). Pace k (the run header, k.min–k.max: BALANCE's 0.75–1.30, the floor
+ * 0.70 here since R3's balance, BUILD_NOTES §7.9: the Mới bot's k is 0.70, at 0.75 it won 62 %) divides the night's pack gaps,
  * the day (the wave clock) and the day's call clocks (a quiz, a mine's half-full call), and enemies walk at
  * 1 + speedK·(k − 1) (spawn gaps alone barely moved a night, the other way at that: docs/changelog/2026-10-23-balance.md;
  * 1B R2 review: 0.2 → 0.3, Biên S of the slow and the fast bots towards each other, BUILD_NOTES §7.4).
@@ -161,7 +162,7 @@ export const PRESET = { keepLevel: 3, villagers: 5, marks: 8, plots: [[2, 0], [1
  * by day only the call clocks ±7 %, against a band without pressure (no enemy comes by day).
  */
 export const PACE = {
-  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 2, mineCallMin: 0.25, speedK: 0.3,
+  dangerM: 24, engageM: 50, eliteHp: 1.3, supportLives: 2, mineCallMin: 0.25, speedK: 0.3, k: { min: 0.7, max: 1.3 },
   night: { up: ["spawn", "elite", "peak", "lull"], down: ["support", "spawn", "lull", "peak", "elite"], spawnStep: 70, eliteCost: 30, peakTicks: 180, lullTicks: 180 },
   day: { up: ["spawn"], down: ["spawn"], spawnStep: 70, eliteCost: 0, peakTicks: 0, lullTicks: 0 },
 } as const;

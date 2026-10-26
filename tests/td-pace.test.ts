@@ -61,12 +61,13 @@ describe("the skill profile (BALANCE.md §2)", () => {
 });
 
 describe("the run header and pace k (BALANCE.md §4.1)", () => {
-  it("gives the standard bot k = 1 (C_ref is its capacity); faster and cleaner is above, slower below, within 0.75–1.30", () => {
+  it("gives the standard bot k = 1 (C_ref is its capacity); faster and cleaner is above, slower below, within 0.70–1.30 (R3: BALANCE's floor 0.75 lowered)", () => {
     expect(C_REF).toBeCloseTo(capacity(effectiveE({ e: STANDARD_BOT.wpm, a: STANDARD_BOT.accuracy, cv: STANDARD_BOT.cv }), 4.5, 1), 9);
     const at = (wpm: number, a: number, cv: number) => paceHeader(updateSkill(newSkillProfile(), { outcome: "won", words: 60, wpm, keys: 400, correctKeys: Math.round(400 * a), cv }).profile, true);
     expect(at(35, 0.95, 0.25)).toEqual({ k: 1, director: true, expected: 35 });
     expect(at(70, 0.97, 0.15).k).toBe(1.3);
-    expect(at(25, 0.92, 0.35).k).toBe(0.75);
+    expect(at(25, 0.92, 0.35).k).toBe(0.7); // the Mới bot: its own k, 0.70, no longer the floor's 0.75
+    expect(at(15, 0.88, 0.4).k).toBe(0.7);
     expect(at(50, 0.85, 0.35).k).toBeLessThan(at(50, 0.96, 0.2).k);
     // Nothing measured: the mode's defaults (Cân bằng is the standard player).
     expect(paceHeader(newSkillProfile(), false)).toEqual({ k: 1, director: false, expected: 35 });

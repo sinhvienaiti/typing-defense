@@ -140,6 +140,7 @@ export type BossDef = {
   stagger: { atPct: number; stunS: number; vulnerable: number; burstLifeS: number; burstReachM: number; burstWords: number; burstPerE: number };
   summon: { enemy: string; count: number; everyS: number; firstS: number; warnS: number };
   keep: { lives: number; everyS: number; warnS: number; stopM: number };
+  drain: { lives: number; everyS: number; warnS: number };
 };
 
 /** The story stage (BUILD_1B §4): its nights, the Bastion's top level, the boss peak, the day each thing opens. */

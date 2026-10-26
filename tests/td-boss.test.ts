@@ -370,6 +370,27 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     expect(w.stats[STAT.livesBoss]).toBe(7);
   });
 
+  it("Rễ hút sinh khí (R3): from its rise every 30 s wherever it stands, warned 1.2 s × the mode's warnK, then −1 life counted at the peak; the stagger starts its clock again", () => {
+    const { w, e } = risen();
+    const every = T(BOSS_DEF.drain.everyS);
+    const rose = w.boss.drainAt - every;
+    // Held far from the Bastion and never staggered: only the drain takes lives.
+    [w.enemies.stunUntil[e], w.enemies.hp[e], w.lives] = [1e9, w.boss.hpMax * 10, 20];
+    const events = until(w, () => w.lives === 18, 2 * every + T(5));
+    const drain = strikes(events, "drain");
+    expect(BOSS_DEF.drain).toMatchObject({ lives: 1, everyS: 30, warnS: 1.2 });
+    expect(drain.filter((ev) => !ev.hit).map((ev) => ev.tick - rose)).toEqual([every, 2 * every]);
+    expect(drain.filter((ev) => ev.hit).map((ev) => [ev.tick - rose, ev.count])).toEqual([[every + T(1.2), 1], [2 * every + T(1.2), 1]]);
+    expect(strikes(events, "keep").length).toBe(0);
+    expect(w.stats[STAT.livesBoss]).toBe(2);
+    w.enemies.hp[e] = Math.floor(w.boss.hpMax * 0.69);
+    until(w, () => w.boss.phase === 2, 2);
+    expect([w.boss.drainAt, w.boss.drainEnd]).toEqual([w.boss.staggerUntil + T(BOSS_DEF.drain.everyS), -1]);
+    const relax = risen({ mode: "relax" }).w;
+    until(relax, () => relax.boss.drainEnd >= 0, every + T(1));
+    expect(relax.boss.drainEnd - (relax.tick - 1)).toBe(T(BOSS_DEF.drain.warnS * MODES.relax.warnK));
+  });
+
   it("at 50 % it retreats: the chest's 150 gold at once (once), 2 s of sinking untouched, then every enemy left melts (no gold, no leak) and the stage is won", () => {
     const { w, e } = risen();
     const kills = w.stats[STAT.kills]!;

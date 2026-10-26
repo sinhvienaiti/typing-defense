@@ -197,15 +197,16 @@ export const SLICE_1A: Content = {
     memberGapS: 0.45,
   },
   // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.35 on its bark (heroMul).
-  // R2 (BUILD_NOTES §7.3): k factor 0.3 / 6.5 (R1 review: 0.2 / 4.3), Thư giãn and Học ×0.78 like Thử thách (R1 review: 0.85).
-  // R2 review (§7.4): the cap 1.5 → 1.46, the fastest bot's boss walks ×1.09 with PACE.speedK 0.3.
+  // k factor (R2 §7.3–§7.4: 0.3 / 6.5, cap 1.46; R3 balance, BUILD_NOTES §7.9: 0.4 / 5.5, cap 1.42), Thư giãn and Học ×0.78.
+  // R3: Rễ hút sinh khí, a life every 30 s of its fight (R3_PLAN §7.1; 20 s cost the slow bots 10–12 points of wins, §7.9).
   boss: {
-    enemy: "moc-tinh", retreatPct: 50, kHp: 0.3, kHp2: 6.5, kHpMax: 1.46, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
+    enemy: "moc-tinh", retreatPct: 50, kHp: 0.4, kHp2: 5.5, kHpMax: 1.42, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },
     slam: { damage: [40, 60], reachM: 3, everyS: 2.5, warnS: 1.2, knockM: 1.5 },
     stagger: { atPct: 70, stunS: 5, vulnerable: 1.25, burstLifeS: 5, burstReachM: 2, burstWords: 3, burstPerE: 20 },
     summon: { enemy: "mam-go", count: 4, everyS: 15, firstS: 3, warnS: 0.8 },
     keep: { lives: 3, everyS: 2.5, warnS: 1.2, stopM: 1.5 },
+    drain: { lives: 1, everyS: 30, warnS: 1.2 },
   },
   // BUILD_1B §4, §12: five nights, the boss at the end of the fifth; what opens on which day.
   stage: {

@@ -173,10 +173,11 @@ describe("1A content", () => {
     }));
     // TK 6.5's 4–8 column was measured on 5–8 letters (58 / 237 / 453 words); the real 4–8 band is wider.
     // Since the split the deck drops flagged words as src/kit/vocab does: 5 of them sat in level 4–5's bands (A unchanged).
+    // R3's balance (BUILD_NOTES §7.9): E 45–64 takes 4–8 letters like E ≥ 65 (it was 4–7: 123 / 355 / 630 words).
     expect(measured).toEqual([
-      [[122, 16, 10], [140, 16, 10], [123, 15, 9], [124, 15, 9]],
-      [[291, 19, 12], [362, 20, 12], [355, 21, 12], [375, 21, 12]],
-      [[494, 22, 12], [621, 22, 12], [630, 23, 12], [671, 23, 12]],
+      [[122, 16, 10], [140, 16, 10], [124, 15, 9], [124, 15, 9]],
+      [[291, 19, 12], [362, 20, 12], [375, 21, 12], [375, 21, 12]],
+      [[494, 22, 12], [621, 22, 12], [671, 23, 12], [671, 23, 12]],
     ]);
     expect([1, 3, 5].map((level) => bandWords(deck, level, 5, 8).length)).toEqual([58, 237, 451]);
   });
