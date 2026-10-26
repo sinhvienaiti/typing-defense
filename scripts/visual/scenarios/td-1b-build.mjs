@@ -54,7 +54,9 @@ export default async function (page) {
   await boot(page, { mouse: false });
   await page.eval(td(`t.send({ t: "sandbox", op: { op: "gold", value: 2000 } }); t.send({ t: "sandbox", op: { op: "wood", value: 600 } }); return true;`));
   await page.sleep(300);
-  const money = async () => { const s = await state(page); return [s.gold, s.wood]; };
+  // Wood less what the chops have paid so far: since the owner's wood rule (26/10/2026) a chop pays as it goes, so the
+  // two villagers' wood would otherwise creep into the prices read 300 ms apart.
+  const money = async () => { const s = await state(page); return [s.gold, s.wood - s.trees.reduce((sum, tree) => sum + 1000 - tree.left, 0)]; };
   const [g0, w0] = await money();
   await key(page, "Insert");
   await key(page, "Enter"); // the Tháp Cung at its first suggested spot
