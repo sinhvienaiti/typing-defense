@@ -449,7 +449,7 @@ export class DebugView {
       if (T.standing[t] === 0) return;
       if (grow(t) < 0) this.disc(x, z, TREE.radiusM * (1.6 + grow(t)), null, `rgba(95, 170, 60, ${-grow(t)})`, 3);
       if (T.marked[t] === 1) this.disc(x, z, TREE.radiusM, null, COLOR.lamp, 3.5);
-      if (T.progress[t]! > 0) this.bar(x, z + TREE.radiusM + 0.4, 2.4, T.progress[t]!, COLOR.lamp), this.text(T.left[t] + "/" + TREE.reserve, x, z + TREE.radiusM + 1.9, 9, COLOR.ink, 800, COLOR.stump);
+      if (T.progress[t]! > 0) this.bar(x, z + TREE.radiusM + 0.4, 2.4, T.progress[t]!, COLOR.lamp), this.text(T.left[t] + "/" + TREE.reserve, x, z + TREE.radiusM + 2, 11, COLOR.ink, 800, COLOR.stump);
     });
   }
 
