@@ -4,6 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 26/10/2026 | 1B R3 phần B (bước 7, 8, 11, kịch bản bước 10): Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát; bot chơi Học; gói chơi thử và B9 từ file; `td-1b-tour`; sửa sau lượt kiểm (file chơi thử bấm thật, gõ lại khi máy tải, hộp cát không vào B9) | [2026-10-26-td-r3-part-b](./2026-10-26-td-r3-part-b.md) |
 | 26/10/2026 | 1B R3 phần A (bước 1–6): tách chunk, Học (Từ Ôn, sổ ôn lưu, kế hoạch học, sự kiện học, luật nghĩa), bảng dạy bản đồ 1, dòng Chế độ, sao lưu; kịch bản `td-1b-learn`, `td-1b-story` | [2026-10-26-td-r3-part-a](./2026-10-26-td-r3-part-a.md) |
 | 25/10/2026 | 1B R3 "Học và dạy": kế hoạch (`docs/td/R3_PLAN.md`), mốc gói và hồ sơ một khung ở 60 Hz trên Mac | [2026-10-25-td-r3-plan](./2026-10-25-td-r3-plan.md) |
 | 25/10/2026 | 1B R2: sửa sau phản biện lần 3 trên Mac (F3 chunk hỏng được hỏi lại, F4 thẻ màn đầu tải khi chọn, F5 chấm tổng mỗi khung, F6 A/B trên Mac; thẻ nhà cấp 3 vừa ở 1280 × 720) | [2026-10-25-td-1b-r2-fix3](./2026-10-25-td-1b-r2-fix3.md) |

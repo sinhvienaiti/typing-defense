@@ -60,8 +60,17 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   learning events every 5 s, the book kept in `typing-defense.learn`); the meaning rule and the jade Từ Ôn card; the
   teaching table (`ui/tips.ts`: Bà Cú Mực's rows top right, off the field; "làm gì" lines on building cards); the
   "Chế độ (truyện)" setting and the stars in `td.campaign`. "/" 81.25 kB gzip (3.75 kB headroom, Apple M4 build),
-  10,255 lines, 322 tests. Next: R3 part B (step 7 the sandbox's R3 enemies, step 8 the bots' Học, step 9 the balance
-  pass, steps 10–11); the owner's playtest of map 1 at 1280 × 720 (`BUILD_1B.md` §22, B9 numbers) stays open.
+  10,255 lines, 322 tests. **R3 part B built** (26/10/2026, §7.7, `docs/changelog/2026-10-26-td-r3-part-b.md`): step 7 the
+  sandbox's Cương Thi Đầu Đàn (Neo; its aura leads the pack) and Quỷ Núi Troll (Phá Khiên; a dome riding on it), no cut;
+  step 8 the bots play Học (cold start, a 20-word book row, B8 R3 in `td:balance`); step 11 the owner's play-test pack
+  (`docs/td/PLAYTEST_1B.md`: "Chép số chơi thử" saves the numbers and the whole run, `scripts/td/b9.ts` replays and grades
+  B9; a sandbox run is replayed and listed, never graded); `td-1b-tour` (19 pictures). Checked again on the Mac after
+  the cut-off run: the tour now presses "Chép số chơi thử" for real (the card answers `pointerdown`), `td-1b-direct`
+  types Neo and Phá Khiên again on the next mechanic when a loaded machine misses the window. "/" 82.62 kB gzip
+  (2.38 kB headroom, Apple M4 build), 10,413 lines (87 under the ceiling), 332 tests. With Học the standard bot wins
+  75 / 78 % in Cân bằng (90 / 88 % on the same seeds without; 40 seeds a set, §7.7 part B). Next: the owner's wood rule
+  (26/10/2026: trees regrow each day, a large reserve paid out while chopped), then step 9 the R3 balance pass and §20
+  on the Mac; the owner's playtest (B9 numbers) stays open.
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
@@ -119,6 +128,12 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   in `view/words/cards.ts`; the teaching table `src/ui/tips.ts` (`TIPS`, `DOES`, `doesLine`) shown by `BossBanner`
   (`teachHtml`: panel `td-tip`, top right) in `ui/hud.ts`; the mode setting and the stars in `app/prefs.ts`
   (`storyMode`, `keepStars`, key `td.campaign`), `ui/settings.ts`, `ui/title.ts`, `ui/sheets.ts`.
+- 1B R3 part B: the three verbs in `sim/systems/direct.ts` (`AbilitySpec` a union in `content/types.ts`, compiled with
+  a `verb` index; `verbOf`, `domesUp`, `domeMul`), the leader's aura and lead (`DIRECT.leadM`) in `move.ts`, the dome on
+  shots in `projectile.ts` (shots keep their launch point `ox`, `oz`), ×1.3 in `combat.ts` (`takenUntil`); their marks in
+  `view/debug-2d.ts` (`lead`, the dome), outcomes in `view/fx-2d.ts`, sounds in `view/audio-min.ts`, the call's icon and name
+  by verb (`callLabel` in `view/words/cards.ts`). Bots' Học: `learnStore`, `learnHeader`, `StageRun` (`timedFresh`) and the
+  `standard@book20` row in `tests/td/flow.ts`. Play-test file: `playtestFile` in `app/retry.ts`; B9: `tests/td/b9.ts`.
 - Chunks (BUILD_1B §20, R2 review and its second fix): `vite.config.ts` keeps what the
   game needs to start as one chunk; the title (`ui/title.ts`), the settings card
   (`ui/settings.ts`, the stored settings in `app/prefs.ts`), Hồ sơ gõ (`ui/profile.ts`),
@@ -170,7 +185,8 @@ pnpm td:balance          # bot balance report (Markdown): BALANCE §3 matrix + B
                          #   --set=slice.enemies.3.hp=4300 --set=POWER.quick=0.8 … (numbers overridden in every worker, printed on top)
 node --import tsx scripts/td/boss-tune.ts --hp=2900 --seeds=40 --bots=standard,fast  # quick boss probe (numbers overridable: --khp2, --modehp, --quick, --woodgold, --tl, …)
 node --import tsx scripts/td/retry-log.ts --seed=7 --day=5 --mode=relax --out=tmp/retry.json  # a long bot run kept as "Chơi lại Ngày n" keeps it (td-1b-night5 uses it)
-node --import tsx scripts/td/retry-log.ts --seed=7 --end --out=tmp/won.json  # R3: the bot's whole story kept at its end (td-1b-story: the won card, td.campaign)
+node --import tsx scripts/td/retry-log.ts --seed=7 --end --out=tmp/won.json  # R3: the bot's whole story kept at its end (td-1b-story: the won card, td.campaign); runs carry the bot's study lists (--book20: its 20-word book)
+node --import tsx scripts/td/b9.ts ~/Downloads/loi-goi-choi-thu-*.json --seeds=40  # B9: each play-test file replayed on Node, then graded against the bot with the owner's profile (docs/td/PLAYTEST_1B.md)
 pnpm td:golden:check     # golden runs must match tests/golden/td-1a.json and td-1b-boss.json
 pnpm td:golden:update    # remake both goldens after an intended change
 OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1a6-day.mjs --width=1280 --height=720
@@ -183,11 +199,12 @@ URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scr
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-perf.mjs --width=1280 --height=720    # boss + flood(300, topped up) + Tối Thượng ×2, frames paced to 60 Hz (PERF_HZ=0: the browser's own rate)
 # 1B R2:
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-ult.mjs --width=1280 --height=720     # =, feathers, Chữ Chiêu typed / left alone
-URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720  # Tanuki: Ngắt typed, let run (heal), ≤ 2 cards
+URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-direct.mjs --width=1280 --height=720  # Tanuki: Ngắt typed, let run (heal), ≤ 2 cards; R3: Neo and Phá Khiên typed, a dome let run
 URL=http://127.0.0.1:3046/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-chunks.mjs --width=1280 --height=720  # a chunk blocked: title skipped, pause told in the HUD; card, sandbox panel and sound asked again after the cool-down (back where the browser fetches a failed import again)
 # 1B R3 (dev server on 3006, as the lane's strict port on the Mac):
 URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-learn.mjs --width=1280 --height=720  # meanings by the rule, Từ Ôn back and redeemed, the book across a reload, learning events
 URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-story.mjs --width=1280 --height=720  # the teaching table (day 1, night 1, day 3 replayed), the mode setting, the stars of a won run
+URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-tour.mjs --width=1280 --height=720   # the owner's 19 pictures (day 5 to the won card, the play-test file replayed, Ngắt, Neo, Phá Khiên, Từ Ôn, Bà Cú Mực); ~5 min a size
 # Perf numbers need a Chrome with a GPU (Chrome in WSL draws in software): on the Dell, Windows node + Windows Chrome,
 # then the pages' logs replayed in WSL (scripts/td/replay.ts), as in BUILD_NOTES §7.2. On the Mac mini M4 the macOS
 # Chrome draws with the GPU: run cdp-run as above, under the parent's .local/bin/heavy.sh --gpu (BUILD_NOTES §7.6).

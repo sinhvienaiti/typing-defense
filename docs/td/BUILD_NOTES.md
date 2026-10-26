@@ -45,7 +45,7 @@ Mốc đang làm: **1B.R3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
 | 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
-| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → … (mục 7.7, phần R3) | 830 | 10.500 |
+| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7) | 830 | 10.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -1303,3 +1303,54 @@ Kế hoạch: `docs/td/R3_PLAN.md` (việc theo file, thứ tự, dạng dữ li
   - Chạy lại vì đợt này chạm tới: `td-theme` (Cài đặt có thêm dòng), `td-1b-build` (thẻ nhà ở truyện có dòng "làm gì"; mọi thẻ cấp 3 vẫn vừa), `td-1b-night5` (hai hàng boss ở hộp cát và sau "Chơi lại Ngày 5"), `td-1b-boss`, `td-1a-boot`, `td-balance` (Cài đặt, dòng nhịp).
   - Ảnh đã xem; sửa từ ảnh: khung câu dời khỏi giữa đỉnh màn (che Khe Nứt), chip xuống dòng giữa hai phần, sao vàng trên dòng "Bắt đầu" đang chọn (đỏ trên đỏ không đọc được), nhãn "Chế độ (truyện)" để dòng phụ vừa một dòng.
 - **Còn mở trước phần B:** 11 kịch bản cũ chưa chạy lại trên Mac (bước 10); lượt cân bằng chưa chạy vì bot chưa chơi Học (bước 8) nên luật của bot không đổi.
+
+**Phần B (bước 7, 8, 11 và phần kịch bản của bước 10; 26/10/2026; changelog `docs/changelog/2026-10-26-td-r3-part-b.md`).** Số Apple M4, bản dựng trên Mac. Bằng chứng (ngoài Git): `tmp/mac-2026-10-25/r3b/` (lượt làm, bị ngắt lúc 02:28 vì hết hạn mức), `tmp/mac-2026-10-25/r3b2/` (lượt kiểm và sửa: nhật ký `pnpm check`, bảng cân bằng, ảnh và nhật ký kịch bản, script gỡ lỗi `dbg/`).
+
+| Bước | Commit | "/" gzip (chừa) | Dòng `.ts` | Ghi chú |
+|---|---|---|---|---|
+| 7 Troll, Đầu Đàn, Neo, Phá Khiên | `b8d78d3` | 82,62 (2,38) | 10.413 | +1,37 kB (ước +0,9), +158 dòng (ước +105). Còn 87 dòng dưới trần: **không cắt** (thứ tự cắt `R3_PLAN.md` §8 không dùng tới) |
+| 8 bot Học | `096f69d` | — | — | chỉ `tests/`, `scripts/` |
+| 11 gói chơi thử | `0bb942f` | 82,62 (2,38) | 10.413 | `retry` 1,01 kB nạp sau; `?title=0` 81,22 kB |
+| 10 (một phần) kịch bản | `0738e94`, sửa ở lượt kiểm | — | — | `td-1b-tour` mới, `td-1b-direct` thêm phần R3 |
+
+- **Test:** 331 test / 31 file trên `0738e94`; 332 sau lượt kiểm (`td-b9`: file hộp cát không vào B9). Mới ở phần B: `td-r3-abilities` (6: Neo đứng sững 3 s và ×1,3 trong 6 s, hào quang +20 % và dẫn bầy, vòm ×0,3 cho đạn từ ngoài, cận chiến và lông không đổi, 10 s không dựng lại, ải truyện không có hai quái này), `td-b9` (3), `td-flow` (B8 R3).
+- **File vàng:** bước 7 làm lại cả hai (mã nội dung và ba cột mới `takenUntil`, `ox`, `oz`; bỏ ba cột khỏi mã băm thì mọi mã băm y như cũ, đã thử). Trên `0738e94`: `same: true`, 19.147 và 5.306 tick, nội dung `8ea58c7a`.
+- **Bước 7, vì sao từng luật** (chi tiết `R3_PLAN.md` §5 A20–A25): Neo và Phá Khiên chỉ bật khi một nhà **đánh** ở gần (A20), như bài học Tanuki của R2: lời gọi ở chỗ không vòng giúp nào tới thì không sáng, không đáng gõ. Đầu Đàn dẫn bầy (A21): Cương Thi nhanh hơn nó (3,8 so với 3,4 m/s), không dẫn thì bầy bỏ xa và điều kiện "≥ 4 trong 6 m" không bao giờ đạt. Vòm đi theo Troll (A22): mối đe dọa là "Troll đi xuyên làn đạn", nên gõ Phá Khiên mới đáng. Hình và tiếng: vòng hào quang và cờ trên Đầu Đàn, vòng đá có vạch quanh Troll; chữ nổi "Đứng sững!", "×1,3", "Vỡ vòm!"; thẻ có biểu tượng ⚓, 🛡️ (`callLabel`); tiếng riêng mỗi động từ (`audio-min.ts`).
+- **Bước 8, bot Học.** Bot chơi Học đúng như trang tính (`planFor` của `app/learn.ts`): mọi hàng khởi động lạnh, thêm hàng `standard@book20` (sổ 20 từ) ở Cân bằng. Từ Ôn là từ "đang học" trong `HumanTypist`. Lượt dò trên `0738e94` (Cân bằng, 40 seed mỗi bộ, hai bộ, `--quick`, 25 phút trên máy đang chạy ba làn khác; `r3b2/balance-probe-40x2.md`):
+
+| Bot | Thắng bộ 1 / bộ 2 | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q | Không Học: thắng, S (bộ 1 / bộ 2) |
+|---|---|---|---|---|---|---|---|---|
+| Trẻ em | 2,5 / 0 % | 0 / 0 % | 29 / 29 % | 0,2 / 0 % | 0 / 0 % | 0,03 / 0,00 | 67 / 67 % | — |
+| Mới | 75 / 78 % | 38 / 35 % | 23 / 25 % | 5,5 / 5,4 % | 0 / 0 % | 0,15 / 0,23 | 67 / 67 % | 83 / 73 %, 48 / 38 % |
+| Chậm chắc | 90 / 90 % | 70 / 65 % | 22 / 21 % | 5,3 / 4,8 % | 0 / 0 % | 0,17 / 0,10 | 67 / 66 % | 83 / 78 %, 65 / 58 % |
+| Chuẩn | 75 / 78 % | 65 / 60 % | 21 / 22 % | 2,8 / 2,8 % | 0 / 0 % | 0,07 / 0,07 | 66 / 66 % | 90 / 88 %, 70 / 75 % |
+| Khá | 85 / 75 % | 65 / 48 % | 20 / 23 % | 2,0 / 1,6 % | 0 / 0 % | 0,03 / 0,03 | 66 / 67 % | 80 / 80 %, 55 / 48 % |
+| Ẩu | 58 / 65 % | 30 / 25 % | 25 / 25 % | 0,7 / 0,8 % | 0,1 / 0,1 % | 0,03 / 0,20 | 66 / 67 % | 58 / 65 %, 15 / 28 % |
+| Nhanh | 80 / 83 % | 60 / 55 % | 23 / 23 % | 3,3 / 3,2 % | 0,1 / 0,1 % | 0,05 / 0,07 | 67 / 67 % | 80 / 85 %, 60 / 65 % |
+| Chuẩn, sổ 20 từ | 75 / 75 % | 68 / 68 % | 22 / 23 % | 2,4 / 2,3 % | 0,1 / 0,1 % | 0,07 / 0,13 | 67 / 66 % | — |
+
+- Cột "Không Học": cùng bot, cùng seed, đầu ván R2 không danh sách (`r3b2/nolearn.ts`). Học làm bot Chuẩn thua nhiều hơn ở cả hai bộ (90 → 75 %, 88 → 78 %; gộp 89 → 76 %, khoảng 3 sai số chuẩn ở 80 ván): từ mới cấp 3 và Từ Ôn gõ chậm hơn từ quen. Bot khác lệch trong khoảng sai số 40 seed (±6–7 điểm). Lượt cân bằng R3 (bước 9) phải đo trên mã có Học, như `R3_PLAN.md` §7 đã định.
+- Cổng của lượt dò (chỉ Cân bằng nên B3, B5, B6 thiếu số): B1 **trượt** (bộ 1: Chậm chắc S 70 %, Ẩu 58 % / 30 %; bộ 2: Ẩu 65 % / 25 %), B2 đạt, B4 đạt, B7 đạt bộ 1, **trượt** bộ 2 (hàng tắt nhịp: Biên S 25 %), B8 đạt (B8 R3: mọi hàng 8 từ mới mỗi ván, lớn nhất 8, 0 ở lời gọi có hạn và Đêm 5), B9 thiếu số. G2 đạt (Đêm 1–4 23,0 %, Đêm 5 23,8 % gộp), G3 **trượt** (44,5 / 45,8 s; gộp 45,1), G5, G6, G8 đạt. Đích chặt gộp: 2/6 (Khá, Nhanh). Ván có từ quay lại của bot Chuẩn: 73 / 75 % (A3 ≥ 70 %).
+- **Bước 11, gói chơi thử:** `docs/td/PLAYTEST_1B.md`; "Chép số chơi thử" lưu file có số và cả nhật ký ván. Lượt kiểm thêm: `scripts/td/b9.ts` đọc file `td-1b-tour` bắt được ở trang (ván hộp cát): chạy lại trên Node khớp mã băm trang (`bb34489b`). Ván hộp cát giờ được liệt kê nhưng không vào B9 (`R3_PLAN.md` §5 A26; trước đó bị chấm như ải truyện và trượt oan: S 100 % / 78 %).
+- **Kịch bản (lượt kiểm).** Hai lỗi kịch bản tìm thấy và sửa:
+  - `td-1b-tour` bấm "Chép số chơi thử" bằng `click()` của phần tử, mà nút thẻ kết nghe `pointerdown` (`ui/sheets.ts`): không file nào được lưu, kiểm `playtestFileReplays` trượt ở cả hai cỡ trong lượt bị ngắt. Giờ bấm chuột thật qua CDP; file lưu và chạy lại khớp ở cả hai cỡ.
+  - `td-1b-direct` trượt `domeTypedBreaksIt` lúc máy đang rất tải (ba làn khác chạy cân bằng và chụp hình; tải trung bình 5 phút đo lúc 06:02 là 53, máy 10 lõi): chụp ảnh thẻ trước khi gõ tốn hết 2,5 s còn lại của cửa sổ, nên không phím nào được gõ (nhật ký trang chạy lại trên Node: Troll dựng vòm 5 lần, không lần nào bị gõ). Giờ gõ lại ở lần dựng vòm sau, tối đa 3 lần; ở máy rảnh cả hai cỡ gõ được ngay lần đầu.
+- **Kịch bản trên mã của đợt này** (src của `0738e94`, kịch bản của `3b42a39`; 26/10 05:19–07:06, Chrome 155 macOS có GPU, máy chủ dev cổng 3006, dưới `heavy.sh --gpu` xen với lượt chụp hình của làn khác): **20/20 lượt đạt** (10 kịch bản × 2 cỡ), 0 ngoại lệ, 0 lỗi console ngoài 10 lỗi cố ý của `td-1b-chunks` (7 của R2, thêm `retry`, `learn`, `tips`), nhật ký trang chạy lại trên Node khớp ở mọi kịch bản có kiểm.
+
+| Kịch bản | Kiểm | 1280 × 720 | 1920 × 1080 | Ghi chú |
+|---|---|---|---|---|
+| `td-1b-tour` | 17 | đạt | đạt | 19 ảnh mỗi cỡ; file chơi thử `loi-goi-choi-thu-s1-n5-5577.json` (1280) và `…-5607.json` (1920) chạy lại khớp |
+| `td-1b-direct` | 16 | đạt | đạt | Neo, Phá Khiên gõ được ngay lần đầu; bầy đứng 165 tick (≤ 180), ×1,3 còn 345 tick; Troll choáng 75–76 tick (≤ 90) |
+| `td-1b-learn` | 14 | đạt | đạt | |
+| `td-1b-story` | 17 | đạt | đạt | Ngày 3 và ván thắng từ `retry-log` có danh sách học |
+| `td-1b-chunks` | 24 | đạt | đạt | |
+| `td-1b-night5` | 12 | đạt | đạt | nhật ký `retry-log` nay mang danh sách học của bot; trang chơi lại khớp |
+| `td-1b-boss` | 16 | đạt | đạt | |
+| `td-1b-build` | 18 | đạt | đạt | bảng hộp cát có hàng "Đầu Đàn", "Troll" |
+| `td-1b-ult` | 13 | đạt | đạt | |
+| `td-1a-boot` | 11 | đạt | đạt | |
+
+- Lượt trượt trước khi sửa (cùng giờ, máy rất tải): `td-1b-direct` 1280 (Troll không kịp gõ, xem trên), `td-1b-direct` 1920 (không lời gọi Neo, Phá Khiên nào sáng trong 60 s chờ; lượt kéo 39 phút), `td-1b-tour` 1920 (kịch bản đứng giữa chừng: trang chỉ đi 78 tick trong 143 s, không lời gọi trực tiếp nào sáng), `td-1b-learn` 1280 (chạy 28 phút, từ gõ Ẩu không kịp quay lại). Chạy lại lúc máy rảnh (tải ~5): đạt cả bốn. Bài học: kịch bản tính giờ bằng đồng hồ tường dễ trượt khi máy dùng chung quá tải; nên chạy một luồng GPU và xem tải trước khi chạy lượt chốt.
+- **Ảnh đã xem:** 19 ảnh `td-1b-tour` ở 1280 × 720 và các ảnh R3 ở 1920 × 1080 (Neo, đứng sững, Phá Khiên, vỡ vòm), `td-1b-direct` (thẻ ⚓, 🛡️, vòm để chạy đi tới gần Lũy), `td-1b-learn` (Từ Ôn, "Chuộc lại"), `td-1b-story` (Đêm 1, thẻ thắng "Kỷ lục mới"), `td-1b-night5`, `td-1b-boss`, `td-1b-build`. Chữ đọc được ở 1280 × 720. Ghi lại, chưa sửa: chữ nổi "×1,3" nhỏ (cùng kiểu chữ nổi R2) và "Đứng sững!" màu xanh trên cỏ hơi nhạt ở 1920 × 1080; thẻ lời gọi che một phần bầy hay Troll lúc mới sáng (thẻ đứng trên đầu quái như mọi lời gọi trực tiếp R2).
+- **Kiểm sau sửa:** `pnpm check` 332 test / 31 file đạt, "/" 82,62 kB (chừa 2,38), `?title=0` 81,22 kB; `pnpm td:golden:check` `same: true`; 10.413 dòng.
+- **Còn mở sau phần B:** bước `wood` của chủ dự án (26/10), bước 9 (cân bằng R3), phần còn lại của bước 10 (đo §20 với cảnh 10 loại quái, `td-1a-ime`, `td-1a6-*`, `td-theme`, `td-balance`, `td-1b-perf`, `td-1a6-perf`), B9 chờ chủ dự án chơi.

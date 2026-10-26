@@ -374,8 +374,8 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 | Động từ | Quái | Bắt đầu khi | Thành công | Bỏ qua | Ở đâu |
 |---|---|---|---|---|---|
 | **Ngắt** | Lửng Tanuki | Có ≥ 3 quái khác trong 6 m (theo mã: ≥ 4, sửa phản biện R2 cho G6, BUILD_NOTES §7.4; và mép một nhà đánh trong 9 m, §7.3), hồi 12 s đã qua: đứng lại đánh Trống Bụng Lớn trong T | Hủy trống, Tanuki choáng 2 s, +5 Vàng (Lá Tanuki) | Hết T: quái trong 6 m (cả nó) hồi 25 % máu tối đa | Bản đồ 1 Đêm 4 (R2) |
-| **Neo** | Cương Thi Đầu Đàn | Bầy ≥ 4 trong 6 m và cách một nhà < 20 m (hồi 15 s) | Bầy trong 6 m đứng sững 3 s; Đầu Đàn nhận +30 % sát thương 6 s | Bầy đi tiếp (hào quang +20 % tốc trong 6 m luôn có) | Hộp cát (R3) |
-| **Phá Khiên** | Quỷ Núi Troll | Cách một nhà đánh < 25 m (hồi 6 s sau khi vòm tắt): dựng Vòm Đá 4 m trong T | Vòm vỡ, Troll choáng 1,5 s, không dựng lại 10 s | Vòm giữ T giây: đạn từ ngoài vòm vào quái trong vòm −70 % | Hộp cát (R3) |
+| **Neo** | Cương Thi Đầu Đàn | Bầy ≥ 4 trong 6 m và cách một nhà < 20 m (hồi 15 s; theo mã: nhà đánh, như Ngắt, `R3_PLAN.md` §5 A20) | Bầy trong 6 m đứng sững 3 s; Đầu Đàn nhận +30 % sát thương 6 s | Bầy đi tiếp (hào quang +20 % tốc trong 6 m luôn có; bầy không vượt Đầu Đàn quá 1,5 m, A21) | Hộp cát (R3) |
+| **Phá Khiên** | Quỷ Núi Troll | Cách một nhà đánh < 25 m (hồi 6 s sau khi vòm tắt): dựng Vòm Đá 4 m trong T (vòm đi theo Troll, Troll vẫn đi, A22) | Vòm vỡ, Troll choáng 1,5 s, không dựng lại 10 s | Vòm giữ T giây: đạn từ ngoài vòm vào quái trong vòm −70 % (lông Tối Thượng, cận chiến không đổi, A12) | Hộp cát (R3) |
 
 ### 9.3 Ngân sách chú ý
 
@@ -394,7 +394,7 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 | `tanuki` | Lửng Tanuki | R2 | nhỏ | 110 | 0 / 30 | 2,4 | 1 | 12 | 1 | 1 | Ngắt; chỉ trống khi mép một nhà đánh (Lũy, tháp) trong 9 m (`reachM`, BUILD_NOTES §7.3) và ≥ 4 quái khác trong 6 m (`need`, sửa phản biện R2) |
 | `nuppeppo` | Nuppeppō | R2 | nhỏ | 90 | 0 / 0 | 2,6 | 1 | 6 | 1 | 3 | Chết vì sát thương không nổ thì tách 2 con |
 | `nuppeppo-con` | Nuppeppō con | R2 | bầy | 30 | 0 / 0 | 4,0 | 1 | 2 | 1 | 2 | — |
-| `cuong-thi-lead` | Cương Thi Đầu Đàn | R3 | vừa | 160 | 30 / 0 | 3,4 | 2 | 25 | 1 | 1 | Neo; hộp cát |
+| `cuong-thi-lead` | Cương Thi Đầu Đàn | R3 | vừa | 160 | 30 / 0 | 3,4 | 2 | 25 | 1 | 1 | Neo; dẫn bầy (A21); hộp cát |
 | `troll` | Quỷ Núi Troll | R3 | nặng | 600 | 30 / 30 | 2,0 | 3 | 30 | 2 | 1 | Phá Khiên; hộp cát |
 
 - Số từ TK 22.6; Ma Trơi giữ số đã chỉnh (60 máu, lọt 1). Bảng `TIERS` thêm bậc `boss` (vàng 0, lọt 0).
@@ -532,10 +532,10 @@ Chủ dự án chơi bản R1 (§17), và đã từng loại một bản vì hi�
 | Thẻ nhà: Bán (bấm hai lần) | Bán 60 % | R1 |
 | Thẻ Lũy: Nâng Lũy | Nâng Lũy bằng tiền | R1 |
 | Thẻ kết (`src/ui/sheets.ts`, ↑ ↓ chọn, Enter): thêm "Chơi lại Ngày n" đứng đầu, là nút Enter khi n ≥ 2; "Chơi lại" cũ đổi thành "Chơi lại từ đầu" | §4.3 | R1 |
-| Màn kết: "Chép số chơi thử" | Chép `__td.balance()` (JSON) vào bộ nhớ tạm; không được thì tải file `.json`. Cho B9, chủ dự án không phải mở bảng điều khiển trình duyệt | R1 |
+| Màn kết: "Chép số chơi thử" | Chép `__td.balance()` (JSON) vào bộ nhớ tạm; không được thì tải file `.json`. Cho B9, chủ dự án không phải mở bảng điều khiển trình duyệt. R3 phần B (`R3_PLAN.md` §5 A24): luôn lưu file `loi-goi-choi-thu-s<seed>-n<ngày>-<tick>.json` có số và cả nhật ký ván (đầu ván, mọi lệnh), chép cùng nội dung; `scripts/td/b9.ts` chạy lại nhật ký trên Node rồi chấm B9 | R1, R3 |
 | `=` hoặc nút | Tối Thượng ở điểm chuột hay chỗ đông quái | R2 |
 | Cài đặt: Chế độ | Thư giãn, Cân bằng, Thử thách, Học (lưu ở `td.settings`, áp dụng ván sau) | R3 |
-| Hộp cát | `boss` (gọi Mộc Tinh ngay), `skipTo` (sang Ngày n của ải, đợt đã qua tính là xong), `spawn` (quái, số con), `ult` (nạp đầy) | R1 (`boss`, `skipTo`), R2 (`spawn`, `ult`) |
+| Hộp cát | `boss` (gọi Mộc Tinh ngay), `skipTo` (sang Ngày n của ải, đợt đã qua tính là xong), `spawn` (quái, số con), `ult` (nạp đầy); R3: nút "Đầu Đàn" (cùng 5 Cương Thi, một tick, A25), "Troll" | R1 (`boss`, `skipTo`), R2 (`spawn`, `ult`), R3 (nút) |
 
 - Phím `-` vẫn trống (để dành cho 1C). Không phím chữ cái nào là lệnh.
 
@@ -547,8 +547,11 @@ Chủ dự án chơi bản R1 (§17), và đã từng loại một bản vì hi�
 // src/content/types.ts (thêm)
 export type EnemyTier = "swarm" | "small" | "medium" | "heavy" | "boss";
 export type EnemyDef = { /* … */ unblockable?: true; burnTakenMul?: number; ability?: AbilitySpec; split?: { enemy: string; count: number } };
-/** R2 (theo mã sau R2; R3 thêm "anchor" | "shield"): a mechanic a direct call can break (TK 9.2); drums only with an attack building's rim within reachM; broken: stunned stunS, `gold`; let run: heals healPct within radiusM. */
-export type AbilitySpec = { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number };
+/** R2, R3 (theo mã sau R3 bước 7): the three verbs a direct call can break (TK 9.2), each started by an attack building's rim within reachM. */
+export type AbilitySpec =
+  | { verb: "interrupt"; cooldownS: number; radiusM: number; need: number; reachM?: number; healPct: number; stunS: number; gold: number }
+  | { verb: "anchor"; cooldownS: number; radiusM: number; need: number; reachM: number; freezeS: number; takenMul: number; takenS: number; auraSpeed: number }
+  | { verb: "shield"; cooldownS: number; reachM: number; domeM: number; outsideMul: number; stunS: number; lockS: number };
 export type BossDef = {
   enemy: string; retreatPct: number; retreatS: number; chestGold: number; // hit points: the enemy's `hp` (one source)
   kHp: number; kHp2: number; kHpMax: number; modeHp: Partial<Record<Mode, number>>; // §5.6, two-way k, ×modeHp of the run's mode
@@ -575,7 +578,7 @@ export const SELL = { refund: 0.6, confirmS: 3 } as const;
 // theo mã sau sửa phản biện R2 (damage 25 → 21; trực tiếp +3 nằm ở DIRECT.ult)
 export const ULT = { max: 100, perWord: 1.2, shard: 0.6, nightPerS: 0.3, minGapS: 45, castM: 20, autoM: 14, areaM: 6, radiusM: 6, feathers: 12, everyTicks: 10, fallS: 0.8, damage: 21, blastM: 1.5, burnS: 3, bossMul: 0.25, ringM: 12, words: 3, lifeS: 4, perWordFeathers: 3, perfectFeathers: 1, delayS: 0.3 } as const;
 export const SHARDS = { swarm: 0.5, small: 1, medium: 2, heavy: 3, boss: 0, stagger: 6 } as const;
-export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8 } as const;
+export const DIRECT = { open: 2, openBoss: 3, gold: 2, ult: 3, minS: 3, maxS: 7, base: 0.8, leadM: 1.5 } as const; // R3: leadM, a pack within the leader's aura walks at most this far ahead of it (A21)
 export const PANIC = { m: 6, s: 5 } as const; // a helper within m of a rooted building's rim runs home for s seconds
 // PACE.speedK (sẵn có từ bước cân bằng): 0,2 → 0,3 ở sửa phản biện R2 (§6.5 bước 7)
 export const LEARN = { returnS: [25, 45], reviewShare: 0.25, returns: 2, plan: { due: 0.6, current: 0.25, fresh: 0.15 }, freshMax: 8, bookSaved: 40 } as const;
@@ -649,9 +652,9 @@ Kế hoạch làm (file, thứ tự, dạng dữ liệu, chỗ chưa rõ đã ch
 
 1. Luật nghĩa, Từ Ôn, sổ ôn lưu, kế hoạch học, khởi động lạnh, sự kiện học (§11).
 2. Bảng dạy, lịch mở, câu Bà Cú Mực và chip (§12); dòng Chế độ trong Cài đặt; lưu sao.
-3. Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát (cắt đầu tiên nếu vượt trần).
-4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`.
-5. Gói chơi thử cho chủ dự án (§22), xuất nhật ký cho B9.
+3. Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát (cắt đầu tiên nếu vượt trần). **Xong** (R3 phần B, `b8d78d3`; không cắt: 10.413 dòng).
+4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`. **Bot Học và ba kịch bản xong** (phần A, phần B); cân bằng lần cuối là bước kế, sau quyết định gỗ của chủ dự án (26/10/2026).
+5. Gói chơi thử cho chủ dự án (§22), xuất nhật ký cho B9. **Gói xong** (`docs/td/PLAYTEST_1B.md`, `scripts/td/b9.ts`); số B9 chờ chủ dự án chơi.
 
 ---
 
@@ -731,10 +734,10 @@ Chạy với máy chủ dev cổng 3046: `pnpm exec vite --host 127.0.0.1 --port
 | `td-1b-build` | R1 | Màn đầu → "Bắt đầu" vào truyện: không bảng hộp cát, lệnh hộp cát bị từ chối (`noSandbox`), nút khóa hiện "Mở ở Ngày 3". Chỉ bàn phím: xây, nâng (giá đúng), nâng Lũy (Chấm ra), bán bấm hai lần (hoàn 60 %), hoàn tác 5 s; lý do từ chối hiện đúng |
 | `td-1b-perf` | R1 | Boss + `flood(300)` + Mầm Gỗ (R2: + Tối Thượng): ngân sách §20 |
 | `td-1b-ult` | R2 | Nạp đầy bằng hộp cát, `=`: lông rơi có bóng báo, Chữ Chiêu 3 từ gõ thật, +3 lông mỗi từ; bỏ qua Chữ Chiêu không mất gì; cửa sổ 20 s ≤ 8 s |
-| `td-1b-direct` | R2 | `spawn` Tanuki trong bầy: thẻ trên đầu có vòng T; gõ được → choáng, +5 Vàng; bỏ qua → vòng hồi máu; tối đa 2 thẻ trực tiếp |
+| `td-1b-direct` | R2 | `spawn` Tanuki trong bầy: thẻ trên đầu có vòng T; gõ được → choáng, +5 Vàng; bỏ qua → vòng hồi máu; tối đa 2 thẻ trực tiếp. R3: Đầu Đàn và bầy (thẻ ⚓ Neo gõ được: bầy đứng sững 3 s, ×1,3 trong 6 s), Troll (thẻ 🛡️ Phá Khiên gõ được: vòm vỡ, choáng 1,5 s; một vòm để chạy giữ T) |
 | `td-1b-learn` | R3 | Nghĩa hiện 2 lần đầu rồi ẩn (Cân bằng); Từ Ôn quay lại có nhãn "Ôn"; sổ ôn còn sau khi tải lại trang; hàng đợi sự kiện học có sự kiện đúng `gameId` |
 | `td-1b-story` | R3 | Màn đầu → Bản đồ 1: câu Bà Cú Mực và chip ở Ngày 1, Đêm 1, Ngày 3 (≤ 2 câu tự hiện mỗi Ngày, Đêm); Cài đặt đổi chế độ |
-| `td-1b-tour` | R3 | Bộ ảnh cho chủ dự án: làng Ngày 5 có báo boss, lặng trước bão, Rễ Trồi báo và trúng, choáng, Mầm Gỗ, rút, màn thắng, Tối Thượng, Ngắt, Từ Ôn, chip bảng dạy |
+| `td-1b-tour` | R3 | Bộ ảnh cho chủ dự án: làng Ngày 5 có báo boss, lặng trước bão, Rễ Trồi báo và trúng, choáng, Mầm Gỗ, rút, màn thắng, Tối Thượng, Ngắt, Từ Ôn, chip bảng dạy (theo mã: 19 ảnh đánh số, thêm Neo, bầy đứng sững, Phá Khiên, vòm vỡ, "Chuộc lại"; file "Chép số chơi thử" bắt được và chạy lại trên Node ra cùng mã băm) |
 
 - Ảnh ở `OUT_DIR` ngoài repo (không media trong Git). Mỗi hiệu ứng phải nhìn thấy trong ảnh chậm (hạn chót: AI tự xem ảnh trước khi báo xong).
 
@@ -774,7 +777,7 @@ Chạy với máy chủ dev cổng 3046: `pnpm exec vite --host 127.0.0.1 --port
 
 ## 22. Chủ dự án chơi thử (1280 × 720, khoảng 30 phút)
 
-Trước khi chơi: Cài đặt → Nhịp tự điều **Bật**, chế độ Cân bằng. Sau mỗi ván: ở màn kết bấm **"Chép số chơi thử"** và dán vào một file gửi lại (hồ sơ và chỉ số cho B9; không cần mở bảng điều khiển trình duyệt).
+Trước khi chơi: Cài đặt → Nhịp tự điều **Bật**, chế độ Cân bằng. Sau mỗi ván: ở màn kết bấm **"Chép số chơi thử"** và dán vào một file gửi lại (hồ sơ và chỉ số cho B9; không cần mở bảng điều khiển trình duyệt). R3 phần B: nút này lưu luôn file `.json` vào Tải về, có cả nhật ký ván; gửi các file đó. Gói chơi thử đủ (chuẩn bị ở 1280 × 720, phiếu 11 câu, cách điều phối viên chấm B9 bằng `node --import tsx scripts/td/b9.ts <file>… --seeds=40`): `docs/td/PLAYTEST_1B.md`.
 
 1. **Một ván đủ bản đồ 1** (khoảng 12 phút). Cuối ván ghi: thắng hay thua, còn bao nhiêu mạng, mấy sao.
 2. Ngày 5: có thấy báo Mộc Tinh và mạch rễ trên nhánh nó đi không? Có làm gì khác đi vì lời báo không (thêm tháp trên nhánh đó, bán tháp bên kia, nâng nhà, dời Tướng)?
