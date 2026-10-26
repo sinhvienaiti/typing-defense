@@ -18,7 +18,7 @@ import { NPC_KIND, TASK } from "../stores/npcs";
 import { MODE } from "../stores/walkers";
 import type { World } from "../world";
 import { passive, slotsOpen, stand, toward, walk, walkTo } from "./agents";
-import { closeCall, endWork, makeCall } from "./calls";
+import { chopTree, closeCall, endWork, makeCall } from "./calls";
 import { selectTargets } from "./combat";
 import { callScale } from "./pace";
 
@@ -158,7 +158,11 @@ function chooseTree(w: World, n: number): number {
   return -1;
 }
 
-/** §4.2: an idle villager walks (A*) to its tree, chops it in 20 s (a 4-word call); it falls for 8 wood at once. A tree with no way to it is left (−2) until marked again. */
+/**
+ * §4.2: an idle villager walks (A*) to its tree and chops it, 45 s a 4-word call (none by night: trees that never run out
+ * made chop words crowd out the towers' calls), its wood paid as it goes; then it picks a tree again (a mark may call it
+ * away). A tree with no way to it is left (−2) until marked again.
+ */
 function villager(w: World, n: number): void {
   const N = w.npcs;
   const T = w.trees;
@@ -179,15 +183,23 @@ function villager(w: World, n: number): void {
     if (N.mode[n] === MODE.walk) walk(w, N, n, NPC.speed);
     if (N.mode[n] === MODE.walk) return;
     N.task[n] = TASK.working;
-    N.call[n] = makeCall(w, CALL_KIND.chop, CALL.words.chop, n, -1, t, -1);
+    N.call[n] = w.phase === "night" ? -1 : makeCall(w, CALL_KIND.chop, CALL.words.chop, n, -1, t, -1);
   }
-  if (addAt(T.progress, t, passive(w, N.x[n]!, N.z[n]!) / CHOP) < DONE) return;
-  T.standing[t] = 0;
+  if (!chopTree(w, t, passive(w, N.x[n]!, N.z[n]!) / CHOP)) return;
+  T.progress[t] = 0;
+  if (T.left[t] === 0) return fell(w, t);
   T.worker[t] = -1;
-  w.wood += TREE.wood;
-  bump(w.stats, STAT.wood, TREE.wood);
-  w.events.rare.push({ t: "felled", tick: w.tick, tree: t });
   endWork(w, N.call[n]!);
+  idle(w, n);
+}
+
+/** Tree t falls (its wood all paid, or the sandbox's "fell"): a stump till the next day; its villager looks for another. */
+export function fell(w: World, t: number): void {
+  const n = w.trees.worker[t]!;
+  [w.trees.standing[t], w.trees.left[t], w.trees.progress[t], w.trees.worker[t]] = [0, 0, 0, -1];
+  w.events.rare.push({ t: "felled", tick: w.tick, tree: t });
+  if (n < 0) return;
+  endWork(w, w.npcs.call[n]!);
   idle(w, n);
 }
 

@@ -17,7 +17,7 @@ import { NPC_KIND, TASK } from "./stores/npcs";
 import { moveAgent, orderAgent, recallAgent, releaseBuilding, reroute, slotsOpen } from "./systems/agents";
 import { callBoss } from "./systems/boss";
 import { closeCall, closeCallsOf, configureDeck, typeKey } from "./systems/calls";
-import { addVillager, countNpcs, finishSite, releaseNpc, staffBuilders, villagerCap } from "./systems/economy";
+import { addVillager, countNpcs, fell, finishSite, releaseNpc, staffBuilders, villagerCap } from "./systems/economy";
 import { setPaceMode } from "./systems/pace";
 import { flood, queuePacks } from "./systems/spawn";
 import { castUlt } from "./systems/ult";
@@ -39,7 +39,8 @@ export type SandboxOp =
   | { op: "boss" }
   | { op: "skipTo"; value: number }
   | { op: "spawn"; enemy: string; value: number }
-  | { op: "ult" };
+  | { op: "ult" }
+  | { op: "fell"; value: number };
 
 export type CommandBody =
   | { t: "build"; def: number; qx: number; qz: number }
@@ -301,6 +302,8 @@ function sandbox(w: World, op: SandboxOp): string | null {
     case "ult":
       [w.ult.charge, w.ult.castAt] = [ULT.max, -0x40000000];
       return null;
+    case "fell": // a standing tree down at once (the owner's wood rule: it grows back the next day; td-1b-wood)
+      return Number.isInteger(op.value) && w.trees.standing[op.value] === 1 ? (fell(w, op.value), null) : "noTree";
   }
 }
 

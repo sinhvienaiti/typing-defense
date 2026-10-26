@@ -201,6 +201,18 @@ export function closeCallsOf(w: World, b: number): void {
   for (const c of w.calls.live()) if (w.calls.b[c] === b) closeCall(w, c);
 }
 
+/** Pushes tree t's chop by `part`: its wood paid as the chop passes each one, from what it holds (owner, 26/10/2026); done or empty. */
+export function chopTree(w: World, t: number, part: number): boolean {
+  const T = w.trees;
+  const paidAt = (p: number): number => (p >= DONE ? TREE.wood : Math.floor(p * TREE.wood));
+  const before = paidAt(T.progress[t]!);
+  const paid = Math.min(T.left[t]!, paidAt(addAt(T.progress, t, part)) - before);
+  T.left[t] = T.left[t]! - paid;
+  w.wood += paid;
+  bump(w.stats, STAT.wood, paid);
+  return T.progress[t]! >= DONE || T.left[t] === 0;
+}
+
 /** The work a word moves, `share` of one word's part (§5.1); returns whether the call's own work is now done. */
 function work(w: World, c: number, share: number, word: number, len: number, quality: number, crit: boolean, soon: number): boolean {
   const C = w.calls;
@@ -211,7 +223,7 @@ function work(w: World, c: number, share: number, word: number, len: number, qua
     case CALL_KIND.harvest:
       return addAt(B.plotWork, b * FARM.plots + C.plot[c]!, part) >= DONE;
     case CALL_KIND.chop:
-      return addAt(w.trees.progress, C.tree[c]!, part) >= DONE;
+      return chopTree(w, C.tree[c]!, part);
     case CALL_KIND.build:
       return addAt(B.progress, b, part) >= DONE;
     case CALL_KIND.mine: {

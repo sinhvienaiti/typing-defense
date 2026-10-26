@@ -15,7 +15,7 @@ export type Tip = { line: string; chip: string };
 export const TIPS: Readonly<Record<string, Tip>> = {
   day1: { line: "Lúa chín, bác nông dân gọi. Đưa Draconis tới, gõ chữ trên bong bóng.", chip: "Gõ chữ đầu để chọn · Esc để thôi" },
   night1: { line: "Đêm xuống, tháp gọi khi quái tới gần. Gõ là bắn Phát Chữ.", chip: "Bỏ qua lời gọi không mất gì" },
-  day2: { line: "Gỗ để xây nhà. Bấm cây để đánh dấu chặt.", chip: "Shift + \\ thuê dân" },
+  day2: { line: "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt.", chip: "Shift + \\ thuê dân" },
   night2: { line: "Ma Trơi bay qua đầu lính. Tháp Cung và Draconis bắn được.", chip: "" },
   day3: { line: "Nâng Lũy thì Chấm ra giúp. Thư Đồng làm việc nhanh hơn.", chip: "1–4 chọn người · Enter gửi đi" },
   night3: { line: "Lông lửa đầy rồi! Bấm = rồi gõ thêm chữ cho mưa to hơn.", chip: "= Tối Thượng" },

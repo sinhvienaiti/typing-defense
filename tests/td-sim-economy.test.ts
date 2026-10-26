@@ -11,7 +11,9 @@ import { CELL } from "../src/sim/nav/grid";
 import { MODE } from "../src/sim/stores/walkers";
 import { damageEnemy } from "../src/sim/systems/combat";
 import { countNpcs } from "../src/sim/systems/economy";
-import { step, type World } from "../src/sim/world";
+import type { Command, CommandBody } from "../src/sim/commands";
+import { hashHex } from "../src/sim/hash";
+import { runLog, step, type World } from "../src/sim/world";
 import { build, built, def, goTo, q, ready, run, send, world } from "./td/fixtures";
 
 /** Day and night, farms, trees, villagers, sites, mines and the money they make (docs/td/BUILD_1A6.md §2–§4). */
@@ -170,8 +172,9 @@ describe("farms (§4.1)", () => {
 });
 
 describe("villagers and trees (§4.2)", () => {
-  it("two villagers start; unmarked they chop the trees nearest the Bastion within 30 m, one a tree; a tree falls after its chop time for its wood, its stump blocks nothing", () => {
+  it("two villagers start; unmarked they chop the trees nearest the Bastion within 30 m, one a tree; the wood comes as the chop goes, from the tree's reserve; the tree stands on", () => {
     const w = world();
+    w.phaseEnd = 1e9; // a day with no end: no new day refills the trees
     expect(countNpcs(w, NPC_KIND.villager)).toBe(VILLAGERS.start);
     run(w, 2);
     const [kx, kz] = w.map.keep;
@@ -179,17 +182,88 @@ describe("villagers and trees (§4.2)", () => {
     near.sort((a, b) => Math.hypot(w.map.trees[a]![0] - kx, w.map.trees[a]![1] - kz) - Math.hypot(w.map.trees[b]![0] - kx, w.map.trees[b]![1] - kz) || a - b);
     const taken = [...w.trees.worker.keys()].filter((t) => w.trees.worker[t]! >= 0).sort((a, b) => a - b);
     expect(taken).toEqual(near.slice(0, 2).sort((a, b) => a - b));
-    const wood = w.wood;
+    expect(w.trees.left.every((left) => left === TREE.reserve)).toBe(true);
     const tree = taken[0]!;
-    until(w, () => w.trees.standing[tree] === 0, T(TREE.chopS + 20));
-    expect(w.wood - wood).toBeGreaterThanOrEqual(TREE.wood);
-    expect(w.trees.worker[tree]).toBe(-1);
-    // Seven trees lie within 30 m: once they are down, the villagers wait for marks.
-    run(w, T(4 * TREE.chopS + 60));
-    expect(near.every((t) => w.trees.standing[t] === 0)).toBe(true);
-    expect(near.length).toBe(7);
-    expect(w.npcs.live().filter((n) => w.npcs.kind[n] === NPC_KIND.villager).every((n) => w.npcs.task[n] === TASK.idle)).toBe(true);
-    expect(w.wood).toBe(ECONOMY.start.wood + 7 * TREE.wood);
+    until(w, () => w.trees.progress[tree]! > 0);
+    const [wood, start] = [w.wood, w.tick];
+    // Half a chop alone pays half its wood, a wood at a time (the owner's rule, 26/10/2026: not all at the fall).
+    until(w, () => w.tick - start >= T(TREE.chopS / 2), T(TREE.chopS));
+    expect(w.wood - wood).toBeGreaterThanOrEqual(2 * (TREE.wood / 2 - 1));
+    expect(w.wood - wood).toBeLessThanOrEqual(2 * (TREE.wood / 2));
+    expect(TREE.reserve - w.trees.left[tree]!).toBe(Math.floor(w.trees.progress[tree]! * TREE.wood + 1e-9));
+    // A whole chop pays TREE.wood; the villager picks a tree again, the same one, and chops on: no tree falls.
+    run(w, T(4 * TREE.chopS));
+    expect(near.every((t) => w.trees.standing[t] === 1)).toBe(true);
+    expect(w.wood - ECONOMY.start.wood).toBe(2 * TREE.reserve - w.trees.left[taken[0]!]! - w.trees.left[taken[1]!]!);
+    expect(w.wood - ECONOMY.start.wood).toBeGreaterThanOrEqual(8 * TREE.wood);
+    expect(w.stats[STAT.wood]).toBe(w.wood - ECONOMY.start.wood);
+    expect([w.trees.worker[taken[0]!]! >= 0, w.trees.worker[taken[1]!]! >= 0]).toEqual([true, true]);
+  });
+
+  it("a tree falls only once its reserve is paid, to a stump that blocks nothing; its villager moves on; it stands again, full, at the next day's start only (owner, 26/10/2026)", () => {
+    const w = world();
+    run(w, 2);
+    const tree = w.trees.worker.findIndex((n) => n >= 0);
+    const other = w.trees.worker.findIndex((n, t) => n >= 0 && t !== tree);
+    w.trees.left[tree] = 3;
+    const wood = w.wood;
+    until(w, () => w.trees.standing[tree] === 0, T(TREE.chopS));
+    expect([w.wood - wood - (TREE.reserve - w.trees.left[other]!), w.trees.left[tree], w.trees.worker[tree], w.trees.progress[tree]]).toEqual([3, 0, -1, 0]);
+    expect(w.events.rare.some((event) => event.t === "felled" && event.tree === tree)).toBe(true);
+    run(w, 3);
+    expect(w.npcs.live().filter((n) => w.npcs.kind[n] === NPC_KIND.villager).every((n) => w.npcs.job[n] !== tree)).toBe(true);
+    // Mid-day nothing grows back, and a chopped tree is not refilled; the night neither.
+    run(w, T(20));
+    send(w, { t: "callNight" });
+    expect([w.trees.standing[tree], w.trees.left[other]! < TREE.reserve]).toEqual([0, true]);
+    clearNight(w);
+    run(w, T(PHASE.dawnS));
+    expect([w.phase, w.day]).toEqual(["day", 2]);
+    expect([w.trees.standing[tree], w.trees.left[tree], w.trees.left[other]]).toEqual([1, TREE.reserve, TREE.reserve]);
+  });
+
+  it("a stump under a building stays a stump at the day's start; the sandbox's fell takes a standing tree only", () => {
+    const w = world({ gold: 1000 });
+    const [x, z] = w.map.trees[28]!;
+    expect(send(w, { t: "sandbox", op: { op: "fell", value: 28 } }).some((event) => event.t === "felled")).toBe(true);
+    expect(send(w, { t: "sandbox", op: { op: "fell", value: 28 } }).find((event) => event.t === "rejected")).toMatchObject({ reason: "noTree" });
+    const site = built(w, "archer", x, z); // on the stump: nothing stands in the way now
+    send(w, { t: "sandbox", op: { op: "fell", value: 27 } });
+    send(w, { t: "sandbox", op: { op: "skipTo", value: 2 } });
+    expect([w.trees.standing[28], w.trees.standing[27], w.trees.left[27]]).toEqual([0, 1, TREE.reserve]);
+    expect(w.buildings.used[site]).toBe(1);
+  });
+
+  it("the wood rule replays: chops, a fall and a regrown day step to the same hash from the log", () => {
+    const w = world();
+    const log: Command[] = [];
+    const go = (body: CommandBody) => {
+      log.push({ ...body, tick: w.tick } as Command);
+      step(w, [log[log.length - 1]!]);
+    };
+    run(w, T(30));
+    go({ t: "sandbox", op: { op: "fell", value: w.trees.worker.findIndex((n) => n >= 0) } });
+    run(w, T(20));
+    go({ t: "sandbox", op: { op: "skipTo", value: 2 } });
+    run(w, T(30));
+    const again = world();
+    runLog(again, log, w.tick);
+    expect(hashHex(again)).toBe(hashHex(w));
+    expect(Array.from(again.trees.left)).toEqual(Array.from(w.trees.left));
+  });
+
+  it("by night a villager chops on without a call; a chop call left open at nightfall lives a power call's time (the towers' calls first)", () => {
+    const w = world();
+    until(w, () => w.calls.live().some((c) => w.calls.kind[c] === CALL_KIND.chop));
+    const open = w.calls.live().find((c) => w.calls.kind[c] === CALL_KIND.chop)!;
+    send(w, { t: "callNight" });
+    expect(w.calls.expire[open]).toBe(w.tick - 1 + T(CALL.powerLifeS));
+    w.waveLeft[1] = w.waveLeft[1]! + 1000; // the night held open
+    const made: number[] = [];
+    const wood = w.wood;
+    for (let k = 0; k < T(TREE.chopS + 5) && w.phase === "night"; k += 1) made.push(...send(w).filter((event) => event.t === "call" && event.kind === CALL_KIND.chop && event.state === "made").map(() => w.tick));
+    expect([w.phase, w.calls.used[open], made]).toEqual(["night", 0, []]);
+    expect(w.wood - wood).toBeGreaterThanOrEqual(2 * TREE.wood - 2); // both villagers chopped a whole chop alone
   });
 
   it("a marked tree nearest the villager comes first; a mark toggles; a stump takes none", () => {

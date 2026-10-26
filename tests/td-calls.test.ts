@@ -286,33 +286,36 @@ describe("work by hand and by typing (§5.1)", () => {
     return { w, c, tree: w.calls.tree[c]! };
   }
 
-  it("self-work and typed words add up: one Perfect word of four takes a quarter off the chop; a call the worker ends costs nothing and pays no bonus (review R1)", () => {
+  it("self-work and typed words add up: one Perfect word of four takes a quarter off the chop and pays its wood at once; a call the worker ends costs nothing and pays no bonus (review R1)", () => {
     const { w, c, tree } = chopping();
     const started = w.calls.born[c]!;
-    const [chain, wood] = [w.typing.chain, w.wood];
+    const [chain, left, owed] = [w.typing.chain, w.trees.left[tree]!, TREE.wood - Math.floor(w.trees.progress[tree]! * TREE.wood)];
+    const paid = () => left - w.trees.left[tree]!;
+    const before = paid();
     type(w, wordOfCall(w, c), 60, true);
     expect(w.typing.chain).toBe(chain + 1);
-    let felled = -1;
-    for (let k = 0; k < T(TREE.chopS) && felled < 0; k += 1) {
+    expect(paid() - before).toBeGreaterThanOrEqual(TREE.wood / 4); // the word's quarter, paid as it lands (owner, 26/10/2026)
+    let done = -1;
+    for (let k = 0; k < T(TREE.chopS) && done < 0; k += 1) {
       step(w);
-      if (w.trees.standing[tree] === 0) felled = w.tick - 1;
+      if (w.calls.used[c] === 0) done = w.tick - 1;
     }
-    expect(felled - started).toBeGreaterThanOrEqual(T(TREE.chopS) * 0.75 - 2);
-    expect(felled - started).toBeLessThanOrEqual(T(TREE.chopS) * 0.75 + 2);
-    expect(w.calls.used[c]).toBe(0); // closed with the tree, three words untyped
-    expect(w.wood).toBe(wood + TREE.wood); // one Perfect word is not a whole Perfect call
+    expect(done - started).toBeGreaterThanOrEqual(T(TREE.chopS) * 0.75 - 2);
+    expect(done - started).toBeLessThanOrEqual(T(TREE.chopS) * 0.75 + 2);
+    expect([w.trees.standing[tree], w.trees.progress[tree], paid()]).toEqual([1, 0, owed]); // the chop done, the tree on
     expect(w.events.rare.find((event) => event.t === "callEnd")).toMatchObject({ perfect: false, finished: false });
     expect(w.typing.chain).toBe(chain + 1);
   });
 
-  it("answered to the end, every word Perfect: the word that fells the tree earns the bonus, though self-work spared the last one", () => {
+  it("answered to the end, every word Perfect: the word that ends the chop earns the bonus, though self-work spared the last one", () => {
     const { w, c, tree } = chopping();
-    const wood = w.wood;
+    const lost = () => TREE.reserve * w.trees.count - w.trees.left.reduce((sum, left) => sum + left, 0);
+    const [wood, lost0] = [w.wood, lost()];
     run(w, T(TREE.chopS * 0.28)); // over a quarter of the chop done alone: three Perfect words of four finish it
     for (let k = 0; k < 3; k += 1) type(w, wordOfCall(w, c), 60, true);
-    expect([w.trees.standing[tree], w.calls.used[c], w.calls.done[c]]).toEqual([0, 0, 3]);
-    expect(w.wood).toBe(wood + TREE.wood + TREE.perfectWood);
+    expect([w.trees.standing[tree], w.trees.progress[tree], w.calls.used[c], w.calls.done[c]]).toEqual([1, 0, 0, 3]);
     expect(w.events.rare.find((event) => event.t === "callEnd")).toMatchObject({ perfect: true, finished: true });
+    expect(w.wood - wood).toBe(lost() - lost0 + TREE.perfectWood); // every wood from a reserve, the bonus on top
   });
 
   it("a sloppy word pushes the work ×CALL.sloppy (×1 since balance step 4: the pace k already prices accuracy)", () => {

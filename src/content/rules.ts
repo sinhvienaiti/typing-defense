@@ -57,11 +57,12 @@ export const CHAIN = {
  * helper's quiz every 25 s by day; the review book holds 20 words, a word with 2 errors goes in like a sloppy one.
  * The director's word budget (review R3, docs/td/BUILD_NOTES.md §5): a word's lock time at E ×paceK, and slipS
  * more for slips, must fit the 20 s window (the bot at 35 WPM, 95 %: no window past 8 s, 30 % of the day typed;
- * 1B R2: 1.1 → 1.15 s, a chain of chop words ran one window to 8.13 s, BUILD_NOTES §7.3).
+ * 1B R2: 1.1 → 1.15 s, a chain of chop words ran one window to 8.13 s, BUILD_NOTES §7.3; 1.35 s with trees that never
+ * run out, the owner's wood rule of 26/10/2026: chop chains ran windows to 8.60 and 8.43 s, BUILD_NOTES §7.8).
  */
 export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
-  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.15,
+  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.35,
 } as const;
 /**
  * BUILD_1B §11 (R3, docs/td/R3_PLAN.md §3.2–§3.4): a word of the review book comes back returnS after it went in as the next
@@ -121,12 +122,11 @@ export const STARS = [18, 6, 1] as const;
 /** §4.1: 4 plots a farm, 1.1 m off its centre; sow 2 s, grow 40 s, harvest 12 s for 5 food; seeds 4 for 30 gold, or 1 for 8 bought on the spot. */
 export const FARM = { plots: 4, plotM: 1.1, sowS: 2, growS: 40, harvestS: 12, food: 5, pack: { seeds: 4, gold: 30 }, seedGold: 8, perfectFood: 3 } as const;
 /**
- * §4.2: a tree blocks building within 1.5 m; unmarked, only trees within 30 m of the Bastion are chopped. It falls
- * after 45 s of chopping for 12 wood (§4.2 said 20 s, 8 wood; review R3: alone a villager earns a third less, 0.27
- * wood/s, not 0.4; a call has time to be answered before the tree falls by itself; and the sandbox's 36 trees hold
- * 432 wood, not 288, which the typing bot had felled by day 4).
+ * §4.2: a tree blocks building within 1.5 m; unmarked, only trees within 30 m of the Bastion are chopped. A chop (a call)
+ * is 45 s for 12 wood, paid as it goes (review R3: 0.27 wood/s alone). The owner's rule (26/10/2026): a tree holds
+ * `reserve` wood, falls only once it is all paid (an hour alone), and every new day stands again full (waves.ts regrow).
  */
-export const TREE = { radiusM: 1.5, wood: 12, chopS: 45, perfectWood: 2, nearKeepM: 30 } as const;
+export const TREE = { radiusM: 1.5, wood: 12, chopS: 45, perfectWood: 2, nearKeepM: 30, reserve: 1000 } as const;
 /** §4.2: villagers at the start, a hire's price, the most by Bastion level. NPCs walk at `speed` m/s (not in the design; a starting number). */
 export const VILLAGERS = { start: 2, gold: 25, food: 5, cap: [3, 5, 7, 9] } as const;
 export const NPC = { speed: 3, farmSpeed: 1.5 } as const;

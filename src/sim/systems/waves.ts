@@ -6,9 +6,10 @@
  * left: each wave pays 10 + 2 × its number; a 3 s dawn, then the next day.
  */
 import { ticks, waveSchedule } from "../../content/compile";
-import { ECONOMY, MODES, PHASE, TICK_HZ } from "../../content/rules";
+import { CALL, ECONOMY, MODES, PHASE, TICK_HZ, TREE } from "../../content/rules";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
+import { CALL_KIND } from "../stores/calls";
 import { gapScale } from "./pace";
 import type { Mode } from "../../content/types";
 import type { World } from "../world";
@@ -17,7 +18,20 @@ export function enter(w: World, phase: "day" | "night" | "dawn", length: number)
   w.phase = phase;
   w.phaseEnd = length < 0 ? -1 : w.tick + length;
   if (phase === "day") w.dayStarts[w.day] = w.tick + 1;
+  if (phase === "day") regrow(w);
+  // Night falls: a chop call left open lives a power call's time; the villagers chop on alone (economy.ts: no new one by night).
+  for (const c of phase === "night" ? w.calls.live() : []) if (w.calls.kind[c] === CALL_KIND.chop) w.calls.expire[c] = w.tick + ticks(CALL.powerLifeS);
   w.events.rare.push({ t: "phase", tick: w.tick, phase, day: w.day });
+}
+
+/** A new day (the owner's rule, 26/10/2026): every tree holds its whole reserve again; a stump grows back unless a building stands on it now. */
+function regrow(w: World): void {
+  const B = w.buildings;
+  w.map.trees.forEach(([x, z], t) => {
+    const near = (b: number): boolean => (B.x[b]! - x) * (B.x[b]! - x) + (B.z[b]! - z) * (B.z[b]! - z) < (w.c.buildings[B.def[b]!]!.radius + TREE.radiusM) * (w.c.buildings[B.def[b]!]!.radius + TREE.radiusM);
+    if (w.trees.standing[t] === 0 && B.live().some(near)) return;
+    [w.trees.standing[t], w.trees.left[t]] = [1, TREE.reserve];
+  });
 }
 
 /** The day `key` (a building id, "keep2", "keep3", "upgrade") opens in the story (BUILD_1B §12); the sandbox opens all. */

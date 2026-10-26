@@ -102,7 +102,7 @@ export function installDevTools(ctx: DevContext): void {
         review: Array.from(T.review.subarray(0, T.reviewN), (word) => wordText(deck, word)),
         reviewAt: Array.from(T.reviewAt.subarray(0, T.reviewN)), reviewBack: Array.from(T.reviewBack.subarray(0, T.reviewN)),
         learn: { dueDealt: world.learn.dueDealt, freshDealt: world.learn.freshDealt, live: world.learn.live },
-        trees: world.map.trees.map(([x, z], t) => ({ x, z, standing: world.trees.standing[t] === 1, marked: world.trees.marked[t] === 1 })),
+        trees: world.map.trees.map(([x, z], t) => ({ x, z, standing: world.trees.standing[t] === 1, marked: world.trees.marked[t] === 1, left: world.trees.left[t]!, worker: world.trees.worker[t]!, progress: world.trees.progress[t]! })),
       };
     },
   };

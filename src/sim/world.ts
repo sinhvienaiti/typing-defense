@@ -7,7 +7,7 @@
  */
 import { createRng, type Rng } from "../kit/platform/rng";
 import { compile, ticks, type Compiled } from "../content/compile";
-import { CALL, ECONOMY, EXPECTED, MODES, STORE, VILLAGERS } from "../content/rules";
+import { CALL, ECONOMY, EXPECTED, MODES, STORE, TREE, VILLAGERS } from "../content/rules";
 import { SLICE_1A } from "../content/slice-1a";
 import type { Content, MapDef, Mode } from "../content/types";
 import { compileDeck, type Deck } from "../typing/decks";
@@ -179,7 +179,7 @@ export function createWorld(options: WorldOptions): World {
     words: new WordStore(STORE.words),
     agents: new AgentStore(STORE.agents),
     npcs: new NpcStore(STORE.npcs),
-    trees: new TreeStore(map.trees.length),
+    trees: new TreeStore(map.trees.length, TREE.reserve),
     calls: new CallStore(STORE.calls),
     typing: createTyping(deck),
     stats: createStats(),

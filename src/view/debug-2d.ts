@@ -71,6 +71,9 @@ export class DebugView {
   private baseKey = "";
   private dark = 0;
   private darkAt = -1;
+  /** Each tree as last drawn (standing or not) and when it began to grow back, ms. */
+  private stood = new Uint8Array(0);
+  private grownAt = new Float64Array(0);
   private scale = 1;
   private ox = 0;
   private oy = 0;
@@ -410,34 +413,40 @@ export class DebugView {
 
   /**
    * Bamboo clumps from above: a dark round clump edged in ink (a gold rim when marked) with five light culm
-   * tops in it, a cut ring once felled; the chop's bar under it. One path per layer for every tree.
+   * tops in it, a cut ring once felled; the chop's bar under it and the wood the clump still holds (the owner's rule,
+   * 26/10/2026); a stump that stands again at a day's start grows in, staggered, in a fading green ring. One path a layer.
    */
   private trees(w: World): void {
     const { ctx } = this;
-    const r = TREE.radiusM;
-    const standing = w.map.trees.filter((_, t) => w.trees.standing[t] === 1);
+    const T = w.trees;
+    const now = performance.now();
+    if (this.stood.length !== T.count) [this.stood, this.grownAt] = [Uint8Array.from(T.standing), new Float64Array(T.count).fill(-1e9)];
+    const grow = (t: number): number => Math.max(0, Math.min(1, (now - this.grownAt[t]!) / 900)) - 1;
+    const r = (t: number): number => TREE.radiusM * Math.max(0, 1 + 2.7 * grow(t) ** 3 + 1.7 * grow(t) ** 2); // eased out, a little past full
+    T.standing.forEach((up, t) => (up > this.stood[t]! && (this.grownAt[t] = now + (t % 7) * 90), (this.stood[t] = up)));
+    const standing = [...w.map.trees.keys()].filter((t) => T.standing[t] === 1);
     ctx.beginPath();
-    for (const [x, z] of standing) {
-      ctx.moveTo(x + r, z);
-      ctx.arc(x, z, r, 0, Math.PI * 2);
-    }
+    for (const t of standing) ctx.moveTo(w.map.trees[t]![0] + r(t), w.map.trees[t]![1]), ctx.arc(w.map.trees[t]![0], w.map.trees[t]![1], r(t), 0, Math.PI * 2);
     Object.assign(ctx, { fillStyle: COLOR.bamboo, strokeStyle: COLOR.ink, lineWidth: this.px(1) });
     ctx.fill();
     ctx.stroke();
     ctx.beginPath();
-    for (const [x, z] of standing) {
+    for (const t of standing) {
+      const [x, z] = w.map.trees[t]!;
       for (let k = 0; k < 5; k += 1) {
         const a = k * 1.2566 + x;
-        ctx.moveTo(x + Math.cos(a) * r * 0.48 + r * 0.2, z + Math.sin(a) * r * 0.48);
-        ctx.arc(x + Math.cos(a) * r * 0.48, z + Math.sin(a) * r * 0.48, r * 0.2, 0, Math.PI * 2);
+        ctx.moveTo(x + Math.cos(a) * r(t) * 0.48 + r(t) * 0.2, z + Math.sin(a) * r(t) * 0.48);
+        ctx.arc(x + Math.cos(a) * r(t) * 0.48, z + Math.sin(a) * r(t) * 0.48, r(t) * 0.2, 0, Math.PI * 2);
       }
     }
     ctx.fillStyle = COLOR.culm;
     ctx.fill();
     w.map.trees.forEach(([x, z], t) => {
-      if (w.trees.standing[t] === 0) return this.disc(x, z, 0.45, COLOR.stump, COLOR.ink, 1);
-      if (w.trees.marked[t] === 1) this.disc(x, z, r, null, COLOR.lamp, 3.5);
-      if (w.trees.progress[t]! > 0) this.bar(x, z + r + 0.4, 2.4, w.trees.progress[t]!, COLOR.lamp);
+      if (T.standing[t] === 0 || grow(t) < 0) this.disc(x, z, 0.45, COLOR.stump, COLOR.ink, 1);
+      if (T.standing[t] === 0) return;
+      if (grow(t) < 0) this.disc(x, z, TREE.radiusM * (1.6 + grow(t)), null, `rgba(95, 170, 60, ${-grow(t)})`, 3);
+      if (T.marked[t] === 1) this.disc(x, z, TREE.radiusM, null, COLOR.lamp, 3.5);
+      if (T.progress[t]! > 0) this.bar(x, z + TREE.radiusM + 0.4, 2.4, T.progress[t]!, COLOR.lamp), this.text(T.left[t] + "/" + TREE.reserve, x, z + TREE.radiusM + 1.9, 9, COLOR.ink, 800, COLOR.stump);
     });
   }
 
