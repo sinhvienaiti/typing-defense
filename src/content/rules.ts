@@ -111,7 +111,7 @@ export const COMBAT = { critMul: 1.15, armorTiers: [0, 30, 60, 80], minDamage: 1
 /** §3: the run's start; a building's old price G becomes round(0.3 G) wood and the rest gold; a food sale, a wood sale (1B R1 review). */
 export const ECONOMY = {
   start: { gold: 220, wood: 40, food: 0, seeds: 4 }, lives: 20,
-  earlyCall: { goldPerS: 1, goldCap: 30 }, waveBonus: { base: 10, perWave: 2 },
+  earlyCall: { goldCap: 30 }, waveBonus: { base: 10, perWave: 2 },
   undoWindowS: 5, woodShare: 0.3, sale: { food: 10, gold: 10, wood: 10, woodGold: 4 },
 } as const;
 /** BUILD_1B §7: a finished building sells for 60 % of what it cost (rounded down); the HUD asks twice within 3 s. */

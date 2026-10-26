@@ -9,7 +9,7 @@ import { BOSS } from "../sim/stores/boss";
 import { CALL_KIND } from "../sim/stores/calls";
 import { bossSlot } from "../sim/systems/boss";
 import { chainTier } from "../sim/systems/chain";
-import { earlyCallBonus, locked, opensOn } from "../sim/systems/waves";
+import { dayTicks, earlyCallBonus, locked, opensOn } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { Rect } from "../view/words/lanes";
@@ -42,7 +42,7 @@ const stat = (label: string, value: string): string => `<span class="td-stat"><s
 
 /**
  * Pause and sound; the resources and lives (BUILD_1A6 §9; a blow on the Bastion flashes "−3" there); "Ngày 2 · 0:41",
- * "Đêm 2 · còn 12 quái" or dawn; knowledge and the review book once there are any (§7); the early night call's gold (§2).
+ * "Đêm 2 · còn 12 quái" or dawn; knowledge and the review book once there are any (§7); the early night call (§2).
  */
 export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: boolean, notices: readonly string[], hit = 0): string {
   const left = Math.max(0, Math.ceil((w.phaseEnd - w.tick) / TICK_HZ));
@@ -56,10 +56,18 @@ export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: b
     `<div class="td-row">${stat("Vàng", String(Math.floor(w.gold / 1000)))}${stat("Gỗ", String(w.wood))}${stat("Lúa", String(w.food))}${stat("Hạt", String(w.seeds))}${stat("Mạng", lives)}</div>` +
     `<p class="td-phase"><b>${phase}</b></p>` +
     (w.knowledge > 0 || w.typing.reviewN > 0 ? `<p class="td-learn">Tri thức <b>${w.knowledge}</b> · Sổ ôn <b>${w.typing.reviewN}</b></p>` : "") +
-    (w.phase === "defeat" ? `<p class="td-warn">Lũy đã mất hết mạng</p>` : w.phase === "day" ? button("night", `Gọi đêm sớm · +${earlyCallBonus(w)} vàng`, "⇧ Enter", ' class="td-call"') : "") +
+    (w.phase === "defeat" ? `<p class="td-warn">Lũy đã mất hết mạng</p>` : w.phase === "day" ? earlyHtml(w, left, clock, paused) : "") +
     notices.map((notice) => `<p class="td-warn">${notice}</p>`).join("")
   );
 }
+
+/**
+ * The early night call (the owner's play-test, 26/10/2026): its gold and the day's time left on the button, a bar that
+ * empties with them, a pulse in the last 10 s; paused, "Đã dừng" where the time was.
+ */
+const earlyHtml = (w: World, left: number, clock: string, paused: boolean): string =>
+  button("night", `<b>Gọi đêm sớm · +${earlyCallBonus(w)} vàng</b><i><s style="width:${Math.round((100 * Math.max(0, w.phaseEnd - w.tick)) / dayTicks(w.mode, w.pace.k))}%"></s></i><b>${paused ? "Đã dừng" : clock}</b>`,
+    "⇧ Enter", ` class="td-call${left <= 10 && !paused ? " is-last" : ""}"`);
 
 /**
  * The compact word strip (TK 23.4): the locked word, its typed part in jade, or a note; the chain and its tier. A

@@ -67,8 +67,8 @@ describe("day, night and dawn (§2)", () => {
     }
   });
 
-  it("Shift+Enter calls the night early, by day only: a gold for each whole second left, at most 30", () => {
-    for (const [into, bonus] of [[0, 30], [T(75) - T(10) - 1, 10], [T(75) - 61, 1], [T(75) - 59, 0]] as const) {
+  it("Shift+Enter calls the night early, by day only: up to 30 gold by the day's share left, draining from its first second (owner, 26/10/2026)", () => {
+    for (const [into, bonus] of [[0, 30], [T(1), 30], [T(3), 29], [T(15), 24], [T(37.5), 15], [T(75) - T(10), 4], [T(75) - 1, 1]] as const) {
       const w = world();
       run(w, into);
       const called = send(w, { t: "callNight" }).find((event) => event.t === "nightCalled");
@@ -76,6 +76,9 @@ describe("day, night and dawn (§2)", () => {
       expect([w.phase, w.wave]).toEqual(["night", 1]);
       expect(send(w, { t: "callNight" }).find((event) => event.t === "rejected")).toMatchObject({ reason: "notDay" });
     }
+    const fast = world({ pace: { k: 1.25, director: false } }); // a 60 s day: half of it gone, half the gold
+    run(fast, T(30));
+    expect(send(fast, { t: "callNight" }).find((event) => event.t === "nightCalled")).toMatchObject({ bonus: 15 });
   });
 
   it("the sandbox's mode, changed by day, gives the running day the new length, the time gone kept (review R1)", () => {

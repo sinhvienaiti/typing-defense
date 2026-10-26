@@ -1,12 +1,12 @@
 /**
  * Day, night and dawn (BUILD_1A6 §2; TK 18.3, 17.2). A run opens on Day 1;
  * when the day's clock runs out, or the player calls the night early
- * (Shift+Enter: a gold for each whole second left, at most 30), the next
+ * (Shift+Enter: up to 30 gold by the day's share left), the next
  * wave starts. The night ends when every wave has spawned and no enemy is
  * left: each wave pays 10 + 2 × its number; a 3 s dawn, then the next day.
  */
 import { ticks, waveSchedule } from "../../content/compile";
-import { CALL, ECONOMY, MODES, PHASE, TICK_HZ, TREE } from "../../content/rules";
+import { CALL, ECONOMY, MODES, PHASE, TREE } from "../../content/rules";
 import { STAT, bump } from "../stats";
 import { BOSS } from "../stores/boss";
 import { CALL_KIND } from "../stores/calls";
@@ -77,9 +77,12 @@ export function startNight(w: World): void {
   startWave(w);
 }
 
-/** The gold an early call on this tick pays, for whole seconds of day left: the call button shows this number. */
+/**
+ * The gold an early call on this tick pays: the call button shows it. Up to 30 by the day's share left, so it drains from
+ * the day's first second (the owner's play-test, 26/10/2026: a flat 30 till the last 30 s read as no change).
+ */
 export const earlyCallBonus = (w: World): number =>
-  w.phase === "day" ? Math.min(ECONOMY.earlyCall.goldCap, Math.floor((w.phaseEnd - w.tick) / TICK_HZ) * ECONOMY.earlyCall.goldPerS) : 0;
+  w.phase === "day" ? Math.min(ECONOMY.earlyCall.goldCap, Math.ceil((ECONOMY.earlyCall.goldCap * Math.max(0, w.phaseEnd - w.tick)) / dayTicks(w.mode, w.pace.k))) : 0;
 
 /** callNight (Shift+Enter): only by day. */
 export function callNight(w: World): boolean {

@@ -14,6 +14,7 @@
  * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
  * drum's thump (Ngắt), a bronze stroke and knock (Neo), a stone dome cracking (Phá Khiên).
  */
+import { TICK_HZ } from "../content/rules";
 import { FX, type RareEvent } from "../sim/events";
 import { PROJECTILE } from "../sim/stores/projectiles";
 import { chainTier } from "../sim/systems/chain";
@@ -44,7 +45,7 @@ export class TypingAudio {
   private cursor = 0;
   private phase = "";
   /** Real-time stamps (ms) of the last sounds a cap counts. */
-  private readonly last = { arrow: [] as number[], puff: [] as number[], coin: [] as number[], leak: -1e9, caller: 0 };
+  private readonly last = { arrow: [] as number[], puff: [] as number[], coin: [] as number[], leak: -1e9, caller: 0, left: -1 };
 
   constructor(private settings: Settings) {}
 
@@ -102,10 +103,13 @@ export class TypingAudio {
   /**
    * Each frame: the music's layer (calm on the title and by day, tension at night), the music ducked under a
    * word being spoken (TK 24.2 PRONUNCIATION_DUCK: −9 dB in 0.12 s, back in 0.5 s), on the title a villager
-   * calling every 3–7 s from left or right.
+   * calling every 3–7 s from left or right; a wood-block knock each of the day's last 10 s, higher for the last 3 (the early call).
    */
   frame(w: World | null, now: number): void {
     if (this.ctx === null || this.music === null) return;
+    const left = w !== null && w.phase === "day" ? Math.ceil((w.phaseEnd - w.tick) / TICK_HZ) : -1;
+    if (left !== this.last.left && left > 0 && left <= 10) go(this.out.ui, this.ctx.currentTime, left <= 3 ? 1180 : 880, 0.07, 0.04);
+    this.last.left = left;
     this.music.set(w !== null && w.phase === "night", w === null ? 0 : w.boss.stage === 2 || w.boss.stage === 3 ? 1 : w.boss.stage === 4 ? 2 : 0);
     this.music.update();
     const speaking = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;

@@ -41,15 +41,28 @@ describe("the status panel", () => {
   });
 
   it("the call button promises the gold an early night pays, at every tick of the day", () => {
-    for (const into of [0, 1, 31, 59, 60, 61, 3000, 4439, 4441]) {
+    for (const into of [0, 1, 31, 59, 60, 61, 3000, 4439, 4441, 4499]) {
       const w = world();
       run(w, into);
       const html = status(w);
       const promised = Number(/Gọi đêm sớm · \+(\d+) vàng/.exec(html)?.[1]);
       const called = send(w, { t: "callNight" }).find((event) => event.t === "nightCalled");
       expect(called, "tick " + into).toMatchObject({ day: 1, bonus: promised });
-      expect(promised).toBe(Math.min(30, Math.floor((w.phaseEnd < 0 ? 4500 - into : 0) / TICK_HZ)));
+      expect(promised).toBe(Math.ceil((30 * (4500 - into)) / 4500));
     }
+  });
+
+  it("the call button shows the time left and a bar that empties with the day, pulses in the last 10 s, and says Đã dừng when paused (owner, 26/10/2026)", () => {
+    const w = world();
+    const bar = (html: string) => Number(/<s style="width:(\d+)%">/.exec(html)?.[1]);
+    expect(status(w)).toContain("<b>Gọi đêm sớm · +30 vàng</b>");
+    expect([bar(status(w)), /<b>1:15<\/b>/.test(status(w)), status(w).includes("is-last")]).toEqual([100, true, false]);
+    run(w, 1800);
+    expect([bar(status(w)), /<b>0:45<\/b>/.test(status(w)), /\+18 vàng/.test(status(w))]).toEqual([60, true, true]);
+    run(w, 4500 - 1800 - 600);
+    expect([/<b>0:10<\/b>/.test(status(w)), status(w).includes('class="td-call is-last"')]).toEqual([true, true]);
+    const paused = statusHtml(w, true, true, false, []);
+    expect([paused.includes("<b>Đã dừng</b>"), paused.includes("is-last"), /<b>0:10<\/b>/.test(paused)]).toEqual([true, false, false]);
   });
 
   it("names every reason the sim may refuse a command for, in Vietnamese", () => {
