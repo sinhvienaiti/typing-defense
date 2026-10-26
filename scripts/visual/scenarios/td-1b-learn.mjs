@@ -65,6 +65,7 @@ export default async function (page) {
   const back = []; // Từ Ôn met: { text, kind, cls, mean, tick }
   const redeemed = [];
   const sloppyWords = [];
+  const dimmed = []; // Từ Ôn seen, but its call dimmed before the keys came (no review event): not an attempt
   let sloppy = null;
   let meaningShot = false;
   const ends = Date.now() + 240000;
@@ -105,11 +106,18 @@ export default async function (page) {
     back.push({ text: review.text, kind: call?.kind ?? -1, words: call?.words ?? 0, cls: card?.cls ?? "", mean: card?.mean ?? "", tick: s.tick, due: s.reviewAt[s.review.indexOf(review.text)] ?? -1, knowledge: s.knowledge });
     if (back.length === 1) await shot("review");
     if ((await page.eval(td("return t.typing().lock;"))) >= 0) await send(page, { t: "unlock" });
+    const reviews = (await seen.poll(page)).filter((e) => e.t === "review").length;
     for (const ch of review.text) {
       await letter(page, ch);
       await page.sleep(160);
     }
     await page.sleep(120);
+    // R3 final check: on a loaded machine the call can dim between the look and the keys (Draconis' ring moved, or the cap
+    // turned: 8 ticks after it lit in the 26/10 runs); the keys then find no card and the sim says nothing. Look again.
+    if ((await seen.poll(page)).filter((e) => e.t === "review").length === reviews) {
+      dimmed.push({ ...back.pop(), dimmedBy: (await state(page)).tick });
+      continue;
+    }
     const stamp = await page.eval(`[...document.querySelectorAll(".td-stamp.is-redeem")].filter((el) => Number(el.style.opacity) > 0.2).map((el) => el.textContent)`);
     if (redeemed.length === 0) await shot("redeem");
     const after = await state(page);
@@ -151,7 +159,7 @@ export default async function (page) {
   return finish(page, checks, {
     saved: setup.saved, start: { learn: start?.learn && { book: start.learn.book, due: start.learn.due.length, fresh: start.learn.fresh.length }, review: start?.review },
     firstSights: firsts.length, shown: firsts.filter((f) => f.shown).length, mismatches: firsts.filter((f) => f.shown !== f.expected).slice(0, 6),
-    back, redeemed, sloppyWords, sloppyAt, loopEnd, kept, stored: stored && { book: stored.book, seen: Object.keys(stored.seen ?? {}).length }, queued: queued.length, sent: sentBefore?.sent?.length,
+    back, dimmed, redeemed, sloppyWords, sloppyAt, loopEnd, kept, stored: stored && { book: stored.book, seen: Object.keys(stored.seen ?? {}).length }, queued: queued.length, sent: sentBefore?.sent?.length,
     reload, replay, cards: cardSummary(cards), shots,
   });
 }
