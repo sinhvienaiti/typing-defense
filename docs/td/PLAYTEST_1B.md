@@ -14,7 +14,7 @@
 
 | Bước | Làm gì | Vì sao |
 |---|---|---|
-| 1 | Mở game: `pnpm --dir games/typing-defense dev` rồi vào `http://127.0.0.1:3006/`; hoặc `https://td.typing-game.local` (nginx của repo cha) | |
+| 1 | Mở game từ **bản dựng**: trong bản chơi thử `games/.wt-play-typing-defense` (worktree ở commit đã push, không agent nào sửa; điều phối viên đưa nó lên commit mới nhất) chạy `pnpm install --frozen-lockfile && pnpm build && pnpm preview` rồi vào `http://127.0.0.1:3006/` (cổng 3006 phải trống). Không dùng `pnpm dev` của cây đang sửa | Máy chủ dev tải lại trang mỗi lần agent lưu file, ván đang chơi mất (chủ dự án gặp ngày 26/10) |
 | 2 | Cửa sổ 1280 × 720: Chrome → `⌥⌘I` → nút thiết bị (`⇧⌘M`) → Responsive, gõ 1280 và 720; đóng bảng DevTools sang bên | §22 chấm chữ và thẻ ở 1280 × 720 |
 | 3 | Màn đầu → **Cài đặt** → "Nhịp tự điều" **Bật**, "Chế độ (truyện)" **Cân bằng** → Esc | Bot của B9 chạy đúng hai thiết lập này |
 | 4 | Không cần mở bảng điều khiển trình duyệt, không cần xoá dữ liệu cũ | Hồ sơ gõ cũ giúp game đo đúng hơn |

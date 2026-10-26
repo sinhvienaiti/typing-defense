@@ -45,7 +45,7 @@ Mốc đang làm: **1B.R3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
 | 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
-| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7) | 830 | 10.500 |
+| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8) | 830 | 10.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -1354,3 +1354,124 @@ Kế hoạch: `docs/td/R3_PLAN.md` (việc theo file, thứ tự, dạng dữ li
 - **Ảnh đã xem:** 19 ảnh `td-1b-tour` ở 1280 × 720 và các ảnh R3 ở 1920 × 1080 (Neo, đứng sững, Phá Khiên, vỡ vòm), `td-1b-direct` (thẻ ⚓, 🛡️, vòm để chạy đi tới gần Lũy), `td-1b-learn` (Từ Ôn, "Chuộc lại"), `td-1b-story` (Đêm 1, thẻ thắng "Kỷ lục mới"), `td-1b-night5`, `td-1b-boss`, `td-1b-build`. Chữ đọc được ở 1280 × 720. Ghi lại, chưa sửa: chữ nổi "×1,3" nhỏ (cùng kiểu chữ nổi R2) và "Đứng sững!" màu xanh trên cỏ hơi nhạt ở 1920 × 1080; thẻ lời gọi che một phần bầy hay Troll lúc mới sáng (thẻ đứng trên đầu quái như mọi lời gọi trực tiếp R2).
 - **Kiểm sau sửa:** `pnpm check` 332 test / 31 file đạt, "/" 82,62 kB (chừa 2,38), `?title=0` 81,22 kB; `pnpm td:golden:check` `same: true`; 10.413 dòng.
 - **Còn mở sau phần B:** bước `wood` của chủ dự án (26/10), bước 9 (cân bằng R3), phần còn lại của bước 10 (đo §20 với cảnh 10 loại quái, `td-1a-ime`, `td-1a6-*`, `td-theme`, `td-balance`, `td-1b-perf`, `td-1a6-perf`), B9 chờ chủ dự án chơi.
+
+### 7.8 Luật gỗ của chủ dự án, "Gọi đêm sớm" đếm ngược, hai con rồng (26/10/2026, Mac mini M4)
+
+Theo quyết định của chủ dự án 26/10/2026, sau khi chơi bản đồ 1. Chen vào trước bước 9 của R3 (`R3_PLAN.md`) để lượt cân bằng đo trên luật mới. Changelog: `docs/changelog/2026-10-26-td-wood.md`. Số đo là số **Apple M4**. Bằng chứng (ngoài Git): `tmp/mac-2026-10-25/wood/` (lượt làm, bị ngắt khoảng 08:30: các lượt đo cổng `gates-*.md`, bảng `td:balance` đủ `balance-full.md`, dò hai con rồng `probe-*`, kịch bản trên mã cũ `before/`), `tmp/mac-2026-10-25/wood2/` (lượt kiểm: `pnpm check`, các lượt tắt từng luật, so bot không gõ, kịch bản và ảnh).
+
+| Commit | Việc | "/" gzip (chừa) | Dòng `.ts` |
+|---|---|---|---|
+| `213c3ad` | trước (R3 phần B) | 82,62 (2,38) | 10.413 |
+| `5c9f630` | luật gỗ | 83,18 (1,82) | 10.466 |
+| `3c7ee5d` | "Gọi đêm sớm" đếm ngược | 83,25 (1,75) | 10.481 |
+| `b58bd54` | hai con rồng | 83,26 (1,74) | 10.484 |
+| `ce3f6b0` | lượt kiểm: nhãn kho 9 → 11 px | 83,26 (1,74) | 10.484 |
+| `83c5de6` | lượt kiểm: một nhãn kho mỗi cụm cây | 83,31 (1,69) | 10.486 |
+
+Mỗi commit dựng lại trên Mac trong một cây làm việc tạm (cùng `node_modules`). Còn **14 dòng** dưới trần 10.500 và 1,69 kB ở "/": bước 9 (ước +33 dòng, +0,3 kB) phải cắt theo `R3_PLAN.md` §8 trước khi viết mã.
+
+**Luật gỗ** (`content/rules.ts` `TREE`; `sim/stores/trees.ts` `left`; `sim/systems/calls.ts` `chopTree`; `sim/systems/economy.ts` `villager`, `fell`; `sim/systems/waves.ts` `enter`, `regrow`):
+
+- Mỗi cây giữ `left` Gỗ (`Uint16Array`, băm cùng kho cây như mọi kho), đầu ván `TREE.reserve` 1.000.
+- Một lần chặt vẫn 45 s cho 12 Gỗ (0,27 Gỗ/s một dân), nhưng trả **dần**: `chopTree` trả phần `floor(tiến độ × 12)` chưa trả, lấy từ `left`. Dân tự chặt và từ gõ đi chung một đường. Thưởng cả lời gọi Hoàn hảo (+2) cộng thêm, không lấy từ kho.
+- Cây chỉ đổ khi `left` về 0 (`fell`: thành gốc, dân của nó đi tìm cây khác, sự kiện `felled`). Một dân cần khoảng một giờ cho một cây, nên trên bản đồ 1 cây không đổ nữa: đúng ý chủ dự án.
+- Đầu mỗi Ngày (`enter(w, "day")`, cả `skipTo` của hộp cát): mọi cây `left` = 1.000, gốc đứng lại, trừ gốc có nhà đè (bán kính nhà + 1,5 m). Giữa Ngày và ban Đêm không mọc (test).
+- Xong một lần chặt, dân chọn cây lại (cây đánh dấu trước, rồi cây gần Lũy trong 30 m), thường là cây cũ.
+- Ban Đêm dân chặt tiếp nhưng không tạo lời gọi Chặt mới; lời gọi Chặt còn mở lúc Đêm xuống sống thêm `CALL.powerLifeS` 9 s. `CALL.slipS` 1,15 → 1,35 s.
+- Hình: cây đang chặt có thanh tiến độ và chữ "988/1000" dưới thanh (11 px từ lượt kiểm, `ce3f6b0`: 9 px khó đọc ở 1280 × 720; một nhãn mỗi cụm cây đang chặt, `83c5de6`: nhãn của cây sát nhau chồng thành đống); gốc mọc lại trong 0,9 s (to dần, hơi vượt rồi về), mỗi cây lệch 90 ms, trong vòng xanh mờ dần. Câu dạy Ngày 2: "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt."
+- Không còn chữ nào nói gỗ có hạn (đã tìm trong `src`: chỉ câu Ngày 2 nói về cây).
+
+**Vì sao hai luật thêm** (lượt kiểm, mã `b58bd54`, tắt từng luật trong cây tạm; báo cáo cổng 1A.6 trên ải truyện: bot 35 WPM và bot không gõ, Cân bằng, 5 seed, 4 Đêm; `wood2/gates-*.md`, `wood2/night-*.txt`):
+
+| Mã | 5a cửa sổ 20 s (≤ 8 s) | 5b Ngày (30–45 %) | 5c Đêm (15–25 %) | 7 gõ / không gõ (≥ +25 %) | Đêm: Chặt / Bắn mạnh (% thời gian) | Bắn mạnh: tạo, gõ, sáng mà bỏ qua | Gỗ làm ra Ngày 1–4, bot gõ | Mạng cuối, gõ / không gõ |
+|---|---|---|---|---|---|---|---|---|
+| `213c3ad` (trước) | 7,95 s | 30,9 % | 23,7 % | +39,6 % | 9,8 / 5,5 | 85, 65, 8 | 88 / 128 / 157 / 90 | 16,0 / 11,0 |
+| `b58bd54` tắt luật Đêm | 8,00 s | 30,8 % | **27,6 %** | +46,2 % | 21,6 / 4,4 | 116, 56, 24 | 125 / 171 / 201 / 249 | 14,2 / 9,6 |
+| `b58bd54` `slipS` 1,15 | **8,60 s** | 31,3 % | 23,6 % | +38,3 % | — | 90, 72, 11 | 113 / 153 / 171 / 210 | 13,8 / 9,4 |
+| `b58bd54` | 7,90 s | 30,2 % | 21,8 % | +38,2 % | 6,1 / 5,7 | 93, 64, 20 | 117 / 151 / 168 / 198 | 13,8 / 9,4 |
+
+- Không có luật Đêm, dân không bao giờ hết việc nên ban Đêm cứ 45 s lại có lời gọi Chặt 4 từ: bot gõ Chặt 21,6 % thời gian Đêm, cổng 5c trượt. Đêm là lúc của tháp.
+- `slipS` 1,15 thì chuỗi từ Chặt ban Ngày đẩy cửa sổ 20 s lên 8,60 s (cổng 5a). Cái giá của 1,35: Bắn mạnh sáng mà bỏ qua 11 → 20 (mỗi từ được tính nhiều giờ hơn nên ít lời gọi sáng cùng lúc). `td-pace` (k 0,75) đạt cả với 1,15 trên mã này; con số 8,43 s của lượt làm là ở lượt trước khi có luật Đêm.
+- Lượt làm (bị ngắt) đo 6 lượt (tối đa của một họ cổng); còn bảng của lượt 1, 2, 6 (`wood/gates-new.md`, `gates-A.md`, `gates-6.md`), cùng hướng với bảng trên.
+- **Kinh tế giàu hơn:** Gỗ là tốc độ do số dân và việc gõ quyết, không còn ngân sách 432 Gỗ (36 cây × 12). Bot gõ làm ra 463 → 635 Gỗ trong 4 Ngày (+37 %), bot không gõ 331 → 445; bot bán phần Gỗ trên 100 thành Vàng sớm hơn (lần bán đầu ở giây 195 thay 243). Tốc chặt (Gỗ/giây) và giá nhà giữ nguyên: đó là núm của bước 9.
+- **Mạng ở Đêm 4 giảm** (bot gõ 16,0 → 13,8, bot không gõ 11,0 → 9,4; 5 seed). Bot không gõ xây cùng nhà, gần cùng giờ (lệch ≤ 20 s; `wood2/lives-*.txt`), mạng sau Đêm 1–3 lệch ≤ 2; khác chủ yếu ở Đêm 4 (3 / 5 seed mất 3 mạng ở Đêm này, trước 0): Thuồng Luồng lọt 3 lần / 5 seed (trước 0), số quái sinh ra đổi theo bộ điều nhịp (seed 5: 55 → 59). Nguyên nhân chưa tách: việc của bước 9.
+
+**"Gọi đêm sớm"** (`sim/systems/waves.ts` `earlyCallBonus`, `ui/hud.ts` `earlyHtml`, `ui/td.css` `.td-call`, `view/audio-min.ts`): thưởng = `ceil(30 × phần Ngày còn lại)` (đã chọn theo đề xuất: chia theo độ dài Ngày, giữ trần 30, tổng vàng không tăng; Ngày 75 s: +30 ở 2,5 s đầu, +26 lúc 1:05, +10 lúc 0:24; không hơn luật cũ trừ giây cuối, 1 thay 0). Nút có hai dòng: "Gọi đêm sớm · +26 vàng" và phím, rồi thanh cạn dần cùng đồng hồ "1:04"; 10 s cuối nút nhấp nháy (`prefers-reduced-motion`: viền thay nhấp nháy) và mỗi giây một tiếng mõ gỗ, 3 s cuối cao hơn; dừng (Esc hay Tạm dừng chiến thuật) thì "Đã dừng" thay đồng hồ. Để yên thì Ngày tự hết ở 0:00 và Đêm xuống (nhật ký không có `callNight`). File vàng `td-1a` đổi vì bot vàng gọi Đêm ở giây 60 của Ngày 75 s: 15 → 6 vàng.
+
+**Hai con rồng.** Kịch bản dò `wood/probe-dragons.mjs` chơi bản đồ 1 từ màn đầu ở 1280 × 720 và chụp từng mốc; `td-1b-wood` đếm từng khung trên canvas (hình rồng màu cam của Draconis, chữ "D"):
+
+| Mã | Khung đếm | Hình rồng mỗi khung | Chữ "D" trên sân mỗi khung | Chữ "D" ở HUD |
+|---|---|---|---|---|
+| `213c3ad` | 4.744 | 1 | **2** | 1 |
+| `83c5de6` (1280 × 720 / 1920 × 1080) | 4.741 / 4.744 | 1 | 0 | 1 |
+
+Chỉ có một Draconis (một thực thể, một hình). Cái đọc thành con rồng thứ hai là **đĩa dân có chữ "D"** (Dân, chữ của BUILD_1A6 §9) trùng chữ "D" trên đèn lồng Draconis ở thanh đội; đầu ván có hai dân đi chặt nên trên sân luôn có hai chữ "D". Đĩa NPC giờ hiện biểu tượng lời gọi của mình: 🌾 nông dân, 🪓 dân, 🔨 thợ xây, ⛏️ thợ mỏ (`view/debug-2d.ts` `NPC_LETTER`). Kiểm `oneDragonEveryFrame`, `noDGlyphOnField`, `oneDInHud` ở `td-1b-wood`.
+
+**Test:** 337 test / 31 file (+5). Mới: trả gỗ theo tiến độ (nửa lần chặt trả nửa số gỗ), cây chỉ đổ ở 0, mọc lại chỉ đầu Ngày (không giữa Ngày, không ban Đêm), nạp lại kho cây đang chặt, gốc dưới nhà không mọc, `fell` của hộp cát, nhật ký chặt + đổ + Ngày mới chạy lại ra cùng mã băm, ban Đêm không lời gọi Chặt mới (`tests/td-sim-economy.test.ts`); thưởng Gọi đêm sớm từng tick, nút có đồng hồ, thanh, nhấp nháy 10 s cuối, "Đã dừng" (`tests/td-hud.test.ts`).
+
+**File vàng** làm lại có chủ đích: `5c9f630` (`td-1a` 19.147 → 19.774 tick; `td-1b-boss` gỗ cuối 100 → 150, lời gọi 20 → 12 vì Đêm của boss không còn lời gọi Chặt), `3c7ee5d` (`td-1a` 19.660 tick; `td-1b-boss` chỉ mã nội dung `49318eba`). Trên `b58bd54`: `pnpm td:golden:check` `same: true`.
+
+**Kịch bản** (Chrome 155 macOS có GPU, máy chủ dev cổng 3006, dưới `heavy.sh --gpu` xen với lượt chụp hình và đo của ba làn khác; tải trung bình 7–36). **22/22 lượt đạt** ở 11 kịch bản × 1280 × 720 và 1920 × 1080, 0 lỗi console, 0 ngoại lệ, nhật ký trang chạy lại trên Node khớp ở mọi kịch bản có kiểm:
+
+| Kịch bản | Kiểm | 1280 × 720 | 1920 × 1080 | Mã | Ghi chú |
+|---|---|---|---|---|---|
+| `td-1b-wood` (mới) | 21 | đạt | đạt | `83c5de6` (cũng đạt trên `b58bd54`) | 4.741 / 4.744 khung: mỗi khung 1 hình rồng, 0 chữ "D" trên sân, 1 "D" ở HUD; thưởng 30 → 26 sau 10 s, thanh 100 → 86 %; dừng: "Đã dừng", tick đứng; 10 s cuối nhấp nháy; Đêm tự xuống, 0 lệnh; kho 998 → 981; 3 cây đổ, Ngày 2 đứng lại 1.000 |
+| `td-1a6-day` (sửa) | 19 | đạt | đạt | `83c5de6` (cũng `b58bd54`) | `woodFromReserve`, `treesStand` thay `treeFelled` |
+| `td-1b-build` (sửa, `eccaea0`) | 18 | đạt | đạt | `83c5de6` | lần đầu trượt `keepPrice`, `woodSells` ở cả hai cỡ: Gỗ chặt ra giữa hai lần đọc giá (43 thay 45, 9 thay 10); kịch bản giờ trừ phần Gỗ chặt (kho cây) khỏi số Gỗ |
+| `td-1b-tour` | 17 | đạt | đạt | `83c5de6` | 19 ảnh mỗi cỡ, file chơi thử chạy lại khớp |
+| `td-theme` | 17 | đạt | đạt | `83c5de6` | nút "Gọi đêm sớm" mới vừa thẻ HUD |
+| `td-1a6-learn` | 18 | đạt | đạt | `83c5de6` | |
+| `td-1b-story` | 17 | đạt | đạt | `ce3f6b0` | lượt làm trượt vì máy chủ dev bị tắt giữa chừng |
+| `td-1b-learn` | 14 | đạt | đạt | `ce3f6b0` | |
+| `td-1a6-keyboard` | 21 | đạt | đạt | `b58bd54` (lượt làm) | |
+| `td-1a6-attention` | 11 | đạt | đạt | `b58bd54` (lượt làm) | |
+| `td-1a6-night` | 11 | đạt | đạt | `b58bd54` (lượt làm) | |
+
+`ce3f6b0` và `83c5de6` chỉ đổi nhãn kho trên bản đồ (không đổi sim, không đổi HUD). Bằng chứng: `wood/` (lượt làm), `wood2/` (`b58bd54`, `ce3f6b0`), `wood3/` (`83c5de6`), `wood4/` (`td-1b-build` sau sửa).
+
+- **Ảnh đã xem:** `td-1b-wood` ở hai cỡ (Ngày, cây đang chặt có nhãn kho, nút đang dừng "Đã dừng", 10 s cuối, Đêm tự xuống, gốc, đang mọc, mọc lại), `td-1a6-day` (chặt, xây), `td-1b-story` (Ngày 3 chơi lại: cây nạp đầy, nhãn 999 / 1.000), `td-1b-learn` (Từ Ôn), `td-theme` (Ngày), `td-1b-tour` (Đêm 5, Từ Ôn), `td-1a6-night` (dân chặt ban Đêm, không lời gọi Chặt). Sửa từ ảnh: nhãn kho 9 → 11 px (`ce3f6b0`), một nhãn mỗi cụm (`83c5de6`; trước đó 4–5 nhãn chồng nhau ở hộp cát "Đặt sẵn", 3 nhãn ở Ngày 3). Ghi lại, chưa sửa: nhãn có thể nằm dưới thẻ lời gọi của dân bên cạnh; vòng mọc lại chỉ 0,9 s nên lúc chụp 160 ms sau Ngày mới mới thấy rõ.
+- **Kiểm trên mã cuối `83c5de6`:** `pnpm check` 337 test / 31 file đạt, "/" 83,31 kB gzip (chừa 1,69 kB), `?title=0` 81,91 kB; `pnpm td:golden:check` `same: true` cả hai file; 10.486 dòng `.ts`.
+
+**Cân bằng trên luật mới** (điểm xuất phát của bước 9; chưa chỉnh núm nào của R3 §7).
+
+`pnpm td:balance --threads=4` đủ mọi chế độ, 120 seed mỗi bộ, hai bộ, mã `b58bd54` (26/10 08:00–08:15, 870 s; `wood/balance-full.md`). Cân bằng, bộ 1 / bộ 2:
+
+| Bot | Thắng | Biên S | Áp lực P | Nhàn I | Ngộp O | Gần thua N | Quãng Q |
+|---|---|---|---|---|---|---|---|
+| Trẻ em | 0 / 0,8 % | 0 / 0 % | 29 / 29 % | 2,3 / 2,2 % | 0 / 0 % | 0,00 / 0,01 | 68 / 68 % |
+| Mới | 68 / 56 % | 30 / 15 % | 24 / 24 % | 3,3 / 3,7 % | 0 / 0,1 % | 0,17 / 0,09 | 67 / 67 % |
+| Chậm chắc | 83 / 85 % | 70 / 70 % | 21 / 21 % | 2,7 / 2,8 % | 0 / 0 % | 0,12 / 0,12 | 67 / 67 % |
+| Chuẩn | 86 / 88 % | 70 / 65 % | 21 / 21 % | 4,7 / 5,0 % | 0,1 / 0,1 % | 0,07 / 0,10 | 66 / 67 % |
+| Khá | 70 / 73 % | 60 / 55 % | 23 / 23 % | 4,3 / 4,6 % | 0,1 / 0,1 % | 0,06 / 0,09 | 67 / 67 % |
+| Ẩu | 74 / 74 % | 55 / 55 % | 23 / 23 % | 6,0 / 5,5 % | 0,2 / 0,2 % | 0,13 / 0,13 | 67 / 67 % |
+| Nhanh | 84 / 80 % | 65 / 68 % | 21 / 21 % | 3,0 / 3,5 % | 0,1 / 0 % | 0,10 / 0,03 | 67 / 67 % |
+| Không gõ | 0 / 0 % | 0 / 0 % | 32 / 32 % | 1,0 / 1,1 % | 0,1 / 0,1 % | 0,00 / 0,00 | 68 / 68 % |
+| Chỉ gõ | 0 / 0 % | 0 / 0 % | 49 / 50 % | 0 / 0 % | 0 / 0 % | 0,00 / 0,00 | 97 / 97 % |
+| Chuẩn, chiến thuật Tốt | 93 / 89 % | 73 / 70 % | 19 / 19 % | 4,3 / 4,7 % | 0,1 / 0,1 % | 0,07 / 0,05 | 66 / 67 % |
+| Chuẩn, chiến thuật Kém | 22 / 29 % | 0 / 0 % | 28 / 28 % | 1,6 / 2,0 % | 0 / 0 % | 0,06 / 0,06 | 67 / 67 % |
+| Chuẩn, sổ 20 từ | 84 / 88 % | 70 / 70 % | 21 / 21 % | 5,1 / 4,9 % | 0 / 0 % | 0,06 / 0,05 | 67 / 67 % |
+| Chuẩn, tắt nhịp | 86 / 89 % | 65 / 65 % | 21 / 21 % | 4,9 / 4,9 % | 0,1 / 0,1 % | 0,04 / 0,07 | 67 / 67 % |
+
+- Thư giãn: mọi bot gõ thắng 94–100 %, Trẻ em 94 / 97 % (S 55 %), Quãng Q 61–66 % (in đậm, ngoài dải của Thư giãn). Thử thách: Chuẩn 92 / 89 %, Ẩu 68 / 72 %, Khá 78 / 83 %, Mới 88 / 90 %.
+- Cổng (bộ 1 / bộ 2 / gộp): B1 **trượt** cả ba (gộp: Mới 62 %, S 25 %; Chậm chắc S 70 %; Khá 71 %; Ẩu 74 %; Chuẩn và Nhanh trong dải BALANCE §3); B2 đạt; B3 **trượt** (Mới ở Cân bằng 68 / 56 / 62 %, cần ≥ 70 %); B4 đạt / **trượt** / đạt (bộ 2: sát thương lên boss p50 Chuẩn 40,6 so với Ẩu 41,3); B5, B6 đạt (Tốt hơn Kém: 93 so với 22 %, 89 so với 29 %); B7 đạt / đạt / **trượt** theo đích chặt 1B (hàng tắt nhịp Biên S 65 %, đích 40–60 %; theo dải BALANCE §3 thì đạt); B8 đạt (B8 R3: 8 từ mới mỗi ván, 0 ở lời gọi có hạn và Đêm 5); B9 thiếu số.
+- G1 đạt (bảng trên); G2 đạt (Đêm 1–4 22,6 %, Đêm 5 24,5 %); **G3 đạt** (giao chiến boss p50 48,1 s ở cả hai bộ); G5 đạt (mọi bot ≤ 2,6 % lên boss, ≤ 14,1 % cả ải); G6 đạt (một lời gọi trực tiếp mỗi 30,2 s ở Đêm 4, tối đa 2 mở cùng lúc; từ trực tiếp 0,2 % số từ, như R2); G8 đạt (24,1 s, Nhàn I 3,0 %); G4, G7 là test trong `pnpm check`, đạt.
+- Đích chặt gộp: 1/6 (Nhanh). Bot Chuẩn thắng 87 % gộp nhưng Biên S 65 % (đích 40–60 %).
+
+**Cùng seed, trước và sau luật gỗ** (lượt dò Cân bằng `--quick`, 40 seed mỗi bộ, hai bộ, cùng lệnh với phần B; trước `0738e94` có Học, sau `b58bd54`; `wood2/balance-probe-40x2.md`, 191 s):
+
+| Bot | Thắng trước → sau | Biên S trước → sau | Nhàn I trước → sau |
+|---|---|---|---|
+| Mới | 75 / 78 → 73 / 70 % | 38 / 35 → 33 / 35 % | 5,5 / 5,4 → 3,0 / 3,3 % |
+| Chậm chắc | 90 / 90 → 80 / 85 % | 70 / 65 → 68 / 68 % | 5,3 / 4,8 → 2,8 / 2,8 % |
+| Chuẩn | 75 / 78 → **90 / 83 %** | 65 / 60 → 65 / 70 % | 2,8 / 2,8 → 4,7 / 4,7 % |
+| Khá | 85 / 75 → 55 / 83 % | 65 / 48 → 25 / 65 % | 2,0 / 1,6 → 4,3 / 4,4 % |
+| Ẩu | 58 / 65 → 78 / 70 % | 30 / 25 → 60 / 50 % | 0,7 / 0,8 → 6,4 / 5,5 % |
+| Nhanh | 80 / 83 → 78 / 88 % | 60 / 55 → 60 / 65 % | 3,3 / 3,2 → 3,1 / 2,7 % |
+| Chuẩn, sổ 20 từ | 75 / 75 → 85 / 85 % | 68 / 68 → 65 / 70 % | 2,4 / 2,3 → 5,0 / 5,1 % |
+| Chuẩn, tắt nhịp | 80 / 80 → 85 / 88 % | 45 / 25 → 65 / 65 % | 2,3 / 2,4 → 5,0 / 4,6 % |
+
+- Áp lực P, Ngộp O, Gần thua N, Quãng Q đổi trong ±0,1 điểm hay ±4 điểm %, ở trong dải như trước (bảng đủ ở file).
+- G3 44,5 / 45,8 → 48,3 / 51,1 s (trượt → đạt); G2, G8 đạt cả hai lượt. B7 bộ 2 trượt → đạt; gộp vẫn trượt (giờ vì S cao, trước vì S thấp). Đích chặt gộp 2/6 → 1/6.
+- Đọc: Gỗ không cạn làm ván dễ hơn với bot Chuẩn và Ẩu (thắng +12 và +13 điểm gộp, Biên S chạm 65–70 %). Gỗ dư đổi ra Vàng sớm hơn và Lũy lên sớm hơn (bot không gõ của cổng 1A.6: lần bán Gỗ đầu ở giây 195 thay 243, Lũy cấp 2 ở giây 349–355 thay 360–367; `wood2/lives-*.txt`). Sai số 40 seed khoảng ±7 điểm, nên hàng Khá (55 % ở bộ 1) cần đo lại ở 120 seed (bảng 120 seed trên: 70 / 73 %).
+
+**Núm cho bước 9 từ đợt này:** tốc chặt (`TREE.wood` / `chopS`) và giá Gỗ của nhà (`ECONOMY.woodShare`), cùng các núm sẵn của `R3_PLAN.md` §7 (Rễ hút sinh khí, `LENGTH_BY_E` với `kHp2`). Lời gọi Chặt (4 từ mỗi 45 s mỗi dân) là núm thứ ba nếu bước 9 muốn trả lại Bắn mạnh bị bỏ (11 → 20 với `slipS` 1,35): 3 từ, hoặc một lời gọi mỗi hai lần chặt.

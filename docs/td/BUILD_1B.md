@@ -315,11 +315,17 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 | Hoàn tác | Giữ như 1A.6: trong 5 s hoàn đủ | — |
 | Bán khi tê | Được (không khác) | — |
 | **Bán gỗ** (sửa review R1) | Lệnh `sellWood` (nút ở thẻ Lũy, cạnh Bán Lúa): 10 Gỗ thành 4 Vàng. HUD nhắc "Gỗ thừa: bán gỗ ở thẻ Lũy" ban Ngày khi Gỗ ≥ 150 và Vàng < 50. Bot (bố cục Chuẩn, Tốt, Vừa) bán phần Gỗ trên 100 | 10 → 4 |
+| **Gỗ không cạn** (theo quyết định của chủ dự án 26/10/2026) | Mỗi cây giữ một kho gỗ. Một lần chặt (một lời gọi Chặt 4 từ) vẫn 45 s, 12 Gỗ, nhưng **trả dần từng gỗ theo tiến độ** (dân tự chặt hay từ gõ đều trả ngay), lấy từ kho của cây; thưởng cả lời gọi Hoàn hảo +2 Gỗ cộng thêm, không lấy từ kho. Cây chỉ đổ khi kho về 0. **Đầu mỗi Ngày mới** (cả `skipTo` của hộp cát): mọi cây đang đứng nạp đầy kho, mọi gốc mọc lại đầy kho, trừ gốc có nhà đè lên (nhà xây trên gốc được, gốc không chặn). Xong một lần chặt, dân chọn cây lại (cây đánh dấu kéo đi được), thường là cây cũ. Ban Đêm dân vẫn chặt nhưng **không tạo lời gọi Chặt mới**; lời gọi Chặt còn mở lúc Đêm xuống sống thêm 9 s (bằng lời gọi Bắn mạnh) rồi tắt. Lệnh hộp cát `fell` (một cây đứng đổ ngay) cho kịch bản | `TREE.reserve` 1.000; `TREE.wood` 12, `chopS` 45 (0,27 Gỗ/s một dân, khoảng một giờ mới hết một cây); `CALL.slipS` 1,15 → 1,35 s |
+| **Gọi đêm sớm** (chủ dự án chơi thử 26/10/2026) | Vàng thưởng = trần (30) × phần Ngày còn lại, làm tròn lên (**đã chọn theo đề xuất**: chia theo độ dài Ngày thay vì bỏ trần, để tổng vàng không tăng): Ngày 75 s đầy 30 chỉ ở 2,5 s đầu, còn 1:05 thì +26, còn 0:24 thì +10 (trước: 1 vàng mỗi giây còn lại, trần 30, nên đứng 30 tới 30 s cuối). Không hơn luật cũ, trừ giây cuối (1 vàng thay 0). Nút hiện vàng, thời gian còn lại và thanh cạn dần; 10 s cuối nút nhấp nháy, mỗi giây một tiếng mõ gỗ (3 s cuối cao hơn); đang dừng (Esc, Tạm dừng chiến thuật) nút ghi "Đã dừng" thay giờ. Để yên thì hết giờ Đêm tự xuống, không cần lệnh | `ECONOMY.earlyCall.goldCap` 30 (bỏ `goldPerS`) |
 
 - Nhà giữ tổng đã chi (`spentGold`, `spentWood`) thay cho số của lần cuối. Hoàn tác một lần nâng trừ đúng phần đã hoàn khỏi tổng.
 - Lệnh `sell` giữ một tên cho cả hai việc: trong 5 s từ lúc xây hay nâng là hoàn tác (hoàn đủ phần đó), sau đó với nhà đã xong là bán 60 %. Công trường chưa xong quá 5 s vẫn bị từ chối như nay (`undoWindow`).
 - **Test thuộc tính:** không chuỗi xây, nâng, bán, hoàn tác nào làm Vàng hoặc Gỗ cao hơn lúc chưa làm gì (TK 11.12).
 - HUD: thẻ nhà có nút Bán với số tiền; thẻ Lũy có nút "Nâng Lũy · 105 vàng, 45 gỗ" và dòng "Mở: Chấm".
+- **Vì sao luật gỗ như vậy** (26/10/2026): trước đây 36 cây giữ 432 Gỗ, hết vào khoảng Ngày 4, nên Gỗ là ngân sách cố định. Chủ dự án muốn Gỗ không cạn và cây không dễ đổ: giờ Gỗ là **tốc độ** do số dân và việc gõ quyết. Kinh tế giàu hơn (bot gõ ở cổng 1A.6: Gỗ làm ra mỗi Ngày 88 / 128 / 157 / 90 → 117 / 151 / 168 / 198, BUILD_NOTES §7.8). Tốc chặt (Gỗ/giây) và giá nhà là núm cho lượt cân bằng R3, không chỉnh ở bước này.
+- **Vì sao Đêm không có lời gọi Chặt mới:** cây không cạn thì dân không bao giờ hết việc, mỗi 45 s lại có lời gọi 4 từ. Đo trên bot 1A.6 (mã `b58bd54` tắt riêng luật này, BUILD_NOTES §7.8): ban Đêm bot gõ Chặt 21,6 % thời gian, Bắn mạnh 4,4 %, bỏ 24 lời gọi Bắn mạnh (trước luật gỗ 8); tỉ lệ gõ ban Đêm 27,6 % (dải 15–25 %). Có luật: Chặt 6,1 %, Bắn mạnh 5,7 %, 21,8 %. Đêm là lúc của tháp: dân chặt lặng lẽ, lời gọi Chặt còn mở tắt sau 9 s.
+- **Vì sao `CALL.slipS` 1,35 s:** chuỗi từ Chặt không dứt ban Ngày đẩy cửa sổ 20 s của bot 35 WPM lên 8,60 s với 1,15 s (cổng 5a ≤ 8 s); 1,35 s đưa về 7,90 s. Cái giá: lời gọi Bắn mạnh sáng mà bỏ qua 11 → 20 (5 seed). Núm cho bước 9.
+- **Vì sao thưởng gọi Đêm sớm tụt từ đầu:** chủ dự án đứng chờ mà nút vẫn "+30 vàng", nên tưởng chờ không mất gì. Thưởng theo phần Ngày còn lại làm mỗi giây chờ hiện ra trên nút; trần giữ 30 nên tổng vàng không tăng (bot vàng file `td-1a` gọi Đêm ở giây 60 của Ngày 75 s: 15 → 6 vàng).
 
 ---
 
@@ -456,7 +462,7 @@ Một bảng duy nhất (TK 20.4 đổi theo Lời Gọi). Mỗi ý mới một 
 |---|---|---|---|
 | Ngày 1 | Ruộng, lời gọi Gặt; vòng giúp của Tướng | "Lúa chín thì bác nông dân gọi. Đưa Draconis tới, gõ chữ trên bong bóng." | "Gõ chữ đầu để bắt đầu · Esc để thôi" |
 | Đêm 1 | Tháp Cung; lời gọi Bắn mạnh | "Đêm xuống, tháp gọi khi quái tới gần. Gõ là bắn Phát Chữ." | "Bỏ qua lời gọi không mất gì" |
-| Ngày 2 | Chặt cây, dân, Gỗ; Trại Lính | "Gỗ để xây nhà. Bấm cây để đánh dấu chặt." | "Shift + \\ thuê dân" |
+| Ngày 2 | Chặt cây, dân, Gỗ; Trại Lính | "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt." (luật gỗ 26/10/2026) | "Shift + \\ thuê dân" |
 | Đêm 2 | Ma Trơi bay | "Ma Trơi bay qua đầu lính. Tháp Cung và Draconis bắn được." | — |
 | Ngày 3 | Mỏ Vàng, lời gọi Đào; Lũy cấp 2 mở Chấm | "Nâng Lũy thì Chấm ra giúp. Thư Đồng làm việc nhanh hơn." | "1–4 chọn người · Enter gửi đi" |
 | Đêm 3 | Tháp Pháo và Nuppeppō; Tối Thượng, Chữ Chiêu | "Lông lửa đầy rồi! Bấm = rồi gõ thêm chữ cho mưa to hơn." | "= Tối Thượng" |
@@ -653,7 +659,7 @@ Kế hoạch làm (file, thứ tự, dạng dữ liệu, chỗ chưa rõ đã ch
 1. Luật nghĩa, Từ Ôn, sổ ôn lưu, kế hoạch học, khởi động lạnh, sự kiện học (§11).
 2. Bảng dạy, lịch mở, câu Bà Cú Mực và chip (§12); dòng Chế độ trong Cài đặt; lưu sao.
 3. Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát (cắt đầu tiên nếu vượt trần). **Xong** (R3 phần B, `b8d78d3`; không cắt: 10.413 dòng).
-4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`. **Bot Học và ba kịch bản xong** (phần A, phần B); cân bằng lần cuối là bước kế, sau quyết định gỗ của chủ dự án (26/10/2026).
+4. Bot theo lịch mở; cân bằng lần cuối; file vàng; kịch bản `td-1b-learn`, `td-1b-story`, `td-1b-tour`. **Bot Học và ba kịch bản xong** (phần A, phần B); quyết định gỗ của chủ dự án (26/10/2026) đã làm (BUILD_NOTES §7.8); cân bằng lần cuối là bước kế, đo trên luật gỗ mới.
 5. Gói chơi thử cho chủ dự án (§22), xuất nhật ký cho B9. **Gói xong** (`docs/td/PLAYTEST_1B.md`, `scripts/td/b9.ts`); số B9 chờ chủ dự án chơi.
 
 ---

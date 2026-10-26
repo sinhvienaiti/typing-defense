@@ -24,7 +24,7 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/R3_PLAN.md`: the plan of 1B R3 "Học và dạy" (work items by file, order with the
   bundle budget first, data shapes, the spec points chosen as proposed, tests, scenarios, the
   balance plan, line budget and cut order) and the pre-R3 baseline on the Apple M4.
-- **State (25/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
+- **State (26/10/2026):** 1B R1 built, reviewed and fixed (`BUILD_NOTES.md` §7.1,
   §7.2); 1B R2 built (§7.3: Tối Thượng, Chữ Chiêu, Mảnh Chữ, Ngắt on Lửng Tanuki,
   Nuppeppō, Thư Đồng's panic, R2's 2D layers, design call (b) applied) and **reviewed
   and fixed** (§7.4): G5 graded for every bot (Tối Thượng 25 → 21), G6 counted by
@@ -68,9 +68,17 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   the cut-off run: the tour now presses "Chép số chơi thử" for real (the card answers `pointerdown`), `td-1b-direct`
   types Neo and Phá Khiên again on the next mechanic when a loaded machine misses the window. "/" 82.62 kB gzip
   (2.38 kB headroom, Apple M4 build), 10,413 lines (87 under the ceiling), 332 tests. With Học the standard bot wins
-  75 / 78 % in Cân bằng (90 / 88 % on the same seeds without; 40 seeds a set, §7.7 part B). Next: the owner's wood rule
-  (26/10/2026: trees regrow each day, a large reserve paid out while chopped), then step 9 the R3 balance pass and §20
-  on the Mac; the owner's playtest (B9 numbers) stays open.
+  75 / 78 % in Cân bằng (90 / 88 % on the same seeds without; 40 seeds a set, §7.7 part B). **The owner's wood rule**
+  (26/10/2026, §7.8, `docs/changelog/2026-10-26-td-wood.md`): a tree holds 1000 wood (`TREE.reserve`, `trees.left`, hashed),
+  paid a wood at a time as the chop goes (`chopTree`), falls only when empty and stands again full at each day's start
+  (`regrow`, not under a building); villagers chop on by night without a call (`CALL.slipS` 1.35 keeps the 20 s window);
+  the chopped tree shows "988/1000", a regrown one grows in. "Gọi đêm sớm" counts down (gold by the day's share left,
+  cap 30; time left, a draining bar, a pulse and a knock in the last 10 s, "Đã dừng" while paused). The "two dragons"
+  were the villagers' "D" discs read as Draconis' "D" lantern: NPC discs show their call's icon now (`td-1b-wood` counts
+  one dragon and no "D" on the field every frame). "/" 83.31 kB gzip (1.69 kB headroom), 10,486 lines (14 under the
+  ceiling: step 9 must cut first, `R3_PLAN.md` §8), 337 tests. Next: step 9 the R3 balance pass on this rule (the first
+  full `td:balance` on it is in §7.8), then §20 on the Mac; the owner's playtest (B9 numbers) stays open. Play-tests use a
+  build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
 
