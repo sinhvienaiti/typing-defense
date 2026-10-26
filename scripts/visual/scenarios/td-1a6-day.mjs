@@ -3,8 +3,10 @@
 // Bastion marked, the Bastion at level 3 with 3 builders), then real CDP keys at 45 WPM:
 //   1. the hero flies to the farm; the farmer's harvest call is typed: the plot is reaped (food), and the
 //      farmer sows the empty plots (seeds go down, the farm card's "Lớn" count goes up);
-//   2. the hero flies to the south-east trees; a chop call is typed until a tree falls (wood);
-//   3. an archer is put down by the hero; the builder's build call is typed until it stands.
+//   2. the hero flies to the south-east trees; a chop call is typed until its chop is done: the wood comes as the chop
+//      goes, out of the tree's reserve (the owner's rule of 26/10/2026: a tree holds 1000 wood and stands on);
+//   3. an archer is put down by the hero; the builder's build call is typed until it stands (the chop words of the
+//      trees by it too: the villagers never run out of chops now, and their older calls hold the bright places first).
 // Each job must be finished by a typed word (its callEnd has finished: true, so the words pushed the work,
 // not the worker alone). The page's command log is replayed on Node to the page's hash. The cards are
 // measured and gated (cardsClean). Pictures
@@ -61,6 +63,8 @@ export default async function (page) {
 
   // 2. Chop: the hero by the south-east trees the villagers are chopping; only chop words are typed.
   await send(page, { t: "move", agent: 0, qx: q(15), qz: q(36) });
+  const reserve = (s) => s.trees.reduce((sum, tree) => sum + tree.left, 0);
+  const beforeChop = await state(page);
   let chopShot = false;
   const chop0 = Date.now();
   while (Date.now() - chop0 < 50000) {
@@ -70,12 +74,14 @@ export default async function (page) {
       chopShot = true;
       shots.push(await page.shot(out("td-1a6-day-chop-" + size + ".png")));
     }
-    if (seen.of("callEnd").some((e) => e.kind === KIND.chop && e.finished) && seen.of("felled").length > 0) break;
+    if (seen.of("callEnd").some((e) => e.kind === KIND.chop && e.finished)) break;
   }
   const afterChop = await state(page);
   if (!chopShot) shots.push(await page.shot(out("td-1a6-day-chop-" + size + ".png")));
 
-  // 3. Build: an archer a few metres from the hero; the builders walk over; only build words are typed.
+  // 3. Build: an archer a few metres from the hero; the builders walk over; build words are typed, and the chop words
+  // of the five villagers by it (since the wood rule of 26/10/2026 their calls never stop: a build call lights once the
+  // older chop calls in the ring are done, which typing them hurries, as a player would).
   const site = await page.eval(td(`
     const spots = [];
     for (let x = 4; x <= 14; x += 0.5) for (let z = 26; z <= 34; z += 0.5) if (t.canPlace("archer", x, z).ok) spots.push([x, z]);
@@ -88,7 +94,7 @@ export default async function (page) {
   const build0 = Date.now();
   let archer = null;
   while (Date.now() - build0 < 45000) {
-    await typeFor(page, 600, { wpm: 45, kinds: [KIND.build], seen });
+    await typeFor(page, 600, { wpm: 45, kinds: [KIND.build, KIND.chop], seen });
     const v = await look(page, cards);
     if (!buildShot && v.words.length > 0 && seen.hits(KIND.build).length >= 1) {
       buildShot = true;
@@ -103,6 +109,7 @@ export default async function (page) {
   const end = await state(page);
   const stats = await page.eval(td("return t.stats();"));
   const replay = await replayOnNode(page, "td-1a6-day");
+  const extra = afterChop.wood - beforeChop.wood - (reserve(beforeChop) - reserve(afterChop)); // a whole Perfect chop's bonus, ≤ 3 by the chain
   const finishedBy = (kind) => seen.of("callEnd").some((e) => e.kind === kind && e.finished);
   const typed = { harvest: seen.hits(KIND.harvest).length, chop: seen.hits(KIND.chop).length, build: seen.hits(KIND.build).length };
   const checks = {
@@ -116,7 +123,9 @@ export default async function (page) {
     sowed: afterHarvest.seeds < start.seeds && maxGrowing > (plotsBefore?.growing ?? 0),
     chopTyped: typed.chop >= 1,
     chopFinishedByTyping: finishedBy(KIND.chop),
-    treeFelled: seen.of("felled").length >= 1 && afterChop.wood > afterHarvest.wood,
+    // Every wood the chops paid came out of the trees' reserves (one bonus of a whole Perfect call at most on top); none fell.
+    woodFromReserve: afterChop.wood > beforeChop.wood && extra >= 0 && extra <= 3 * seen.of("callEnd").filter((e) => e.kind === KIND.chop && e.perfect).length,
+    treesStand: seen.of("felled").length === 0 && afterChop.trees.every((tree) => tree.standing) && afterChop.trees.some((tree) => tree.left < 1000),
     siteFound: site !== null,
     buildTyped: typed.build >= 1,
     buildFinishedByTyping: finishedBy(KIND.build),
@@ -127,7 +136,7 @@ export default async function (page) {
   };
   return finish(page, checks, {
     typed, plotsBefore, maxGrowing, site,
-    resources: { start: [start.gold, start.wood, start.food, start.seeds], harvest: [afterHarvest.food, afterHarvest.seeds], chop: afterChop.wood, end: [end.gold, end.wood, end.food, end.seeds] },
+    resources: { start: [start.gold, start.wood, start.food, start.seeds], harvest: [afterHarvest.food, afterHarvest.seeds], chop: [beforeChop.wood, afterChop.wood, reserve(beforeChop) - reserve(afterChop)], end: [end.gold, end.wood, end.food, end.seeds] },
     callEnds: seen.of("callEnd").map((e) => [e.kind, e.finished, e.perfect]),
     stats: { callWords: stats.callWords, callsPerfect: stats.callsPerfect, keys: stats.keys, keyErrors: stats.keyErrors },
     cards: { clean: cardsClean(cards), ...cardSummary(cards) }, replay, shots,
