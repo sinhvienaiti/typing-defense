@@ -1,18 +1,14 @@
 /**
- * Word cards (docs/td/BUILD_NOW.md §5.2, TK 23.4; BUILD_1A6 §7, §9): a pool
- * of 20 DOM cards over the canvas. A frame changes only transform and
- * opacity; text and classes change when a word's state does. A bright call's
- * word is its bubble over its NPC (or building): the kind's icon and colour,
- * the word, dots for the words the call still asks (●●○), the meaning under it
- * by the rule of BUILD_1B §11.1 (R3: meaningShown); a Từ Ôn is jade with its
- * "Ôn" tag, its meaning always, "Chuộc lại" stamped when redeemed; a quiz shows the meaning and the first letter with
- * blanks ("tốt; hay · g _ _ _"). It grows when locked with the typed part in
- * jade, shakes on a wrong key; typed, it shows its meaning for 1 s (the
- * grade's own name, TK 0.6, stamped over it) or, with none, flies home; it
- * folds when its call dims or closes. A power call's bar is its 6 s. Columns
- * part at once and ease back on the spring, so no frame shows two cards
- * overlapping. A card on its way out has the class is-gone (is-mean while it
- * shows a meaning), so the browser checks can tell it from a live one.
+ * Word cards (docs/td/BUILD_NOW.md §5.2, TK 23.4; BUILD_1A6 §7, §9): a pool of 20 DOM cards over the canvas. A frame
+ * changes only transform and opacity; text and classes change when a word's state does. A bright call's word is its
+ * bubble over its NPC (or building): the kind's icon and colour, the word, dots for the words the call still asks
+ * (●●○), the meaning under it by the rule of BUILD_1B §11.1 (R3: meaningShown); a Từ Ôn is jade with its "Ôn" tag, its
+ * meaning always, "Chuộc lại" stamped when redeemed; a quiz shows the meaning and the first letter with blanks ("tốt;
+ * hay · g _ _ _"). It grows when locked with the typed part in jade, shakes on a wrong key; typed, it shows its meaning
+ * for 1 s (the grade's own name, TK 0.6, stamped over it) or, with none, flies home; it folds when its call dims or
+ * closes. A power call's bar is its 6 s. Columns part at once and ease back on the spring, so no frame shows two cards
+ * overlapping. A card on its way out has the class is-gone (is-mean while it shows a meaning), so the browser checks
+ * can tell it from a live one.
  */
 import { LEARN } from "../../content/rules";
 import type { Grade, Mode } from "../../content/types";

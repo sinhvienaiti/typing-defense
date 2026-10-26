@@ -1,9 +1,7 @@
 /**
- * Day, night and dawn (BUILD_1A6 §2; TK 18.3, 17.2). A run opens on Day 1;
- * when the day's clock runs out, or the player calls the night early
- * (Shift+Enter: up to 30 gold by the day's share left), the next
- * wave starts. The night ends when every wave has spawned and no enemy is
- * left: each wave pays 10 + 2 × its number; a 3 s dawn, then the next day.
+ * Day, night and dawn (BUILD_1A6 §2; TK 18.3, 17.2). A run opens on Day 1; when the day's clock runs out, or the player
+ * calls the night early (Shift+Enter: up to 30 gold by the day's share left), the next wave starts. The night ends when
+ * every wave has spawned and no enemy is left: each wave pays 10 + 2 × its number; a 3 s dawn, then the next day.
  */
 import { ticks, waveSchedule } from "../../content/compile";
 import { CALL, ECONOMY, MODES, PHASE, TREE } from "../../content/rules";

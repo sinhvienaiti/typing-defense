@@ -1,12 +1,9 @@
 /**
- * What the player has in hand (docs/td/TYPING_DEFENSE_DESIGN.md 25.7: app
- * state, never in the sim). Keys and buttons name the same actions, so every
- * task has a keyboard path (BUILD_NOW §5.4, BUILD_1A6 §8). Tab goes through
- * the buildings, then the dim calls, nearest the agent first; Enter sends the
- * agent there. A click on a tree marks it, on a ripe plot asks its farmer to
- * harvest it first, on an NPC or a call's bubble sends the agent to it. Space
- * is the tactical pause of the relax and learn modes: the world stops, the
- * hand keeps working, typing waits.
+ * What the player has in hand (docs/td/TYPING_DEFENSE_DESIGN.md 25.7: app state, never in the sim). Keys and buttons
+ * name the same actions, so every task has a keyboard path (BUILD_NOW §5.4, BUILD_1A6 §8). Tab goes through the
+ * buildings, then the dim calls, nearest the agent first; Enter sends the agent there. A click on a tree marks it, on a
+ * ripe plot asks its farmer to harvest it first, on an NPC or a call's bubble sends the agent to it. Space is the
+ * tactical pause of the relax and learn modes: the world stops, the hand keeps working, typing waits.
  */
 import { ticks } from "../content/compile";
 import { ECONOMY, FARM, MODES, SELL, TREE } from "../content/rules";

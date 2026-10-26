@@ -1,12 +1,9 @@
 /**
- * Calls and their words (BUILD_1A6 §5; TK 6.4–6.6, 6.15; 25.6 steps 1, 11).
- * A worker or a building makes a call when its work starts; the director
- * (attention.ts) opens it and lights it. A bright call holds one live word
- * and its first letter. A finished word is scored from the moment the call
- * got it, moves the chain and pushes the same work the worker does alone (a
- * sloppy one ×0.6). A locked call keeps its word, and gets the next one
- * locked, until it is done or Esc. Nothing is ever lost: a call that dims,
- * closes or runs out costs nothing, and what was typed stays done.
+ * Calls and their words (BUILD_1A6 §5; TK 6.4–6.6, 6.15; 25.6 steps 1, 11). A worker or a building makes a call when
+ * its work starts; the director (attention.ts) opens it and lights it. A bright call holds one live word and its first
+ * letter. A finished word is scored from the moment the call got it, moves the chain and pushes the same work the
+ * worker does alone (a sloppy one ×0.6). A locked call keeps its word, and gets the next one locked, until it is done
+ * or Esc. Nothing is ever lost: a call that dims, closes or runs out costs nothing, and what was typed stays done.
  */
 import { AGENT, BUILD, CALL, FARM, LENGTH_BY_E, MINE, MODES, POWER, TREE, ULT, WORD_D } from "../../content/rules";
 import { bandWords } from "../../typing/decks";

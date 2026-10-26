@@ -1,9 +1,7 @@
 /**
- * Player commands (docs/td/TYPING_DEFENSE_DESIGN.md 25.7; BUILD_1A6 §3–§8):
- * the only way into the world. Play, bots and replays all go through
- * applyCommand, each command stamped with the tick it acts on. A refused
- * command changes nothing and leaves a `rejected` event with the reason.
- * Positions are quarter metres.
+ * Player commands (docs/td/TYPING_DEFENSE_DESIGN.md 25.7; BUILD_1A6 §3–§8): the only way into the world. Play, bots and
+ * replays all go through applyCommand, each command stamped with the tick it acts on. A refused command changes nothing
+ * and leaves a `rejected` event with the reason. Positions are quarter metres.
  */
 import { ticks } from "../content/compile";
 import { BUILD, ECONOMY, EXPECTED, FARM, MODES, PRESET, RALLY, SELL, STORE, ULT, VILLAGERS } from "../content/rules";

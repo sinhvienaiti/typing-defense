@@ -1,13 +1,10 @@
 /**
- * The key router (docs/td/TYPING_DEFENSE_DESIGN.md 6.15), run inside the
- * simulation: a key is a command with a tick. With a word locked, the right
- * letter moves it on and a wrong one is an error on it, except the soft
- * switch: at most one letter in (none for a call's next word, which comes
- * locked: BUILD_1A6 §5.2), no error yet, and the key starts another live word
- * (the lock moves there; the first word goes back to untyped, unpunished).
- * With no lock, a tier-1 first letter locks its word, a tier-2 letter opens
- * the pair and the second key picks one, and anything else is a stray key.
- * Locking never stops a word's clock.
+ * The key router (docs/td/TYPING_DEFENSE_DESIGN.md 6.15), run inside the simulation: a key is a command with a tick.
+ * With a word locked, the right letter moves it on and a wrong one is an error on it, except the soft switch: at most
+ * one letter in (none for a call's next word, which comes locked: BUILD_1A6 §5.2), no error yet, and the key starts
+ * another live word (the lock moves there; the first word goes back to untyped, unpunished). With no lock, a tier-1
+ * first letter locks its word, a tier-2 letter opens the pair and the second key picks one, and anything else is a
+ * stray key. Locking never stops a word's clock.
  */
 import type { Deck } from "./decks";
 import type { Letters, LiveWords } from "./letters";

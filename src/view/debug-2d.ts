@@ -1,20 +1,16 @@
 /**
- * The 1A picture (docs/td/BUILD_NOW.md §5.1, BUILD_1A6 §9): the world seen
- * from above on a Canvas 2D, no media. Grass, lanes, the Silver Stream and
- * its bridges, ore nodes, trees (stumps once felled, a gold rim when marked),
- * buildings as discs of their true radius (a site dashed, its progress an
- * arc), a farm's four plots by stage with a harvest bar, a tower's five power
- * charges, enemies as ink-purple dots sized by tier, soldiers, the NPC workers
- * lettered (a miner by each mine) with "!" at work and "…" when their call
- * waits, shots and short-lived hit marks read from the combat ring; the hero
- * and the helpers with their paths and the selected one's help ring; Word
- * Shots with a jade head trailing their word; a dim call's faded bubble (no
- * word: walk over to help), an arrow at the edge for a call off screen; the
- * player's hand. The camera zooms and pans. It reads the world and never changes it.
- * Painted in the Văn Điền palette (SPLIT_PLAN D7; theme.css): terraced paddies in the field, ripe paddies
- * and stilt-house roofs beyond a bamboo hedge, a silver stream, earth paths, trees as bamboo clumps. The
- * ground that does not change is painted once per camera into a second canvas; at night an indigo wash
- * falls on it and the buildings glow like lanterns (eased over ~1 s, the picture's own clock).
+ * The 1A picture (docs/td/BUILD_NOW.md §5.1, BUILD_1A6 §9): the world seen from above on a Canvas 2D, no media. Grass,
+ * lanes, the Silver Stream and its bridges, ore nodes, trees (stumps once felled, a gold rim when marked), buildings as
+ * discs of their true radius (a site dashed, its progress an arc), a farm's four plots by stage with a harvest bar, a
+ * tower's five power charges, enemies as ink-purple dots sized by tier, soldiers, the NPC workers lettered (a miner by
+ * each mine) with "!" at work and "…" when their call waits, shots and short-lived hit marks read from the combat ring;
+ * the hero and the helpers with their paths and the selected one's help ring; Word Shots with a jade head trailing
+ * their word; a dim call's faded bubble (no word: walk over to help), an arrow at the edge for a call off screen; the
+ * player's hand. The camera zooms and pans. It reads the world and never changes it. Painted in the Văn Điền palette
+ * (SPLIT_PLAN D7; theme.css): terraced paddies in the field, ripe paddies and stilt-house roofs beyond a bamboo hedge,
+ * a silver stream, earth paths, trees as bamboo clumps. The ground that does not change is painted once per camera into
+ * a second canvas; at night an indigo wash falls on it and the buildings glow like lanterns (eased over ~1 s, the
+ * picture's own clock).
  */
 import { AGENT, BUILD, FARM, TICK_HZ, TREE } from "../content/rules";
 import { FX } from "../sim/events";

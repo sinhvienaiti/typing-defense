@@ -1,26 +1,22 @@
 /**
- * Lời Gọi (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with
- * 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) and 1B's map 1 with Mộc Tinh
- * (docs/td/BUILD_1B.md) in the Văn Điền theme (SPLIT_PLAN D7): the title screen
- * first (a link with ?sandbox= skips it, ?title=1 / 0 forces it), while the
- * vocabulary loads; the story stage, or the sandbox with ?sandbox=1. A lost run
- * may be played again from the day of the night it was lost ("Chơi lại Ngày n":
- * the page reloads, replays the log to that day's start and checks its hash).
- * Then the world steps at 60 Hz in a session,
- * the 2D view draws it, the calls' word cards float over it, the keys, the
- * mouse and the HUD act through the selection, sound and music follow its
- * events, Esc's pause card and the results card sit over it, and window.__td
- * lets the browser scenarios drive it through commands. The typing profile
- * (app/skill.ts, BALANCE.md §2) gives the run its header (E, pace k, the pace
- * director by the settings) and takes each day and night's typing after it. The title, its settings and Hồ sơ gõ
- * cards, the pause and results cards, sound and the sandbox panel are chunks of their own (BUILD_1B §20): at "/" the
- * page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest comes once
- * the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review fix 2) and
- * asks again when it is wanted (R2 review fix 3). R3 step 1 (docs/td/R3_PLAN.md §3.1) took window.__td (app/dev-tools.ts)
- * and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too. Học (R3, BUILD_1B §11; app/learn.ts, a
- * chunk asked for at once, with the portal bridge) plans the run's study lists before its first step, counts the words
- * seen, sends the learning events and keeps the review book across runs; one that cannot load plays with no lists. The
- * teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top, what a building does on its card.
+ * Lời Gọi (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) and 1B's
+ * map 1 with Mộc Tinh (docs/td/BUILD_1B.md) in the Văn Điền theme (SPLIT_PLAN D7): the title screen first (a link with
+ * ?sandbox= skips it, ?title=1 / 0 forces it), while the vocabulary loads; the story stage, or the sandbox with
+ * ?sandbox=1. A lost run may be played again from the day of the night it was lost ("Chơi lại Ngày n": the page
+ * reloads, replays the log to that day's start and checks its hash). Then the world steps at 60 Hz in a session, the 2D
+ * view draws it, the calls' word cards float over it, the keys, the mouse and the HUD act through the selection, sound
+ * and music follow its events, Esc's pause card and the results card sit over it, and window.__td lets the browser
+ * scenarios drive it through commands. The typing profile (app/skill.ts, BALANCE.md §2) gives the run its header (E,
+ * pace k, the pace director by the settings) and takes each day and night's typing after it. The title, its settings
+ * and Hồ sơ gõ cards, the pause and results cards, sound and the sandbox panel are chunks of their own (BUILD_1B §20):
+ * at "/" the page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest
+ * comes once the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review
+ * fix 2) and asks again when it is wanted (R2 review fix 3). R3 step 1 (docs/td/R3_PLAN.md §3.1) took window.__td
+ * (app/dev-tools.ts) and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too. Học (R3,
+ * BUILD_1B §11; app/learn.ts, a chunk asked for at once, with the portal bridge) plans the run's study lists before its
+ * first step, counts the words seen, sends the learning events and keeps the review book across runs; one that cannot
+ * load plays with no lists. The teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top,
+ * what a building does on its card.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";

@@ -1,9 +1,7 @@
 /**
- * Deaths and leaks (TK 25.6 step 15). A kill's gold reaches the treasury on
- * the tick the enemy dies (TK 17.4: coins flying to the HUD are only a
- * picture), its Mảnh Chữ charge Tối Thượng near Draconis, and a Nuppeppō no
- * blast killed splits in two where it fell (BUILD_1B §8.1, §10); a leak costs
- * the Bastion its lives, and at 0 the run is lost.
+ * Deaths and leaks (TK 25.6 step 15). A kill's gold reaches the treasury on the tick the enemy dies (TK 17.4: coins
+ * flying to the HUD are only a picture), its Mảnh Chữ charge Tối Thượng near Draconis, and a Nuppeppō no blast killed
+ * splits in two where it fell (BUILD_1B §8.1, §10); a leak costs the Bastion its lives, and at 0 the run is lost.
  */
 import { SHARDS } from "../../content/rules";
 import { FX } from "../events";
