@@ -6,8 +6,8 @@
 //   night-relax    a night at Thư giãn (the preset village, the hero at the merge, power words typed)
 //   night-challenge  the same night at Thử thách
 // Checks: the card shows the profile's numbers and its advice line; ← → switch the pace row and td.settings keeps it;
-// the run started from the title takes the profile's header (E 45, k from it, the director on) and the sandbox panel
-// shows it; both nights run with the director on, their logs replay on Node to the page's hash; no console error.
+// the run started from the title takes the profile's header (E 45, k from it, the director on; the card's k is the run's)
+// and the sandbox panel shows it; both nights run with the director on, their logs replay on Node to the page's hash; no console error.
 // R2 review fix 3 (F4): the card's chunk is fetched only when "Hồ sơ gõ" is picked, not with the title.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-balance.mjs --width=1280 --height=720
 import { DEV_URL } from "./common.mjs";
@@ -64,7 +64,10 @@ export default async function (page) {
   await nav(page, "Digit5", 400);
   const card = await page.eval(CARD);
   await shot("profile");
-  shown.profile = card !== null && /Hồ sơ gõ/.test(card.text) && /45 WPM/.test(card.text) && /91 %/.test(card.text) && /1,4 s/.test(card.text) && /×1,0[0-9]/.test(card.text);
+  // The card's pace k, checked against the run header below (R3: E 45–64 deal 4–8 letter words, so this profile's k
+  // is 0.958, under 1; a fixed "×1,0x" broke with the length table).
+  const cardK = card?.text.match(/×(\d,\d\d)/)?.[1] ?? null;
+  shown.profile = card !== null && /Hồ sơ gõ/.test(card.text) && /45 WPM/.test(card.text) && /91 %/.test(card.text) && /1,4 s/.test(card.text) && cardK !== null;
   shown.advice = card !== null && /chậm lại một nhịp/.test(card.advice);
   await nav(page, "Escape", 300);
   shown.profileCloses = (await page.eval(CARD)) === null;
@@ -88,7 +91,9 @@ export default async function (page) {
   // Bắt đầu: the run takes the profile's header.
   await nav(page, "Digit1", 800);
   const flags = await page.eval(td("return t.flags();"));
-  shown.header = flags?.expected === 45 && flags?.pace?.director === true && flags.pace.k > 0.95 && flags.pace.k < 1.1;
+  const runK = typeof flags?.pace?.k === "number" ? flags.pace.k.toFixed(2).replace(".", ",") : null;
+  shown.header = flags?.expected === 45 && flags?.pace?.director === true && flags.pace.k > 0.9 && flags.pace.k < 1.1;
+  shown.profileKIsTheRunK = runK !== null && cardK === runK;
 
   // A night at Thư giãn, then at Thử thách: the preset village, the hero by the merge, power words typed.
   const nights = {};
@@ -116,7 +121,7 @@ export default async function (page) {
     const panel = (await page.eval(`document.querySelector(".td-sandbox")?.textContent ?? ""`)) ?? "";
     const replay = await replayOnNode(page, "td-balance-" + mode);
     nights[mode] = { ready, phase: s.phase, mode: s.mode, enemies: s.enemies, lives: s.lives, typed, panel: panel.replace(/^.*Nhịp/, "Nhịp"), replay: replay.match };
-    shown["night" + mode[0].toUpperCase() + mode.slice(1)] = ready && s.mode === mode && typed > 0 && /k ×1,0\d · tự điều Bật/.test(panel) && replay.match === true;
+    shown["night" + mode[0].toUpperCase() + mode.slice(1)] = ready && s.mode === mode && typed > 0 && panel.includes(`k ×${runK} · tự điều Bật`) && replay.match === true;
   }
 
   const checks = { ...Object.fromEntries(Object.entries(shown).map(([name, value]) => [name, value === true])), ...consoleChecks(page) };
