@@ -5,7 +5,7 @@
 // staggered at 70 % by real power words typed at 60 WPM (the banner under the boss bar at the top, the "Dồn lửa"
 // calls ≤ the cap, lit with or without a help ring, 2 words at E 35; the vulnerable countdown on the bar: review R1),
 // calls Mầm Gỗ and retreats at 50 %: the results card has its stars and the chest. Slow frame sets (jpg) of each
-// move: lull, rise, roots warning and strike, slam, stagger, sprouts, retreat. Checks: the warnings' times from the events, the
+// move: lull, rise, roots warning and strike, slam, R3's drain, stagger, sprouts, retreat. Checks: the warnings' times from the events, the
 // banner's place, no card over the HUD (the boss bar is a panel), the page's log replayed on Node to its hash.
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1b-boss.mjs --width=1280 --height=720
 import { KIND, Seen, boot, cardStats, cardSummary, cardsClean, consoleChecks, finish, look, out, replayOnNode, sandbox, send, sizeOf, state, td, typeFor } from "./td-1a6-common.mjs";
@@ -40,13 +40,16 @@ export default async function (page) {
   const risen = await boss();
   // On to the merge at game speed 2.
   await sandbox(page, "speed", 2);
+  const SAY = `document.querySelector(".td-boss .td-say")?.textContent ?? ""`;
+  let drainSaid = "";
   for (let k = 0; k < 400; k += 1) {
     const b = await boss();
+    if (b.drainEnd >= 0 && drainSaid === "") drainSaid = await page.eval(SAY);
     if (b.dist >= b.mergeM - 16 || b.stage !== BOSS.fight) break;
     await page.sleep(100);
   }
   await sandbox(page, "speed", 1);
-  const done = { roots: false, slam: false, stagger: false, sprouts: false, retreat: false };
+  const done = { roots: false, slam: false, drain: false, stagger: false, sprouts: false, retreat: false };
   let staggerAt = 0;
   let banner = null;
   let burstMax = 0;
@@ -59,7 +62,20 @@ export default async function (page) {
     const s = await state(page);
     burstMax = Math.max(burstMax, s.calls.filter((c) => c.burst && c.bright).length);
     burstWords = Math.max(burstWords, ...s.calls.filter((c) => c.burst).map((c) => c.words), 0);
-    if (!done.roots && b.rootsEnd >= 0) {
+    if (!done.drain && b.drainAt > s.tick && b.drainAt - s.tick <= 150) {
+      // R3, Rễ hút sinh khí, from just before its warning: the root crawling to the Bastion, its ring and "−1 mạng", the leaves
+      // drawn off (its 1.2 s warning is shorter than a turn of this loop, so it is waited for here, typing on: the boss is at
+      // the merge by then, and hands at rest there let it reach the Bastion).
+      done.drain = true;
+      for (let k = 0; k < 40 && (await boss()).drainEnd < 0; k += 1) await typeFor(page, 60, { wpm: 60, kinds: [KIND.power], seen, sloppy });
+      if (drainSaid === "") drainSaid = await page.eval(SAY);
+      // Typing between the pictures: at the merge 1.5 s of hands at rest was enough for it to reach the Bastion and win.
+      frames.drain = [];
+      for (let k = 0; k < 8; k += 1) {
+        frames.drain.push(await page.shot(out("td-1b-boss-drain-" + size) + "-" + String(k).padStart(2, "0") + ".jpg"));
+        await typeFor(page, 120, { wpm: 60, kinds: [KIND.power], seen, sloppy });
+      }
+    } else if (!done.roots && b.rootsEnd >= 0) {
       done.roots = true;
       await film("roots-warn", 6, 150);
       await film("roots-hit", 5, 90);
@@ -101,6 +117,11 @@ export default async function (page) {
     risesAtTheFork: risen.stage === BOSS.fight && risen.route === warned.route && risen.dist >= 19 && risen.dist <= 36,
     rootsWarned90: pairs("roots").length > 0 && pairs("roots").every((d) => d === 90),
     slamWarned72: pairs("slam").every((d) => d === 72),
+    // R3 (R3_PLAN §7.1): warned 1.2 s like every move (G4), −1 life a drain, its line said once on the bar.
+    drainWarned72: pairs("drain").length > 0 && pairs("drain").every((d) => d === 72),
+    drainTakesOneLife: strikes.filter((e) => e.move === "drain" && e.hit).every((e) => e.count === 1),
+    drainSaidOnTheBar: drainSaid.includes("Sinh khí") || drainSaid.includes("Rễ hút"),
+    drainFilmed: done.drain && (frames.drain ?? []).length === 8,
     staggerBannerUnderTheBar: banner !== null && banner.text.includes("choáng") && banner.top >= banner.barTop && banner.bottom <= 0.3 * page.height,
     burstWithinCap: burstMax <= 3,
     // Review R1: Dồn lửa lights whether a help ring holds it or not, round(E / 20) words (E 35: 2); the countdown on the bar.
@@ -114,7 +135,7 @@ export default async function (page) {
     ...consoleChecks(page),
   };
   return finish(page, checks, {
-    done, banner, burstMax, burstWords, countdown, roots: pairs("roots"), slams: pairs("slam"), sheet: sheet && { stars: sheet.stars, review: sheet.review },
+    done, banner, burstMax, burstWords, countdown, roots: pairs("roots"), slams: pairs("slam"), drains: pairs("drain"), drainSaid, sheet: sheet && { stars: sheet.stars, review: sheet.review },
     end: { phase: end.phase, lives: end.lives, tick: end.tick }, frames, shots, cards: cardSummary(cards), replay,
   });
 }

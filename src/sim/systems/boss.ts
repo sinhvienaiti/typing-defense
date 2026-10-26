@@ -5,7 +5,7 @@
  * strikes after a warning: Rễ Trồi stuns the buildings within 8 m (no damage), Quật cành hits and knocks back the
  * soldiers in front, at 70 % it staggers (5 s still and vulnerable, every stun lifted, "Dồn lửa" power calls on the
  * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow; from its
- * rise its roots drain a life every 20 s (R3). At 50 % it retreats: the chest is paid, 2 s later every enemy left melts.
+ * rise its roots drain a life every drain.everyS (30 s, R3). At 50 % it retreats: the chest is paid, 2 s later every enemy left melts.
  */
 import { ticks } from "../../content/compile";
 import { MODES, SHARDS } from "../../content/rules";
@@ -194,7 +194,7 @@ function summon(w: World, e: number): void {
 
 /**
  * A blow on the Bastion after a warning: Quật Lũy once it stands at it (−3 lives a blow); Rễ hút sinh khí from anywhere, every
- * 20 s from its rise, its clock started again by the stagger (R3, docs/td/R3_PLAN.md §7.1: a cost of the boss's time alive that
+ * drain.everyS from its rise, its clock started again by the stagger (R3, docs/td/R3_PLAN.md §7.1: a cost of the boss's time alive that
  * no clearing of the escort takes away; a quick kill pays less).
  */
 function keepBlow(w: World, move: "keep" | "drain"): void {

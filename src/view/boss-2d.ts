@@ -51,6 +51,7 @@ export class BossView {
   private staggerAt = -1e9;
   private readonly shake = new Map<number, number>();
   private burnAt = -1e9;
+  private drainAt = -1e9; // R3: the last drain (ms)
   private readonly still = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   /** The next floater of the numbers' ring (0) or the wilts' (1), set. */
@@ -88,9 +89,10 @@ export class BossView {
       } else if (event.t === "bossStrike" && event.hit && event.move === "summon" && bossSlot(w) >= 0) fx.burst(0, w.enemies.x[bossSlot(w)]!, w.enemies.z[bossSlot(w)]!, 10, 3, 600, now); // R2: soil
       else if (event.t === "bossStrike" && event.hit && event.move === "keep") fx.burst(0, w.map.keep[0], w.map.keep[1] - 2, 10, 4.5, 650, now); // R2: stone chips
       else if (event.t === "bossStrike" && event.hit && event.move === "drain" && bossSlot(w) >= 0) {
-        // R3, Rễ hút sinh khí: the life drawn off the Bastion, green leaves flying along the root to its canopy.
+        // R3, Rễ hút sinh khí: the life drawn off the Bastion, embers along the root to its canopy after the pulse (under()).
         const [x, z, e] = [w.map.keep[0], w.map.keep[1], bossSlot(w)];
-        for (let k = 0; k < 14; k += 1) fx.emit(3, x, z - 1, (w.enemies.x[e]! - x) / (1 + k * 0.06), (w.enemies.z[e]! - z - 2) / (1 + k * 0.06), 1000, now);
+        this.drainAt = now;
+        for (let k = 0; k < 14; k += 1) fx.emit(5, x, z - 1, (w.enemies.x[e]! - x) / (1 + k * 0.06), (w.enemies.z[e]! - z - 2) / (1 + k * 0.06), 1000, now);
       }
       else if (event.t === "bossPhase") {
         this.staggerAt = now;
@@ -183,14 +185,19 @@ export class BossView {
         ctx.stroke();
       }
     }
-    // R3, Rễ hút sinh khí's warning: a root crawls from its feet to the Bastion, reaching it as the life is drawn.
-    if (S.drainEnd >= 0 && e >= 0) {
-      const t = ease(span(w.tick, S.drainEnd - Math.round(w.c.content.boss!.drain.warnS * MODES[w.mode].warnK * TICK_HZ), S.drainEnd));
+    // R3, Rễ hút sinh khí: over its warning a root crawls from its feet to the Bastion, ink-edged so it reads on the road;
+    // at the drain an amber pulse (the life) runs up it to the canopy in 0.7 s.
+    const pulse = (now - this.drainAt) / 700;
+    if (e >= 0 && (S.drainEnd >= 0 || pulse < 1)) {
+      const t = S.drainEnd < 0 ? 1 : ease(span(w.tick, S.drainEnd - Math.round(w.c.content.boss!.drain.warnS * MODES[w.mode].warnK * TICK_HZ), S.drainEnd));
       const [x, z, kx, kz] = [w.enemies.x[e]!, w.enemies.z[e]!, w.map.keep[0], w.map.keep[1]];
-      Object.assign(ctx, { strokeStyle: C.root, lineWidth: pen.px(7), lineCap: "round" });
       ctx.beginPath();
       for (let s = 0; s <= 1; s += 0.04) ctx.lineTo(x + (kx - x) * s * t + Math.sin(s * 23) * 0.7, z + (kz - z) * s * t + Math.cos(s * 19) * 0.7);
+      Object.assign(ctx, { strokeStyle: C.ink, lineWidth: pen.px(11), lineCap: "round" });
       ctx.stroke();
+      Object.assign(ctx, { strokeStyle: C.root, lineWidth: pen.px(6) });
+      ctx.stroke();
+      if (pulse < 1) this.dot(pen, kx + (x - kx) * ease(pulse), kz + (z - kz) * ease(pulse), 1.1 - 0.5 * pulse, C.amber);
     }
     this.fx.draw(pen, now, C.root, C.ink);
   }
