@@ -122,10 +122,17 @@ Bảng từng đêm, Cân bằng, seed 25–48 (P / I trước → sau):
 - **§12 trên 20 seed**: 4 **đạt** (thấp nhất 3 mạng, seed 15–16; trước 5), 5c 23,0 → 23,0 %, 6, 7 (+38,0 %) đạt; 5a 8,48 s và 5b 29,5 % **trượt như trước** (không đổi: việc của bước khác). Bảng từng đêm còn thấy bot không gõ thua Đêm 4 ở 1/24 ván seed 25–48 (mạng mất TB 5,04): biên của cổng 4 mỏng, ghi lại.
 - **G2–G8**: G2 gõ Đêm 1–4 22,4 → 22,6 %, Đêm 5 24,4 → 24,0 %; G3 giao chiến 48,3 → 50,2 s; G5 đạt mọi bot (cả ải ≤ 13,7 %); G6 một lời gọi trực tiếp mỗi 31,8 → 37,1 s ở Đêm 4 (25–40 s: đạt, vì Đêm 4 dài hơn); G8 trồi → trúng đầu p50 24,1 → **32,1 s** (≤ 35 s, đạt nhưng sát; bộ 1 24,1 s, bộ 2 32,1 s), Nhàn I đỉnh boss 3,0 → 0,4 %.
 - `pnpm check` trước mỗi commit: 346 → 347 test (32 file), kit 31 file khớp; `pnpm td:golden:check` cùng.
+- **Dò thêm trên seed 81–160** (không phải bộ cổng; `--quick` Cân bằng 40 × 4, seed 1–160, `runs/*-q160.md`): gộp 160 ván, trước → sau: thắng Mới 79 → 87 %, Chậm chắc 84 → 87 %, Chuẩn 82 → 84 %, Khá 83 → 85 %, Ẩu 78 → 78 %, Nhanh 84 → 84 % (dải chặt vẫn 6/6); nhưng **Biên S bot Mới 55 → 70 %** (seed 81–160: 70 và 73 %; dải 35–65 %) và **bot Chuẩn tắt nhịp 88 %** (B7), nên trên 160 seed B1 và B7 trượt, trước bước thì đạt. Thử `kHp` 0,35: Mới S 65 %, nhưng Ẩu 78 % "thấp", tắt nhịp vẫn 88 %; `kHp` 0,3: Mới S 65 % mà bộ cổng (seed 1–80) Mới còn 75,6 %, trượt B1. Không lấy; hai mép này **mở** (dưới).
+- Lặng chờ và pha 2 ở chế độ khác: Thử thách, lúc toán hộ tống rời Khe Nứt còn quái nặng 8–23 ván trên 40 → 0 ở mọi bot; rút lui mà không lứa mầm nào 9–30 trên 30–38 lần rút → 0. Thư giãn: 0 quái nặng lúc hộ tống rời (`runs/*-ch-*`, `fin2-rx-lull-probe.md`).
 
 ### Trên trình duyệt
 
-Đang chờ chỗ trình duyệt của `heavy.sh --gpu` (các làn khác giữ): `zz-a1-hold` (kịch bản dùng một lần, ở `a1-nights/zz-a1-hold.mjs`: lặng chờ Thuồng Luồng, câu trên thanh boss, đếm ngược đứng yên rồi chạy lại, boss trồi sau đó, nhật ký trang chạy lại trên Node) và `td-1b-boss` (choáng, Mầm Gỗ, rút lui) ở 1280 × 720 và 1920 × 1080. Kết quả ghi ở commit sau.
+Chrome macOS có GPU, mỗi lượt dưới `heavy.sh --gpu`, Vite riêng ở `127.0.0.1:4161 --strictPort` (tắt khi xong), mã `10ce627`; ảnh ở `a1-nights/browser/`, đã xem từng ảnh nêu dưới.
+
+| Kịch bản | 1280 × 720 | 1920 × 1080 | Nhìn thấy |
+|---|---|---|---|
+| `zz-a1-hold` (dùng một lần, `a1-nights/zz-a1-hold.mjs`: hộp cát, Đặt sẵn, 6 Thuồng Luồng từ Khe Nứt, gọi boss khi toán gần khúc nhập) | **đạt 7/7** (`heldShown`, `heldStill`, `countsAfter`, `risesAfter`, `replaysOnNode`, không lỗi console) | **đạt 7/7** ở lượt 2; lượt 1 trượt vì chính kịch bản đọc trạng thái trước khi lệnh `boss` vào khung kế (sửa: chờ lặng bắt đầu) | Đếm ngược chạy 12 → 4 s, rồi đứng ở "Mộc Tinh tới sau 3 s · chờ quái gần Lũy" 16 s khi toán Thuồng Luồng ở giữa hai tháp khúc nhập, chạy lại khi toán hết, boss trồi sau đó; nhật ký trang chạy lại trên Node khớp mã băm (ảnh `zz-a1-hold-held-*`, `zz-a1-hold-counting-*`: câu một dòng, không đè gì) |
+| `td-1b-boss` | **đạt 20/20** (thắng, còn 1 mạng) | **đạt 20/20** (còn 14 mạng) | Pha 2 có lứa Mầm Gỗ: thanh boss "pha 2 · còn 33–35 m tới Lũy", máu dừng giữa vạch 70 % và vạch rút lui, bốn mầm trong vòng sáng quanh boss ở khúc nhập (ảnh `td-1b-boss-sprouts-*-02`); rồi rút lui, thẻ thắng có rương; nhật ký chạy lại trên Node khớp |
 
 ### Ngân sách
 
@@ -147,7 +154,7 @@ Trên nhánh `a1-nights`, gộp vào `main` bằng `--ff-only`; chưa đẩy (đ
 - `b14fa42` việc 2 (file vàng không đổi).
 - `84d0ac1` việc 4, chỗ hở tick lứa mầm (file vàng không đổi).
 - `10ce627` việc 1 và 5 (hai file vàng chỉ đổi mã nội dung `cd59313e` → `c39e3fea`, các lượt chạy giữ nguyên; thân commit ghi nhầm chiều mã băm, số đúng là đây).
-- Commit giấy tờ này (changelog, `BUILD_1B` §4.2, §4.4, §5.1, §5.2, §5.6, `BUILD_NOTES` §7.10, `R3_PLAN`, `AGENTS.md`).
+- `c83b2ea` giấy tờ (changelog, `BUILD_1B` §4.2, §4.4, §5.1, §5.2, §5.6, `BUILD_NOTES` §7.10, `R3_PLAN`, `AGENTS.md`); commit sau đó thêm phần trình duyệt và lượt dò seed 81–160.
 
 ### Còn mở
 
@@ -157,4 +164,5 @@ Trên nhánh `a1-nights`, gộp vào `main` bằng `--ff-only`; chưa đẩy (đ
 - **Trống Tanuki**: 0–25 % ván Đêm 4 không có trống (theo bot).
 - **Biên cổng 4** mỏng (3 mạng ở seed xấu nhất; 1/24 ván seed 25–48 thua Đêm 4); **G8** 32,1 s, sát trần 35 s.
 - Cổng 5a (8,48 s) và 5b (29,5 %) trên 20 seed vẫn trượt như trước bước này.
+- **Mép của dải trên seed 81–160**: Biên S bot Mới 70 % (dải 35–65 %), bot Chuẩn tắt nhịp 88 %; bộ cổng 1–80 đạt. Lượt cân bằng sau nên đo trên cả hai bộ.
 - Gói "/" còn 13 byte.
