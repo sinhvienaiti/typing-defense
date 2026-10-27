@@ -12,13 +12,13 @@ export const STORE = { enemies: 640, soldiers: 96, projectiles: 512, buildings: 
 /** streamLive*: TK 6.5's stream cap, which typing/decks.ts still computes from a band. */
 export const CAP = { soldiers: 64, agents: 4, streamLiveMax: 12, streamLiveMin: 4 } as const;
 
-/** BUILD_1A6 §2: what a mode sets. lifeK scales the clock a word is scored against (TK 6.4's k_L); powerCdS is §4.5's cooldown. */
-/** BUILD_1B §5.2: warnK scales a boss move's warning (relax, learn 1.33; challenge 0.8); §9.1: directK a direct call's window. */
+/** BUILD_1A6 §2: what a mode sets; slipS the director's margin for slips (attention.ts, §12 gate 5a: no 20 s window past typeS). */
+/** lifeK scales a word's scoring clock (TK 6.4's k_L); powerCdS §4.5's cooldown; warnK, directK BUILD_1B §5.2, §9.1. */
 export const MODES = {
-  relax: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
-  balanced: { dayS: 75, open: 3, typeS: 8, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false, warnK: 1, directK: 2.2 },
-  challenge: { dayS: 50, open: 4, typeS: 10, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false, warnK: 0.8, directK: 1.6 },
-  learn: { dayS: 120, open: 2, typeS: 6, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
+  relax: { dayS: 120, open: 2, typeS: 6, slipS: 2.2, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
+  balanced: { dayS: 75, open: 3, typeS: 8, slipS: 1.35, hpMul: 1, floorE: 20, lifeK: 1.0, powerCdS: 9, pause: false, warnK: 1, directK: 2.2 },
+  challenge: { dayS: 50, open: 4, typeS: 10, slipS: 1.35, hpMul: 1.19, floorE: 30, lifeK: 0.9, powerCdS: 10, pause: false, warnK: 0.8, directK: 1.6 },
+  learn: { dayS: 120, open: 2, typeS: 6, slipS: 2.2, hpMul: 0.5, floorE: 12, lifeK: 1.25, powerCdS: 12, pause: true, warnK: 1.33, directK: 2.8 },
 } as const;
 /** §2: dawn's length; building at night takes ×1.5 as long. */
 export const PHASE = { dawnS: 3, nightBuildMul: 1.5 } as const;
@@ -53,14 +53,13 @@ export const CHAIN = {
  * §5.1: words a call asks for (build by footprint, an upgrade 3), what a sloppy word's share of the work keeps,
  * the power call's life. §5.3: the attention window, and how many economy calls the night keeps open. §6–§7: a
  * helper's quiz every 25 s by day; the review book holds 20 words, a word with 2 errors goes in like a sloppy one.
- * The director's word budget (review R3, docs/td/BUILD_NOTES.md §5): a word's lock time at E ×paceK, and slipS
- * more for slips, must fit the 20 s window (the bot at 35 WPM, 95 %: no window past 8 s, 30 % of the day typed;
- * 1B R2: 1.1 → 1.15 s, a chain of chop words ran one window to 8.13 s, BUILD_NOTES §7.3; 1.35 s with trees that never
- * run out, the owner's wood rule of 26/10/2026: chop chains ran windows to 8.60 and 8.43 s, BUILD_NOTES §7.8).
+ * The director's word budget (review R3, docs/td/BUILD_NOTES.md §5): a word's lock time at E and the mode's slipS
+ * must fit the 20 s window (the bot at 35 WPM, 95 %: no window past typeS, 30 % of the day typed; slipS 1.1 → 1.15 →
+ * 1.35 s for chains of chop words, BUILD_NOTES §7.3, §7.8; by mode since lane A2, §7.10).
  */
 export const CALL = {
   words: { harvest: 3, chop: 4, mine: 2, power: 1, quiz: 1, upgrade: 3, build: { S: 2, M: 3, L: 4, XL: 4 } },
-  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2, paceK: 1, slipS: 1.35,
+  sloppy: 0.6, powerLifeS: 9, windowS: 20, nightEconomy: 1, quizEveryS: 25, review: 20, reviewErrors: 2,
 } as const;
 /**
  * BUILD_1B §11 (R3, docs/td/R3_PLAN.md §3.2–§3.4): a word of the review book comes back returnS after it went in as the next

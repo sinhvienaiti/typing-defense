@@ -51,16 +51,22 @@ export const survived = (r: Runs, nights: number): boolean => r.runs.every((run)
 
 export type Gate = { id: string; name: string; target: string; measured: string; pass: boolean };
 
+/** Gate 5a in any mode, against that mode's own cap (test pass 27/10 row 20: Thư giãn and Học allow 6 s, not 8). */
+export function windowGate(r: Runs): Gate {
+  const window = windowMax(r);
+  const cap = MODES[r.mode].typeS;
+  return { id: "5a", name: "Bot gõ 35 WPM 95 %: giây gõ trong mọi cửa sổ 20 s (" + MODE_NAMES[r.mode] + ")", target: "≤ " + cap + " s", measured: window.toFixed(2) + " s", pass: window <= cap + 1e-9 };
+}
+
 /** BUILD_1A6 §12 gates 4, 5, 6 (as the runs check them) and 7, from the balanced runs. */
 export function gates(typing: Runs, idle: Runs, nights: number, mode: Mode = "balanced"): Gate[] {
   const [day, night] = shares(typing);
-  const window = windowMax(typing);
   const ratio = earnedAfter(typing) / earnedAfter(idle);
   const pct = (value: number) => (100 * value).toFixed(1) + " %";
   const problems = [...typing.runs, ...idle.runs].reduce((n, run) => n + run.problems.length + run.rejected.length, 0);
   return [
     { id: "4", name: "Bot không gõ qua Đêm 1–" + nights + " (" + MODE_NAMES[mode] + ", mọi seed)", target: "không thua", measured: "mạng " + idle.runs.map((run) => (run.defeat ? "thua" : run.world.lives)).join(" / "), pass: survived(idle, nights) },
-    { id: "5a", name: "Bot gõ 35 WPM 95 %: giây gõ trong mọi cửa sổ 20 s", target: "≤ 8 s", measured: window.toFixed(2) + " s", pass: window <= 8 + 1e-9 },
+    { ...windowGate(typing), name: "Bot gõ 35 WPM 95 %: giây gõ trong mọi cửa sổ 20 s" },
     { id: "5b", name: "Tỉ lệ gõ ban Ngày", target: "30–45 %", measured: pct(day), pass: day >= 0.3 && day <= 0.45 },
     { id: "5c", name: "Tỉ lệ gõ ban Đêm", target: "15–25 %", measured: pct(night), pass: night >= 0.15 && night <= 0.25 },
     { id: "6", name: "Bất biến lời gọi mỗi tick, lệnh bị từ chối", target: "0", measured: String(problems), pass: problems === 0 },
@@ -91,10 +97,11 @@ export function balanceReport(options: ReportOptions, print: (text: string) => v
   const modes = options.modes ?? (["relax", "balanced", "challenge", "learn"] as const);
   const all = new Map<Mode, [Runs, Runs]>(modes.map((mode) => [mode, [play(mode, true, seeds, nights), play(mode, false, seeds, nights)]]));
   const [typing, idle] = all.get("balanced") ?? [play("balanced", true, seeds, nights), play("balanced", false, seeds, nights)];
-  const result = gates(typing, idle, nights);
+  // Gate 5a is the director's in every mode, against the mode's own cap (lane A2: Thư giãn and Học were not scored).
+  const result = [...gates(typing, idle, nights), ...[...all.values()].filter(([t]) => t.mode !== "balanced").map(([t]) => windowGate(t))];
   print(`## Cổng BUILD_1A6 §12 trên ải truyện (${seeds} seed, ${nights} đêm, theo lịch mở, từ vựng thật)\n`);
   print("Bot gõ: 35 WPM, 95 % mỗi phím, 30 % lần trượt có Backspace; mắt thấy từ mới sau 0,35–0,6 s, từ kế của lời gọi đang khóa sau 0,15–0,3 s, nhớ từ Hỏi bài sau 0,8–1,6 s. Bot không gõ: cùng kế hoạch, không phím chữ nào. Kế hoạch chuẩn (`tests/td/policies`): Ruộng cạnh rừng đông nam, Tháp Cung và Trại Lính ở khúc nhập, Mỏ ★★★ N1, Lũy cấp 2 rồi 3 trả bằng Vàng và Gỗ, Tháp Cung đường đông, Tháp Pháo, nâng cấp; đánh dấu cây theo cụm, tối đa 4 dân, bán Lúa quá 20; Tướng ban Ngày tới chỗ lời gọi tụ nhiều nhất (lệnh như Tab + Enter), ban Đêm tới tháp có quái và lời gọi Bắn mạnh; không gọi Đêm sớm.\n");
-  print("### Cổng `BUILD_1A6.md` §12 (Cân bằng)\n");
+  print("### Cổng `BUILD_1A6.md` §12 (Cân bằng; cổng 5a cả ở mỗi chế độ khác, theo trần gõ 20 s của chế độ đó)\n");
   print("| Cổng | Nội dung | Mục tiêu | Đo được | Kết quả |");
   print("|---|---|---|---|---|");
   for (const gate of result) print(`| ${gate.id} | ${gate.name} | ${gate.target} | ${gate.measured} | ${gate.pass ? "Đạt" : "**Hỏng**"} |`);

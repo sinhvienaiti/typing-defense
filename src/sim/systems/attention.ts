@@ -9,7 +9,7 @@
  * typing dims for another call in a ring. Last, every bright call without a word gets one.
  *
  * The typing budget is kept word by word (BUILD_1A6 §12 gate 5, review R3): a word may start only if typing it from
- * now, at E's pace (typeSeconds of its letters but the first, ×CALL.paceK), after the word in flight, keeps every 20 s
+ * now, at E's pace (typeSeconds of its letters but the first) and the mode's slipS, after the word in flight, keeps every 20 s
  * window within the mode's seconds, counting the typed ticks that leave the window meanwhile; or when nothing is typed
  * at all (a word longer than the budget still comes, alone). A call lights only if a word of its band's longest would;
  * a bright call whose word is not begun dims (it waits, and gives the word back) once its word would not fit, the next
@@ -28,10 +28,10 @@ const ECONOMY_RANK = 2;
 const QUIZ_RANK = 3;
 
 /**
- * Ticks a word holds the lock while `letters` of it are left at E, ×CALL.paceK for slips: the lock comes with its
+ * Ticks a word holds the lock while `letters` of it are left at E (slips aside: the mode's slipS): the lock comes with its
  * first letter, so the letters after it and the reading of the next word (typeSeconds counts a space: one fewer letter).
  */
-const typeTicks = (w: World, letters: number): number => ticks(typeSeconds(letters - 1, expectedE(w), WORD_D.known) * CALL.paceK);
+const typeTicks = (w: World, letters: number): number => ticks(typeSeconds(letters - 1, expectedE(w), WORD_D.known));
 
 /** peak[k]: for k ticks typed from now, the most the window's count rises meanwhile (k less the typed ticks leaving it), over 0..k. */
 const peak = new Int32Array(4096);
@@ -69,7 +69,7 @@ export function attentionStep(w: World): void {
   const lock = T.router.lock;
   const flying = lock >= 0 && W.typed[lock]! > 0 ? typeTicks(w, T.deck.len[W.word[lock]!]! - W.typed[lock]!) : 0;
   const fits = (letters: number): boolean => {
-    const k = flying + typeTicks(w, letters) + ticks(CALL.slipS);
+    const k = flying + typeTicks(w, letters) + ticks(mode.slipS);
     return (T.typedSum === 0 && flying === 0) || (k <= T.typed.length ? peak[k]! : peak[T.typed.length]! + k - T.typed.length) <= room;
   };
   const longest = lengthBand(expectedE(w))[1];
