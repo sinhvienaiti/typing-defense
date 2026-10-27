@@ -64,7 +64,7 @@ describe("Cương Thi Đầu Đàn and Neo (BUILD_1B §9.2)", () => {
     expect(after - w.enemies.hp[lead]!).toBe(Math.round(100 * (1 - 0.3)));
   });
 
-  it("let run, its pack walks on and nothing else happens; with 3 others by it, or no building within 20 m, it calls nothing", () => {
+  it("let run, its pack walks on and nothing else happens; with 3 others by it, no building within 20 m, or out of every help ring, it calls nothing", () => {
     const w = world({ deck, vocab: 3 });
     const pack = [9, 9.5, 10, 10.5].map((back) => standing(w, "cuong-thi", back));
     const lead = standing(w, "cuong-thi-lead", 9.5, true);
@@ -85,6 +85,12 @@ describe("Cương Thi Đầu Đàn and Neo (BUILD_1B §9.2)", () => {
     for (const d of [10, 10.5, 11, 11.5]) rift.enemies.stunUntil[enemyAt(rift, "cuong-thi", 0, d)] = 1e9;
     const by = enemyAt(rift, "cuong-thi-lead", 0, 10.5);
     expect([send(rift).some((e) => e.t === "drum"), rift.enemies.castEnd[by]]).toEqual([false, 0]);
+    // Test pass 27/10: by the Bastion but Draconis away (no helper out), no ring takes it in: no Neo, its call would never light.
+    const away = world({ deck, vocab: 3 });
+    [9, 9.5, 10, 10.5].forEach((back) => standing(away, "cuong-thi", back));
+    const unseen = standing(away, "cuong-thi-lead", 9.5, true);
+    [away.agents.x[0], away.agents.z[0]] = [0, -30];
+    expect([send(away).some((e) => e.t === "drum"), away.enemies.castEnd[unseen]]).toEqual([false, 0]);
   });
 
   it("its aura hurries every enemy within 6 m ×1.2, always, and leads them: on its road none walks on past 1.5 m ahead of it; one further on walks at its own pace; it all ends with it", () => {
@@ -111,9 +117,12 @@ describe("Cương Thi Đầu Đàn and Neo (BUILD_1B §9.2)", () => {
 });
 
 describe("Quỷ Núi Troll and Phá Khiên (BUILD_1B §9.2)", () => {
-  it("within 25 m of an attack building it raises a 4 m dome for T that rides on it; a shot launched outside hurts under it ×0.3, from inside or off it ×1", () => {
+  it("within 25 m of an attack building and in a help ring it raises a 4 m dome for T that rides on it; a shot launched outside hurts under it ×0.3, from inside or off it ×1", () => {
     const w = world({ deck, vocab: 3 });
     const troll = standing(w, "troll", 15, true);
+    send(w);
+    expect(w.enemies.castEnd[troll]).toBe(0); // 15 m short of the Bastion, out of Draconis' 14 m ring: no dome (test pass 27/10)
+    [w.agents.x[0], w.agents.z[0]] = [w.enemies.x[troll]!, w.enemies.z[troll]! + 6]; // he comes: his ring takes it in
     send(w);
     expect([w.enemies.castEnd[troll], w.enemies.stunUntil[troll]]).toEqual([w.tick - 1 + directTicks(w), 0]);
     const [x, z] = [w.enemies.x[troll]!, w.enemies.z[troll]!];

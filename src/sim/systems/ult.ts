@@ -15,7 +15,7 @@ import { CALL_KIND } from "../stores/calls";
 import { PROJECTILE } from "../stores/projectiles";
 import type { World } from "../world";
 import { makeCall } from "./calls";
-import { locked } from "./waves";
+import { locked, opensOn } from "./waves";
 
 const FALL = ticks(ULT.fallS);
 /** A feather comes down from the north-west at 12 m/s: FALL ticks onto a target standing still. */
@@ -51,10 +51,13 @@ export function ultSpot(w: World, mouse: { x: number; z: number } | null): { x: 
   return best;
 }
 
+/** Shut until the night of its unlock day (BUILD_1B §12 "dùng được từ Đêm 3"; test pass 27/10: day 3 already cast it). */
+export const ultShut = (w: World): boolean => locked(w, "ult") || (w.day === opensOn(w, "ult") && w.phase === "day" && !w.sandbox);
+
 /** The `ult` command: full, 45 s on, no rain falling, within 20 m of Draconis (quarter metres); the reason it may not, or null. */
 export function castUlt(w: World, qx: number, qz: number): string | null {
   const U = w.ult;
-  if (locked(w, "ult")) return "locked";
+  if (ultShut(w)) return "locked";
   if (!Number.isInteger(qx) || !Number.isInteger(qz)) return "bounds";
   if (U.charge < ULT.max) return "ultEmpty";
   if (U.on === 1 || w.tick - U.castAt < ticks(ULT.minGapS)) return "ultBusy";

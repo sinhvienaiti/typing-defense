@@ -102,7 +102,7 @@ describe("Tối Thượng (BUILD_1B §8)", () => {
     expect(reason(ult(w, spot.x, spot.z))).toBeUndefined();
   });
 
-  it("the boss takes ×0.25 of it and never burns; the story opens it on day 3", () => {
+  it("the boss takes ×0.25 of it and never burns; the story opens it on night 3 (BUILD_1B §12; test pass 27/10: day 3 took it)", () => {
     const w = world({ gold: 5000 });
     send(w, sb("preset"), sb("boss"));
     for (let k = 0; k < 60 * 60 && w.boss.stage !== BOSS.fight; k += 1) step(w);
@@ -115,6 +115,8 @@ describe("Tối Thượng (BUILD_1B §8)", () => {
     story.ult.charge = ULT.max;
     expect(reason(ult(story, hero(story).x, hero(story).z - 5))).toBe("locked");
     story.day = 3;
+    expect(reason(ult(story, hero(story).x, hero(story).z - 5))).toBe("locked");
+    story.phase = "night";
     expect(reason(ult(story, hero(story).x, hero(story).z - 5))).toBeUndefined();
   });
 
@@ -259,8 +261,8 @@ describe("Nuppeppō and the sandbox's R2 commands (BUILD_1B §10, §14)", () => 
 describe("Tối Thượng on the HUD (BUILD_1B §8.2, §13.3)", () => {
   it("the action button shows the day it opens, the charge in steps of 5 %, the rain; Draconis' lantern carries the charge as a ring", () => {
     const w = world({ sandbox: false });
-    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Tối Thượng · Mở ở Ngày 3');
-    [w.day, w.ult.charge] = [3, 47.3];
+    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Tối Thượng · Mở ở Đêm 3');
+    [w.day, w.ult.charge, w.phase] = [3, 47.3, "night"];
     expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Tối Thượng 45 %<kbd>=</kbd>');
     expect(teamHtml(w, 0)).toContain('class="td-ult" style="--ult:45%"');
     w.ult.charge = ULT.max;

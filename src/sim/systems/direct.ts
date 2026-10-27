@@ -2,8 +2,9 @@
  * Direct calls and their verbs (BUILD_1B §9; R2 Ngắt, R3 Neo and Phá Khiên), where the village fights (an attack
  * building's rim within reachM: R2 learnt that by the rift no ring lit them): a Tanuki with 4 others within 6 m (9 m)
  * stands and drums; a Đầu Đàn with 4 others within 6 m (20 m) calls its pack on; a Troll (25 m) raises a 4 m dome
- * riding on it. Each lasts T = clamp(0.8 + k_d·(len + 1)·12 / E; 3; 7) s. A direct call of one known short word follows
- * the enemy, lit in a help ring and within the typing budget; at most 2 open (3 with the boss up), one more runs uncalled.
+ * riding on it; those two also wait for a help ring (test pass 27/10: from 20–25 m out their calls lit late if ever). Each
+ * lasts T = clamp(0.8 + k_d·(len + 1)·12 / E; 3; 7) s. A direct call of one known short word follows the enemy, lit in
+ * a help ring and within the typing budget; at most 2 open (3 with the boss up), one more runs uncalled.
  * Typed: +2 gold (the leaf +5 more), Tối Thượng +3; the drum breaks (stunned 2 s), the pack stands 3 s and the leader
  * takes ×1.3 for 6 s, or the dome breaks (stunned 1.5 s, none for 10 s). Let run: a drum heals 25 % within 6 m (never
  * the boss); a pack walks on (the leader's +20 % aura, move.ts, is always on); a dome holds T (shots from outside ×0.3).
@@ -13,6 +14,7 @@ import { DIRECT, MODES, PACE } from "../../content/rules";
 import { STAT, bump } from "../stats";
 import { CALL_KIND } from "../stores/calls";
 import type { World } from "../world";
+import { inRing } from "./agents";
 import { bossSlot } from "./boss";
 import { closeCall, expectedE, lengthBand, makeCall } from "./calls";
 import { maxHp } from "./spawn";
@@ -101,7 +103,7 @@ export function directStep(w: World): void {
       if (w.tick >= E.castEnd[e]!) letRun(w, e);
       continue;
     }
-    if (w.tick < E.abilityAt[e]! || E.stunUntil[e]! > w.tick || (ability.reach > 0 && !byTheFight(w, E.x[e]!, E.z[e]!, ability.reach))) continue;
+    if (w.tick < E.abilityAt[e]! || E.stunUntil[e]! > w.tick || (ability.reach > 0 && !byTheFight(w, E.x[e]!, E.z[e]!, ability.reach)) || (ability.verb !== INTERRUPT && !inRing(w, E.x[e]!, E.z[e]!))) continue;
     let others = 0;
     for (let o = 0; o < E.top && others < ability.need; o += 1) if (o !== e && E.used[o] === 1 && E.dying[o] === 0 && near(E.x[o]!, E.z[o]!, E.x[e]!, E.z[e]!, ability.radius)) others += 1;
     if (others < ability.need) continue;

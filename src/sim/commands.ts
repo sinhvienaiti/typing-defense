@@ -10,6 +10,7 @@ import { routeBackspace } from "../typing/router";
 import { CELL } from "./nav/grid";
 import { canPlace } from "./placement";
 import { STAT, bump } from "./stats";
+import { BOSS } from "./stores/boss";
 import { PLOT } from "./stores/buildings";
 import { NPC_KIND, TASK } from "./stores/npcs";
 import { moveAgent, orderAgent, recallAgent, releaseBuilding, reroute, slotsOpen } from "./systems/agents";
@@ -289,7 +290,7 @@ function sandbox(w: World, op: SandboxOp): string | null {
     case "boss":
       return callBoss(w) ? null : "bossBusy";
     case "skipTo":
-      return skipTo(w, op.value) ? null : "badValue";
+      return skipTo(w, op.value) ? null : w.boss.stage >= BOSS.lull ? "bossBusy" : "badValue";
     case "spawn": {
       // BUILD_1B §14 (R2): packs of any enemy but the boss leave the rift in the running wave.
       const def = w.c.content.enemies.find((enemy) => enemy.id === op.enemy);

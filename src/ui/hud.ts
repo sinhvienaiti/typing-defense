@@ -9,7 +9,8 @@ import { BOSS } from "../sim/stores/boss";
 import { CALL_KIND } from "../sim/stores/calls";
 import { bossSlot } from "../sim/systems/boss";
 import { chainTier } from "../sim/systems/chain";
-import { dayTicks, earlyCallBonus, locked, opensOn } from "../sim/systems/waves";
+import { ultShut } from "../sim/systems/ult";
+import { dayTicks, earlyCallBonus, opensOn } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { Rect } from "../view/words/lanes";
@@ -94,9 +95,9 @@ export function stripHtml(w: World, note: string, tactical = false): string {
 
 /** Build and hire; Tối Thượng with its charge (BUILD_1B §8.2, R2); the tactical pause where the mode has it (§8). */
 export function actionsHtml(w: World, tactical: boolean): string {
-  const shut = locked(w, "ult");
+  const shut = ultShut(w);
   const charge = Math.floor(w.ult.charge);
-  const ult = shut ? "Tối Thượng · Mở ở Ngày " + opensOn(w, "ult") : w.ult.on === 1 ? "Mưa lông lửa" : charge >= ULT.max ? "Tối Thượng" : "Tối Thượng " + Math.floor(charge / 5) * 5 + " %";
+  const ult = shut ? "Tối Thượng · Mở ở Đêm " + opensOn(w, "ult") : w.ult.on === 1 ? "Mưa lông lửa" : charge >= ULT.max ? "Tối Thượng" : "Tối Thượng " + Math.floor(charge / 5) * 5 + " %";
   return button("build", "Xây", "Insert / \\") + button("hire", "Thuê dân", "⇧ \\") + button("ult", ult, "=", shut || charge < ULT.max || w.ult.on === 1 ? " disabled" : "") +
     (MODES[w.mode].pause ? button("space", tactical ? "Chạy tiếp" : "Tạm dừng", "Space") : "");
 }
