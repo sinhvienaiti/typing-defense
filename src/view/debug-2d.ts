@@ -12,7 +12,7 @@
  * a second canvas; at night an indigo wash falls on it and the buildings glow like lanterns (eased over ~1 s, the
  * picture's own clock).
  */
-import { AGENT, BUILD, FARM, TICK_HZ, TREE } from "../content/rules";
+import { AGENT, BUILD, FARM, TICK_HZ, TREE, ULT } from "../content/rules";
 import { FX } from "../sim/events";
 import { MODE, PATH_MAX } from "../sim/stores/agents";
 import { PLOT } from "../sim/stores/buildings";
@@ -20,12 +20,14 @@ import { CALL_STATE } from "../sim/stores/calls";
 import { TASK } from "../sim/stores/npcs";
 import { PROJECTILE } from "../sim/stores/projectiles";
 import { slotsOpen } from "../sim/systems/agents";
+import { bossSlot } from "../sim/systems/boss";
 import { plotAt } from "../sim/systems/economy";
 import type { World } from "../sim/world";
 import { wordText } from "../typing/decks";
 import { BossView, type Pen } from "./boss-2d";
 import { FxView } from "./fx-2d";
-import { CALL_COLOR, CALL_ICON, pips, ROOF_M } from "./words/cards";
+import { CALL_COLOR, callLabel, pips, ROOF_M } from "./words/cards";
+import type { Rect } from "./words/lanes";
 
 /** The Văn Điền palette (theme.css --vd-*): paddies, bamboo, silver water, earth paths; the meaning colours as TK 23.3. */
 const COLOR = {
@@ -83,6 +85,9 @@ export class DebugView {
   private readonly marks: Mark[] = [];
   /** The dim bubbles drawn last frame, CSS px: what a click hits. */
   private readonly bubbles: Bubble[] = [];
+  /** Word shots in flight by slot (their target and word), and where they landed with when (ms). */
+  private readonly flying = new Map<number, [number, number, string]>();
+  private readonly hits: [number, number, number][] = [];
   /** Mộc Tinh's layers (BUILD_1B §13.1) and R2's Tối Thượng and direct calls (§13.3); main.ts hands them each frame's events. */
   readonly boss = new BossView();
   readonly fx = new FxView(this.boss.fx);
@@ -594,7 +599,7 @@ export class DebugView {
       ctx.fill();
       ctx.stroke();
       ctx.font = Math.round(14 * ratio) + "px " + FONT;
-      ctx.fillText(CALL_ICON[kind]!, b.x + 6 * ratio, b.y + b.h / 2 + ratio);
+      ctx.fillText(callLabel(w, b.c)[0], b.x + 6 * ratio, b.y + b.h / 2 + ratio); // a direct call by its verb: ✋ ⚓ 🛡️ (test pass 27/10)
       Object.assign(ctx, { font: "700 " + Math.round(9 * ratio) + "px " + FONT, fillStyle: COLOR.ink });
       ctx.fillText(pips(w, b.c), b.x + 26 * ratio, b.y + b.h / 2);
       ctx.globalAlpha = 1;
@@ -641,7 +646,7 @@ export class DebugView {
       const { ctx } = this;
       ctx.beginPath();
       for (let e = 0; e < E.top; e += 1) {
-        if (E.used[e] === 0 || w.c.enemies[E.def[e]!]!.boss) continue;
+        if (E.used[e] === 0 || w.c.enemies[E.def[e]!]!.boss || w.c.enemies[E.def[e]!]!.altitude > 0) continue;
         const r = w.c.enemies[E.def[e]!]!.radius + this.px(2.5);
         ctx.moveTo(E.x[e]! + r, E.z[e]!);
         ctx.arc(E.x[e]!, E.z[e]!, r, 0, Math.PI * 2);
@@ -653,12 +658,13 @@ export class DebugView {
       if (E.used[e] === 0) continue;
       const def = w.c.enemies[E.def[e]!]!;
       const x = E.x[e]!;
-      const z = E.z[e]!;
+      const lift = def.altitude > 0 ? 1.1 + 0.35 * Math.sin(now * 0.005 + e) : 0; // test pass 27/10: Ma Trơi read as walkers
+      const z = E.z[e]! - lift;
       if (def.boss || def.id === w.c.content.boss?.summon.enemy) continue; // boss-2d.ts draws Mộc Tinh and its sprouts
       if (def.altitude > 0) {
-        // Flyers: a ground shadow, the body lifted, a soft glow ring.
-        this.disc(x + 0.5, z + 0.9, def.radius * 0.8, "rgba(43, 33, 24, 0.25)", null);
-        this.disc(x, z, def.radius + 0.45, "rgba(186, 160, 255, 0.35)", null);
+        // Flyers: a ground shadow where they are, the body bobbing over it, a soft glow ring.
+        this.disc(x, E.z[e]! + 0.3, def.radius * (0.9 - 0.15 * Math.sin(now * 0.005 + e)), "rgba(43, 33, 24, 0.3)", null);
+        this.disc(x, z, def.radius + 0.6, "rgba(186, 160, 255, 0.45)", "rgba(255, 244, 214, 0.7)", 1.5);
       }
       if (E.elite[e] === 1) this.disc(x, z, def.radius + 0.35, null, COLOR.buildingHp, 2.5); // an elite (the pace director, BALANCE.md §4.2)
       // R2 (BUILD_1B §13.3): a drumming Tanuki beats a red ring out; one whose drum was broken sees stars. R3 (§9.2): a
@@ -735,7 +741,7 @@ export class DebugView {
         const waddle = A.panic[a] !== 0 && A.mode[a] === MODE.walk ? Math.sin(performance.now() * 0.03) * 0.25 : 0;
         this.disc(x + waddle, z, 0.85, view.color, COLOR.ink, 1.5);
         this.text(view.short, x + waddle, z, 10, COLOR.ink);
-        if (A.panic[a] !== 0) this.text("!", x, z - 1.6, 18, COLOR.seal, 900, COLOR.seal);
+        if (A.panic[a] !== 0) this.text("!", x + (a - 2) * 2.4, z - 1.6, 18, COLOR.seal, 900, COLOR.seal); // side by side, never stacked
         continue;
       }
       if (up > 0) this.disc(x + 0.9 * up, z + 1.4 * up, 0.9, "rgba(43, 33, 24, 0.25)", null);
@@ -745,6 +751,8 @@ export class DebugView {
 
   private shots(w: World): void {
     const P = w.projectiles;
+    const now = performance.now();
+    const live = new Set<number>();
     for (let p = 0; p < P.top; p += 1) {
       if (P.used[p] === 0) continue;
       const x = P.x[p]!;
@@ -752,6 +760,7 @@ export class DebugView {
       const kind = P.kind[p]!;
       if (kind === PROJECTILE.wordShot) {
         this.wordShot(w, x, z, P.tx[p]! - x, P.tz[p]! - z, P.word[p]!);
+        live.add(p), this.flying.set(p, [P.tx[p]!, P.tz[p]!, P.word[p]! >= 0 ? wordText(w.typing.deck, P.word[p]!) : ""]);
         continue;
       }
       if (kind === PROJECTILE.feather) {
@@ -771,14 +780,26 @@ export class DebugView {
       const back = (kind === PROJECTILE.bolt ? 1.4 : 1.1) / (Math.sqrt(dx * dx + dz * dz) || 1);
       this.polyline([x - dx * back, z - dz * back, x, z], kind === PROJECTILE.bolt ? COLOR.paper : COLOR.ink, 0, kind === PROJECTILE.bolt ? 3 : 2);
     }
+    // A word shot gone since last frame has landed: its letters burst out of a jade flash (FxView), and the cards keep off it.
+    for (const [p, [x, z, text]] of this.flying) if (!live.has(p)) this.flying.delete(p), this.fx.wordHit(x, z, text, now), this.hits.push([x, z, now]);
+    while (this.hits.length > 0 && now - this.hits[0]![2] > 700) this.hits.shift();
   }
 
-  /** A jade head with the word's letters trailing behind it. */
+  /** A glowing jade head with the word's letters trailing behind it (test pass 27/10: 2–3× the old 6 px dot). */
   private wordShot(w: World, x: number, z: number, dx: number, dz: number, word: number): void {
     const d = Math.sqrt(dx * dx + dz * dz) || 1;
     const text = word >= 0 ? wordText(w.typing.deck, word) : "";
-    for (let k = 0; k < text.length; k += 1) this.text(text[text.length - 1 - k]!, x - (dx / d) * 0.9 * (k + 1), z - (dz / d) * 0.9 * (k + 1), 11, "rgba(11, 138, 120, " + (0.9 - k * 0.1).toFixed(2) + ")");
-    this.disc(x, z, 0.45, "#7ff5e0", COLOR.jade, 2);
+    for (let k = 0; k < text.length; k += 1) this.text(text[text.length - 1 - k]!, x - (dx / d) * 1.2 * (k + 1), z - (dz / d) * 1.2 * (k + 1), 15, "rgba(11, 138, 120, " + (0.95 - k * 0.1).toFixed(2) + ")", 900);
+    this.disc(x, z, 1.3, "rgba(127, 245, 224, 0.35)", null);
+    this.disc(x, z, 0.75, "#7ff5e0", COLOR.jade, 2.5);
+  }
+
+  /** Where the action is, CSS px, which the word cards keep off (test pass 27/10): Mộc Tinh with 1.5 m round it, the rain of Tối Thượng, a word shot's target and where one landed in the last 0.7 s. */
+  keepOut(w: World): Rect[] {
+    const [e, spots] = [bossSlot(w), [...this.flying.values(), ...this.hits].map(([x, z]): [number, number, number] => [x, z, 2])];
+    if (e >= 0) spots.push([w.enemies.x[e]!, w.enemies.z[e]!, w.c.enemies[w.enemies.def[e]!]!.radius * 1.3 + 1.5]);
+    if (w.ult.on === 1) spots.push([w.ult.x, w.ult.z, ULT.radiusM]);
+    return spots.map(([x, z, r]) => ({ left: this.project(x - r, z).x, top: this.project(x, z - r).y, right: this.project(x + r, z).x, bottom: this.project(x, z + r).y }));
   }
 
   private readMarks(w: World): void {
@@ -789,6 +810,7 @@ export class DebugView {
       const kind = ring.kind[slot]!;
       if (kind === FX.death || kind === FX.burst || kind === FX.leak || kind === FX.coin || kind === FX.soldierDown || kind === FX.fizzle) {
         this.marks.push({ kind, x: ring.x[slot]!, z: ring.z[slot]!, value: ring.value[slot]!, tick: ring.tick[slot]! });
+        if (kind === FX.death) this.boss.fx.burst(6, ring.x[slot]!, ring.z[slot]!, 6, 4, 500, performance.now(), 0.8); // ink flies off the body
       }
     }
     while (this.marks.length > 0 && (w.tick - this.marks[0]!.tick > MARK_TICKS || this.marks.length > 200)) this.marks.shift();
@@ -803,7 +825,7 @@ export class DebugView {
       else if (mark.kind === FX.soldierDown) this.disc(mark.x, mark.z, 0.5 + age, null, "rgba(59, 125, 221, " + alpha + ")", 2);
       else if (mark.kind === FX.leak) this.disc(mark.x, mark.z, 1 + age * 4, null, "rgba(255, 74, 74, " + alpha + ")", 3);
       else if (mark.kind === FX.fizzle) this.disc(mark.x, mark.z - 2 - age * 3, 0.4 + age * 1.6, null, "rgba(127, 245, 224, " + alpha + ")", 2);
-      else this.text("+" + mark.value, mark.x, mark.z - 1 - age * 2.5, 12, "rgba(201, 138, 46, " + alpha + ")");
+      else this.text("+" + mark.value, mark.x, mark.z - 1.5 - age * 3.5, 16, "rgba(214, 140, 20, " + alpha + ")", 900);
     }
   }
 }

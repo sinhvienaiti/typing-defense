@@ -47,7 +47,7 @@ export const SLICE_1A: Content = {
       },
       shot: { dBar: [67.5, 99, 139.5], pierce: 1 },
       power: { dmgMul: 1.6, targets: 1 },
-      view: { name: "Tháp Cung", short: "C", color: ATTACK },
+      view: { name: "Tháp Cung", short: "🏹", color: ATTACK }, // test pass 27/10: "C" and "P" were Chấm's and Phẩy's letters too
     },
     {
       id: "cannon", family: "attack", footprint: "M", placement: "free", costs: [110, 230, 390], hp: [300, 360, 440],
@@ -61,7 +61,7 @@ export const SLICE_1A: Content = {
       },
       shot: { dBar: [117, 189, 288], pierce: 0, splashMul: 1.15 },
       power: { dmgMul: 1.4, areaMul: 1.3 },
-      view: { name: "Tháp Pháo", short: "P", color: ATTACK },
+      view: { name: "Tháp Pháo", short: "🧨", color: ATTACK },
     },
     {
       id: "barracks", family: "military", footprint: "M", placement: "free", costs: [70, 150, 270], hp: [380, 450, 540],

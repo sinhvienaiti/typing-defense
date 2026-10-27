@@ -1,12 +1,10 @@
 /**
- * Where word cards go (docs/td/TYPING_DEFENSE_DESIGN.md 23.4), as pure
- * layout. A building's words stack in a column above its roof, newest at the
- * bottom: height is the clock (120 px over the word's life), each card at
- * least 40 px above the one below it, the column at most 240 px. Columns that
- * overlap side by side push each other sideways only (up to 240 px each: four
- * call bubbles over villagers at neighbouring trees, BUILD_1A6 §9) and stay
- * inside the safe area, and off the HUD's side panels when there is room
- * (review R2). Screen pixels throughout, so zoom never changes the spacing.
+ * Where word cards go (docs/td/TYPING_DEFENSE_DESIGN.md 23.4), as pure layout. A building's words stack in a column
+ * above its roof, newest at the bottom: height is the clock (120 px over the word's life), each card at least 40 px
+ * above the one below it, the column at most 240 px. Columns that overlap side by side push each other sideways only
+ * (up to 240 px each: four call bubbles over villagers at neighbouring trees, BUILD_1A6 §9) and stay inside the safe
+ * area, and off the HUD's side panels when there is room (review R2). Screen pixels throughout, so zoom never changes
+ * the spacing.
  */
 export const COLUMN = { rise: 120, gap: 40, max: 240, push: 240, clear: 10 } as const;
 
@@ -20,22 +18,24 @@ export function columnHeights(ages: readonly number[], lives: readonly number[],
   return out;
 }
 
-/** A column on screen: its roof's x, its vertical extent (top < bottom), its widest card's half width; `lo`–`hi` where it may stand. */
-export type LaneBox = { x: number; top: number; bottom: number; half: number; lo?: number; hi?: number };
+/** A column on screen: its roof's x, its vertical extent (top < bottom), its widest card's half width; `lo`–`hi` where it may stand; `at` where it stood last frame. */
+export type LaneBox = { x: number; top: number; bottom: number; half: number; lo?: number; hi?: number; at?: number };
 export type Rect = { left: number; top: number; right: number; bottom: number };
 
 /**
  * `lane` with `lo`–`hi` kept clear of the side panels it meets at its height (CSS px): a panel left of the middle
  * pushes `lo` past its right edge, one right of it pulls `hi` before its left edge; one across the middle (the word
- * strip) is no side panel.
+ * strip) is no side panel. `keep` (test pass 27/10/2026): boxes of the action on the field (the boss, the rain), which
+ * a lane meeting one at its height stands beside, on the side it stood last frame (`at`, else its roof's): never flips.
  */
-export function besidePanels(lane: LaneBox, panels: readonly Rect[], middle: number, gap = 6): LaneBox {
+export function besidePanels(lane: LaneBox, panels: readonly Rect[], middle: number, keep: readonly Rect[] = [], gap = 6): LaneBox {
   let [lo, hi] = [-Infinity, Infinity];
   for (const p of panels) {
     if (p.top >= lane.bottom || lane.top >= p.bottom || (p.left < middle && p.right > middle)) continue;
     if (p.right <= middle) lo = Math.max(lo, p.right + gap);
     else hi = Math.min(hi, p.left - gap);
   }
+  for (const p of keep) if (p.top < lane.bottom && lane.top < p.bottom) [lo, hi] = (lane.at ?? lane.x) < (p.left + p.right) / 2 ? [lo, Math.min(hi, p.left - gap)] : [Math.max(lo, p.right + gap), hi];
   return { ...lane, lo, hi };
 }
 
@@ -45,12 +45,12 @@ export function lanesTouch(lanes: readonly LaneBox[], out: readonly number[]): b
 }
 
 /**
- * Sideways offsets that keep overlapping columns `clear` px apart: the one
- * whose roof is further left goes left (ties: the earlier lane), each by at
- * most `push`; a lane with `lo`–`hi` is put back inside them every pass, so
- * its neighbours make way; then each column is moved inside [left, right].
+ * Sideways offsets that keep overlapping columns `clear` px apart: the one whose roof is further left goes left (ties:
+ * the earlier lane), each by at most `push` (COLUMN.push, the cards' last resort a longer one: test pass 27/10, four
+ * columns at neighbouring trees with a meaning strip at 1920 × 1080 need more than 240 px); a lane with `lo`–`hi` is put back
+ * inside them every pass, so its neighbours make way; then each column is moved inside [left, right].
  */
-export function spreadLanes(lanes: readonly LaneBox[], left: number, right: number, out: number[]): number[] {
+export function spreadLanes(lanes: readonly LaneBox[], left: number, right: number, out: number[], push: number = COLUMN.push): number[] {
   const order = lanes.map((_, index) => index).sort((a, b) => lanes[a]!.x - lanes[b]!.x || a - b);
   out.length = lanes.length;
   out.fill(0);
@@ -64,8 +64,8 @@ export function spreadLanes(lanes: readonly LaneBox[], left: number, right: numb
         const gap = b.x + out[order[j]!]! - b.half - (a.x + out[order[i]!]! + a.half);
         if (gap >= COLUMN.clear - 0.01) continue;
         const half = (COLUMN.clear - gap) / 2;
-        out[order[i]!] = Math.max(-COLUMN.push, out[order[i]!]! - half);
-        out[order[j]!] = Math.min(COLUMN.push, out[order[j]!]! + half);
+        out[order[i]!] = Math.max(-push, out[order[i]!]! - half);
+        out[order[j]!] = Math.min(push, out[order[j]!]! + half);
         moved = true;
       }
     }

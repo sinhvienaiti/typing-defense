@@ -299,7 +299,8 @@ export class BossView {
       for (let n = 0; n < spec.summon.count; n += 1) {
         // Just outside the canopy (drawn 1.3× its body): four green nubs pushing up.
         const [x, z] = [w.enemies.x[e]! + Math.cos(n * 1.57 + 0.8) * 3.9, w.enemies.z[e]! + Math.sin(n * 1.57 + 0.8) * 3.9];
-        this.dot(pen, x, z, 0.2 + 0.35 * ease(t), C.sprout);
+        this.circle(pen, x, z, 1.1, "rgba(255, 244, 214, " + (0.4 + 0.5 * t).toFixed(2) + ")", 3); // a pale ring on the grass (test pass 27/10)
+        this.dot(pen, x, z, 0.3 + 0.5 * ease(t), C.sprout);
         this.leafAt(pen, x + 0.2, z - 0.3 * t, 1);
       }
     }
@@ -386,7 +387,7 @@ export class BossView {
       ctx.beginPath();
       ctx.ellipse(x + 1, z - r * 0.6, 0.45 * f, 0.9 * f, 0, 0, Math.PI * 2);
       ctx.fill();
-      pen.text("Cháy ×1,25", x, z - r - 1.6, 12, "#c23b22", 800, "#c23b22");
+      pen.text("Cháy ×1,25", x, z + r + 1.6, 12, "#c23b22", 800, "#c23b22"); // under it: the hits' numbers rise over it (test pass 27/10)
     }
     // The stagger: stars going round over it, and the vulnerable ring counting down.
     if (w.tick < S.staggerUntil) {

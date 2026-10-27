@@ -1,16 +1,15 @@
 /**
- * Lời Gọi's sound made in code (docs/td/BUILD_NOW.md §5.5, TK 24; SPLIT_PLAN §1.2), no files: bamboo, wood,
- * bronze bells and paper (folk.ts), the list and the prompts for the real files in
- * docs/audio/THEME_SOUND_LIST.md. Buses (TK 24.2): music (ducked under a spoken word), typing (its own light
- * compressor), world, ui, a shared reverb, master and a limiter; the settings set master, music and effects.
- * A call that lights up rings its kind's alert (power a trống cơm pair, build two bamboo taps, harvest a high
- * bell, chop a low wood knock, mine a small clink, quiz a sáo call; at most 3 a second); a right key is a
- * bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB lower; a finished word a
- * đàn tranh note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots whoosh, blasts thud,
- * the ink folk puff like paper, a leak rings a gong; night and dawn have their own calls. The title adds far
- * villagers calling across the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's swelling
- * rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers; Rễ
- * Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
+ * Lời Gọi's sound made in code (docs/td/BUILD_NOW.md §5.5, TK 24; SPLIT_PLAN §1.2), no files: bamboo, wood, bronze
+ * bells and paper (folk.ts), the list and the prompts for the real files in docs/audio/THEME_SOUND_LIST.md. Buses (TK
+ * 24.2): music (ducked under a spoken word), typing (its own light compressor), world, ui, a shared reverb, master and
+ * a limiter; the settings set master, music and effects. A call that lights up rings its kind's alert (power a trống
+ * cơm pair, build two bamboo taps, harvest a high bell, chop a low wood knock, mine a small clink, quiz a sáo call; at
+ * most 3 a second); a right key is a bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB
+ * lower; a finished word a đàn tranh note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots
+ * whoosh, blasts thud, the ink folk puff like paper, a leak rings a gong; night and dawn have their own calls. The
+ * title adds far villagers calling across the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's
+ * swelling rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers;
+ * Rễ Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
  * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
  * drum's thump (Ngắt), a bronze stroke and knock (Neo), a stone dome cracking (Phá Khiên).
  */
@@ -213,7 +212,8 @@ export class TypingAudio {
         if (event.verb === 0) trong(world, t, 0.35, 180);
         else if (event.verb === 1) [chuong(world, t, 147, 0.14, 1.6), go(world, t + 0.04, 260, 0.22, 0.08)];
         else [go(world, t, 95, 0.45, 0.14), giay(world, t + 0.02, 0.14, 0.45, 1400, 260), rumble(world, t + 0.05, 0.5, 0.25)];
-      } else if (event.t.startsWith("boss")) this.boss(event, t);
+      } else if (event.t === "panic") [0, 0.1].forEach((at) => go(world, t + at, 1250, 0.05, 0.05)); // a helper runs: two quick high knocks (test pass 27/10)
+      else if (event.t.startsWith("boss")) this.boss(event, t);
       else if (event.t === "defeat") {
         chuong(world, t, 82.4, 0.2, 3.5);
         [0, 0.35, 0.7].forEach((at, k) => sao(world, t + 0.2 + at, note(7 - 2 * k), 0.4, 0.05));

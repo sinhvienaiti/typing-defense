@@ -110,15 +110,15 @@ export class Particles {
   }
 }
 
-/** A heal ring (0), a drum broken into letters (1), a pack pinned (2) or a dome broken (3) at a world point, from a ring of 12. */
-type Mark = { x: number; z: number; at: number; kind: number };
+/** A heal ring (0), a drum broken into letters (1), a pack pinned (2), a dome broken (3) or a word shot's hit (4, its word) at a world point, from a ring of 12. */
+type Mark = { x: number; z: number; at: number; kind: number; text: string };
 const SCRAPS = "ngatchu";
 const ease = (t: number): number => 1 - (1 - t) * (1 - t);
 /** A feather starts this far from where it lands (ult.ts: 12 m/s for ULT.fallS). */
 const FALL_M = 12 * ULT.fallS;
 
 export class FxView {
-  private readonly marks: Mark[] = Array.from({ length: 12 }, () => ({ x: 0, z: 0, at: -1e9, kind: 0 }));
+  private readonly marks: Mark[] = Array.from({ length: 12 }, () => ({ x: 0, z: 0, at: -1e9, kind: 0, text: "" }));
   private next = 0;
   private castAt = -1e9;
   private raining = false;
@@ -131,12 +131,17 @@ export class FxView {
     for (const e of events) {
       if (e.t === "ult") this.castAt = now;
       if (e.t !== "direct" || (e.verb > 0 && !e.ok)) continue; // a pack let run walks on, a dome let run just ends
-      Object.assign(this.marks[(this.next = (this.next + 1) % this.marks.length)]!, { x: e.x, z: e.z, at: now, kind: e.ok ? e.verb + 1 : 0 });
+      Object.assign(this.marks[(this.next = (this.next + 1) % this.marks.length)]!, { x: e.x, z: e.z, at: now, kind: e.ok ? e.verb + 1 : 0, text: SCRAPS });
       const dome = e.verb === 2;
       if (e.ok) this.fx.burst(dome ? 6 : 1, e.x, e.z, dome ? 12 : 8, dome ? 6 : 4, dome ? 800 : 500, now);
     }
     if (this.raining && w.ult.on === 0) Object.assign(this.embers, { x: w.ult.x, z: w.ult.z, at: now });
     this.raining = w.ult.on === 1;
+  }
+
+  /** A word shot landed (test pass 27/10: a dot that vanished): a jade flash and its word's letters bursting out. */
+  wordHit(x: number, z: number, text: string, now: number): void {
+    Object.assign(this.marks[(this.next = (this.next + 1) % this.marks.length)]!, { x, z, at: now, kind: 4, text: text || "chu" });
   }
 
   /** Under the enemies: the rain's ring, a shadow under each feather (darker as it nears), the ember pool of its burn. */
@@ -169,7 +174,7 @@ export class FxView {
     }
   }
 
-  /** Over the enemies: heal rings spreading 6 m, broken drums bursting into letters, pinned packs, broken domes. */
+  /** Over the enemies: heal rings spreading 6 m, broken drums and word shots' hits bursting into letters, pinned packs, broken domes. */
   over(pen: Pen, now: number): void {
     for (const m of this.marks) {
       const age = (now - m.at) / 700;
@@ -188,7 +193,11 @@ export class FxView {
         pen.ctx.arc(m.x, m.z, pin ? 6 - 5 * ease(age) : 4 + 2 * ease(age), 0, Math.PI * 2);
         pen.ctx.stroke();
         pen.text(pin ? "Đứng sững!" : "Vỡ vòm!", m.x, m.z + 2.4 + age, 16, pin ? "#2f4f6f" : "#2b2118", 900); // under it: its card hangs above
-      } else for (let k = 0; k < SCRAPS.length; k += 1) pen.text(SCRAPS[k]!, m.x + Math.cos(k * 0.9) * 3 * ease(age), m.z + Math.sin(k * 0.9) * 3 * ease(age) - age, 16 - 6 * age, "#2b2118", 900);
+      } else {
+        if (m.kind === 4 && age < 0.45) pen.text("✦", m.x, m.z, 40 * (1 - age), "rgba(127, 245, 224, " + (1 - age / 0.45).toFixed(2) + ")", 900);
+        const n = m.text.length;
+        for (let k = 0; k < n; k += 1) pen.text(m.text[k]!, m.x + Math.cos(k * 6.283 / n + 0.4) * 3 * ease(age), m.z + Math.sin(k * 6.283 / n + 0.4) * 3 * ease(age) - age, 16 - 6 * age, m.kind === 4 ? "#0b6f61" : "#2b2118", 900);
+      }
     }
   }
 

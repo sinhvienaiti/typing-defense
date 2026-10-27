@@ -363,7 +363,7 @@ runFrameLoop({
   draw(now) {
     timed(costs.draw, () => {
       view.draw(world, selection);
-      cards.draw(world, now, window.innerWidth, window.innerHeight, hud.boxes(window.innerWidth, window.innerHeight));
+      cards.draw(world, now, window.innerWidth, window.innerHeight, hud.boxes(window.innerWidth, window.innerHeight), view.keepOut(world));
     });
     painted = true;
   },

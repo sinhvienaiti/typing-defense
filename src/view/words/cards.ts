@@ -48,7 +48,7 @@ export const pips = (w: World, c: number): string => (w.calls.words[c]! > 1 ? "â
 
 const POOL = 20;
 const STAMPS = 10;
-const MS = { hit: 220, fold: 200, mean: 1000, stamp: 900, shake: 120, pink: 150, spring: 150 } as const;
+const MS = { hit: 220, fold: 200, mean: 1000, stamp: 900, shake: 220, spring: 150 } as const;
 const SAFE = { side: 8, top: 64, bottom: 8 } as const;
 
 /** "mean": typed, the card shows the word's meaning for 1 s in its call's column, then folds. */
@@ -100,10 +100,9 @@ export class WordCards {
     for (const event of events) {
       const card = "word" in event ? this.byId.get(event.word) : undefined;
       if (card === undefined) continue;
-      if (event.t === "wordKey" && event.result === KEY.wrong) {
-        card.shakeUntil = now + MS.shake;
-        card.pinkUntil = now + MS.pink;
-      } else if (event.t === "wordHit") {
+      // A wrong key shakes the card and the letter wanted stays pink until it comes (test pass 27/10: 0.15 s was missed).
+      if (event.t === "wordKey") [card.shakeUntil, card.pinkUntil] = event.result === KEY.wrong ? [now + MS.shake, Infinity] : [card.shakeUntil, 0];
+      else if (event.t === "wordHit") {
         this.byId.delete(event.word);
         const c = w.calls.slotOf(event.call);
         const to = c >= 0 ? this.project(w.calls.x[c]!, w.calls.z[c]!) : card;
@@ -145,7 +144,7 @@ export class WordCards {
   private render(card: Card, typed: number, pink: boolean, tier: number, dots: string): void {
     card.tier = tier;
     const letters = [...card.word].map((ch, k) => {
-      const kind = (k < typed ? " t" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : "");
+      const kind = (k < typed ? " t" : "") + (k === typed - 1 ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
       const shown = card.quiz && k >= Math.max(1, typed) ? "_" : ch;
       return kind === "" ? shown : '<span class="' + kind.trim() + '">' + shown + "</span>";
     });
@@ -160,8 +159,8 @@ export class WordCards {
     return card === undefined ? -1 : card.call;
   }
 
-  /** `panels`: the HUD's panels on screen, which columns keep off when there is room. */
-  draw(w: World, now: number, width: number, height: number, panels: readonly Rect[] = []): void {
+  /** `panels`: the HUD's panels on screen, which columns keep off when there is room; `keep`: the action on the field (the view's keepOut), the same. */
+  draw(w: World, now: number, width: number, height: number, panels: readonly Rect[] = [], keep: readonly Rect[] = []): void {
     const W = w.words;
     const lock = w.typing.router.lock;
     const dt = Math.min(100, now - this.last);
@@ -199,7 +198,7 @@ export class WordCards {
       if (c < 0) [c, card.ax, card.ay] = [-1 - this.cards.indexOf(card), Number.isNaN(card.ax) ? card.x : card.ax, Number.isNaN(card.ax) ? card.y + card.height : card.ay];
       (lanes.get(c) ?? lanes.set(c, []).get(c)!).push(card);
     }
-    this.layout(w, lanes, lock, now, dt, width, height, panels);
+    this.layout(w, lanes, lock, now, dt, width, height, panels, keep);
     for (const card of this.cards) {
       // A word gone with no result read (the run was reset) folds away.
       if (card.id >= 0 && card.leave === "" && card.seen !== this.frame) {
@@ -217,7 +216,7 @@ export class WordCards {
     }
   }
 
-  private layout(w: World, lanes: Map<number, Card[]>, lock: number, now: number, dt: number, width: number, height: number, panels: readonly Rect[]): void {
+  private layout(w: World, lanes: Map<number, Card[]>, lock: number, now: number, dt: number, width: number, height: number, panels: readonly Rect[], keep: readonly Rect[]): void {
     const W = w.words;
     const C = w.calls;
     const boxes: LaneBox[] = [];
@@ -230,14 +229,15 @@ export class WordCards {
       // A locked card grows up to Ã—1.2 from its bottom edge: the column's box reaches its scaled top (review R3).
       const tallest = Math.max(...cards.map((card, k) => heights[k]! + card.height * (card.slot >= 0 && card.slot === lock ? 1.2 : 1)));
       const roofY = Math.min(height - SAFE.bottom, Math.max(roof.y, SAFE.top + tallest));
-      boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half: Math.max(...cards.map((card) => (card.slot >= 0 && card.slot === lock ? card.half * 1.2 + 18 : card.half))) + 9 });
+      boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half: Math.max(...cards.map((card) => (card.slot >= 0 && card.slot === lock ? card.half * 1.2 + 18 : card.half))) + 9, at: roof.x + (this.offsets.get(c) ?? 0) });
       columns.push({ b: c, cards, heights, roofY });
     }
-    // Off the side panels when the columns still part there (review R2: a fourth bubble pushed over the dock); else
-    // over them, as 1A: a word is never hidden under another.
-    const beside = boxes.map((box) => besidePanels(box, panels, width / 2));
-    const kept = spreadLanes(beside, SAFE.side, width - SAFE.side, []);
-    const target = lanesTouch(boxes, kept) ? spreadLanes(boxes, SAFE.side, width - SAFE.side, []) : kept;
+    // Off the side panels and the action when the columns still part there (review R2: a fourth bubble pushed over the
+    // dock); else off the action alone, else over both and further than 240 px, as 1A: a word is never hidden under another.
+    const spread = (out: LaneBox[], push?: number): number[] => spreadLanes(out, SAFE.side, width - SAFE.side, [], push);
+    let target = spread(boxes.map((box) => besidePanels(box, panels, width / 2, keep)));
+    if (lanesTouch(boxes, target)) target = spread(boxes.map((box) => besidePanels(box, [], width / 2, keep)));
+    if (lanesTouch(boxes, target)) target = spread(boxes, width);
     let eased = columns.map((column, index) => {
       const was = this.offsets.get(column.b) ?? target[index]!;
       return Math.abs(target[index]!) >= Math.abs(was) ? target[index]! : was + (target[index]! - was) * (1 - Math.exp(-dt / MS.spring));
@@ -254,7 +254,7 @@ export class WordCards {
         const typing = locked && W.typed[s]! >= 2;
         const expire = column.b >= 0 ? C.expire[column.b]! : -1;
         card.y = column.roofY - column.heights[k]! - card.height;
-        card.x = boxes[index]!.x + offset + (typing ? 18 : 0) + (now < card.shakeUntil ? Math.sin(now * 0.25) * 3 : 0);
+        card.x = boxes[index]!.x + offset + (typing ? 18 : 0) + (now < card.shakeUntil ? Math.sin(now * 0.25) * 6 : 0);
         const left = expire < 0 || s < 0 ? 0 : Math.max(0, (expire - w.tick) / Math.max(1, expire - C.born[column.b]!));
         card.bar.style.transform = "scaleX(" + left.toFixed(3) + ")";
         if (C.kind[column.b] === CALL_KIND.direct) card.el.style.setProperty("--t", (100 * left).toFixed(0) + "%"); // the window's clock ring
