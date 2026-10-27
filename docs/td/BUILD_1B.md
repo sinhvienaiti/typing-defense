@@ -121,7 +121,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 | 1 | 8 Cương Thi | 10 Cương Thi (quyết định (b): Đêm 1–4 khó hơn) | Lời gọi Bắn mạnh |
 | 2 | 10 Cương Thi, 1 Ma Trơi | 12 Cương Thi, 2 Ma Trơi | Quái bay |
 | 3 | 12 Cương Thi, 2 Ma Trơi | 10 Cương Thi, 4 Nuppeppō, 2 Ma Trơi (bản đầu của đặc tả: 8, 3, 2) | Pháo khắc Nuppeppō; Tối Thượng |
-| 4 | 1 Thuồng Luồng, 10 Cương Thi | 3 Tanuki đi trước, 1 Thuồng Luồng, 9 Cương Thi (bản đầu: 2 Tanuki, 1, 7; 3 Tanuki cho một trống mỗi ~29 s, §9.1) | Ngắt |
+| 4 | 1 Thuồng Luồng, 10 Cương Thi | 3 Tanuki đi trước, 1 Thuồng Luồng, 9 Cương Thi (bản đầu: 2 Tanuki, 1, 7; 3 Tanuki cho một trống mỗi ~29 s, §9.1). **Làn A1** (27/10): thêm 2 Ma Trơi, 4 Cương Thi, 2 Ma Trơi sau cùng (Áp lực P Đêm 4 của bot gõ 0,3–5,7 % → 15–24 %; đợt H của đợt test, có Thuồng Luồng thứ hai, làm bot không gõ thua Đêm 4: cổng 4 của BUILD_1A6 §12) | Ngắt |
 | 5, phần đầu | **5 Thuồng Luồng (một toán 5)**, 7 Cương Thi, 3 Ma Trơi. R1 vòng 1 hạ còn 4; sửa review R1 trả về 5, Thuồng Luồng 385 máu (BUILD_NOTES §7.2) | **6 Thuồng Luồng (một toán 6), 420 máu**, 7 Cương Thi, 3 Ma Trơi | — |
 | 5, đỉnh boss | Lặng 12 s → 2 toán × 4 Cương Thi ra ở Khe Nứt (mỗi nhánh một toán); **Mộc Tinh trồi lên ở ngã ba** (6, −34) 6 s sau, đi nhánh đã báo từ Ngày 5; pha 2 gọi Mầm Gỗ | như R1 | Mộc Tinh |
 
@@ -145,7 +145,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 |---|---|---|
 | Đầu Ngày 5 | Sự kiện `bossWarn` (`day`, `route`). **Nhánh boss** (Tây hay Đông) chọn lúc này bằng luồng `spawn`, vào mã băm | Dải mực trên HUD: "Đêm nay Mộc Tinh thức dậy". Chip "Đêm 5 · Boss". Một tiếng gỗ trầm. **Mạch rễ mờ dọc nhánh boss sẽ đi** (từ ngã ba tới khúc nhập), giữ tới hết ải: người chơi có cả Ngày 5 để xây, bán, dời tháp và Tướng theo nhánh đó |
 | Đầu Đêm 5 | Phần đầu Đêm 5 sinh như mọi đợt | Thanh boss mờ trên HUD, chưa có máu: "Mộc Tinh · đang ngủ" |
-| Phần đầu sinh xong và còn ≤ 2 quái của nó sống, hoặc 30 s sau lần sinh cuối | **Lặng trước bão 12 s:** không lời gọi kinh tế hay Hỏi bài mới nào SÁNG; Bắn mạnh vẫn sáng như thường cho quái phần đầu còn sống (không bao giờ tắt phòng thủ khi còn quái đang tới). Bộ điều nhịp Đêm đứng yên từ đây tới hết ải | Đếm ngược "Mộc Tinh tới sau 12 s"; đất rung nhẹ (rung màn hình ≤ 2 px, tắt khi giảm chuyển động); **vết nứt bò dọc đường từ Khe Nứt tới ngã ba** đúng 12 s; nhạc lùi, trống trầm |
+| Phần đầu sinh xong và còn ≤ 2 quái của nó sống, hoặc 30 s sau lần sinh cuối | **Lặng trước bão 12 s** (làn A1, 27/10: đồng hồ đứng yên khi còn một quái nặng, lọt > 1 mạng và không phải boss, trên đoạn đường chung từ khúc nhập (0, 12) tới Lũy, 37,3 m ở bản đồ 1, nên Thuồng Luồng không tới Lũy cùng boss): không lời gọi kinh tế hay Hỏi bài mới nào SÁNG; Bắn mạnh vẫn sáng như thường cho quái phần đầu còn sống (không bao giờ tắt phòng thủ khi còn quái đang tới). Bộ điều nhịp Đêm đứng yên từ đây tới hết ải | Đếm ngược "Mộc Tinh tới sau 12 s" (đứng yên kèm "· chờ quái gần Lũy" khi đồng hồ chờ); đất rung nhẹ (rung màn hình ≤ 2 px, tắt khi giảm chuyển động); **vết nứt bò dọc đường từ Khe Nứt tới ngã ba** đúng 12 s; nhạc lùi, trống trầm |
 | Hết lặng | 2 toán Cương Thi ra ở Khe Nứt; 6 s sau Mộc Tinh trồi lên ở ngã ba, đi nhánh đã báo | Đất vỡ, gầm; thanh boss đầy máu, vạch 70 % và 50 % ("rút lui"); "còn 96 m tới Lũy" |
 | Mộc Tinh đi | Đòn, pha theo §5.2 | Mỗi đòn có báo trước (§13.1) |
 
@@ -157,7 +157,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 
 | Thứ | Số khởi điểm | Ghi chú |
 |---|---|---|
-| Máu | **4.200** × máu chế độ × hệ số riêng của chế độ × hệ số k (§5.6) | TK 22.7 ghi 4.000; số đo §6.3 cho thấy khoảng 3.000–3.400 mới cho bot Chuẩn thắng ~85 %. R1 chỉnh theo §6.5: 3.200 → 3.400 (vòng 1) → 3.800 (sửa review R1, sau khi bán gỗ, Bắn mạnh nối và Dồn lửa làm mọi bot mạnh lên) → 4.200 (R2, sau Tối Thượng và quyết định (b), BUILD_NOTES §7.3). Hệ số riêng: Thư giãn, Học và Thử thách ×0,78 (R2; sửa review R1: Thư giãn, Học ×0,85) |
+| Máu | **4.200** × máu chế độ × hệ số riêng của chế độ × hệ số k (§5.6) | TK 22.7 ghi 4.000; số đo §6.3 cho thấy khoảng 3.000–3.400 mới cho bot Chuẩn thắng ~85 %. R1 chỉnh theo §6.5: 3.200 → 3.400 (vòng 1) → 3.800 (sửa review R1, sau khi bán gỗ, Bắn mạnh nối và Dồn lửa làm mọi bot mạnh lên) → 4.200 (R2, sau Tối Thượng và quyết định (b), BUILD_NOTES §7.3). Hệ số riêng: Thư giãn, Học ×0,78, Thử thách ×0,9 (làn A1, 27/10; R2: cả ba ×0,78; sửa review R1: Thư giãn, Học ×0,85) |
 | Rút lui | Ở 50 % máu | Lượng máu phải gỡ: 2.100 ở Cân bằng, k = 1 (khởi điểm 3.200: 1.600) |
 | Giáp / KP | 30 % / 0 % | |
 | Tốc | **0,8 m/s** × tốc quái của ải (`foeSpeed` = 1 + `PACE.speedK` × (k − 1); sửa phản biện R2: `speedK` 0,2 → 0,3, BUILD_NOTES §7.4) | Khởi điểm 0,9 m/s, trồi ở mét 20; R1 vòng 1 (G3, G8): 0,8 m/s, trồi ở mét 25 (`emergeM`, BUILD_NOTES §7.1): còn ~88–91 m, đi hết ~110–115 s. Sửa phản biện R2 lần 2 đo 0,78 m/s (§6.5 bước 1, BUILD_NOTES §7.5), không giữ |
@@ -179,7 +179,7 @@ TK §26.1 và BUILD_NOW §9 viết danh sách 1B **trước** khi có Lời Gọ
 | Cả hai pha (R3) | 100 → 50 % | **Rễ hút sinh khí** (núm 1 của cân bằng R3, `R3_PLAN.md` §7.1, A14): từ lúc trồi, mỗi **30 s** boss đứng ở đâu cũng vậy, rễ chạm Lũy: báo 1,2 s × `warnK` của chế độ (Thư giãn, Học 1,6 s; Thử thách 0,96 s), rồi **−1 mạng**. Cú choáng 70 % xóa lần báo đang có và tính lại đồng hồ từ lúc hết choáng. Số trong `slice-1a.ts` `boss.drain` (`lives` 1, `everyS` 30, `warnS` 1,2); 30 s **đã chọn theo đề xuất** (BUILD_NOTES §7.9: 20 s lấy của bot chậm 10–12 điểm thắng) |
 | Rút lui | ≤ 50 % | Boss ngừng mọi thứ, không nhận đòn, chìm xuống đất trong 2 s. Rương 150 Vàng ghi ngay. Hết 2 s: quái còn lại tan, pha `victory` |
 
-- Sát thương dồn qua mốc: một đòn đưa máu qua 70 % thì choáng ngay; qua cả 50 % thì rút lui ngay (không choáng).
+- **Sát thương dừng ở mốc** (làn A1, 27/10/2026, dòng 26 của đợt test; trước đó một đòn qua cả 50 % thì rút lui ngay, nên Dồn lửa lúc choáng thường bỏ qua pha 2): ở pha 1 một đòn chỉ đưa máu tới đúng vạch 70 % (rồi choáng); ở pha 2 máu dừng ngay trên 50 % tới hết tick lứa Mầm Gỗ đầu tiên mọc (3 s + 0,8 s báo sau choáng), nên pha 2 luôn có ít nhất một lứa Mầm Gỗ. Đòn bị chặn hết không hiện số 0.
 - Mọi đòn của boss dùng luồng `combat` cho số sát thương, `spawn` cho chỗ Mầm Gỗ mọc lệch ngang. Thứ tự nhà bị nhắm: theo id tăng dần.
 
 ### 5.3 Tới Lũy
@@ -226,13 +226,14 @@ Mỗi đòn có báo trước **và** một việc người chơi làm được.
 ```
 d = k − 1
 máu = round(4200 × hpMul(chế độ) × modeHp(chế độ) × min(kHpMax; 1 + kHp × d + kHp2 × max(0; d)²))
-kHp = 0,4 · kHp2 = 5,5 · kHpMax = 1,42 · modeHp: Thư giãn, Học, Thử thách 0,78   (R3; R2: 0,3 · 6,5 · 1,46)
+kHp = 0,4 · kHp2 = 7,5 · kHpMax = 1,49 · modeHp: Thư giãn, Học 0,78; Thử thách 0,9   (làn A1, 27/10; R3: 0,4 · 5,5 · 1,42, Thử thách 0,78; R2: 0,3 · 6,5 · 1,46)
 ```
 
 - Số đo §6.3: bot Nhanh (k 1,3) gây lên boss nhiều hơn bot Chuẩn ~15 %; bot Mới (k 0,75) gây gần bằng bot Chuẩn vì boss của nó đi chậm hơn. Vì vậy R1 vòng 1 chỉ nâng máu khi k > 1 (0,4, trần ×1,12).
 - **Sửa review R1:** Bắn mạnh nối và Dồn lửa theo E cho tốc gõ đòn bẩy trong ván, nên bot Nhanh (k bị kit chặn ở 1,30) gây gấp ~1,4 lần bot Chuẩn, còn bot Mới, Chậm chắc (k < 1) gây ít hơn. Vì vậy hệ số k đi hai chiều (−5 % máu ở k 0,75) và có số hạng bậc hai ở trên 1 (k 1,2: ×1,21; k 1,3: ×1,45). Vẫn không có luật riêng cho từng bot.
 - **R2** (BUILD_NOTES §7.3): 3.800 → 4.200, `kHp` 0,2 → 0,3, `kHp2` 4,3 → 6,5 (k 0,75: ×0,925; k 1,2: ×1,33; k 1,3: chạm trần). **Sửa phản biện R2** (§7.4): trần 1,5 → 1,46, vì `PACE.speedK` 0,3 cho boss của bot Nhanh đi nhanh ×1,09 (trước ×1,06).
 - **Cân bằng R3** (BUILD_NOTES §7.9): `kHp` 0,3 → 0,4, `kHp2` 6,5 → 5,5, trần 1,46 → 1,42 (k 0,70: ×0,88; k 1,133: ×1,15; k 1,3: chạm trần 1,42), đo cùng Rễ hút sinh khí, dải từ 4–8 chữ cho E 45–64 và sàn nhịp k 0,70.
+- **Làn A1** (27/10/2026, `docs/changelog/2026-10-27-open-items.md`): `kHp2` 5,5 → 7,5, trần 1,42 → 1,49 (k 1,133: ×1,15 → ×1,19; k 1,3: chạm trần 1,49), Thử thách 0,78 → 0,9. Đo cùng ba đổi luật của làn: pha 2 luôn diễn ra (§5.2), lặng chờ Thuồng Luồng (§4.4) và Đêm 4 mới (§4.2). Trần 1,6 đưa bot Nhanh từ 94 % xuống 68 %, nên chỉ nâng tới 1,49.
 - Máu tính **một lần lúc sinh** từ đầu ván (BALANCE §4.1: tham số đầu ải), không đổi khi boss đang sống.
 
 ---

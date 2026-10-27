@@ -1810,3 +1810,19 @@ Ba người test chạy trên `cc0c2c1` (Đêm 1–4; Đêm 5, Mộc Tinh và H�
 - **Đêm 3 nhàn** (Nhàn I 12–20 %): không do khoảng trống giữa nhóm quái (đếm theo tick, Đêm 3 lúc nào cũng có quái sống); là lúc không có chữ nào và không việc gì, tức luồng lời gọi Bắn mạnh khi quái còn xa tháp. Để lượt cân bằng.
 - Kịch bản sau sửa chạy từ một cây làm việc tạm có `node_modules` thật (lượt đầu dùng liên kết tới `node_modules` của game: Vite không phục vụ phông ngoài thư mục gốc, phông rơi về mặc định, nên đã chạy lại cả lượt): 32/32 lượt đạt ở 16 kịch bản; `td-1b-tour` (17/17 kiểm) và `td-theme` chạy lại từ repo ở HEAD, hai cỡ đạt. `td-1b-perf` trên mã cuối đạt ở hai cỡ (luồng chính 1,29 / 1,14 ms mỗi khung, vẽ p95 0,9 / 0,8 ms, lúc trồi 2,8 / 1,6 ms; một lượt, không xen kẽ). Chi tiết và bảng bot đủ chỉ số ở changelog.
 
+
+#### Làn của điều phối viên, bước A1 (27/10/2026): các đêm và boss
+
+Chủ dự án giao điều phối viên quyết các việc còn mở của đợt test; bước A1 làm năm việc về các đêm và boss. Đủ số, biến thể và lý do ở `docs/changelog/2026-10-27-open-items.md`; bằng chứng ngoài Git `tmp/mac-2026-10-27/open/a1-nights/`. Số đo Apple M4.
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Dòng `.ts` | Test |
+|---|---|---|---|---|---|
+| `e3c2d7f` | trước (sửa "Vỡ vòm!" của phiếu 019) | 84,88 (0,12) | 83,42 | 10.500 | 346 |
+| `b0e10d7` | việc 4: sát thương lên boss dừng ở mốc pha, pha 2 luôn có lứa Mầm Gỗ đầu; file vàng boss làm lại | 84,94 (0,06) | 83,48 | 10.497 | 346 |
+| `b14fa42` | việc 2: đồng hồ lặng Đêm 5 đứng yên khi quái nặng trên đoạn đường chung (37,3 m); câu trên thanh boss | 84,97 (0,03) | 83,52 | 10.500 | 347 |
+| `84d0ac1` | việc 4: sàn giữ cả tick lứa mầm mọc (đạn rơi trước khi boss bước) | 84,97 (0,03) | 83,53 | 10.500 | 347 |
+| `10ce627` | việc 1, 5: Đêm 4 thêm Ma Trơi 2, Cương Thi 4, Ma Trơi 2; `kHp2` 7,5, trần 1,49; Thử thách ×0,9; hai file vàng chỉ đổi mã nội dung | 84,99 (0,01) | 83,54 | 10.500 | 347 |
+
+- **Gói "/" còn 13 byte** (84.987): bước sau thêm mã vào phần khởi động phải lấy chỗ trước. Bước này lấy lại 40 byte bằng `strike()` cho tám sự kiện đòn boss, dòng bằng `rootTargets` hai dòng, gộp chú thích và đầu file `boss.ts` ngắn lại; câu "· chờ quái gần Lũy" 15 byte. Viết gọn `bossWarning` và phép kẹp làm gói lớn thêm 6–9 byte (gzip), không lấy.
+- **Cân bằng sau bước** (40 × 2 seed, Cân bằng): thắng 80–86 % cả sáu bot gõ (dải chặt 6/6, trước 79–85 %), B1–B8 đạt; §12 5 seed đạt hết; §12 20 seed: cổng 4 đạt (thấp nhất 3 mạng), 5a 8,48 s và 5b 29,5 % trượt như trước; G8 24,1 → 32,1 s (trần 35).
+- **Không giữ**: đợt H của quyết định (hỏng cổng 4: bot không gõ thua Đêm 4 ở 6/20 seed); hai biến thể sửa Đêm 3 nhàn (lời gọi Bắn mạnh mở sớm 15 m: Chuẩn, Ẩu vẫn ~19 %, B4 và B8 trượt, 5c 24,8 %; đổi đợt Đêm 3 với 40 m: Chuẩn 14 %). Nguyên nhân Đêm 3 nhàn là đoạn đi tới (quái vào tầm ở giây 18,6 mọi đêm; Đêm 1–2 che nhờ kho có vàng, Đêm 4 nhờ lời gọi Mỏ chờ): về chủ dự án.

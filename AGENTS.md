@@ -97,6 +97,13 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   the sandbox's day and boss buttons; open: night 4 is a lull (six variants measured, each moves the stage's win rates:
   for the next balance pass), night 3's idle, the night-5 Thuồng Luồng spike, phase 2 often skipped. "/" 84.81 kB gzip
   (**0.19 kB headroom**), 10,500 lines (the ceiling; 54 got back by rewrapping comments), 346 tests.
+  **Lane A1, nights and the boss** (27/10, `docs/changelog/2026-10-27-open-items.md`, §7.10): a hit on Mộc Tinh stops at the
+  70 % line, and above 50 % until phase 2's first Mầm Gỗ sprout has landed (phase 2 always plays); night 5's lull clock holds
+  while a heavy foe walks the roads' shared end (`heavyNear` in `sim/systems/boss.ts`; the boss bar adds "chờ quái gần Lũy");
+  night 4 adds Ma Trơi 2, Cương Thi 4, Ma Trơi 2 (P 15–24 %; the decision's variant H broke gate 4), the boss's `kHp2` 7.5 and
+  cap 1.49, Thử thách's boss ×0.9. Tight band 6/6 (80–86 %), B1–B8 and §12 on 5 seeds pass; on 20 seeds 5a and 5b fail as
+  before. Night 3's idle (the approach: the first foe in reach 18.6 s after dusk) is not fixed: for the owner. "/" 84.99 kB
+  gzip (**13 bytes headroom**), 10,500 lines, 347 tests.
   Play-tests use a build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.
