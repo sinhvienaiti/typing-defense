@@ -1,17 +1,15 @@
 /**
- * Damage, targeting, and the attacks of towers, the Bastion's crossbow,
- * soldiers and enemies (docs/td/TYPING_DEFENSE_DESIGN.md 10, 11.3, 12.4, 13;
- * 25.6 steps 6–7; BUILD_1A6 §4.5).
+ * Damage, targeting, and the attacks of towers, the Bastion's crossbow, soldiers and enemies
+ * (docs/td/TYPING_DEFENSE_DESIGN.md 10, 11.3, 12.4, 13; 25.6 steps 6–7; BUILD_1A6 §4.5).
  *
  *   dmg = round(base × power × (1 − armour) × crit), at least 1
  *
- * `base` is uniform in [min, max] on the "combat" stream, a crit is drawn on
- * the "crit" stream, and rounding happens once, on impact. A tower aims at
- * the enemy furthest along its route (least distance left); ties go to the
- * lower id. A tower with a power charge fires a powered volley and spends it.
- * The boss (BUILD_1B §5.1) takes Draconis' own fireballs ×heroMul (0.35, "Vỏ dày"), every
- * hit ×1.25 while it staggers, and never dies of it (it retreats at 50 %); a
- * building Rễ Trồi stunned does not fire.
+ * `base` is uniform in [min, max] on the "combat" stream, a crit is drawn on the "crit" stream, and rounding happens
+ * once, on impact. A tower aims at the enemy furthest along its route (least distance left); ties go to the lower id.
+ * A tower with a power charge fires a powered volley and spends it. The boss (BUILD_1B §5.1) takes Draconis' own
+ * fireballs ×heroMul (0.35, "Vỏ dày"), every hit ×1.25 while it staggers, and never dies of it (it retreats at 50 %);
+ * a hit stops at the stagger's line in phase 1 and at the retreat's till phase 2's first Mầm Gỗ sprout, so the
+ * stagger's burst never skips phase 2 (test pass row 26). A building Rễ Trồi stunned does not fire.
  */
 import { ticks, type CompiledAttack, type CompiledAttackLevel } from "../../content/compile";
 import { COMBAT, TICK_HZ, ULT } from "../../content/rules";
@@ -20,23 +18,23 @@ import { SOURCE, STAT, bump } from "../stats";
 import { PROJECTILE } from "../stores/projectiles";
 import type { World } from "../world";
 
-/** `blast`: a blast's damage (a Nuppeppō it kills does not split, BUILD_1B §10). */
+/** `blast`: a blast's damage (a Nuppeppō it kills won't split, BUILD_1B §10); a Neo-pinned leader takes ×takenMul. */
 export function damageEnemy(w: World, e: number, power: number, damageType: number, source: number, blast = false): number {
   const E = w.enemies;
   if (E.dying[e] !== 0) return 0;
   const def = w.c.enemies[E.def[e]!]!;
   const armour = damageType === 0 ? def.armor : damageType === 1 ? def.resist : 0;
   const boss = def.boss ? w.c.content.boss! : null;
-  // R3 (BUILD_1B §9.2): a leader Neo pinned takes ×takenMul for a while.
   const mul = boss === null ? (E.takenUntil[e]! > w.tick ? def.ability!.takenMul : 1) : (source === SOURCE.hero ? boss.heroMul : source === SOURCE.ult ? ULT.bossMul : 1) * (w.tick < w.boss.vulnUntil ? boss.stagger.vulnerable : 1);
   let dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour) * mul));
   if (boss !== null) {
-    dmg = Math.min(dmg, E.hp[e]! - 1);
+    const S = w.boss;
+    dmg = Math.max(0, Math.min(dmg, E.hp[e]! - (S.phase === 1 ? Math.floor((S.hpMax * boss.stagger.atPct) / 100) : w.tick < S.staggerUntil + ticks(boss.summon.firstS + boss.summon.warnS) ? Math.floor((S.hpMax * boss.retreatPct) / 100) + 1 : 1)));
     bump(w.stats, STAT.bossDamage, dmg);
     if (source === SOURCE.wordShot) bump(w.stats, STAT.bossTyped, dmg);
     if (source === SOURCE.hero) bump(w.stats, STAT.bossHero, dmg);
     if (source === SOURCE.ult) bump(w.stats, STAT.bossUlt, dmg);
-    w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 32 + damageType * 8 + source, w.tick);
+    if (dmg > 0) w.events.ring.push(FX.bossHit, E.x[e]!, E.z[e]!, dmg * 32 + damageType * 8 + source, w.tick);
   }
   E.hp[e] = E.hp[e]! - dmg;
   if (E.hitAt[e] === 0) E.hitAt[e] = w.tick + 1;
@@ -76,8 +74,7 @@ export function selectTargets(w: World, x: number, z: number, attack: CompiledAt
 
 /** Sends a shot of `attack` at enemy e: `power` before armour, the crit already decided. Returns its slot (−1: none free). */
 export function launch(w: World, kind: number, x: number, z: number, attack: CompiledAttack, level: CompiledAttackLevel, e: number, source: number, power: number, crit: boolean, areaMul: number): number {
-  const E = w.enemies;
-  const P = w.projectiles;
+  const [E, P] = [w.enemies, w.projectiles];
   const slot = P.add(kind, x, z, E.id(e), E.x[e]!, E.z[e]!, attack.speed, source);
   if (slot < 0) return -1;
   P.power[slot] = power * (crit ? COMBAT.critMul : 1);

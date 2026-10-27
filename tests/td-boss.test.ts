@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { ticks } from "../src/content/compile";
 import { MODES, POWER } from "../src/content/rules";
 import { SLICE_1A } from "../src/content/slice-1a";
-import type { RareEvent } from "../src/sim/events";
+import { FX, type RareEvent } from "../src/sim/events";
 import { STAT } from "../src/sim/stats";
 import { BOSS } from "../src/sim/stores/boss";
 import { CALL_KIND } from "../src/sim/stores/calls";
@@ -328,12 +328,26 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     expect(w.buildings.powerAt[b]).toBeLessThan(made);
   });
 
-  it("one blow past 70 % and 50 % alike retreats at once, without the stagger", () => {
+  it("a hit stops at 70 % in phase 1 and above 50 % till phase 2's first Mầm Gỗ sprout, so phase 2 always plays (test pass 27/10, row 26)", () => {
     const { w, e } = risen();
-    damageEnemy(w, e, w.boss.hpMax * 0.6, 2, SOURCE.wordShot);
-    const events = until(w, () => w.boss.stage === BOSS.retreat, 2);
-    expect(events.some((ev) => ev.t === "bossPhase")).toBe(false);
-    expect(w.calls.live().some((c) => w.calls.burst[c] === 1)).toBe(false);
+    const spec = BOSS_DEF;
+    expect(damageEnemy(w, e, w.boss.hpMax * 0.6, 2, SOURCE.wordShot)).toBe(w.boss.hpMax - Math.floor(w.boss.hpMax * 0.7));
+    expect(w.enemies.hp[e]).toBe(Math.floor(w.boss.hpMax * 0.7));
+    const events = until(w, () => w.boss.phase === 2, 2);
+    expect(events.some((ev) => ev.t === "bossPhase")).toBe(true);
+    // The stagger's burst and every hit after it stop above the retreat's line: no retreat while stunned, nor before the sprout.
+    const line = Math.floor(w.boss.hpMax * 0.5) + 1;
+    const sproutAt = w.boss.staggerUntil + T(spec.summon.firstS) + T(spec.summon.warnS);
+    const flash = w.events.ring.written;
+    for (; w.tick < sproutAt; step(w)) damageEnemy(w, e, w.boss.hpMax, 2, SOURCE.wordShot);
+    expect(w.enemies.hp[e]).toBe(line);
+    expect(w.boss.stage).toBe(BOSS.fight);
+    let hits = 0; // no "0" floats over it
+    for (let i = flash; i < w.events.ring.written; i += 1) if (w.events.ring.kind[i % w.events.ring.size] === FX.bossHit) hits += 1;
+    expect(hits).toBe(1);
+    expect(strikes(until(w, () => w.boss.summonEnd < 0 && w.enemies.count > 1, 2), "summon").some((ev) => ev.hit)).toBe(true);
+    damageEnemy(w, e, 10, 2, SOURCE.wordShot);
+    until(w, () => w.boss.stage === BOSS.retreat, 2);
   });
 
   it("in phase 2 four Mầm Gỗ sprout at its feet 3 s after the stagger ends (0.8 s warned), then every 15 s, walking its road", () => {
