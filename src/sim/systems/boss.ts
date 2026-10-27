@@ -1,11 +1,11 @@
 /**
- * Mộc Tinh, the boss peak at the end of the stage (BUILD_1B §4.4, §5; after step 9). Day 5 warns of it and picks
- * the branch it will walk. Once night 5's first part has spawned and ≤ 2 of it live (or 30 s on), a 12 s lull; then
- * two escort packs leave the rift and, 6 s later, the boss comes up at the fork. It walks on, never blocked, and
- * strikes after a warning: Rễ Trồi stuns the buildings within 8 m (no damage), Quật cành hits and knocks back the
- * soldiers in front, at 70 % it staggers (5 s still and vulnerable, every stun lifted, "Dồn lửa" power calls on the
+ * Mộc Tinh, the boss peak at the end of the stage (BUILD_1B §4.4, §5). Day 5 warns of it and picks the branch it will
+ * walk. Once night 5's first part has spawned and ≤ 2 live (or 30 s on), a 12 s lull, held while a heavy foe walks the
+ * roads' shared end; then two escort packs leave the rift and, 6 s later, the boss comes up at the fork. It walks on,
+ * never blocked, and strikes after a warning: Rễ Trồi stuns the buildings within 8 m, Quật cành hits and knocks back
+ * the soldiers in front, at 70 % it staggers (5 s still and vulnerable, every stun lifted, "Dồn lửa" power calls on the
  * nearest attack buildings in reach), in phase 2 it calls Mầm Gỗ, at the Bastion it strikes 3 lives a blow; from its
- * rise its roots drain a life every drain.everyS (30 s, R3). At 50 % it retreats: the chest is paid, 2 s later every enemy left melts.
+ * rise its roots drain a life every drain.everyS (R3). At 50 % it retreats: the chest paid, 2 s later all foes melt.
  */
 import { ticks } from "../../content/compile";
 import { MODES, SHARDS } from "../../content/rules";
@@ -30,6 +30,9 @@ export const dist2 = (ax: number, az: number, bx: number, bz: number): number =>
 /** A move's warning in the run's mode (§5.2). */
 const warn = (w: World, seconds: number): number => ticks(seconds * MODES[w.mode].warnK);
 
+/** A move warned (end > now) or struck (end = now), for the view and the sound. */
+const strike = (w: World, move: "roots" | "slam" | "summon" | "keep" | "drain", end: number, count: number): number => w.events.rare.push({ t: "bossStrike", tick: w.tick, move, hit: end === w.tick, end, count });
+
 /** The boss's enemy slot, −1 none. */
 export const bossSlot = (w: World): number => (w.boss.e < 0 ? -1 : w.enemies.slotOf(w.boss.e));
 
@@ -40,7 +43,7 @@ export const bossWarning = (w: World): boolean => w.boss.rootsEnd >= 0 || w.boss
 export function bossHp(w: World): number {
   const boss = w.c.content.boss!;
   const def = w.c.enemies[w.c.enemyIndex(boss.enemy)]!;
-  const [d, up] = [w.pace.k - 1, Math.max(0, w.pace.k - 1)];
+  const d = w.pace.k - 1, up = Math.max(0, d);
   return Math.round(def.hp * MODES[w.mode].hpMul * (boss.modeHp[w.mode] ?? 1) * Math.min(boss.kHpMax, 1 + boss.kHp * d + boss.kHp2 * up * up));
 }
 
@@ -49,7 +52,7 @@ function warnDay(w: World): void {
   S.stage = BOSS.warned;
   S.route = w.rng.spawn.int(0, w.lanes.length - 2);
   // The merge: where the branches meet again (the first point of the routes' common end).
-  const [a, b] = [w.map.routes[0]!, w.map.routes[w.map.routes.length - 1]!];
+  const [a, b] = [w.map.routes[0]!, w.map.routes.at(-1)!];
   let k = 1;
   while (k < a.length && k < b.length && a[a.length - k - 1]!.join() === b[b.length - k - 1]!.join()) k += 1;
   S.mergeM = w.lanes[S.route]!.distAt(a[a.length - k]![0], a[a.length - k]![1]);
@@ -97,11 +100,8 @@ function rootTargets(w: World, e: number, keep: boolean): number {
     const d = Math.sqrt(dist2(B.x[b]!, B.z[b]!, w.enemies.x[e]!, w.enemies.z[e]!));
     if (d - w.c.buildings[B.def[b]!]!.radius <= reach) order[n++] = B.id(b);
   }
-  if (keep) {
-    order.subarray(0, n).sort();
-    w.boss.targets.set(order.subarray(0, n));
-    w.boss.targetN = n;
-  }
+  if (keep) w.boss.targets.set(order.subarray(0, n).sort());
+  if (keep) w.boss.targetN = n;
   return n;
 }
 
@@ -118,7 +118,7 @@ function roots(w: World, e: number): void {
       panicNear(w, b); // R2: a helper by it runs home
       w.events.rare.push({ t: "stun", tick: w.tick, building: S.targets[k]!, until: w.buildings.stunUntil[b]! });
     }
-    w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "roots", hit: true, end: w.tick, count: S.targetN });
+    strike(w, "roots", w.tick, S.targetN);
     [S.rootsEnd, S.targetN] = [-1, 0];
     return;
   }
@@ -131,7 +131,7 @@ function roots(w: World, e: number): void {
   S.rootsAt = w.tick + ticks(spec.everyS);
   if (rootTargets(w, e, true) === 0) return;
   S.rootsEnd = w.tick + warn(w, spec.warnS);
-  w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "roots", hit: false, end: S.rootsEnd, count: S.targetN });
+  strike(w, "roots", S.rootsEnd, S.targetN);
 }
 
 /** Quật cành: soldiers within reach of its rim, in the 120° in front of it (toward the nearest when it began). */
@@ -154,12 +154,11 @@ function slam(w: World, e: number): void {
       hit += 1;
     }
     S.slamEnd = -1;
-    w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "slam", hit: true, end: w.tick, count: hit });
+    strike(w, "slam", w.tick, hit);
     return;
   }
   if (w.tick < S.slamAt) return;
-  let near = -1;
-  let best = reach * reach;
+  let [near, best] = [-1, reach * reach];
   for (let s = 0; s < U.top; s += 1) {
     if (U.used[s] === 0 || U.hp[s]! <= 0) continue;
     const d2 = dist2(U.x[s]!, U.z[s]!, E.x[e]!, E.z[e]!);
@@ -170,7 +169,7 @@ function slam(w: World, e: number): void {
   [S.slamX, S.slamZ] = [(U.x[near]! - E.x[e]!) / d, (U.z[near]! - E.z[e]!) / d];
   S.slamAt = w.tick + ticks(spec.everyS);
   S.slamEnd = w.tick + warn(w, spec.warnS);
-  w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "slam", hit: false, end: S.slamEnd, count: 1 });
+  strike(w, "slam", S.slamEnd, 1);
 }
 
 /** Phase 2: Mầm Gỗ sprout at its feet (0.8 s), then walk on its road. */
@@ -183,13 +182,13 @@ function summon(w: World, e: number): void {
     const spread = Math.max(0, w.map.roadHalfM - w.c.enemies[index]!.radius);
     for (let k = 0; k < spec.count; k += 1) putEnemy(w, index, maxHp(w, index), S.route, w.wave, w.enemies.dist[e]! + 0.5, (w.rng.spawn.float() * 2 - 1) * spread);
     S.summonEnd = -1;
-    w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "summon", hit: true, end: w.tick, count: spec.count });
+    strike(w, "summon", w.tick, spec.count);
     return;
   }
   if (w.tick < S.summonAt) return;
   S.summonAt = w.tick + ticks(spec.everyS);
   S.summonEnd = w.tick + ticks(spec.warnS);
-  w.events.rare.push({ t: "bossStrike", tick: w.tick, move: "summon", hit: false, end: S.summonEnd, count: spec.count });
+  strike(w, "summon", S.summonEnd, spec.count);
 }
 
 /**
@@ -209,13 +208,13 @@ function keepBlow(w: World, move: "keep" | "drain"): void {
     bump(w.stats, STAT.livesBoss, lost);
     S[end] = -1;
     w.events.ring.push(FX.leak, w.map.keep[0], w.map.keep[1], lost, w.tick);
-    w.events.rare.push({ t: "bossStrike", tick: w.tick, move, hit: true, end: w.tick, count: lost });
+    strike(w, move, w.tick, lost);
     return;
   }
   if (w.tick < S[at]) return;
   S[at] = w.tick + ticks(spec.everyS);
   S[end] = w.tick + warn(w, spec.warnS);
-  w.events.rare.push({ t: "bossStrike", tick: w.tick, move, hit: false, end: S[end], count: spec.lives });
+  strike(w, move, S[end], spec.lives);
 }
 
 /**
@@ -295,6 +294,9 @@ function fight(w: World): void {
   keepBlow(w, "drain");
 }
 
+/** A heavy foe (leak > 1, never the boss) on the roads' shared end, from the merge to the Bastion: Thuồng Luồng there reach it with the boss. */
+export const heavyNear = (w: World, E = w.enemies): boolean => E.live().some((e) => w.c.enemies[E.def[e]!]!.leak > 1 && E.dying[e] === 0 && w.lanes[E.route[e]!]!.length - E.dist[e]! <= w.lanes[w.boss.route]!.length - w.boss.mergeM);
+
 export function bossStep(w: World): void {
   const stage = w.c.content.stage;
   if (w.c.content.boss === undefined || stage === undefined) return;
@@ -303,7 +305,8 @@ export function bossStep(w: World): void {
   else if (S.stage === BOSS.warned && w.phase === "night" && w.wave > 0 && w.waveLeft[w.wave] === 0) {
     if (S.lastSpawn < 0) S.lastSpawn = w.tick;
     if (w.waveAlive[w.wave]! <= stage.boss.lullAlive || w.tick >= S.lastSpawn + ticks(stage.boss.lullWaitS)) lull(w);
-  } else if (S.stage === BOSS.lull && w.tick >= S.lullEnd) escort(w);
+  } else if (S.stage === BOSS.lull && heavyNear(w)) S.lullEnd += 1;
+  else if (S.stage === BOSS.lull && w.tick >= S.lullEnd) escort(w);
   else if (S.stage === BOSS.emerge && w.tick >= S.emergeAt) rise(w);
   else if (S.stage === BOSS.fight) fight(w);
   else if (S.stage === BOSS.retreat && w.tick >= S.sinkEnd) victory(w);

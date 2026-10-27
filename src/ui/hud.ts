@@ -7,7 +7,7 @@ import { MODES, TICK_HZ, ULT } from "../content/rules";
 import type { RareEvent } from "../sim/events";
 import { BOSS } from "../sim/stores/boss";
 import { CALL_KIND } from "../sim/stores/calls";
-import { bossSlot } from "../sim/systems/boss";
+import { bossSlot, heavyNear } from "../sim/systems/boss";
 import { chainTier } from "../sim/systems/chain";
 import { ultShut } from "../sim/systems/ult";
 import { dayTicks, earlyCallBonus, opensOn } from "../sim/systems/waves";
@@ -201,7 +201,7 @@ export class BossBanner {
     const e = bossSlot(w);
     let main: string;
     if (S.stage === BOSS.warned) main = w.phase === "night" ? `<b>Mộc Tinh</b> <small>đang ngủ${chip}</small>` : `<b>Đêm ${stage.boss.night} · Boss</b> <small>Mộc Tinh thức dậy${chip}</small>`;
-    else if (S.stage === BOSS.lull) main = `<b>Mộc Tinh tới sau ${Math.max(0, Math.ceil((S.lullEnd - w.tick) / TICK_HZ))} s</b>`;
+    else if (S.stage === BOSS.lull) main = `<b>Mộc Tinh tới sau ${Math.max(0, Math.ceil((S.lullEnd - w.tick) / TICK_HZ))} s</b>${heavyNear(w) ? " · chờ quái gần Lũy" : ""}`;
     else if (S.stage === BOSS.emerge) main = `<b>Mộc Tinh đang trồi lên</b>`;
     else if (e < 0) main = `<b>Mộc Tinh rút lui</b> <small>+${w.c.content.boss!.chestGold} vàng</small>`;
     else {

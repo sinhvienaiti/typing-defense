@@ -91,6 +91,28 @@ describe("Mộc Tinh's peak (BUILD_1B §4.4)", () => {
     expect(w.tick - start).toBeGreaterThanOrEqual(T(STAGE.boss.lullWaitS));
   });
 
+  it("the lull's clock holds while a heavy foe walks the roads' shared end, from the merge to the Bastion (test pass 27/10, row 8)", () => {
+    const w = world({ gold: 5000 });
+    send(w, sb("preset"), sb("boss"));
+    const lane = w.lanes[w.boss.route]!;
+    const shared = lane.length - w.boss.mergeM; // the merge (0, 12) to the Bastion: 37.3 m on map 1
+    expect(shared).toBeGreaterThan(30);
+    expect(shared).toBeLessThan(40);
+    // A Thuồng Luồng still before the merge does not hold it; one past the merge, held still, does.
+    const far = enemyAt(w, "thuong-luong", w.boss.route, w.boss.mergeM - 5);
+    const near = enemyAt(w, "thuong-luong", w.boss.route, w.boss.mergeM + 2);
+    for (const e of [far, near]) [w.enemies.stunUntil[e], w.enemies.hp[e]] = [1e9, 1e6]; // they stand and live
+    const end = w.boss.lullEnd;
+    run(w, T(20));
+    expect(w.boss.stage).toBe(BOSS.lull);
+    expect(w.boss.lullEnd - end).toBeGreaterThanOrEqual(T(20) - 1);
+    expect(w.boss.lullEnd - w.tick).toBe(end - (w.tick - T(20))); // the countdown stood still
+    damageEnemy(w, near, 1e7, 2, SOURCE.tower);
+    const events = until(w, () => w.boss.stage === BOSS.emerge, T(STAGE.boss.lullS) + 3);
+    expect(events.some((e) => e.t === "bossLull")).toBe(false);
+    expect(w.enemies.slotOf(w.enemies.id(far))).toBe(far); // the far one still walks: it never held the clock
+  });
+
   it("in the lull only power calls light; then two escort packs of 4 leave the rift, one a branch, and 6 s later it rises at the fork", () => {
     const w = world({ gold: 5000 });
     send(w, sb("preset"));
