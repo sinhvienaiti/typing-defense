@@ -181,13 +181,13 @@ export const SLICE_1A: Content = {
   },
   waves: {
     // BUILD_1B §4.2 R2 with design call (b) (BUILD_NOTES §7.2–§7.3): nights 1–4 harder (night 1: 8 → 10, night 2: 10 + 1 →
-    // 12 + 2); night 3 brings Nuppeppō (the cannon's foe), night 4 three Tanuki (Ngắt; 3 for a drum every 25–40 s, §9.1)
-    // first, so the packs after them catch up.
+    // 12 + 2); night 3 brings Nuppeppō (the cannon's foe), night 4 three Tanuki (Ngắt) first, the packs after them catch
+    // up, then (lane A1, 27/10: P 0.3–4.7 % → 15–24 %) Ma Trơi, a pack, Ma Trơi; a second Thuồng Luồng lost gate 4.
     list: [
       [{ enemy: "cuong-thi", count: 10 }],
       [{ enemy: "cuong-thi", count: 12 }, { enemy: "ma-troi", count: 2 }],
       [{ enemy: "cuong-thi", count: 10 }, { enemy: "nuppeppo", count: 4 }, { enemy: "ma-troi", count: 2 }],
-      [{ enemy: "tanuki", count: 3 }, { enemy: "thuong-luong", count: 1 }, { enemy: "cuong-thi", count: 9 }],
+      [{ enemy: "tanuki", count: 3 }, { enemy: "thuong-luong", count: 1 }, { enemy: "cuong-thi", count: 9 }, { enemy: "ma-troi", count: 2 }, { enemy: "cuong-thi", count: 4 }, { enemy: "ma-troi", count: 2 }],
       // BUILD_1B §4.2: the first part of night 5, one pack of Thuồng Luồng (§6.5 round 1: 5 → 4; R1 review: 5; R2: 6); the boss peak follows it.
       [{ enemy: "thuong-luong", count: 6 }, { enemy: "cuong-thi", count: 7 }, { enemy: "ma-troi", count: 3 }],
       [{ enemy: "thuong-luong", count: 4 }, { enemy: "cuong-thi", count: 20 }, { enemy: "ma-troi", count: 4 }],
@@ -197,10 +197,10 @@ export const SLICE_1A: Content = {
     memberGapS: 0.45,
   },
   // BUILD_1B §5: Mộc Tinh retreats at half its hit points; its own moves; Draconis' fireballs ×0.35 on its bark (heroMul).
-  // k factor (R2 §7.3–§7.4: 0.3 / 6.5, cap 1.46; R3 balance, BUILD_NOTES §7.9: 0.4 / 5.5, cap 1.42), Thư giãn and Học ×0.78.
+  // k factor (R2 §7.4: 0.3 / 6.5, cap 1.46; R3 §7.9: 0.4 / 5.5, cap 1.42; A1: 0.4 / 7.5, 1.49), Thư giãn, Học ×0.78, Thử thách ×0.9.
   // R3: Rễ hút sinh khí, a life every 30 s of its fight (R3_PLAN §7.1; 20 s cost the slow bots 10–12 points of wins, §7.9).
   boss: {
-    enemy: "moc-tinh", retreatPct: 50, kHp: 0.4, kHp2: 5.5, kHpMax: 1.42, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.78 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
+    enemy: "moc-tinh", retreatPct: 50, kHp: 0.4, kHp2: 7.5, kHpMax: 1.49, modeHp: { relax: 0.78, learn: 0.78, challenge: 0.9 }, retreatS: 2, chestGold: 150, heroMul: 0.35,
     roots: { everyS: 12, firstS: 6, warnS: 1.5, radiusM: 8, stunS: 3 },
     slam: { damage: [40, 60], reachM: 3, everyS: 2.5, warnS: 1.2, knockM: 1.5 },
     stagger: { atPct: 70, stunS: 5, vulnerable: 1.25, burstLifeS: 5, burstReachM: 2, burstWords: 3, burstPerE: 20 },
