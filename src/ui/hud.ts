@@ -30,7 +30,7 @@ export const REASON: Readonly<Record<string, string>> = {
   noBuilding: "Không có nhà đó", noBarracks: "Không phải Trại Lính", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
   noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ dân rồi", notRipe: "Ô này chưa chín",
   locked: "Chưa mở tới ngày này", keepMax: "Lũy đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",
-  ultEmpty: "Tối Thượng chưa đầy", ultBusy: "Mưa lông đang rơi", ultFar: "Xa Draconis quá (20 m)",
+  ultEmpty: "Tối Thượng chưa đầy", ultBusy: "Mưa lông đang rơi", ultFar: "Xa Draconis quá (20 m)", ultNone: "Chưa có quái gần Draconis (14 m)",
 };
 
 export const button = (act: string, label: string, key = "", attrs = ""): string => `<button data-act="${act}"${attrs}>${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`;
@@ -121,6 +121,8 @@ export class BossBanner {
   private readonly said = new Set<string>(); // the moves whose line it has said (Rễ Trồi; R3: Rễ hút sinh khí)
   private hitAt = -1e9;
   private hitLives = 0;
+  /** Lives the boss's blows and drains took this page (the loss card tells them from enemies that got in). */
+  blows = 0;
   private ghost = 1;
   private hp = 1;
   private hpAt = 0;
@@ -152,11 +154,13 @@ export class BossBanner {
     for (const e of events) {
       if (e.t === "bossEmerge") this.say(now, ["Mộc Tinh: " + BOSS_LINES.rise, 3000]);
       else if (e.t === "bossStrike" && (e.move === "roots" || e.move === "drain") && !e.hit && !this.said.has(e.move)) {
-        this.said.add(e.move);
-        this.say(now, ["Mộc Tinh: " + BOSS_LINES[e.move], 2500], ...(e.move === "drain" ? [[`Rễ hút ${e.count} mạng mỗi ${w.c.content.boss!.drain.everyS} s: hạ nó nhanh!`, 3000] as [string, number]] : []));
+        this.said.add(e.move); // a move's lines wait for the other's to end, never cut them (test pass 27/10: the drain's was lost 43–58 %)
+        const lines: [string, number][] = [["Mộc Tinh: " + BOSS_LINES[e.move], 2500], ...(e.move === "drain" ? [[`Rễ hút ${e.count} mạng mỗi ${w.c.content.boss!.drain.everyS} s: hạ nó nhanh!`, 3000] as [string, number]] : [])];
+        if (this.said.size > 1 && this.line !== "") this.lines.push(...lines);
+        else this.say(now, ...lines);
       } else if (e.t === "bossPhase") this.say(now, ["Mộc Tinh choáng! Gõ Bắn mạnh!", 1200], ["Mộc Tinh: " + BOSS_LINES.stagger, 2500]);
       else if (e.t === "bossRetreat") this.say(now, ["Mộc Tinh: " + BOSS_LINES.retreat, 5000]);
-      else if (e.t === "bossStrike" && (e.move === "keep" || e.move === "drain") && e.hit) [this.hitAt, this.hitLives] = [now, e.count];
+      else if (e.t === "bossStrike" && (e.move === "keep" || e.move === "drain") && e.hit) [this.hitAt, this.hitLives, this.blows] = [now, e.count, this.blows + e.count];
     }
     if (now >= this.until) this.next(now);
   }
@@ -192,7 +196,7 @@ export class BossBanner {
     const S = w.boss;
     const stage = w.c.content.stage;
     const say = this.line === "" ? "" : `<p class="td-say">${this.line}</p>`;
-    const chip = this.chip === "" ? "" : " · " + this.chip;
+    const chip = this.chip === "" ? "" : " · Mẹo: " + this.chip; // a tip, not the boss's state (test pass 27/10)
     if (S.stage === BOSS.idle || stage === undefined) return "";
     const e = bossSlot(w);
     let main: string;

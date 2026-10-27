@@ -18,7 +18,7 @@ export const TIPS: Readonly<Record<string, Tip>> = {
   day2: { line: "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt.", chip: "Shift + \\ thuê dân" },
   night2: { line: "Ma Trơi bay qua đầu lính. Tháp Cung và Draconis bắn được.", chip: "" },
   day3: { line: "Nâng Lũy thì Chấm ra giúp. Thư Đồng làm việc nhanh hơn.", chip: "1–4 chọn người · Enter gửi đi" },
-  night3: { line: "Lông lửa đầy rồi! Bấm = rồi gõ thêm chữ cho mưa to hơn.", chip: "= Tối Thượng" },
+  night3: { line: "Lông lửa đầy thì bấm = khi quái tới gần. Gõ chữ, mưa to hơn.", chip: "= Tối Thượng khi quái gần" },
   day4: { line: "Nhà cấp 2 mạnh hơn. Bán lại được sáu phần mười.", chip: "Bán: bấm hai lần" },
   night4: { line: "Tanuki đánh trống hồi máu. Gõ chữ trên đầu nó để Ngắt.", chip: "Chữ trên quái: gõ để phá chiêu" },
   day5: { line: "Đêm nay Mộc Tinh thức dậy. Dồn tháp lên nhánh rễ sáng.", chip: "Boss rút ở 50 % máu" },

@@ -236,7 +236,8 @@ export class TitleScreen {
     this.pending = true;
     void this.card(id).then((card) => {
       this.pending = false;
-      if (card === null) return this.hooks.sound("off"); // its chunk did not load (logged); the menu stays
+      // Its chunk did not load (logged): the menu stays and says so under the entry (test pass 27/10: nothing showed).
+      if (card === null) return (this.entries[at]!.querySelector("small")!.textContent = "Chưa tải được · F5 để thử lại"), this.hooks.sound("off");
       if (this.el.hidden) return;
       this.hooks.sound("pick");
       this.entries.forEach((entry) => (entry.hidden = true));

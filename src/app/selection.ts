@@ -6,14 +6,14 @@
  * tactical pause of the relax and learn modes: the world stops, the hand keeps working, typing waits.
  */
 import { ticks } from "../content/compile";
-import { ECONOMY, FARM, MODES, SELL, TREE } from "../content/rules";
+import { ECONOMY, FARM, MODES, SELL, TREE, ULT } from "../content/rules";
 import type { CommandBody, SandboxOp } from "../sim/commands";
 import { canPlace, nextSpot, spotCandidates, type Point } from "../sim/placement";
 import { PLOT } from "../sim/stores/buildings";
 import { CALL_STATE } from "../sim/stores/calls";
 import { slotsOpen } from "../sim/systems/agents";
 import { plotAt } from "../sim/systems/economy";
-import { ultSpot } from "../sim/systems/ult";
+import { ultShut, ultSpot } from "../sim/systems/ult";
 import type { World } from "../sim/world";
 import { REASON } from "../ui/hud";
 
@@ -25,7 +25,7 @@ export function sandboxOp(op: string, value: string, w: World, focus: number): S
   if (op === "gold") return { op, value: Math.floor(w.gold / 1000) + Number(value) };
   if (op === "wood") return { op, value: w.wood + Number(value) };
   if (op === "spawn") return { op, enemy: value, value: value === "nuppeppo" ? 3 : 1 };
-  if (op === "ult") return { op };
+  if (op === "ult" || op === "boss") return { op };
   return { op, value: op === "mode" ? value : Number(value) } as SandboxOp;
 }
 const dist2 = (x: number, z: number, p: Point): number => (x - p.x) * (x - p.x) + (z - p.z) * (z - p.z);
@@ -49,6 +49,8 @@ export class Selection {
   sellArm = { id: -1, until: 0 };
   /** The field point under the pointer (null: off the map): where `=` casts Tối Thượng when within reach (BUILD_1B §8.2). */
   hover: Point | null = null;
+  /** A command the sandbox panel sends at a later tick (the Tanuki's pack): [tick, command]. */
+  private later: [number, CommandBody] | null = null;
 
   constructor(private readonly w: World, private readonly send: (command: CommandBody) => void) {}
 
@@ -77,6 +79,8 @@ export class Selection {
     sandbox: () => (this.panel = !this.panel),
     ult: () => {
       const at = ultSpot(this.w, this.hover);
+      // Full, no spot picked and no enemy in reach: the rain would fall on empty ground, so the page says so (test pass 27/10).
+      if (at !== this.hover && at.x === this.w.agents.x[0] && at.z === this.w.agents.z[0] && this.w.ult.charge >= ULT.max && !ultShut(this.w)) return this.w.events.rare.push({ t: "rejected", tick: this.w.tick, command: "ult", reason: "ultNone" });
       this.send({ t: "ult", qx: q(at.x), qz: q(at.z) });
     },
   };
@@ -84,8 +88,10 @@ export class Selection {
   /** `name`, `name:value`, or `sb:<op>:<value>` for the sandbox. */
   act(action: string): void {
     const [name = "", arg = "", value = ""] = action.split(":");
-    // R3: a Đầu Đàn comes with a pack of 5 to lead (Neo needs 4 by it), on the same road at the same tick.
+    // R3: a Đầu Đàn comes with a pack of 5 to lead (Neo needs 4 by it), on the same road at the same tick; a Tanuki's pack of 8
+    // leaves 6 s after it and catches it up by the towers, where it drums (test pass 27/10: alone it never had 4 others by it).
     if (name === "sb" && value === "cuong-thi-lead") this.send({ t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 5 } });
+    if (name === "sb" && value === "tanuki") this.later = [this.w.tick + 360, { t: "sandbox", op: { op: "spawn", enemy: "cuong-thi", value: 8 } }];
     if (name === "sb") this.send({ t: "sandbox", op: sandboxOp(arg, value, this.w, this.focus) });
     else this.actions[name]?.(Number(arg));
     this.update();
@@ -120,6 +126,7 @@ export class Selection {
 
   /** After each action and frame: a card whose building or call is gone closes, an agent whose slot closed gives way to the hero, the tactical pause ends with its mode. */
   update(): void {
+    if (this.later !== null && this.w.tick >= this.later[0]) (this.send(this.later[1]), (this.later = null));
     if (this.w.buildings.slotOf(this.focus) < 0) this.focus = -1;
     if (this.w.calls.slotOf(this.call) < 0) this.call = -1;
     if (this.agent >= slotsOpen(this.w)) this.agent = 0;

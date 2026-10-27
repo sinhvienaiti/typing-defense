@@ -34,7 +34,7 @@ export class ProfileCard {
       row("Nhận từ mới", fixed(view.recognize.new, 1) + " s") +
       row("Độ đều", Math.round(Math.max(0, 1 - view.cv) * 100) + " %") +
       row("Nhịp ván tới", k === null ? "Tắt" : "×" + fixed(k, 2), k === null ? "tự điều đang tắt" : k > 1.005 ? "nhanh hơn chuẩn" : k < 0.995 ? "chậm hơn chuẩn" : "chuẩn") +
-      `</dl><p class="td-profile-advice">${ADVICE_VI[skillAdvice(view)]}</p>` +
+      `</dl><p class="td-profile-advice">${profile.trend.stages === 0 ? "Chơi một ngày đêm để game hiểu cách bạn gõ." : ADVICE_VI[skillAdvice(view)]}</p>` + // nothing measured: no praise (test pass 27/10)
       `<p class="td-profile-note">${measured >= 1 ? "Đã đo " + profile.trend.stages + " ngày đêm." : profile.trend.stages === 0 ? "Chưa đo: số trên là mức mặc định, sẽ đúng dần sau mỗi ngày đêm." : "Đã đo " + profile.trend.stages + " ngày đêm: còn trộn với mức mặc định."}</p>` +
       `<button class="vd-seal" type="button">Xong <kbd>Esc</kbd></button>`;
     this.el.hidden = false;

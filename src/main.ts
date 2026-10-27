@@ -127,10 +127,11 @@ const retryChunk = new Chunk("retry", () => import("./app/retry"));
 const retryLoad = kept === null ? null : retryChunk.get();
 const asked = params.get("title");
 if (kept === null && (asked === "1" || (asked !== "0" && !params.has("sandbox")))) showTitle(false);
-/** A fresh run of the same link, past the title (`learn`: in the learn mode). */
-const freshRun = (learn: boolean): string => {
+/** A fresh run of the same link, past the title (`learn`: in the learn mode; `story`: the title's map 1, never the sandbox). */
+const freshRun = (learn: boolean, story = false): string => {
   const next = new URLSearchParams(params);
   next.set("title", "0");
+  if (story) next.delete("sandbox"); // test pass 27/10: "Bắt đầu · Bản đồ 1" from the sandbox's title opened the sandbox
   if (learn) next.set("learn", "1");
   else next.delete("learn");
   return "?" + next.toString();
@@ -167,13 +168,14 @@ void learnChunk.get().then((m) => {
   cards.seen = (item) => learner!.seen(item);
   if (retry === null && world.tick === 0) setLearn(world, (runLearn = learner.header));
 });
-let imeWarning = false;
+/** Until when (ms) the input-method note shows: 8 s after the last sign of one, so it goes once the player turns it off (test pass 27/10). */
+let imeUntil = 0;
 const learnMode = (): void => setMode(world, (startMode = "learn"));
 /** A run has begun: the title was passed (or never shown); a new choice then opens a fresh page. */
 let begun = !titleUp;
 choose = (choice) => {
   if (choice === "continue") selection.paused = false;
-  else if (begun) return void (window.location.search = freshRun(choice === "learn"));
+  else if (begun) return void (window.location.search = freshRun(choice === "learn", true));
   else if (choice === "learn") learnMode();
   else if (world.tick === 0 && retry === null) setMode(world, (startMode = freshMode()));
   // Settings changed on the title apply to this run while it has not stepped (BALANCE.md §4.1: set before the run; R3: the mode too).
@@ -190,6 +192,7 @@ function act(action: string): void {
   const [name, dx, dy] = action.split(":");
   if (name === "pan") view.panBy(Number(dx) * 60, Number(dy) * 60);
   else if (name === "mute" && audio !== null) audio.muted = !audio.muted;
+  else if (name === "pause" && mapOnly) mapOnly = false; // the HUD's Ⅱ brings the results back too
   else selection.act(action);
 }
 
@@ -215,7 +218,7 @@ const sheets = new Chunk("sheets", async () => {
     else if (action === "retry" || action === "copy") void retryChunk.get().then((m) => {
       if (m === null) return tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
       const run = { world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun };
-      if (action === "copy") m.copyNumbers(run, profile, source);
+      if (action === "copy") (m.copyNumbers(run, profile, source), tellLost("Đã lưu file chơi thử và chép số")); // test pass 27/10: it said nothing
       else m.retryDay(run);
     });
     else if (action === "title") showTitle(world.phase !== "defeat");
@@ -243,6 +246,8 @@ function prefetch(): void {
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
 window.addEventListener("keydown", (event) => {
   if (titleUp && title === null) return void (event.preventDefault(), event.stopImmediatePropagation());
+  // "Xem bản đồ" put the results away: Esc or Enter brings them back (test pass 27/10: it was one way, F5 only).
+  if (mapOnly && !titleUp && (event.code === "Escape" || event.code === "Enter")) return void ((mapOnly = false), event.preventDefault(), event.stopImmediatePropagation());
   const open = titleUp ? title : sheet?.open === true ? sheet : null;
   if (open === null) return;
   const taken = open.key(event);
@@ -253,7 +258,7 @@ installKeys(window, {
   // Paused (Esc, or Space's tactical pause), nothing is typed: words wait.
   send: (command) => !selection.halted && (session.send(command), true),
   act,
-  onVietnamese: () => (imeWarning = true),
+  onVietnamese: () => (imeUntil = performance.now() + 8000),
   allowUntrusted: params.get("untrusted") === "1",
 });
 installPointer(canvas, view, {
@@ -288,7 +293,7 @@ function showHud(): void {
   }
   const noCard = card !== "" && sheet === null && sheets.failed;
   const notices = [
-    selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", imeWarning ? "Tắt bộ gõ tiếng Việt để gõ" : "",
+    selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", now < imeUntil ? "Tắt bộ gõ tiếng Việt để gõ" : "", over && mapOnly ? "Esc hoặc Enter: xem lại thẻ kết" : "",
     world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Gỗ thừa: bán gỗ ở thẻ Lũy" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
     now < lost.until ? lost.text : "",
     noCard ? (card === "pause" ? "Tạm dừng · Esc để chạy tiếp (thẻ tạm dừng chưa tải được) · F5 để thử lại" : "Hết ải · F5 để chơi lại (thẻ kết chưa tải được)") : "",
@@ -306,7 +311,7 @@ function showHud(): void {
     banner.teachHtml(world),
   ]);
   document.body.classList.toggle("is-paused", selection.paused);
-  sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null, best: won?.best ?? 0, record: won?.record === true });
+  sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null, best: won?.best ?? 0, record: won?.record === true, blows: banner.blows });
 }
 
 /** The boss bar takes the top of the screen from its warning on: the field moves down under it (BUILD_1B §13.1). */

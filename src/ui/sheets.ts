@@ -1,15 +1,15 @@
 /**
- * The pause and results cards (SPLIT_PLAN D7): dó paper in the middle of the map, never a HUD panel (the
- * word cards do not part around them). Pause (Esc, the HUD's Ⅱ): Chơi tiếp, Cài đặt, Về màn đầu. Results
- * (BUILD_1B §4.3, §13.1): "Giữ được làng" with its stars stamped one by one, or "Lũy đã vỡ" with a hint read off
- * the run, and on a story won the best stars kept (R3: "Kỷ lục ★★", new or not); the numbers, "Từ cần ôn" (the review
- * book's newest five with their meaning); Chơi lại Ngày n (after a
- * night past the first was lost), Chơi lại (từ đầu), Chép số chơi thử, Xem bản đồ, Về màn đầu.
- * Keyboard first: ↑ ↓ pick, Enter chooses, Esc goes back to the game (or closes the settings).
+ * The pause and results cards (SPLIT_PLAN D7): dó paper in the middle of the map, never a HUD panel (the word cards do
+ * not part around them). Pause (Esc, the HUD's Ⅱ): Chơi tiếp, Cài đặt, Về màn đầu. Results (BUILD_1B §4.3, §13.1): "Giữ
+ * được làng" with its stars stamped one by one, or "Lũy đã vỡ" with a hint read off the run, and on a story won the
+ * best stars kept (R3: "Kỷ lục ★★", new or not); the numbers, "Từ cần ôn" (the review book's newest five with their
+ * meaning); Chơi lại Ngày n (after a night past the first was lost), Chơi lại (từ đầu), Chép số chơi thử, Xem bản đồ,
+ * Về màn đầu. Keyboard first: ↑ ↓ pick, Enter chooses, Esc goes back to the game (or closes the settings).
  */
 import { starsFor } from "../app/prefs";
 import { STAT } from "../sim/stats";
 import { BOSS } from "../sim/stores/boss";
+import { locked } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { SettingsCard } from "./settings";
@@ -18,9 +18,9 @@ export type SheetAction = "resume" | "settings" | "title" | "again" | "retry" | 
 type Button = readonly [action: SheetAction, label: string, key: string];
 /**
  * The results card's run: a story or the sandbox, a "Chơi lại Ngày n" this run came from (0: none), whether its chunk is in
- * (R3 step 1), the story's best stars after this run and whether this win set them (R3, td.campaign).
+ * (R3 step 1), the story's best stars after this run and whether this win set them (R3, td.campaign), the lives the boss's blows took.
  */
-export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean; best?: number; record?: boolean };
+export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean; best?: number; record?: boolean; blows?: number };
 
 const PAUSE: readonly Button[] = [["resume", "Chơi tiếp", "Esc"], ["settings", "Cài đặt", ""], ["title", "Về màn đầu", ""]];
 
@@ -29,14 +29,18 @@ export { starsFor };
 export const recordLine = (best: number, record: boolean): string => (best <= 0 ? "" : `<p class="td-best">Kỷ lục${record ? " mới" : ""} <b>${"★".repeat(best)}</b></p>`);
 
 /**
- * The loss card's hint, read off the run (BALANCE §4.3): lost before the boss; it passed the merge with less than half
- * of what had to come off; Dồn lửa words left untyped in the stagger; buildings rooted again and again.
+ * The loss card's hint, read off the run (BALANCE §4.3): before the boss, what the run lacked (a tower, a typed word; the
+ * Pháo's fire once it opens: test pass 27/10); from the lull, enemies that got in when they took more lives than the boss's
+ * `blows` (counted by the page); it passed the merge with less than half of what had to come off; Dồn lửa words left
+ * untyped in the stagger; buildings rooted again and again.
  */
-export function lossHint(w: World): string {
+export function lossHint(w: World, blows = 0): string {
   const S = w.boss;
   const s = w.stats;
   const need = (S.hpMax * w.c.content.boss!.retreatPct) / 100;
-  if (S.stage < BOSS.fight) return "Gõ Bắn mạnh khi quái tới gần tháp; Phát Chữ của Tháp Pháo cạnh Draconis làm quái cháy.";
+  const tower = w.buildings.live().some((b) => w.c.buildings[w.buildings.def[b]!]!.def.family === "attack");
+  if (S.stage < BOSS.lull) return !tower ? "Xây Tháp Cung cạnh đường: Lũy một mình không giữ nổi." : s[STAT.callWords] === 0 ? "Gõ chữ trên thẻ tháp (Bắn mạnh) khi quái tới gần." : "Gõ Bắn mạnh khi quái tới gần tháp" + (locked(w, "cannon") ? "; xây thêm tháp cạnh đường." : "; Phát Chữ của Tháp Pháo cạnh Draconis làm quái cháy.");
+  if (s[STAT.livesBoss]! - blows > blows || S.stage < BOSS.fight) return "Quái lọt vào Lũy lúc Mộc Tinh tới: gõ Bắn mạnh ở tháp gần Lũy.";
   if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Thêm tháp trên nhánh rễ sáng.";
   if (S.phase === 2 && s[STAT.burstTyped]! < s[STAT.burstWords]!) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
   if (s[STAT.rootsHits]! >= 6) return "Đặt Tháp Cung xa đường hơn: rễ không với tới.";
@@ -86,10 +90,10 @@ export class Sheet {
     const stars = won ? starsFor(w.lives) : 0;
     this.el.innerHTML =
       (kind === "pause"
-        ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ anh. Chữ trên thẻ vẫn ở đó.</p>`
+        ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ bạn. Chữ trên thẻ vẫn ở đó.</p>`
         : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
-          : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w)}</p>`) +
-          `<dl>` + (won ? row("Rương", "+" + stats[STAT.goldChest]! / 1000 + " vàng") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
+          : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
+          `<dl>` + (won ? row("Rương", "+" + stats[STAT.goldChest]! / 1000 + " vàng") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
           (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);
