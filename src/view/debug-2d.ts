@@ -452,7 +452,7 @@ export class DebugView {
       if (grow(t) < 0) this.disc(x, z, TREE.radiusM * (1.6 + grow(t)), null, `rgba(95, 170, 60, ${-grow(t)})`, 3);
       if (T.marked[t] === 1) this.disc(x, z, TREE.radiusM, null, COLOR.lamp, 3.5);
       if (T.progress[t]! > 0) this.bar(x, z + TREE.radiusM + 0.4, 2.4, T.progress[t]!, COLOR.lamp);
-      if (T.progress[t]! > 0 && !labels.some(([lx, lz]) => Math.abs(lx - x) < this.px(70) && Math.abs(lz - z) < this.px(24))) labels.push([x, z]), this.text(T.left[t] + "/" + TREE.reserve, x, z + TREE.radiusM + 2, 11, COLOR.ink, 800, COLOR.stump);
+      if (T.progress[t]! > 0 && (Math.abs(w.agents.x[0]! - x) > 7 || Math.abs(w.agents.z[0]! - z - TREE.radiusM - 2) > 3) && !labels.some(([lx, lz]) => Math.abs(lx - x) < this.px(70) && Math.abs(lz - z) < this.px(24))) labels.push([x, z]), this.text(T.left[t] + "/" + TREE.reserve, x, z + TREE.radiusM + 2, 11, COLOR.ink, 800, COLOR.stump);
     });
   }
 

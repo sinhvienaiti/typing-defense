@@ -218,7 +218,7 @@ const sheets = new Chunk("sheets", async () => {
     else if (action === "retry" || action === "copy") void retryChunk.get().then((m) => {
       if (m === null) return tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
       const run = { world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun };
-      if (action === "copy") (m.copyNumbers(run, profile, source), tellLost("Đã lưu file chơi thử và chép số")); // test pass 27/10: it said nothing
+      if (action === "copy") (lost?.text.startsWith("Đã lưu") && performance.now() < lost.until) || (m.copyNumbers(run, profile, source), tellLost("Đã lưu file chơi thử và chép số"));
       else m.retryDay(run);
     });
     else if (action === "title") showTitle(world.phase !== "defeat");

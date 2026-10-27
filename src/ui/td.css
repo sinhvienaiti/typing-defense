@@ -210,4 +210,4 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-review ul { margin: 2px 0 6px; padding-left: 18px; }
 .td-review b { color: var(--vd-jade-ink); }
 /* A short screen (1280 × 720: a won card with 5 words to review was ~730 px): the numbers in two columns, tighter rows. */
-@media (max-height: 800px) { .td-sheet { padding: 12px 18px 14px; } .td-sheet h2 { margin: 0 0 4px; } .td-sheet dl { grid-template-columns: 1fr auto 1fr auto; margin: 4px 0 8px; padding: 6px 10px; } .td-sheet button { margin-top: 5px; padding: 6px 12px; } .td-stars i { font-size: 28px; } }
+@media (max-height: 800px) { .td-sheet { padding: 12px 18px 14px; } .td-sheet h2 { margin: 0 0 4px; } .td-sheet dt { white-space: nowrap; } .td-sheet dl { grid-template-columns: 1fr auto 1fr auto; gap: 3px 8px; margin: 4px 0 8px; padding: 6px 10px; } .td-sheet button { margin-top: 5px; padding: 6px 12px; } .td-stars i { font-size: 28px; } }
