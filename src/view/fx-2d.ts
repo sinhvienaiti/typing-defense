@@ -185,7 +185,7 @@ export class FxView {
         pen.ctx.arc(m.x, m.z, 0.8 + 5.2 * ease(age), 0, Math.PI * 2);
         pen.ctx.stroke();
         if (age < 0.6) pen.text("+25 %", m.x, m.z - 1.5 - age * 2, 14, "#3f7a1e", 900);
-      } else if (m.kind >= 2) {
+      } else if (m.kind % 4 > 1) { // 2 a pinned pack, 3 a broken dome; 4, a word shot's hit, bursts below
         // R3: a pinned pack's slate ring closes in from 6 m; a broken dome's grey ring flies out from 4 m.
         const pin = m.kind === 2;
         Object.assign(pen.ctx, { strokeStyle: (pin ? "rgba(74, 106, 138, " : "rgba(60, 67, 72, ") + (1 - age).toFixed(2) + ")", lineWidth: pen.px(5) });
