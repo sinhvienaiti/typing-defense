@@ -95,9 +95,8 @@ export function soldiersStep(w: World): void {
 const far = (dx: number, dz: number, limit: number) => dx * dx + dz * dz > limit * limit;
 
 /**
- * The nearest ground enemy around the flag that still needs a blocker; with
- * none, the nearest that fewer than 3 soldiers fight (to help); −1 none.
- * Equal distances go to the lower id (TK 25.5).
+ * The nearest ground enemy around the flag that still needs a blocker; with none, the nearest that fewer than 3
+ * soldiers fight (to help); −1 none. Equal distances go to the lower id (TK 25.5).
  */
 function pick(w: World, s: number, rx: number, rz: number): number {
   const E = w.enemies;

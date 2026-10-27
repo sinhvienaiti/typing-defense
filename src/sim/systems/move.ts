@@ -1,11 +1,10 @@
 /**
- * Enemies walk their lane (TK 25.6 step 4, 13). Blocked by enough soldiers
- * they stop; blocked by fewer than their weight they push on at half speed.
- * One that reaches the Bastion is marked leaked; the deaths system takes
- * the lives. The boss is never blocked, stands while stunned and stops short
- * of the Bastion to strike it (BUILD_1B §5.1, §5.3). R3 (§9.2, §10 "dẫn bầy"): a Cương Thi Đầu Đàn hurries every
- * enemy within its radius but the boss (×auraSpeed, itself too), always, and leads them: on its road none walks on
- * past DIRECT.leadM ahead of it (they wait for it), so the pack Neo pins stays by its leader.
+ * Enemies walk their lane (TK 25.6 step 4, 13). Blocked by enough soldiers they stop; blocked by fewer than their
+ * weight they push on at half speed. One that reaches the Bastion is marked leaked; the deaths system takes the lives.
+ * The boss is never blocked, stands while stunned and stops short of the Bastion to strike it (BUILD_1B §5.1, §5.3). R3
+ * (§9.2, §10 "dẫn bầy"): a Cương Thi Đầu Đàn hurries every enemy within its radius but the boss (×auraSpeed, itself
+ * too), always, and leads them: on its road none walks on past DIRECT.leadM ahead of it (they wait for it), so the pack
+ * Neo pins stays by its leader.
  */
 import { DIRECT } from "../../content/rules";
 import type { World } from "../world";

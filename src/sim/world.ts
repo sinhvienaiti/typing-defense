@@ -1,9 +1,8 @@
 /**
- * The Typing Defense world and its fixed 60 Hz step, in the system order of
- * docs/td/TYPING_DEFENSE_DESIGN.md 25.6 (BUILD_1A6: the workers at step 10,
- * the attention director at 11, day and night at 17). Pure TypeScript: no
- * clock, no DOM, randomness only from the named seeded streams. The same
- * seed, content and command log give the same world on Node and in every browser.
+ * The Typing Defense world and its fixed 60 Hz step, in the system order of docs/td/TYPING_DEFENSE_DESIGN.md 25.6
+ * (BUILD_1A6: the workers at step 10, the attention director at 11, day and night at 17). Pure TypeScript: no clock, no
+ * DOM, randomness only from the named seeded streams. The same seed, content and command log give the same world on
+ * Node and in every browser.
  */
 import { createRng, type Rng } from "../kit/platform/rng";
 import { compile, ticks, type Compiled } from "../content/compile";
@@ -55,11 +54,10 @@ export type QueuedSpawn = { tick: number; enemy: number; route: number; wave: nu
 export type PendingShot = { b: number; power: number; crit: boolean; word: number; burn: boolean; bolt: boolean; boss: boolean };
 
 /**
- * The typing state of a run (TK 25.8): bags by the band's top length (a power
- * word takes a shorter band); the chain; the shots words asked for this tick;
- * a ring of the last 20 s, 1 for each tick with a lock, with its sum
- * (BUILD_1A6 §5.3); the review book, deck words oldest first (§7), with the tick each comes back and the times it
- * came back typed (R3, BUILD_1B §11.2).
+ * The typing state of a run (TK 25.8): bags by the band's top length (a power word takes a shorter band); the chain;
+ * the shots words asked for this tick; a ring of the last 20 s, 1 for each tick with a lock, with its sum (BUILD_1A6
+ * §5.3); the review book, deck words oldest first (§7), with the tick each comes back and the times it came back typed
+ * (R3, BUILD_1B §11.2).
  */
 function createTyping(deck: Deck) {
   return {

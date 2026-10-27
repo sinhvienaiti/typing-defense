@@ -1,11 +1,9 @@
 /**
- * The workers (BUILD_1A6 §4; 25.6 step 10), day and night alike. Farmers
- * sow, wait and harvest; villagers chop trees; builders put up sites; mines
- * fill their pile and the miner hauls a basket every 10 s; at night towers
- * with an enemy in reach call for power; by day the helpers ask quizzes from
- * the review book. Work that starts makes its call,
- * whose words push the same work (calls.ts): a job ends whichever way gets
- * there first, and a worker within 6 m of a helper works ×1.5.
+ * The workers (BUILD_1A6 §4; 25.6 step 10), day and night alike. Farmers sow, wait and harvest; villagers chop trees;
+ * builders put up sites; mines fill their pile and the miner hauls a basket every 10 s; at night towers with an enemy
+ * in reach call for power; by day the helpers ask quizzes from the review book. Work that starts makes its call, whose
+ * words push the same work (calls.ts): a job ends whichever way gets there first, and a worker within 6 m of a helper
+ * works ×1.5.
  */
 import { ticks } from "../../content/compile";
 import { BUILD, CALL, FARM, MINE, MODES, NPC, PACE, PHASE, POWER, RICHNESS, TICK_HZ, TREE, VILLAGERS } from "../../content/rules";

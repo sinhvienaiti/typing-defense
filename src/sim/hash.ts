@@ -1,8 +1,7 @@
 /**
- * The world hash (docs/td/TYPING_DEFENSE_DESIGN.md 25.6 step 18): every rule
- * number of the world folded into 32 bits, floats by their bit pattern. Two
- * runs with the same seed, content and command log match tick by tick, on
- * Node and in Chrome. Events are output, not state, and stay out.
+ * The world hash (docs/td/TYPING_DEFENSE_DESIGN.md 25.6 step 18): every rule number of the world folded into 32 bits,
+ * floats by their bit pattern. Two runs with the same seed, content and command log match tick by tick, on Node and in
+ * Chrome. Events are output, not state, and stay out.
  */
 import { rngState } from "../kit/platform/rng";
 import { MODE_IDS } from "./commands";

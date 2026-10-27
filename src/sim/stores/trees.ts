@@ -1,7 +1,6 @@
 /**
- * The map's trees (BUILD_1A6 §4.2), by map index: standing until felled (a
- * stump after, which blocks nothing), marked for the villagers, chopped by at
- * most one villager (`worker`, −1 none, −2 no way there); `progress` 0–1 of the chop;
+ * The map's trees (BUILD_1A6 §4.2), by map index: standing until felled (a stump after, which blocks nothing), marked
+ * for the villagers, chopped by at most one villager (`worker`, −1 none, −2 no way there); `progress` 0–1 of the chop;
  * `left` the wood it still holds (the owner's rule, 26/10/2026: it falls at 0, full again each day).
  */
 export class TreeStore {

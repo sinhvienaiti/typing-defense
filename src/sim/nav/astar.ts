@@ -1,9 +1,8 @@
 /**
- * A* on the walking grid (docs/td/TYPING_DEFENSE_DESIGN.md 25.9): whole-number
- * costs (10 straight, 14 diagonal), the octile estimate, ties to the smaller
- * f, then the smaller h, then the smaller cell index; a binary heap on arrays
- * allocated once per grid size, so a search allocates nothing. The cell path
- * is then pulled tight by line of sight on the cells.
+ * A* on the walking grid (docs/td/TYPING_DEFENSE_DESIGN.md 25.9): whole-number costs (10 straight, 14 diagonal), the
+ * octile estimate, ties to the smaller f, then the smaller h, then the smaller cell index; a binary heap on arrays
+ * allocated once per grid size, so a search allocates nothing. The cell path is then pulled tight by line of sight on
+ * the cells.
  */
 import { STEPS, type WalkGrid } from "./grid";
 

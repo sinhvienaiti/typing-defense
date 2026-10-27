@@ -1,8 +1,7 @@
 /**
- * Free placement (docs/td/TYPING_DEFENSE_DESIGN.md 12.5–12.6), shared by the
- * build menu's red ring and the `build` command. The checks run in the
- * design's fixed order and the first failure is the reason shown; 1A has no
- * slopes, and its only scenery is the standing trees (BUILD_1A6 §4.2).
+ * Free placement (docs/td/TYPING_DEFENSE_DESIGN.md 12.5–12.6), shared by the build menu's red ring and the `build`
+ * command. The checks run in the design's fixed order and the first failure is the reason shown; 1A has no slopes, and
+ * its only scenery is the standing trees (BUILD_1A6 §4.2).
  */
 import { AGENT, BUILD, RALLY, TREE } from "../content/rules";
 import { CELL } from "./nav/grid";

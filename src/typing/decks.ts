@@ -1,11 +1,9 @@
 /**
- * Word decks (docs/td/TYPING_DEFENSE_DESIGN.md 25.5, 6.5). The vocabulary is
- * compiled once into letter codes (a = 0 … z = 25) in one Uint8Array with
- * each word's start, length and vocabulary level: the simulation never holds
- * a word as a string. A band is the words of a length range up to a level;
- * its A (letters that start at least 3 of its words) sets the stream cap.
- * Each word also keeps its Vietnamese meaning and IPA (BUILD_1A6 §7): the
- * view reads them, the simulation and the hash never do.
+ * Word decks (docs/td/TYPING_DEFENSE_DESIGN.md 25.5, 6.5). The vocabulary is compiled once into letter codes (a = 0 … z
+ * = 25) in one Uint8Array with each word's start, length and vocabulary level: the simulation never holds a word as a
+ * string. A band is the words of a length range up to a level; its A (letters that start at least 3 of its words) sets
+ * the stream cap. Each word also keeps its Vietnamese meaning and IPA (BUILD_1A6 §7): the view reads them, the
+ * simulation and the hash never do.
  */
 import { CAP, EMIT, LENGTH_BY_E, LETTERS } from "../content/rules";
 

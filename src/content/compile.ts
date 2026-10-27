@@ -1,9 +1,8 @@
 /**
- * Turns a content slice into the tables the simulation reads: seconds become
- * ticks, percentages fractions, speeds metres per tick, and each level's
- * numbers sit in a ready array (the simulation never computes a curve).
- * Also the content hash: FNV-1a over canonical JSON of the rules and the
- * slice, `view` blocks left out (docs/td/TYPING_DEFENSE_DESIGN.md 25.4).
+ * Turns a content slice into the tables the simulation reads: seconds become ticks, percentages fractions, speeds
+ * metres per tick, and each level's numbers sit in a ready array (the simulation never computes a curve). Also the
+ * content hash: FNV-1a over canonical JSON of the rules and the slice, `view` blocks left out
+ * (docs/td/TYPING_DEFENSE_DESIGN.md 25.4).
  */
 import * as RULES from "./rules";
 import type { AbilitySpec, AttackSpec, BuildingDef, Content, EnemyDef, WaveEntry } from "./types";

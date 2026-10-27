@@ -1,10 +1,8 @@
 /**
- * The keyboard and the mouse (docs/td/BUILD_NOW.md §5.4, BUILD_1A6 §8, TK 6.15, 8.3, 23.6).
- * A letter is a `key` command, Backspace a `backspace`; any other key is read
- * by event.code into the action its button carries, so a letter is never a
- * command. Composing, held (arrows aside), Ctrl, Alt, Meta and synthetic
- * presses (unless the dev flag allows them) do nothing. A Space right after a
- * letter the game took is the space typed between words, not the pause.
+ * The keyboard and the mouse (docs/td/BUILD_NOW.md §5.4, BUILD_1A6 §8, TK 6.15, 8.3, 23.6). A letter is a `key`
+ * command, Backspace a `backspace`; any other key is read by event.code into the action its button carries, so a letter
+ * is never a command. Composing, held (arrows aside), Ctrl, Alt, Meta and synthetic presses (unless the dev flag allows
+ * them) do nothing. A Space right after a letter the game took is the space typed between words, not the pause.
  */
 import { isComposingKey, typedLetter, vietnameseInputSign } from "../kit/input";
 import type { CommandBody } from "../sim/commands";

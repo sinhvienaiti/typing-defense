@@ -1,10 +1,8 @@
 /**
- * Starting constants of Typing Defense: the 1A part of
- * docs/td/TYPING_DEFENSE_DESIGN.md Phụ lục A, with step 1A.6 "Lời Gọi"
- * (docs/td/BUILD_1A6.md) on top. This file is the source of truth: the bot
- * retunes numbers here, never in the rules' code. Times are seconds,
- * distances metres; compile.ts turns times into ticks once. Per-building and
- * per-enemy numbers live in slice-1a.ts.
+ * Starting constants of Typing Defense: the 1A part of docs/td/TYPING_DEFENSE_DESIGN.md Phụ lục A, with step 1A.6 "Lời
+ * Gọi" (docs/td/BUILD_1A6.md) on top. This file is the source of truth: the bot retunes numbers here, never in the
+ * rules' code. Times are seconds, distances metres; compile.ts turns times into ticks once. Per-building and per-enemy
+ * numbers live in slice-1a.ts.
  */
 export const TICK_HZ = 60;
 export const MAX_STEPS_PER_FRAME = 10;

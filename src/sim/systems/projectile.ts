@@ -1,13 +1,11 @@
 /**
- * Shots fly and land (TK 25.6 step 8). A shot follows its target while it
- * lives, then flies on to the last point it saw. On arrival a blast hurts
- * its target at whatever height the attack aimed (Draconis hits high
- * flyers), and every other enemy in its radius at a height blasts reach
- * (COMBAT.splashHits, TK 10.4: ground and low), from full damage at the
- * centre down to the rim's share (cannon: 50 %), times the enemy's blast
- * multiplier (Ma Trơi ×1.5); a single shot hurts its target if it still lives.
- * A burning shot (Draconis' Word Shot from a cannon) sets every enemy it hurts on fire. R3 (BUILD_1B §9.2): an enemy
- * under a Troll's dome takes a shot launched outside it ×0.3 (Tối Thượng's feathers fall from the sky, as before).
+ * Shots fly and land (TK 25.6 step 8). A shot follows its target while it lives, then flies on to the last point it
+ * saw. On arrival a blast hurts its target at whatever height the attack aimed (Draconis hits high flyers), and every
+ * other enemy in its radius at a height blasts reach (COMBAT.splashHits, TK 10.4: ground and low), from full damage at
+ * the centre down to the rim's share (cannon: 50 %), times the enemy's blast multiplier (Ma Trơi ×1.5); a single shot
+ * hurts its target if it still lives. A burning shot (Draconis' Word Shot from a cannon) sets every enemy it hurts on
+ * fire. R3 (BUILD_1B §9.2): an enemy under a Troll's dome takes a shot launched outside it ×0.3 (Tối Thượng's feathers
+ * fall from the sky, as before).
  */
 import { ALTITUDES } from "../../content/compile";
 import { COMBAT } from "../../content/rules";

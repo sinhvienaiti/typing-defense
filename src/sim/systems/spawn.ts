@@ -1,8 +1,7 @@
 /**
- * Spawning (TK 25.6 step 2): queued spawns whose tick has come enter at the
- * gate, spread across the road by the spawn stream, with the mode's hit
- * points (BUILD_1A6 §2). Enemies may also come up along a road (the boss, its
- * Mầm Gỗ, a Nuppeppō's halves) and packs be queued into the running wave.
+ * Spawning (TK 25.6 step 2): queued spawns whose tick has come enter at the gate, spread across the road by the spawn
+ * stream, with the mode's hit points (BUILD_1A6 §2). Enemies may also come up along a road (the boss, its Mầm Gỗ, a
+ * Nuppeppō's halves) and packs be queued into the running wave.
  */
 import { packSchedule } from "../../content/compile";
 import { MODES, PACE } from "../../content/rules";

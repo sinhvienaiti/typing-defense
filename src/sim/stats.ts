@@ -1,7 +1,6 @@
 /**
- * Run counters as one number array (docs/td/TYPING_DEFENSE_DESIGN.md 25.13):
- * the bot report, the result screen and __td.stats() read the same numbers.
- * Gold counters are thousandths, like the treasury; food and wood are whole.
+ * Run counters as one number array (docs/td/TYPING_DEFENSE_DESIGN.md 25.13): the bot report, the result screen and
+ * __td.stats() read the same numbers. Gold counters are thousandths, like the treasury; food and wood are whole.
  */
 export const STATS = [
   "spawned", "kills", "leaks", "livesLost", "shots", "hits", "blocks", "soldierDeaths", "wavesCleared",

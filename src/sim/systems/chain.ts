@@ -1,8 +1,7 @@
 /**
- * The chain (docs/td/TYPING_DEFENSE_DESIGN.md 6.8; BUILD_1A6 §5.4): one
- * count for the whole run. A word that is not sloppy adds 1, a sloppy one
- * halves it, and nothing else touches it: a call ignored, dimmed or closed
- * costs nothing. Its tier multiplies a whole Perfect call's bonus.
+ * The chain (docs/td/TYPING_DEFENSE_DESIGN.md 6.8; BUILD_1A6 §5.4): one count for the whole run. A word that is not
+ * sloppy adds 1, a sloppy one halves it, and nothing else touches it: a call ignored, dimmed or closed costs nothing.
+ * Its tier multiplies a whole Perfect call's bonus.
  */
 import { CHAIN } from "../../content/rules";
 import type { Grade } from "../../content/types";

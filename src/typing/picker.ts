@@ -1,10 +1,8 @@
 /**
- * The next word of a stream (docs/td/TYPING_DEFENSE_DESIGN.md 25.8): drawn
- * from a shuffled bag of the band's words that repeats no word until the
- * band runs out. The first of up to 12 candidates the letters accept wins;
- * a candidate whose first letter is closed anyway is passed over without
- * counting. A round's rest that fits nowhere now is never dropped: it opens
- * the next round, ahead of the words just dealt. Shuffles draw on the `words` stream.
+ * The next word of a stream (docs/td/TYPING_DEFENSE_DESIGN.md 25.8): drawn from a shuffled bag of the band's words that
+ * repeats no word until the band runs out. The first of up to 12 candidates the letters accept wins; a candidate whose
+ * first letter is closed anyway is passed over without counting. A round's rest that fits nowhere now is never dropped:
+ * it opens the next round, ahead of the words just dealt. Shuffles draw on the `words` stream.
  */
 import type { RngStream } from "../kit/platform/rng";
 import type { Deck } from "./decks";

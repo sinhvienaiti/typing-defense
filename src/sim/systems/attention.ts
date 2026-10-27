@@ -1,30 +1,20 @@
 /**
- * The AttentionDirector (BUILD_1A6 §5.3; 25.6 step 11), inside the sim so a
- * replay sees what the player saw. Each tick: the ticks typed in the last
- * 20 s (a tick with a lock is a typing tick); calls that ran out, and
- * quizzes once the day is over, close (the locked one waits for its word);
- * open calls follow their maker, and a
- * bright one that leaves every help ring dims and gives its word back (the
- * locked one stays bright). The cap counts
- * bright calls only: a dim call holds nothing, so calls nobody answers never
- * keep others waiting. While fewer than the mode's cap are bright, queued
- * calls open and open calls in a ring light, by priority (power, build, then
- * harvest = chop = mine, then quiz; older first), within the typing budget;
- * at night no quiz and one economy call bright at a time. At
- * the cap a quiz nobody is typing dims for another call in a ring. Last,
- * every bright call without a word gets one.
+ * The AttentionDirector (BUILD_1A6 §5.3; 25.6 step 11), inside the sim so a replay sees what the player saw. Each tick:
+ * the ticks typed in the last 20 s (a tick with a lock is a typing tick); calls that ran out, and quizzes once the day
+ * is over, close (the locked one waits for its word); open calls follow their maker, and a bright one that leaves every
+ * help ring dims and gives its word back (the locked one stays bright). The cap counts bright calls only: a dim call
+ * holds nothing, so calls nobody answers never keep others waiting. While fewer than the mode's cap are bright, queued
+ * calls open and open calls in a ring light, by priority (power, build, then harvest = chop = mine, then quiz; older
+ * first), within the typing budget; at night no quiz and one economy call bright at a time. At the cap a quiz nobody is
+ * typing dims for another call in a ring. Last, every bright call without a word gets one.
  *
- * The typing budget is kept word by word (BUILD_1A6 §12 gate 5, review R3):
- * a word may start only if typing it from now, at E's pace (typeSeconds of
- * its letters but the first, ×CALL.paceK), after the word in flight, keeps every 20 s
- * window within the mode's seconds, counting the typed ticks that leave the
- * window meanwhile; or when nothing is typed at all (a word longer than the
- * budget still comes, alone). A call lights only if a word of its band's
- * longest would; a bright call whose word is not begun dims (it waits, and
- * gives the word back) once its word would not fit, the next word of the
- * locked call too. Power and build lead the queue but wait for room like the
- * rest. Checked against the past 20 s alone, calls lit at a quiet moment
- * were typed back to back: 17 s in 20 s at 35 WPM.
+ * The typing budget is kept word by word (BUILD_1A6 §12 gate 5, review R3): a word may start only if typing it from
+ * now, at E's pace (typeSeconds of its letters but the first, ×CALL.paceK), after the word in flight, keeps every 20 s
+ * window within the mode's seconds, counting the typed ticks that leave the window meanwhile; or when nothing is typed
+ * at all (a word longer than the budget still comes, alone). A call lights only if a word of its band's longest would;
+ * a bright call whose word is not begun dims (it waits, and gives the word back) once its word would not fit, the next
+ * word of the locked call too. Power and build lead the queue but wait for room like the rest. Checked against the past
+ * 20 s alone, calls lit at a quiet moment were typed back to back: 17 s in 20 s at 35 WPM.
  */
 import { ticks } from "../../content/compile";
 import { CALL, MODES, WORD_D } from "../../content/rules";

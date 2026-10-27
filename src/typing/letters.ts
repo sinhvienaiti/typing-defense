@@ -1,10 +1,8 @@
 /**
- * First letters (docs/td/TYPING_DEFENSE_DESIGN.md 6.5, 25.8). A live word
- * starts with a letter no other live word starts with (tier 1) or, when
- * letters run short, shares it with exactly one untouched word whose second
- * letter differs (tier 2: the second key tells them apart). A released
- * letter rests 1 s; stream and review words leave the last 3 free letters to
- * the higher kinds; q x z j start no word up to vocabulary level 10.
+ * First letters (docs/td/TYPING_DEFENSE_DESIGN.md 6.5, 25.8). A live word starts with a letter no other live word
+ * starts with (tier 1) or, when letters run short, shares it with exactly one untouched word whose second letter
+ * differs (tier 2: the second key tells them apart). A released letter rests 1 s; stream and review words leave the
+ * last 3 free letters to the higher kinds; q x z j start no word up to vocabulary level 10.
  */
 import { KIND_PRIORITY, LETTERS, RESERVE_KINDS, TICK_HZ } from "../content/rules";
 import type { Deck } from "./decks";
@@ -39,9 +37,8 @@ export class Letters {
   }
 
   /**
-   * The tier (1, 2) a word starting `c` then `second` may take for `kind`,
-   * or 0; `free` is this tick's free(). A second letter of −1 asks whether
-   * the first letter is open at all.
+   * The tier (1, 2) a word starting `c` then `second` may take for `kind`, or 0; `free` is this tick's free(). A second
+   * letter of −1 asks whether the first letter is open at all.
    */
   tierOf(deck: Deck, live: LiveWords, c: number, second: number, kind: number, tick: number, vocab: number, free: number): number {
     if (this.avoided(c, vocab) || tick < this.freeAt[c]!) return 0;
@@ -56,9 +53,8 @@ export class Letters {
   }
 
   /**
-   * The tier `word` would go live at, or 0: its letter is closed, it starts
-   * like `last` (its building's previous word), or it is a live word or one
-   * edit away from one.
+   * The tier `word` would go live at, or 0: its letter is closed, it starts like `last` (its building's previous word),
+   * or it is a live word or one edit away from one.
    */
   claim(deck: Deck, live: LiveWords, word: number, kind: number, tick: number, vocab: number, last: number, free: number): number {
     const start = deck.start[word]!;

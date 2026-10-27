@@ -1,22 +1,18 @@
 /**
- * A lane on the ground plane: a Catmull-Rom curve through the map's points,
- * sampled once into short straight pieces so that a distance along it turns
- * into a point with one table lookup (no curve maths per tick).
+ * A lane on the ground plane: a Catmull-Rom curve through the map's points, sampled once into short straight pieces so
+ * that a distance along it turns into a point with one table lookup (no curve maths per tick).
  *
- * Copied from Rift Defense V4 (src/defense/rules/path.ts, RoadPath), which
- * Typing Defense may not import (TK 25.1 rule 3). Changes: Math.hypot became
- * Math.sqrt (the rules' allowed maths, TK 25.5), the atan2 heading is gone,
- * and the curve is in Hermite form so that routes can share tangents
- * (groundLanes).
+ * Copied from Rift Defense V4 (src/defense/rules/path.ts, RoadPath), which Typing Defense may not import (TK 25.1 rule
+ * 3). Changes: Math.hypot became Math.sqrt (the rules' allowed maths, TK 25.5), the atan2 heading is gone, and the
+ * curve is in Hermite form so that routes can share tangents (groundLanes).
  */
 export type Point2 = { x: number; z: number };
 type Knot = readonly [number, number];
 
 /**
- * Lanes for routes that share points (a fork, a merge). A knot's tangent is
- * the mean of its Catmull-Rom tangents over every route through it, so where
- * routes split or join they still trace one curve on the shared stretch and
- * each bends off it smoothly; elsewhere the mean is the plain tangent.
+ * Lanes for routes that share points (a fork, a merge). A knot's tangent is the mean of its Catmull-Rom tangents over
+ * every route through it, so where routes split or join they still trace one curve on the shared stretch and each bends
+ * off it smoothly; elsewhere the mean is the plain tangent.
  */
 export function groundLanes(routes: readonly (readonly Knot[])[]): Lane[] {
   const sums = new Map<string, [number, number, number]>();

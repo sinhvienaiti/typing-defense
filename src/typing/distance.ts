@@ -1,8 +1,7 @@
 /**
- * "form" and "from" must not live together (TK 6.5): two words of the deck
- * at optimal-string-alignment distance ≤ 1, checked directly instead of with
- * a table, stopping at the first difference that rules it out. Words longer
- * than LETTERS.maxEditCheckLen are not compared.
+ * "form" and "from" must not live together (TK 6.5): two words of the deck at optimal-string-alignment distance ≤ 1,
+ * checked directly instead of with a table, stopping at the first difference that rules it out. Words longer than
+ * LETTERS.maxEditCheckLen are not compared.
  */
 import { LETTERS } from "../content/rules";
 

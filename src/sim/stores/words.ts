@@ -1,10 +1,9 @@
 import { Slots } from "./slots";
 
 /**
- * Live words (TK 6.4, 25.8; BUILD_1A6 §5.2): a deck index, never a string. A
- * word belongs to the bright call that holds it; it is born when the call
- * gets it (speed is scored from then) and never runs out: `life` is only the
- * clock it is scored against.
+ * Live words (TK 6.4, 25.8; BUILD_1A6 §5.2): a deck index, never a string. A word belongs to the bright call that holds
+ * it; it is born when the call gets it (speed is scored from then) and never runs out: `life` is only the clock it is
+ * scored against.
  */
 export class WordStore extends Slots {
   readonly word = new Int32Array(this.cap);

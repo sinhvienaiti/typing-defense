@@ -1,11 +1,10 @@
 /**
- * The music placeholder made in code (TK 24.8; SPLIT_PLAN §1.2), on its own bus: one tempo (84 BPM), one
- * scale (ngũ cung, shared with the typing notes), two layers that start together and cross-fade over 2 s.
- * Calm (day, the title): đàn tranh figures over a low string, a sáo trúc phrase every four bars. Tension
- * (night): trống cơm, a low tranh ostinato, bamboo clicks on the off-beats, a bronze gong every four bars.
- * At night both play, the calm one 6 dB down. Before Mộc Tinh rises the music steps back; while it fights a
- * steady low drum joins (BUILD_1B §13.2). Eighths are scheduled a quarter second ahead from the frame loop; a
- * layer faded out schedules nothing.
+ * The music placeholder made in code (TK 24.8; SPLIT_PLAN §1.2), on its own bus: one tempo (84 BPM), one scale (ngũ
+ * cung, shared with the typing notes), two layers that start together and cross-fade over 2 s. Calm (day, the title):
+ * đàn tranh figures over a low string, a sáo trúc phrase every four bars. Tension (night): trống cơm, a low tranh
+ * ostinato, bamboo clicks on the off-beats, a bronze gong every four bars. At night both play, the calm one 6 dB down.
+ * Before Mộc Tinh rises the music steps back; while it fights a steady low drum joins (BUILD_1B §13.2). Eighths are
+ * scheduled a quarter second ahead from the frame loop; a layer faded out schedules nothing.
  */
 import { chuong, go, note, sao, tranh, trong } from "./folk";
 

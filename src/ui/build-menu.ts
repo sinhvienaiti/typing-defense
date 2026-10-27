@@ -1,11 +1,10 @@
 /**
- * The dock over Build (BUILD_NOW §5.3, BUILD_1A6 §9, BUILD_1B §7): the focused
- * building's card (a site's progress, send, undo, upgrade, a sale pressed twice;
- * the farm's seeds and plots; the Bastion's villagers, builders, food sale and
- * its next level with the helper it lets out), the card of the dim call Tab is
- * on (send the agent there), or the build menu with gold and wood prices; what is
- * not open yet in the story says the day it opens. R3 (§12): in the story, what a building opened by day does, on its
- * card and under the menu for the kind picked, until its row of the teaching table has come (`does`: ui/tips.ts doesLine).
+ * The dock over Build (BUILD_NOW §5.3, BUILD_1A6 §9, BUILD_1B §7): the focused building's card (a site's progress,
+ * send, undo, upgrade, a sale pressed twice; the farm's seeds and plots; the Bastion's villagers, builders, food sale
+ * and its next level with the helper it lets out), the card of the dim call Tab is on (send the agent there), or the
+ * build menu with gold and wood prices; what is not open yet in the story says the day it opens. R3 (§12): in the
+ * story, what a building opened by day does, on its card and under the menu for the kind picked, until its row of the
+ * teaching table has come (`does`: ui/tips.ts doesLine).
  */
 import type { Selection } from "../app/selection";
 import { ECONOMY, FARM, POWER, SELL, TICK_HZ, VILLAGERS } from "../content/rules";

@@ -1,8 +1,7 @@
 /**
- * The team bar (BUILD_NOW §5.3, BUILD_1A6 §9, TK 23.5, 23.7): Draconis and
- * the Thư Đồng with their number keys and a badge for the building each was
- * sent to, a closed slot's Bastion level, and the "Đang gọi n/N" chip: bright
- * calls against the mode's cap (BUILD_1A6 §5.3).
+ * The team bar (BUILD_NOW §5.3, BUILD_1A6 §9, TK 23.5, 23.7): Draconis and the Thư Đồng with their number keys and a
+ * badge for the building each was sent to, a closed slot's Bastion level, and the "Đang gọi n/N" chip: bright calls
+ * against the mode's cap (BUILD_1A6 §5.3).
  */
 import { MODES, ULT } from "../content/rules";
 import type { ViewBlock } from "../content/types";
