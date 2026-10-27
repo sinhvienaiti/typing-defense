@@ -384,8 +384,8 @@ Phần đầu Đêm 5, bot Chuẩn, cùng cách đo (mạng cuối Đêm 5 p10 /
 | Động từ | Quái | Bắt đầu khi | Thành công | Bỏ qua | Ở đâu |
 |---|---|---|---|---|---|
 | **Ngắt** | Lửng Tanuki | Có ≥ 3 quái khác trong 6 m (theo mã: ≥ 4, sửa phản biện R2 cho G6, BUILD_NOTES §7.4; và mép một nhà đánh trong 9 m, §7.3), hồi 12 s đã qua: đứng lại đánh Trống Bụng Lớn trong T | Hủy trống, Tanuki choáng 2 s, +5 Vàng (Lá Tanuki) | Hết T: quái trong 6 m (cả nó) hồi 25 % máu tối đa | Bản đồ 1 Đêm 4 (R2) |
-| **Neo** | Cương Thi Đầu Đàn | Bầy ≥ 4 trong 6 m và cách một nhà < 20 m (hồi 15 s; theo mã: nhà đánh, như Ngắt, `R3_PLAN.md` §5 A20) | Bầy trong 6 m đứng sững 3 s; Đầu Đàn nhận +30 % sát thương 6 s | Bầy đi tiếp (hào quang +20 % tốc trong 6 m luôn có; bầy không vượt Đầu Đàn quá 1,5 m, A21) | Hộp cát (R3) |
-| **Phá Khiên** | Quỷ Núi Troll | Cách một nhà đánh < 25 m (hồi 6 s sau khi vòm tắt): dựng Vòm Đá 4 m trong T (vòm đi theo Troll, Troll vẫn đi, A22) | Vòm vỡ, Troll choáng 1,5 s, không dựng lại 10 s | Vòm giữ T giây: đạn từ ngoài vòm vào quái trong vòm −70 % (lông Tối Thượng, cận chiến không đổi, A12) | Hộp cát (R3) |
+| **Neo** | Cương Thi Đầu Đàn | Bầy ≥ 4 trong 6 m và cách một nhà < 20 m (hồi 15 s; theo mã: nhà đánh, như Ngắt, `R3_PLAN.md` §5 A20), **và trong một vòng giúp** (đợt test 27/10/2026: bật ở 20 m thì 58/60 thẻ không sáng lần nào; nay bật là sáng ngay) | Bầy trong 6 m đứng sững 3 s; Đầu Đàn nhận +30 % sát thương 6 s | Bầy đi tiếp (hào quang +20 % tốc trong 6 m luôn có; bầy không vượt Đầu Đàn quá 1,5 m, A21) | Hộp cát (R3) |
+| **Phá Khiên** | Quỷ Núi Troll | Cách một nhà đánh < 25 m **và trong một vòng giúp** (đợt test 27/10/2026, như Neo; hồi 6 s sau khi vòm tắt): dựng Vòm Đá 4 m trong T (vòm đi theo Troll, Troll vẫn đi, A22) | Vòm vỡ, Troll choáng 1,5 s, không dựng lại 10 s | Vòm giữ T giây: đạn từ ngoài vòm vào quái trong vòm −70 % (lông Tối Thượng, cận chiến không đổi, A12) | Hộp cát (R3) |
 
 ### 9.3 Ngân sách chú ý
 
@@ -469,7 +469,7 @@ Một bảng duy nhất (TK 20.4 đổi theo Lời Gọi). Mỗi ý mới một 
 | Ngày 2 | Chặt cây, dân, Gỗ; Trại Lính | "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt." (luật gỗ 26/10/2026) | "Shift + \\ thuê dân" |
 | Đêm 2 | Ma Trơi bay | "Ma Trơi bay qua đầu lính. Tháp Cung và Draconis bắn được." | — |
 | Ngày 3 | Mỏ Vàng, lời gọi Đào; Lũy cấp 2 mở Chấm | "Nâng Lũy thì Chấm ra giúp. Thư Đồng làm việc nhanh hơn." | "1–4 chọn người · Enter gửi đi" |
-| Đêm 3 | Tháp Pháo và Nuppeppō; Tối Thượng, Chữ Chiêu | "Lông lửa đầy rồi! Bấm = rồi gõ thêm chữ cho mưa to hơn." | "= Tối Thượng" |
+| Đêm 3 | Tháp Pháo và Nuppeppō; Tối Thượng, Chữ Chiêu | "Lông lửa đầy thì bấm = khi quái tới gần. Gõ chữ, mưa to hơn." (đợt test 27/10/2026: câu cũ "Lông lửa đầy rồi!" nói sai lúc thanh mới 75–83 %) | "= Tối Thượng khi quái gần" |
 | Ngày 4 | Nâng cấp nhà; bán nhà | "Nhà cấp 2 mạnh hơn. Bán lại được sáu phần mười." | "Bán: bấm hai lần" |
 | Đêm 4 | Tanuki và Ngắt | "Tanuki đánh trống hồi máu. Gõ chữ trên đầu nó để Ngắt." | "Chữ trên quái: gõ để phá chiêu" |
 | Ngày 5 (R1) | Lũy cấp 3 mở Phẩy; báo Mộc Tinh và nhánh nó đi | "Đêm nay Mộc Tinh thức dậy. Dồn tháp lên nhánh rễ sáng." | "Boss rút ở 50 % máu" |
@@ -546,7 +546,7 @@ Chủ dự án chơi bản R1 (§17), và đã từng loại một bản vì hi�
 | Màn kết: "Chép số chơi thử" | Chép `__td.balance()` (JSON) vào bộ nhớ tạm; không được thì tải file `.json`. Cho B9, chủ dự án không phải mở bảng điều khiển trình duyệt. R3 phần B (`R3_PLAN.md` §5 A24): luôn lưu file `loi-goi-choi-thu-s<seed>-n<ngày>-<tick>.json` có số và cả nhật ký ván (đầu ván, mọi lệnh), chép cùng nội dung; `scripts/td/b9.ts` chạy lại nhật ký trên Node rồi chấm B9 | R1, R3 |
 | `=` hoặc nút | Tối Thượng ở điểm chuột hay chỗ đông quái | R2 |
 | Cài đặt: Chế độ | Thư giãn, Cân bằng, Thử thách, Học (lưu ở `td.settings`, áp dụng ván sau) | R3 |
-| Hộp cát | `boss` (gọi Mộc Tinh ngay), `skipTo` (sang Ngày n của ải, đợt đã qua tính là xong), `spawn` (quái, số con), `ult` (nạp đầy); R3: nút "Đầu Đàn" (cùng 5 Cương Thi, một tick, A25), "Troll" | R1 (`boss`, `skipTo`), R2 (`spawn`, `ult`), R3 (nút) |
+| Hộp cát | `boss` (gọi Mộc Tinh ngay), `skipTo` (sang Ngày n của ải, đợt đã qua tính là xong), `spawn` (quái, số con), `ult` (nạp đầy); R3: nút "Đầu Đàn" (cùng 5 Cương Thi, một tick, A25), "Troll". Đợt test 27/10/2026: hàng "Ngày" (2–5, Boss) cho `skipTo` và `boss` (trước chỉ gọi được qua `__td`; `skipTo` khi boss đã thức báo "Mộc Tinh đã thức"), nút "Tanuki" kèm 8 Cương Thi đi sau 6 s (đuổi kịp nó ở tháp, nên nó đánh trống), "Đầy Tối Thượng" thay "Nạp =" | R1 (`boss`, `skipTo`), R2 (`spawn`, `ult`), R3 (nút) |
 
 - Phím `-` vẫn trống (để dành cho 1C). Không phím chữ cái nào là lệnh.
 

@@ -25,7 +25,7 @@
 2. Thua thì bấm **"Chơi lại Ngày 5"** (hay Ngày n) và chơi tiếp một lần.
 3. **Chơi lại Ngày 5, cố ý để boss tới Lũy** (bán bớt tháp ở khúc nhập) để biết cảm giác Lũy bị đập (câu 7).
 4. Trong lúc chơi: nâng một tháp, bán một nhà (bấm hai lần), nâng Lũy lên 2 rồi 3 (câu 8); bấm `=` lúc đông quái (câu 9).
-5. Tùy chọn (5 phút): `http://127.0.0.1:3006/?sandbox=1` → bảng Hộp cát → "Đặt sẵn", rồi hàng "Gọi": **Đầu Đàn** (đi cùng 5 Cương Thi, chữ ⚓ Neo trên đầu: gõ được thì cả bầy đứng sững 3 s) và **Troll** (vòm đá xám quanh nó, chữ 🛡️ Phá Khiên: gõ được thì vòm vỡ). Hai quái này chỉ có ở hộp cát (R3).
+5. Tùy chọn (5 phút): `http://127.0.0.1:3006/?sandbox=1` → bảng Hộp cát → "Đặt sẵn", rồi hàng "Gọi": **Đầu Đàn** (đi cùng 5 Cương Thi, chữ ⚓ Neo trên đầu: gõ được thì cả bầy đứng sững 3 s) và **Troll** (vòm đá xám quanh nó, chữ 🛡️ Phá Khiên: gõ được thì vòm vỡ). Hai quái này chỉ có ở hộp cát (R3). Từ đợt test 27/10 hai chiêu này chỉ bật khi quái vào vòng giúp (Draconis 14 m), nên chữ sáng ngay: để Draconis đứng giữa hai tháp, hoặc chờ bầy tới gần Lũy. Nút **Tanuki** gọi thêm 8 Cương Thi đi sau 6 s: ở chỗ tháp chúng đuổi kịp nó và nó đánh trống (chữ ✋ Ngắt). Hàng "Ngày" nhảy sang Ngày 2–5 hay gọi Boss.
 
 **Sau mỗi ván** (thắng, thua, cả ván "Chơi lại Ngày n"): ở thẻ kết bấm **"Chép số chơi thử"**.
 

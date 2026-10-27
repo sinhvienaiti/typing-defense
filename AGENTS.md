@@ -89,6 +89,14 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   boss layer p95 0.3 ms, the Node step at the boss peak p95 0.39 ms of 0.5: each enemy scans every Đầu Đàn aura in
   `move.ts`); gate 5 fails as above, gate 12 waits for the owner.
   "/" 83.75 kB gzip (1.25 kB headroom), 10,492 lines, 338 tests. The owner's playtest (B9 numbers) stays open.
+  **Test pass of 27/10** (§7.10, `docs/changelog/2026-10-27-test-pass.md`): three testers' 43 findings merged and checked;
+  fixed: word cards keep off the action (`keepOut` in `view/debug-2d.ts`, the `keep` boxes of `besidePanels`), the last
+  push of crowded columns unbounded, word shots, hits, kills and keys that read, towers drawn 🏹 🧨, the results card inside
+  1280 × 720, the pause card's settings, "Xem bản đồ" both ways, the loss hint read off the run, night 3's line and `=`
+  refused with no enemy near (`ultNone`), Neo and Phá Khiên only inside a help ring, Tối Thượng from night 3 (`ultShut`),
+  the sandbox's day and boss buttons; open: night 4 is a lull (six variants measured, each moves the stage's win rates:
+  for the next balance pass), night 3's idle, the night-5 Thuồng Luồng spike, phase 2 often skipped. "/" 84.81 kB gzip
+  (**0.19 kB headroom**), 10,500 lines (the ceiling; 54 got back by rewrapping comments), 346 tests.
   Play-tests use a build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.

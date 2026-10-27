@@ -4,6 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 27/10/2026 | Đợt test 27/10: gộp 43 lỗi của ba người test, sửa mọi lỗi nặng trừ Đêm 4 nhàn (đo 6 biến thể, để lượt cân bằng) và phần áp lực Thuồng Luồng; thẻ chữ tránh chỗ hành động, Phát Chữ và lúc hạ quái, thẻ kết, Xem bản đồ, Neo và Phá Khiên trong vòng giúp, Tối Thượng từ Đêm 3 | [2026-10-27-test-pass](./2026-10-27-test-pass.md) |
 | 26–27/10/2026 | 1B R3 cân bằng cuối (bước 9) và cổng cứng §21 (bước 10): Rễ hút sinh khí, từ 4–8 chữ cho E 45–64, sàn k 0,70, hệ số k máu boss; sáu lượt đo; §20 trên Mac xen kẽ với mốc; 44/44 lượt kịch bản; còn trượt Ẩu 77 % và B4 bộ 1 | [2026-10-26-td-r3-balance](./2026-10-26-td-r3-balance.md) |
 | 26/10/2026 | Luật gỗ của chủ dự án (cây 1.000 Gỗ, mọc lại mỗi Ngày), "Gọi đêm sớm" đếm ngược, hai con rồng; `td-1b-wood` | [2026-10-26-td-wood](./2026-10-26-td-wood.md) |
 | 26/10/2026 | 1B R3 phần B (bước 7, 8, 11, kịch bản bước 10): Troll, Đầu Đàn, Neo, Phá Khiên ở hộp cát; bot chơi Học; gói chơi thử và B9 từ file; `td-1b-tour`; sửa sau lượt kiểm (file chơi thử bấm thật, gõ lại khi máy tải, hộp cát không vào B9) | [2026-10-26-td-r3-part-b](./2026-10-26-td-r3-part-b.md) |

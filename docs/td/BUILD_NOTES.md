@@ -45,7 +45,7 @@ Mốc đang làm: **1B.R3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1A.7 Cân bằng (`docs/games/BALANCE.md` bước 4; đếm như 1A.6, `src/kit` không tính) | 7.064 → 7.492 thật (mục 6): `sim/systems/pace.ts` 164, `app/skill.ts` 107, `ui/profile.ts` 53, nối sim và UI 104 | 430 | 7.500 |
 | 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
-| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8) | 830 | 10.500 |
+| 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -1786,3 +1786,25 @@ Hạt 2D: pool cố định 300 hạt, tối đa 40 mới mỗi khung (`view/fx-
 3. Báo cáo, không là cổng: Thử thách quá dễ (núm `boss.modeHp.challenge`), Quãng Q của Thư giãn, Gần thua N của Cân bằng (ở trên).
 4. Đạt nhưng sát mép, ghi để lượt sau biết: bước sim trên Node ở cảnh boss + lũ 300 p95 0,39 ms (§20 ≤ 0,5 ms; mốc 0,16 ms), vì hào quang của Đầu Đàn duyệt theo số quái × số Đầu Đàn (núm: gom theo đường); 4 mầm báo Mầm Gỗ (0,8 s) chỉ ~7 px, xanh trên nền xanh (cổng 7); nhãn kho chồng nhau ở hộp cát (kịch bản ở trên).
 5. Ba quyết định R2 vẫn chờ chủ dự án xác nhận (`PACE.speedK` 0,3 và trần boss; giữ số sau §7.5; "phần khởi động" thay "cả gói" ở §20). A27, A28 của đợt này đã chọn theo đề xuất (`R3_PLAN.md` §5); điều phối viên xem có đưa sàn k 0,70 vào BALANCE §4.1 không.
+
+### 7.10 Đợt test 27/10/2026: xác minh và sửa (Mac mini M4)
+
+Ba người test chạy trên `cc0c2c1` (Đêm 1–4; Đêm 5, Mộc Tinh và Học; hộp cát và vỏ game), một agent gộp, xác minh và sửa. Bảng đủ 43 lỗi đã gộp, mức, việc đã làm, bằng chứng, độ phủ và lỗ hổng: `docs/changelog/2026-10-27-test-pass.md`. Bằng chứng ngoài Git: `tmp/mac-2026-10-27/test/{nights1-4,night5-learning,sandbox-shell,verify-fix}/`. Số đo Apple M4.
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Dòng `.ts` | Test |
+|---|---|---|---|---|---|
+| `cc0c2c1` | trước | 83,75 (1,25) | 82,36 | 10.492 | 338 |
+| `dfd574f` | gói lại chú thích 31 file về 120 cột (không đổi chữ) | 83,75 (1,25) | 82,36 | 10.438 | 338 |
+| `fe5186a` | luật: Neo, Phá Khiên chỉ bật trong vòng giúp; Tối Thượng từ Đêm 3 ở ải truyện; `skipTo` báo `bossBusy` | 83,79 (1,21) | 82,39 | 10.445 | 338 |
+| `f7d43fc` | trên sân: thẻ tránh vùng hành động, bước đẩy cuối không giới hạn 240 px, Phát Chữ, lúc trúng, lúc chết, phím, tháp 🏹 🧨, Ma Trơi bay, mầm báo, nhãn Cháy, hoảng | 84,43 (0,57) | 83,03 | 10.477 | 338 |
+| `d6c98cf` | thẻ và trang: thẻ kết vừa màn, Cài đặt trong tạm dừng, Xem bản đồ, gợi ý thua, câu Đêm 3, từ chối `=` khi không có quái gần, câu Rễ hút, bảng hộp cát, dải chữ ở 1280, các lời báo | 84,81 (0,19) | 83,36 | 10.500 | 346 |
+| `ce2a8c2` | chú thích nút Tanuki của hộp cát ghi đúng 8 Cương Thi (chỉ chunk hộp cát) | 84,81 (0,19) | 83,36 | 10.500 | 346 |
+
+- **Trần dòng**: đợt sửa cần ~62 dòng mà chỉ còn 8; gói lại chú thích (như `1f77e48` ở §7.9) lấy lại 54. Nay đúng trần 10.500. **Gói "/" chỉ còn 0,19 kB**: lượt sau thêm mã vào phần khởi động phải lấy chỗ trước (gợi ý: đưa vẽ Phát Chữ trúng và hạt mực của `debug-2d.ts`, hay phần `keepOut`, sang chunk sau; hoặc rút chữ của bảng `REASON`).
+- **Luật đổi** (BUILD_1B §9.2, §12 đã ghi): Neo và Phá Khiên cần quái trong một vòng giúp mới bật (bot hộp cát 20 seed: Neo gõ được 0/60 → 18/21 ở 30 WPM, 5/49 → 34/39 ở 70 WPM; Phá Khiên 57/140 → 62/102, 64/140 → 68/82); Tối Thượng ở ải truyện dùng từ Đêm 3 (`ultShut`). File vàng không đổi: hai file không có Troll, Đầu Đàn, không có ngày 3 của ải truyện.
+- **Cân bằng ải truyện không đổi**: lượt dò Cân bằng 40 × 2 seed và bảng từng Đêm 1–4 (seed 25–48) trên mã cuối giống từng ô bảng trên `cc0c2c1` (`verify-fix/stage-final.md` so với `stage-base.md`, `n34-final.md` so với `n34-base.md`; chạy lại trên một cây làm việc ở đúng `cc0c2c1` lúc 11:20, `verify-fix/final/*-cc0c2c1.md`: vẫn giống hệt): bot không dùng Tối Thượng ban ngày.
+- **Thẻ tránh vùng hành động còn hở một chỗ**: khi các cột không tách được, bước cuối của bố cục (`spread(boxes, width)` trong `view/words/cards.ts`) bỏ cả bảng HUD lẫn vùng hành động để không thẻ nào che thẻ nào, nên lúc choáng có ba cột Dồn lửa một thẻ vẫn đè được boss (`td-1b-tour` ảnh 07, 1280 × 720, 1 trong 2 lượt; 1920 × 1080 không bị). Giữ vùng hành động ở bước cuối (che bảng HUD thay vì che boss) cần quyết định và chỗ trong gói "/": để lượt sau.
+- **Đêm 4 quá nhàn: chưa đổi** (đề xuất của vòng này, chờ chủ dự án). Sáu biến thể đợt Đêm 4 đã đo (bảng ở changelog): biến thể đưa P Đêm 4 vào 15–35 % (C, H) đều làm Ẩu ở cả ải xuống 69–70 % và Chậm chắc lên 91–93 %; cần chỉnh cùng Đêm 5. Đề xuất cho lượt cân bằng sau: đợt H (T3, TL1, CT9, TL1, CT10, MT2) và bù Ẩu ở Đêm 5.
+- **Đêm 3 nhàn** (Nhàn I 12–20 %): không do khoảng trống giữa nhóm quái (đếm theo tick, Đêm 3 lúc nào cũng có quái sống); là lúc không có chữ nào và không việc gì, tức luồng lời gọi Bắn mạnh khi quái còn xa tháp. Để lượt cân bằng.
+- Kịch bản sau sửa chạy từ một cây làm việc tạm có `node_modules` thật (lượt đầu dùng liên kết tới `node_modules` của game: Vite không phục vụ phông ngoài thư mục gốc, phông rơi về mặc định, nên đã chạy lại cả lượt): 32/32 lượt đạt ở 16 kịch bản; `td-1b-tour` (17/17 kiểm) và `td-theme` chạy lại từ repo ở HEAD, hai cỡ đạt. `td-1b-perf` trên mã cuối đạt ở hai cỡ (luồng chính 1,29 / 1,14 ms mỗi khung, vẽ p95 0,9 / 0,8 ms, lúc trồi 2,8 / 1,6 ms; một lượt, không xen kẽ). Chi tiết và bảng bot đủ chỉ số ở changelog.
+
