@@ -361,13 +361,20 @@ describe("Mộc Tinh in the fight (BUILD_1B §5.1–§5.4)", () => {
     const line = Math.floor(w.boss.hpMax * 0.5) + 1;
     const sproutAt = w.boss.staggerUntil + T(spec.summon.firstS) + T(spec.summon.warnS);
     const flash = w.events.ring.written;
-    for (; w.tick < sproutAt; step(w)) damageEnemy(w, e, w.boss.hpMax, 2, SOURCE.wordShot);
+    const seen: RareEvent[] = [];
+    // The sprout's own tick too: the shots land before the boss steps (lane A1: 2–6 of 32–35 retreats a bot skipped it so).
+    while (w.tick <= sproutAt) {
+      damageEnemy(w, e, w.boss.hpMax, 2, SOURCE.wordShot);
+      const from = w.events.rare.length;
+      step(w);
+      seen.push(...w.events.rare.slice(from));
+    }
+    expect(strikes(seen, "summon").some((ev) => ev.hit)).toBe(true);
     expect(w.enemies.hp[e]).toBe(line);
     expect(w.boss.stage).toBe(BOSS.fight);
     let hits = 0; // no "0" floats over it
     for (let i = flash; i < w.events.ring.written; i += 1) if (w.events.ring.kind[i % w.events.ring.size] === FX.bossHit) hits += 1;
     expect(hits).toBe(1);
-    expect(strikes(until(w, () => w.boss.summonEnd < 0 && w.enemies.count > 1, 2), "summon").some((ev) => ev.hit)).toBe(true);
     damageEnemy(w, e, 10, 2, SOURCE.wordShot);
     until(w, () => w.boss.stage === BOSS.retreat, 2);
   });

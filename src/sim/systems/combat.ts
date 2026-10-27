@@ -29,7 +29,7 @@ export function damageEnemy(w: World, e: number, power: number, damageType: numb
   let dmg = Math.max(COMBAT.minDamage, Math.round(power * (1 - armour) * mul));
   if (boss !== null) {
     const S = w.boss;
-    dmg = Math.max(0, Math.min(dmg, E.hp[e]! - (S.phase === 1 ? Math.floor((S.hpMax * boss.stagger.atPct) / 100) : w.tick < S.staggerUntil + ticks(boss.summon.firstS + boss.summon.warnS) ? Math.floor((S.hpMax * boss.retreatPct) / 100) + 1 : 1)));
+    dmg = Math.max(0, Math.min(dmg, E.hp[e]! - (S.phase === 1 ? Math.floor((S.hpMax * boss.stagger.atPct) / 100) : w.tick <= S.staggerUntil + ticks(boss.summon.firstS + boss.summon.warnS) ? Math.floor((S.hpMax * boss.retreatPct) / 100) + 1 : 1)));
     bump(w.stats, STAT.bossDamage, dmg);
     if (source === SOURCE.wordShot) bump(w.stats, STAT.bossTyped, dmg);
     if (source === SOURCE.hero) bump(w.stats, STAT.bossHero, dmg);
