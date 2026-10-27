@@ -1826,3 +1826,18 @@ Chủ dự án giao điều phối viên quyết các việc còn mở của đ�
 - **Gói "/" còn 13 byte** (84.987): bước sau thêm mã vào phần khởi động phải lấy chỗ trước. Bước này lấy lại 40 byte bằng `strike()` cho tám sự kiện đòn boss, dòng bằng `rootTargets` hai dòng, gộp chú thích và đầu file `boss.ts` ngắn lại; câu "· chờ quái gần Lũy" 15 byte. Viết gọn `bossWarning` và phép kẹp làm gói lớn thêm 6–9 byte (gzip), không lấy.
 - **Cân bằng sau bước** (40 × 2 seed, Cân bằng): thắng 80–86 % cả sáu bot gõ (dải chặt 6/6, trước 79–85 %), B1–B8 đạt; §12 5 seed đạt hết; §12 20 seed: cổng 4 đạt (thấp nhất 3 mạng), 5a 8,48 s và 5b 29,5 % trượt như trước; G8 24,1 → 32,1 s (trần 35).
 - **Không giữ**: đợt H của quyết định (hỏng cổng 4: bot không gõ thua Đêm 4 ở 6/20 seed); hai biến thể sửa Đêm 3 nhàn (lời gọi Bắn mạnh mở sớm 15 m: Chuẩn, Ẩu vẫn ~19 %, B4 và B8 trượt, 5c 24,8 %; đổi đợt Đêm 3 với 40 m: Chuẩn 14 %). Nguyên nhân Đêm 3 nhàn là đoạn đi tới (quái vào tầm ở giây 18,6 mọi đêm; Đêm 1–2 che nhờ kho có vàng, Đêm 4 nhờ lời gọi Mỏ chờ): về chủ dự án.
+
+
+#### Làn của điều phối viên, bước A2 (28/10/2026): các ngày và cổng §12
+
+Bốn việc về Ngày và cổng §12 (dòng 18–21 của đợt test). Đủ số, đầu dò, biến thể và lý do ở `docs/changelog/2026-10-27-open-items.md` (mục "Bước A2"); bằng chứng ngoài Git `tmp/mac-2026-10-27/open/a2-days/`. Số đo Apple M4.
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Dòng `.ts` | Test |
+|---|---|---|---|---|---|
+| `86b7258` | trước (cuối bước A1) | 84,99 (84.987 byte; 13) | 83,54 | 10.500 | 347 |
+| `e49189a` | việc 3: lề trượt của bộ điều phối theo chế độ (`MODES.*.slipS`: Thư giãn, Học 2,2 s; Cân bằng, Thử thách 1,35 s), báo cáo §12 chấm 5a mọi chế độ | 84,97 (84.975 byte; 25) | 83,53 | 10.499 | 350 |
+
+- **Giữ**: Thư giãn và Học giữ trần gõ 20 s của chúng (6,82 → 5,67 s trên 20 seed, trần 6 s; 5,93 s trên 100 seed). Cân bằng, Thử thách chạy đúng từng tick như trước; file vàng chỉ đổi mã nội dung.
+- **Không giữ, về chủ dự án**: gói việc 1, 2, 4. Chặt bắt đầu ban Đêm gọi lúc rạng sáng (sáng Ngày 2–4 có 192/200 dân chặt dở mà không lời gọi), gặt ban Đêm không lời gọi (lời gọi Gặt ban Đêm lấy chỗ của Bắn mạnh; với k > 1 lúa chín đúng lúc toán đầu tới, Khá mất 4,22 mạng ở Đêm 1, Phát Chữ 82 so với 331 của Chuẩn), lề Cân bằng 1,8 s. Trên 20 seed: 5a 8,48 → 7,95 s, 5b 29,5 → 30,1 %, 5c 23,0 → 15,5 %, Khá Đêm 1 4,22 → 2,00 mạng; nhưng mọi bot gõ thắng 91–100 % nên phải chỉnh boss, và hai biến thể (máu 4.550, kHp 0,35 hay 0,32, kHp2 12, trần 1,40, Rễ hút 20 s) đều để Chậm chắc ở 71/80 = 88,75 % (dải chặt ≤ 88 %), cùng B1 bộ 1 (Biên S Mới 70 %) và B4 bộ 2 (sát thương/s lên boss Chuẩn 32,6 < Ẩu 39,3–39,9) trượt. Gói lưu ở `a2-days/a2-package-v2.patch`; cần thêm 21 byte ở "/" (còn 4).
+- **Đọc**: số Ngày của luật gỗ (`TREE.wood`, `woodShare`, `woodGold`, `MINE.wordGold`, số từ Chặt) không dời 5b quá 0,3 điểm: 55–62 % số tick Ngày có lời gọi bị ngân sách 8 s/20 s giữ, nên 5b do ngân sách và các tick không lời gọi quyết. Dải chặt 78–88 % trên 80 ván có sai số chuẩn ~4,2 điểm mỗi bot: mọi đổi luật trước Đêm 5 là gieo lại sáu bot.
+- **Vẫn trượt trên 20 seed**: 5a Cân bằng 8,48 s, 5b 29,5 %.

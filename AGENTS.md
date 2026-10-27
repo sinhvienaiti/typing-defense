@@ -104,6 +104,13 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
   cap 1.49, Thử thách's boss ×0.9. Tight band 6/6 (80–86 %), B1–B8 and §12 on 5 seeds pass; on 20 seeds 5a and 5b fail as
   before. Night 3's idle (the approach: the first foe in reach 18.6 s after dusk) is not fixed: for the owner. "/" 84.99 kB
   gzip (**13 bytes headroom**), 10,500 lines, 347 tests.
+  **Lane A2, days and the §12 gates** (28/10, same changelog, §7.10): the director's slip margin is the mode's
+  (`MODES.*.slipS`: Thư giãn, Học 2.2 s, so their 20 s windows keep 6 s: 6.82 → 5.67 s on 20 seeds; Cân bằng, Thử thách
+  1.35 s, every tick as before) and the §12 report scores gate 5a in every mode. Not kept, for the owner: chop calls at
+  daybreak, no harvest calls by night and a 1.8 s margin pass 5a/5b/5c on 20 seeds (7.95 s, 30.1 %, 15.5 %) and fix night
+  1 for fast-paced bots (Khá 4.22 → 2.00 lives), but lift every typing bot, and both boss retunes leave Chậm chắc at 71/80
+  (88.75 %) with B1, B4 failing per set (`a2-days/a2-package-v2.patch`). 5a 8.48 s and 5b 29.5 % still fail on 20 seeds.
+  "/" 84.97 kB gzip (84,975 bytes, 25 bytes headroom), 10,499 lines, 350 tests.
   Play-tests use a build (`pnpm build && pnpm preview`), never the dev server of a tree being edited (it reloads the page).
 - `docs/art-requests/td/`: asset prompt pack (text only).
 - `docs/changelog/`: one Vietnamese entry per update.

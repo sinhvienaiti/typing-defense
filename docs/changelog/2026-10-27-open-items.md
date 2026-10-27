@@ -166,3 +166,126 @@ Trên nhánh `a1-nights`, gộp vào `main` bằng `--ff-only`; chưa đẩy (đ
 - Cổng 5a (8,48 s) và 5b (29,5 %) trên 20 seed vẫn trượt như trước bước này.
 - **Mép của dải trên seed 81–160**: Biên S bot Mới 70 % (dải 35–65 %), bot Chuẩn tắt nhịp 88 %; bộ cổng 1–80 đạt. Lượt cân bằng sau nên đo trên cả hai bộ.
 - Gói "/" còn 13 byte.
+
+## Bước A2: các ngày và cổng §12
+
+Làm trên **Mac mini M4** (Node v24.22, Chrome macOS có GPU), máy dùng chung với các làn khác. Bằng chứng ngoài Git: `games/typing-defense/tmp/mac-2026-10-27/open/a2-days/` (đầu dò `probes/*.ts`, kịch bản đo `measure.sh`, `g5grid.sh`, `g5all.sh`, `qbal.sh`, cây thử `trees/`, số ở `runs/`, ảnh ở `browser/`, gói không giữ `a2-package-v2.patch`). Hai lần chạy trước của bước này bị cắt (hết lượt dùng) trước khi báo, để lại trên nhánh `a2-days` phần sửa chưa commit ở `rules.ts`, `attention.ts` và hai file test (việc 3). Lượt này đọc lại, đo lại phần đó (giống từng ô số của lượt trước), giữ nó, rồi làm các việc còn lại.
+
+Cách đo như bước A1: `td:balance` 40 × 2 seed (seed 1–80, đủ ba chế độ, §12 trên 5 seed), cổng §12 trên 20 seed (`--stage-seeds=12 --stage-sets=1 --seeds=20 --nights=4`; báo cáo §12 nay chấm cả 5a của Thư giãn, Thử thách, Học), bảng từng pha (seed 25–48). Thêm cho bước này: đầu dò cổng 5 (`g5.ts`, bot §12 mỗi chế độ, seed 1–20 và 21–40, vài lượt trên 100–200 seed), đầu dò Ngày (`daymix.ts`: mỗi tick Ngày là gõ, có chữ chưa khóa, lời gọi bị ngân sách giữ, lời gọi ngoài vòng, không lời gọi; `dawn.ts`: đầu Ngày), đầu dò Đêm 1 (`night1.ts`, seed 1–40, từng bot với k của nó; `--k=1`, `--e=35` để tách nguyên nhân). Dò nhanh: `td:balance --quick` Cân bằng 40 × 2. "Trước" là `86b7258` (cuối bước A1).
+
+### Quyết định và kết quả
+
+| Việc | Quyết định (điều phối viên) | Đã làm | Giữ? |
+|---|---|---|---|
+| 3. Thư giãn, Học vượt trần gõ 20 s của chính chúng (dòng 20) | Sửa, và báo cáo §12 chấm cả hai chế độ đó | Lề trượt của bộ điều phối theo chế độ (`MODES.*.slipS`): Thư giãn, Học 2,2 s; Cân bằng, Thử thách 1,35 s như cũ. Báo cáo §12 và test cổng chấm 5a ở mọi chế độ theo trần của chế độ đó | **Giữ** (`e49189a`) |
+| 1. Cổng 5b (Ngày 30–45 %) trượt 29,5 % trên 20 seed; gỗ thừa, vàng thiếu, gõ Chặt thành việc vặt (dòng 18, 19) | Chỉnh số Ngày trong luật gỗ của chủ dự án (không đổi hình luật) để gõ ban Ngày có ý nghĩa và 5b đạt trên 20 seed | Số Ngày không dời được 5b (dưới). Chỗ hở thật nằm trong luật gỗ: chặt bắt đầu ban Đêm không có lời gọi, nên sáng ra dân đang chặt mà không gọi. Sửa: **chặt bắt đầu ban Đêm gọi lúc rạng sáng** (m1). Cùng lề trượt Cân bằng 1,8 s thì 5b 29,5 → 30,1 % | **Không giữ** (gói việc 1, 2, 4 trượt dải chặt và B1, B4 theo bộ; số ở dưới) |
+| 2. Cổng 5a (cửa sổ 20 s ≤ 8 s) 8,48 s | Đưa dưới 8 s | Lề trượt Cân bằng 1,35 → 1,8 s: 8,48 → 7,95 s trên 20 seed (8,00 s trên seed 21–40) | **Không giữ** (cùng gói) |
+| 4. Biên S giảm khi bot gõ nhanh hơn (dòng 21; Đêm 1: Khá mất 4,1 mạng, Mới 0,6) | Bot gõ nhanh không được bị phạt; tìm nguyên nhân và sửa | Nguyên nhân là lời gọi Gặt ban Đêm và nhịp k, không phải tốc gõ (dưới). Sửa: **gặt ban Đêm không lời gọi**, như Chặt (h0): Đêm 1 Khá mất 4,22 → 2,00 mạng, Biên S Khá 45 → 60 %. Nhưng mọi bot gõ thắng thêm 6–14 điểm nên phải chỉnh lại boss; hai biến thể đều trượt dải chặt ở bot Chậm chắc **đúng một ván** (71/80 = 88,75 %) | **Không giữ**; về chủ dự án |
+
+### Việc 3: Thư giãn và Học giữ trần gõ của chính chúng
+
+Cửa sổ 20 s đầy nhất của bot §12 (35 WPM, 95 %) quá trần vì một từ nhiều lỗi giữa chuỗi từ Chặt: seed 5 Thư giãn, từ Chặt 5 chữ gõ 11 phím, 4 lỗi, giữ khóa 4,50 s so với 1,71 s dự tính (`window.ts`). Lề trượt 1,35 s đủ cho trần 8 s, không đủ cho trần 6 s. Trần nhỏ cần lề lớn hơn so với trần, nên lề nay theo chế độ: Thư giãn, Học 2,2 s (đầu dò, seed 1–20 / 21–40: 1,5 s 6,00 / 5,98 s; 1,6 s 5,98 / 6,05 s; 1,7 s 6,47 / 6,03 s; 1,8 s 6,47 / 5,98 s; 2,0 s 6,02 / 5,85 s; 2,2 s 5,67 s ở seed 1–20 và 5,93 s trên seed 1–100, không seed nào quá trần). `CALL.paceK` (= 1, không ai đổi) bỏ; `CALL.slipS` vào `MODES`.
+
+| Đo (seed 1–20, bot §12) | Trước | Sau |
+|---|---|---|
+| 5a Thư giãn (trần 6 s) | **6,82 s** (seed 5; 16: 6,38; 17: 6,10) | 5,67 s |
+| 5a Học (trần 6 s) | **6,82 s** | 5,67 s |
+| 5a Thử thách (trần 10 s), Cân bằng (8 s) | 10,00 s; 8,48 s | không đổi (cùng tick) |
+| Tỉ lệ gõ Ngày / Đêm, Thư giãn | 19,7 / 13,2 % | 15,4 / 11,8 % (không có dải chấm) |
+
+Cân bằng và Thử thách chạy đúng từng tick như trước (bảng Cân bằng của `td:balance` giống hệt ô nào cũng vậy). Thư giãn, gộp 80 ván: mọi bot gõ vẫn thắng 100 %, Biên S 85–95 → 90–95 %, P 10–14 → 11–14 %, Q 59–63 → 60–65 % (vẫn ngoài dải ≤ 45 %, như trước); Trẻ em 94 → 91 % (B3 ≥ 85 %: đạt), Chuẩn chiến thuật Kém Biên S 78 → 48 %. B1–B8 đạt như trước. File vàng: chỉ mã nội dung `c39e3fea` → `f2a21037` (mọi tick giữ nguyên; đổi luật có chủ ý: lề vào `MODES`).
+
+### Việc 1 và 2: vì sao 5a, 5b trượt
+
+- **5b do ngân sách gõ, không do số Ngày.** Mỗi tick Ngày của bot §12 (seed 1–20, Ngày 1–4): gõ 29,5 %, có chữ chưa khóa (mắt, tay) 5,3 %, **có lời gọi trong vòng nhưng bộ điều phối giữ (ngân sách 8 s/20 s) 54,7 %**, lời gọi ngoài vòng 3,8 %, không lời gọi 6,7 % (`daymix.ts`). Các số Ngày của luật gỗ không dời 5b quá 0,3 điểm ở cùng lề (đầu dò, seed 1–20 và 21–40): `TREE.wood` 16, 20; `ECONOMY.woodShare` 0,4, 0,45; `ECONOMY.sale.woodGold` 6, 8; `MINE.wordGold` 3; `CALL.words.chop` 3, 6; dải dài từ ở E 45 thêm 1 chữ. Lề lớn hơn thì 5a đạt nhưng 5b xuống: 1,35 s 8,48 s / 29,5 %; 1,6 s 7,95 s / 28,9 %; 1,8 s 7,95 s / 28,2 %; 2,0 s 7,97 s / 27,7 %.
+- **Chỗ hở trong luật gỗ.** Sáng Ngày 2–4, 192/200 dân đang chặt dở mà không có lời gọi (chặt bắt đầu ban Đêm không gọi, một lần chặt dài 45 s), nên 5 s đầu Ngày 53 % số tick không có lời gọi nào, 5–15 s còn 24–25 % (`dawn.ts`); Ngày 3–4 chỉ gõ 28,8 / 28,7 %. Cho chặt bắt đầu ban Đêm gọi ngay tick đầu Ngày (m1, một dòng ở `economy.ts`): không còn tick nào thiếu lời gọi, Ngày 3–4 lên 31–32 %, 5b +1,1 đến +1,7 điểm ở mọi lề. Hình luật gỗ không đổi (cây 1.000 gỗ, mọc lại đầu Ngày, Đêm chặt không gọi).
+- **5a do một từ nhiều lỗi**, không do chuỗi: seed 17 Ngày 1 giây 49, từ Chặt 4 chữ gõ 10 phím, 3 lỗi, giữ 3,93 s so với 1,03 s dự tính, đẩy cửa sổ lên 8,48 s. Lề phải phủ được đuôi đó.
+- m1 với lề Cân bằng 1,6 s: 5a 7,98 / 8,00 s, 5b 30,6 / 30,6 %, 5c 21,1 / 22,2 % (seed 1–20 / 21–40; 100 seed 8,00 s, 30,5 %). Với lề 1,8 s: 7,98 / 8,00 s, 30,3 / 30,3 %, 20,1 / 19,9 %.
+- Dải chặt với m1 riêng (không h0): lề 1,35 s (lượt trước) thắng 84 / 91 / 88 / 75 / 78 / 91 % (Mới / Chậm chắc / Chuẩn / Khá / Ẩu / Nhanh); lề 1,6 s 84 / **91** / 88 / **74** / 78 / 79 %, Biên S Mới **68 %**: B1 trượt. Lệch hai phía (Chậm chắc lên, Khá xuống), nên không một số boss nào kéo về được; Khá thấp vì đúng việc 4.
+
+### Việc 4: vì sao bot gõ nhanh bị phạt ở Đêm 1
+
+Đầu dò Đêm 1 (seed 1–40, Cân bằng, mỗi bot với đầu ván của nó):
+
+| Bot (k) | Mạng mất Đêm 1 | Ván mất ≥ 3 | Sát thương Phát Chữ Đêm 1 | Mạng mất, k ép 1 | Mạng mất, E ép 35 | Mạng mất, gói m1 + h0, lề 1,8 s |
+|---|---|---|---|---|---|---|
+| Mới (0,70) | 0,47 | 0 | 382 | 2,77 | 0,55 | 0,55 |
+| Chậm chắc (0,79) | 1,82 | 17 | 217 | 2,40 | 0,97 | 0,72 |
+| Chuẩn (1,00) | 1,77 | 18 | 331 | 1,77 | 1,77 | 1,27 |
+| Khá (1,133) | **4,22** | 36 | **82** | 1,32 | 4,13 | 2,00 |
+| Ẩu (0,982) | 1,55 | 14 | 407 | 2,02 | 1,45 | 1,48 |
+| Nhanh (1,30) | 2,60 | 20 | 390 | 1,15 | 2,15 | 2,17 |
+
+- **Không do tốc gõ**: ép k = 1 thì Khá, Nhanh mất ít mạng nhất (1,32, 1,15); ép E = 35 (giữ k) thì Khá vẫn mất 4,13. **Do nhịp k**: k > 1 chia ngắn Ngày (Khá 66 s, Nhanh 58 s), Ruộng xong sát tối, lúa chín 13–20 s sau khi tối, đúng lúc toán đầu tới tháp (~18 s). Lời gọi Gặt 3 từ lấy chỗ kinh tế duy nhất của Đêm và ngân sách gõ, nên lời gọi Bắn mạnh tắt: Khá chỉ gõ 1,6 từ Bắn mạnh, Phát Chữ 82 sát thương so với 331 của Chuẩn.
+- Gặt ban Đêm không lời gọi (h0: nông dân gặt tiếp một mình, lời gọi Gặt còn mở lúc tối sống thêm 9 s như Chặt; hai dòng ở `economy.ts`, `waves.ts`): Khá 4,22 → 2,00, Nhanh 2,60 → 2,17, Chậm chắc 1,82 → 0,72 mạng; Biên S Khá 45 → 60 %. Thử thêm cho lúa lớn theo k (`growS` ÷ k, như các đồng hồ Ngày khác): không đỡ Khá (4,47) mà làm Mới, Chậm chắc mất nhiều hơn (1,00, 2,23), bỏ.
+- Cái giá: h0 trả lời gọi Bắn mạnh ban Đêm cho **mọi** bot gõ (cả lúc đỉnh boss), nên thắng lên 91–100 % (h0 riêng, lượt trước: 99 / 100 / 96 / 96 / 94 / 91 %; m1 + h0 lề 1,8 s: 96 / 98 / 93 / 96 / 91 / 89 %). Muốn giữ dải chặt phải làm boss khó hơn.
+
+### Gói việc 1, 2, 4 và chỉnh boss: hai biến thể, không giữ
+
+Gói: m1 + h0 + lề Cân bằng 1,8 s (cổng 5 trên 20 seed đạt cả ba: 5a 7,95 s, 5b 30,1 %, 5c 15,5 %; seed 21–40: 8,00 s, 30,1 %, 15,8 %; lề 1,6 s thì seed 12 lên 9,12 s, lề 2,0 s thì 5b 29,5 %). Đầu dò boss (`--quick` Cân bằng 40 × 2, thắng gộp Mới / Chậm chắc / Chuẩn / Khá / Ẩu / Nhanh, Biên S cùng thứ tự):
+
+| Thử | Máu boss, kHp / kHp2, trần, Rễ hút | Thắng | Biên S |
+|---|---|---|---|
+| gói, boss cũ | 4.200, 0,4 / 7,5, 1,49, 30 s | 96 / 98 / 93 / 96 / 91 / 89 | 75 / 75 / 60 / 65 / 60 / 63 |
+| K-a | 4.600, trần 1,40 | 88 / 93 / 80 / 90 / 79 / 85 | 63 / 70 / 58 / 65 / 58 / 60 |
+| K-b | Rễ hút 15 s | 91 / 96 / 88 / 96 / 88 / 86 | 65 / 60 / 50 / 55 / 50 / 53 |
+| K-c | 4.500, kHp 0,2 | 74 / 86 / 83 / 96 / 84 / 76 | 50 / 70 / 58 / 65 / 60 / 60 |
+| K-e | 4.600, 0,3 / 12, 1,40 | 76 / 88 / 80 / 81 / 79 / 85 | 55 / 70 / 58 / 65 / 58 / 60 |
+| K-f | 4.600, 0,35 / 12, 1,40, 20 s | 79 / 86 / 77,5 / 83 / 77,5 / 83 | 50 / 65 / 53 / 60 / 50 / 55 |
+| K-g | như K-f, 25 s | 79 / 89 / 79 / 83 / 79 / 84 | 55 / 70 / 55 / 60 / 55 / 60 |
+| **Biến thể 1** (đo đủ) | 4.550, 0,35 / 12, 1,40, 20 s | 83 / **89** / 81 / 83 / 79 / 85 | 50 / 65 / 55 / 60 / 55 / 55 |
+| **Biến thể 2** (đo đủ) | như 1, kHp 0,32 | 80 / **89** / 81 / 85 / 79 / 85 | 50 / 65 / 55 / 60 / 55 / 55 |
+
+- Chỉnh boss chỉ đổi trận boss (Đêm 1–4 giữ từng tick), nên thắng dời theo một chiều: từ K-f sang biến thể 1 (máu −1,1 %) Mới +3 ván, Chuẩn +3, Chậm chắc +2, Ẩu +1. Nhưng hệ số k chỉ tách được bot theo k: Mới (k 0,70) và Chậm chắc (0,79) cùng phía, trong khi Chậm chắc cần boss to hơn còn Mới cần nhỏ hơn. Chậm chắc đứng ở 71/80 ván (88,75 %, trần 88 %) ở cả hai biến thể.
+- **Biến thể 1** trượt: B1 gộp (Chậm chắc 88,75 %), B1 bộ 1 (Biên S Mới 70 %, dải 35–65 %), B4 bộ 2 (sát thương/s lên boss p50 Chuẩn 32,6 < Ẩu 39,3). **Biến thể 2** trượt: B1 gộp (Chậm chắc 88,75 %), B1 bộ 1 (Mới S 70 %), B1 bộ 2 (Mới thắng 73 %, S 33 %), B4 bộ 2 (32,6 < 39,9). Trước bước này mọi ô đó đạt, nên theo luật của làn không giữ biến thể nào; mã đã sửa ngược lại tay, gói lưu ở `a2-days/a2-package-v2.patch` (có hai test mới của m1 và h0, đạt).
+- Các cổng khác của gói (biến thể 1; biến thể 2 giống ở Đêm 1–4): §12 trên 20 seed 4 đạt (thấp nhất **1 mạng**, seed 1 và 12; trước 3), 5a 7,95 s, 5b 30,1 %, 5c 15,5 %, 6 = 0, 7 +39,2 %, 5a Thư giãn / Thử thách / Học 5,67 / 9,98 / 5,67 s; trên 5 seed 7,93 s, 30,5 %, 15,4 %, 4 (1 / 7 / 4 / 8 / 7 mạng); G2 Đêm 1–4 22,6 → 16,9 %, Đêm 5 24,0 → 18,6 %; G3 50,2 → 51,9 s; G6 37,1 → 37,6 s; G8 32,1 s; G5 đạt; B2, B3, B5–B8 đạt. Thử thách thắng 76 / 89 / 70 / 61 / 63 / 51 → 83 / 88 / 70 / 63 / 70 / 68 %.
+- Gói còn làm **Đêm 3 nhàn hơn**: Nhàn I Đêm 3 (seed 25–48) Chuẩn 20,1 → 31,1 %, Ẩu 20,1 → 34,6 %, Chậm chắc 14,2 → 24,5 %: lời gọi Gặt ban Đêm vốn lấp đoạn quái đi tới (việc 3 của bước A1).
+- Gói "/" của gói: 84.996 byte (còn 4), 10.499 dòng.
+
+Đọc: dải chặt 78–88 % trên 80 ván có sai số chuẩn ~4,2 điểm mỗi bot (nhị thức ở 83 %), gần bằng nửa bề rộng dải; đổi bất kỳ luật nào trước Đêm 5 là gieo lại cả sáu bot. Trước bước này 6/6 trong dải; sau một đổi luật, xác suất cả sáu bot cùng trong dải ước chỉ khoảng một phần tư dù trung bình đặt đúng giữa (0,79 mũ 6).
+
+### Số trước → sau (mã cuối của bước, `e49189a`)
+
+Cân bằng: không đổi một ô nào (bảng của bước A1, cột "sau"): Mới 86 % / 60 % / 23 % / 3,1 % / 0,1 % / 0,14 / 67 %; Chậm chắc 86 / 65 / 23 / 2,8 / 0 / 0,06 / 67; Chuẩn 80 / 55 / 24 / 3,7 / 0,1 / 0,11 / 67; Khá 84 / 45 / 26 / 2,4 / 0,1 / 0,07 / 67; Ẩu 83 / 55 / 26 / 4,2 / 0,1 / 0,15 / 67; Nhanh 83 / 60 / 25 / 1,8 / 0,1 / 0,04 / 67 % (Thắng / S / P / I / O / N / Q). Thử thách không đổi. Thư giãn: như ở việc 3.
+
+### Cổng
+
+- **B1–B9** (từng bộ và gộp): B1–B8 đạt trước và sau; B9 thiếu số người thật. Dải chặt 6/6 (80–86 %) trước và sau.
+- **§12 trên 5 seed**: 4 (6 / 9 / 9 / 7 / 7 mạng), 5a 7,90 s, 5b 30,2 %, 5c 22,2 %, 6 = 0, 7 +38,2 %: đạt như trước; mới chấm: 5a Thư giãn 5,67 s (≤ 6), Thử thách 9,88 s (≤ 10), Học 5,67 s (≤ 6): đạt.
+- **§12 trên 20 seed**: 4 đạt (thấp nhất 3 mạng), 5c 23,0 %, 6, 7 (+38,0 %) đạt; 5a Thư giãn 6,82 → **5,67 s**, Học 6,82 → **5,67 s**, Thử thách 10,00 s: đạt; **5a Cân bằng 8,48 s và 5b 29,5 % vẫn trượt** (việc 1, 2 không giữ).
+- G2–G8 không đổi. `pnpm check` 350 test (32 file), kit 31 file khớp; `pnpm td:golden:check` khớp sau khi làm lại mã nội dung.
+
+### Trên trình duyệt
+
+Chrome macOS có GPU, mỗi lượt dưới `heavy.sh --gpu`, Vite riêng ở `127.0.0.1:4161 --strictPort` (tắt khi xong), mã `e49189a`; ảnh ở `a2-days/browser/`.
+
+| Kịch bản | 1280 × 720 | 1920 × 1080 | Nhìn thấy |
+|---|---|---|---|
+| `td-1a6-learn` (Học: nghĩa trước, Hỏi bài, tạm dừng chiến thuật) | **đạt 18/18** | **đạt 18/18** | Ảnh `td-1a6-learn-meaning-1280x720`: hai thẻ Chặt sáng có nghĩa ("see · thấy; nhìn thấy", "head · đầu"), không chồng nhau, HUD "Đang gọi 2/2" (trần Học 2); ảnh `td-1a6-learn-quiz-1920x1080`: thẻ Hỏi bài "khuôn mặt; mặt · f _ _ _" sáng, các lời gọi khác chờ ("Đang gọi 1/2"); nhật ký trang chạy lại trên Node khớp mã băm, 0 lỗi console |
+| `td-1b-learn` (Từ Ôn, sổ qua lần tải lại, nghĩa theo luật) | **đạt 14/14** | **đạt 14/14** | Ảnh `td-1b-learn-review-1280x720`: thẻ ngọc "Ôn · good · tốt; hay" cạnh hai thẻ Chặt, "Đang gọi 3/3" ở Cân bằng; chạy lại khớp |
+
+Gói không giữ (m1, h0) không chạy trên trình duyệt; kịch bản dùng một lần đã viết sẵn cho nó (`a2-days/zz-a2-days.mjs`: lời gọi Chặt, Gặt hết sau 9 s lúc tối, không lời gọi mới ban Đêm mà lúa vẫn gặt, rạng sáng mỗi dân đang chặt có lời gọi) để chạy khi chủ dự án chọn giữ gói. Các nhãn kho "…/1000" vẫn chồng nhau quanh cụm cây (dòng 17, đã mở từ trước).
+
+### Ngân sách
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Dòng `.ts` | Test |
+|---|---|---|---|---|---|
+| `86b7258` | trước | 84,99 (84.987 byte; 13 byte) | 83,54 | 10.500 | 347 |
+| `e49189a` | việc 3: lề trượt theo chế độ, 5a mọi chế độ | 84,97 (84.975 byte; 25 byte) | 83,53 | 10.499 | 350 |
+
+Gói không giữ cần thêm 21 byte (84.996, còn 4); bước sau đổi mã ở phần khởi động vẫn phải lấy chỗ trước.
+
+### Commit
+
+Trên nhánh `a2-days`, gộp vào `main` bằng `--ff-only`; chưa đẩy (điều phối viên đẩy):
+
+- `e49189a` việc 3 (file vàng chỉ đổi mã nội dung `c39e3fea` → `f2a21037`, mọi tick giữ nguyên).
+- Commit giấy tờ của bước này (changelog, `BUILD_NOTES` §7.10, `AGENTS.md`).
+
+### Còn mở (về chủ dự án; chặn việc 1, 2, 4)
+
+- **Gói việc 1, 2, 4** (`a2-package-v2.patch`): đạt mọi cổng §12 trên 20 seed và sửa Đêm 1 cho bot gõ nhanh, nhưng dải chặt trượt ở Chậm chắc đúng một ván (88,75 %) và B1, B4 theo bộ trượt. Chủ dự án chọn: (a) chấm dải chặt trên 160 seed (hai bộ hiện có cộng seed 81–160) hoặc nới trần 88 % để sai số 80 ván không quyết; (b) hay giữ luật cũ và nhận 5a, 5b trượt.
+- **Gặt ban Đêm không lời gọi** là mở rộng luật gỗ của chủ dự án ("Đêm là lúc của tháp") sang nông dân: cần chủ dự án đồng ý trước khi vào luật; nó cũng làm Đêm 3 nhàn hơn (Nhàn I 20 → 31–35 % ở Chuẩn, Ẩu) và 5c sát sàn (15,5 %).
+- **Gỗ thừa, vàng thiếu (dòng 18)**: số Ngày không dời 5b; muốn mỗi từ Chặt đáng hơn thì giá bán gỗ (`woodGold` 4 → 6) hay phần gỗ của giá nhà (`woodShare` 0,3 → 0,4) là núm, chưa đo cân bằng đủ.
+- Cổng 5a (8,48 s), 5b (29,5 %) trên 20 seed vẫn trượt.
+- Biên cổng 4 trong gói còn 1 mạng ở seed xấu nhất.
