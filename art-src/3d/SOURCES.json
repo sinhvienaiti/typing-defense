@@ -20,6 +20,12 @@
    "image": "art-src/animals/trau.png",
    "usedBy": []
   },
+  "bosses/dai-bang-tinh.glb": {
+   "md5": "e58368ca43239f909a9f011da022c250",
+   "bytes": 4191472,
+   "image": "art-src/bosses/dai-bang-tinh.png",
+   "usedBy": []
+  },
   "bosses/moc-tinh.glb": {
    "md5": "c991772e8358877d296e45b156217eb8",
    "bytes": 4541332,
@@ -28,6 +34,114 @@
    "downloadedAs": [
     "tree+creature+3d+model (1).glb"
    ]
+  },
+  "branches/archer-en-bao.glb": {
+   "md5": "734ead8c0a5f127b886425562b6437cf",
+   "bytes": 3492672,
+   "image": "art-src/branches/archer-en-bao.png",
+   "usedBy": []
+  },
+  "branches/archer-than-tien.glb": {
+   "md5": "99661150e2014d362bf5dfa11caec633",
+   "bytes": 3526188,
+   "image": "art-src/branches/archer-than-tien.png",
+   "usedBy": []
+  },
+  "branches/barracks-giao-dai.glb": {
+   "md5": "6e47134434db80727d274fd78b016d0d",
+   "bytes": 3088412,
+   "image": "art-src/branches/barracks-giao-dai.png",
+   "usedBy": []
+  },
+  "branches/barracks-khien-dong.glb": {
+   "md5": "753b15d89238033d469d84261d4794e7",
+   "bytes": 3739160,
+   "image": "art-src/branches/barracks-khien-dong.png",
+   "usedBy": []
+  },
+  "branches/cannon-coi-lon.glb": {
+   "md5": "9f30c15c7b61f4edb17d152564085510",
+   "bytes": 3200312,
+   "image": "art-src/branches/cannon-coi-lon.png",
+   "usedBy": []
+  },
+  "branches/cannon-vac-lua.glb": {
+   "md5": "655e863da1c98565f62e791a37c2f6a9",
+   "bytes": 3151704,
+   "image": "art-src/branches/cannon-vac-lua.png",
+   "usedBy": []
+  },
+  "branches/farm-bac-thang.glb": {
+   "md5": "cc8e35e799129b5d9723e41d93f8bae1",
+   "bytes": 3124876,
+   "image": "art-src/branches/farm-bac-thang.png",
+   "usedBy": []
+  },
+  "branches/farm-chuong-trau.glb": {
+   "md5": "963e09b072d1c0d8f79e46dbe2522a73",
+   "bytes": 3119792,
+   "image": "art-src/branches/farm-chuong-trau.png",
+   "usedBy": []
+  },
+  "branches/gold-mine-ham-sau.glb": {
+   "md5": "96360fdf379ca450ea59b23a39d9887c",
+   "bytes": 3301292,
+   "image": "art-src/branches/gold-mine-ham-sau.png",
+   "usedBy": []
+  },
+  "branches/gold-mine-lo-duc-tien.glb": {
+   "md5": "46a6fb5d861495bcba2ccea770ed945e",
+   "bytes": 3332324,
+   "image": "art-src/branches/gold-mine-lo-duc-tien.png",
+   "usedBy": []
+  },
+  "branches/infirmary-tram-cuu-thuong.glb": {
+   "md5": "ca3785bb404dd0ca103da5988a1969b7",
+   "bytes": 3208944,
+   "image": "art-src/branches/infirmary-tram-cuu-thuong.png",
+   "usedBy": []
+  },
+  "branches/infirmary-vuon-thao-duoc.glb": {
+   "md5": "cf1c4fd946f3099131c40a06129e7dec",
+   "bytes": 3681104,
+   "image": "art-src/branches/infirmary-vuon-thao-duoc.png",
+   "usedBy": []
+  },
+  "branches/lumber-xuong-cua.glb": {
+   "md5": "8b601993cc8123132b710071bc74d29c",
+   "bytes": 3255408,
+   "image": "art-src/branches/lumber-xuong-cua.png",
+   "usedBy": []
+  },
+  "branches/lumber-xuong-rao.glb": {
+   "md5": "1a0f6ef0cb44cc09469a3cf571fc65b4",
+   "bytes": 3150640,
+   "image": "art-src/branches/lumber-xuong-rao.png",
+   "usedBy": []
+  },
+  "branches/scribe-but-loi.glb": {
+   "md5": "cdbf2feb53ae03f3274bac4cbf0af699",
+   "bytes": 4012036,
+   "image": "art-src/branches/scribe-but-loi.png",
+   "usedBy": []
+  },
+  "branches/scribe-muc-bang.glb": {
+   "md5": "5cb3d3f33fda455728d298ce489c2e64",
+   "bytes": 3958844,
+   "image": "art-src/branches/scribe-muc-bang.png",
+   "usedBy": []
+  },
+  "branches/seal-dais-phong-an.glb": {
+   "md5": "96de2e12cc5d1ba7c8f07b5c311a262a",
+   "bytes": 3093960,
+   "image": "art-src/branches/seal-dais-phong-an.png",
+   "usedBy": []
+  },
+  "branches/seal-dais-vang-am.glb": {
+   "md5": "fe2377e291b0233deea23e375c05fa8b",
+   "bytes": 3512768,
+   "image": "art-src/branches/seal-dais-vang-am.png",
+   "usedBy": []
   },
   "buildings/archer.glb": {
    "md5": "9304f2a0466c2acf999da6e8f8254662",
@@ -65,6 +179,18 @@
     "round+wooden+arena+3d+model.glb"
    ]
   },
+  "buildings/farm-ao-ca.glb": {
+   "md5": "2215611d0eb8c1f74bd90399b8ae4b9b",
+   "bytes": 3209056,
+   "image": "art-src/buildings/farm-ao-ca.png",
+   "usedBy": []
+  },
+  "buildings/farm-nuong.glb": {
+   "md5": "3083e6add5de3a7424a7a5d8c237a347",
+   "bytes": 3188024,
+   "image": "art-src/buildings/farm-nuong.png",
+   "usedBy": []
+  },
   "buildings/farm.glb": {
    "md5": "0d001b99d2d5bd642f9859c632a57437",
    "bytes": 3004116,
@@ -83,6 +209,12 @@
     "mine+entrance+3d+model.glb"
    ]
   },
+  "buildings/infirmary.glb": {
+   "md5": "8465861481e7f4993e7c6d504c41de89",
+   "bytes": 3676400,
+   "image": "art-src/buildings/infirmary.png",
+   "usedBy": []
+  },
   "buildings/keep.glb": {
    "md5": "238645401744fc019302f0a37e913186",
    "bytes": 3822380,
@@ -91,6 +223,18 @@
    "downloadedAs": [
     "round+tower+3d+model.glb"
    ]
+  },
+  "buildings/lumber.glb": {
+   "md5": "66477ef54dc105b37fbded7721438573",
+   "bytes": 3276620,
+   "image": "art-src/buildings/lumber.png",
+   "usedBy": []
+  },
+  "buildings/scribe.glb": {
+   "md5": "d69dff697cf20f41606889be35a7f8f1",
+   "bytes": 3668136,
+   "image": "art-src/buildings/scribe.png",
+   "usedBy": []
   },
   "buildings/seal-dais.glb": {
    "md5": "1a74c3880b97fb7d247c66d0756a23b0",
@@ -299,6 +443,12 @@
     "fantasy+feathered+tail+3d+model.glb"
    ]
   },
+  "heroes/draconis.glb": {
+   "md5": "eb9ea56aca97c752443bdc23555ae34c",
+   "bytes": 4507128,
+   "image": "art-src/heroes/draconis.png",
+   "usedBy": []
+  },
   "heroes/lam.glb": {
    "md5": "83ba7c3c06a054d05fc92a3ec31ef008",
    "bytes": 3636228,
@@ -318,6 +468,216 @@
    "md5": "7a65303632b6a77cdf3249d10477cce0",
    "bytes": 2316404,
    "image": "art-src/heroes/tre-slingshot.png",
+   "usedBy": []
+  },
+  "heroes/tre.glb": {
+   "md5": "30f96dec4d390e2faf62d61815b48f1d",
+   "bytes": 3639448,
+   "image": "art-src/heroes/tre.png",
+   "usedBy": []
+  },
+  "kits/archer-kit-l2.glb": {
+   "md5": "6cc3271005aae485e85c3d13f2784c6b",
+   "bytes": 2652564,
+   "image": "art-src/kits/archer-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/archer-kit-l3.glb": {
+   "md5": "c00d5d570e0626f3b42ec5a4b59cbb90",
+   "bytes": 2806208,
+   "image": "art-src/kits/archer-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/barracks-kit-l2.glb": {
+   "md5": "55f0019e3265c3391c281c1e6cb9241e",
+   "bytes": 3140092,
+   "image": "art-src/kits/barracks-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/barracks-kit-l3.glb": {
+   "md5": "6552c26f58afaaee33c6cffe98d9bf84",
+   "bytes": 2783228,
+   "image": "art-src/kits/barracks-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/cannon-barrel-l3.glb": {
+   "md5": "a3bf43ec06cb7574d25fa0ab79e306ae",
+   "bytes": 2464612,
+   "image": "art-src/kits/cannon-barrel-l3.png",
+   "usedBy": []
+  },
+  "kits/cannon-kit-l2.glb": {
+   "md5": "29ab9206cd352a51bd817b07801ed397",
+   "bytes": 2617532,
+   "image": "art-src/kits/cannon-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/cannon-kit-l3.glb": {
+   "md5": "f536af6b24d78b7e9da065496cb845d9",
+   "bytes": 2919628,
+   "image": "art-src/kits/cannon-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/farm-kit-l2.glb": {
+   "md5": "b7a272e60c38dd706d4920750d20e230",
+   "bytes": 2885136,
+   "image": "art-src/kits/farm-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/farm-kit-l3.glb": {
+   "md5": "bc193c9be6e3426fbe42c3732eabb8e7",
+   "bytes": 2706132,
+   "image": "art-src/kits/farm-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/gold-mine-kit-l2.glb": {
+   "md5": "9560f7f122228d2e5aba9da75fdc37c8",
+   "bytes": 2965552,
+   "image": "art-src/kits/gold-mine-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/gold-mine-kit-l3.glb": {
+   "md5": "d973178be6c4cb819ad7ada05689af9b",
+   "bytes": 2819268,
+   "image": "art-src/kits/gold-mine-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/infirmary-kit-l2.glb": {
+   "md5": "8875c8f402fc014a656051716a55d92a",
+   "bytes": 2787948,
+   "image": "art-src/kits/infirmary-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/infirmary-kit-l3.glb": {
+   "md5": "63ddc9df037a7673d30c88ca263a5a03",
+   "bytes": 2689832,
+   "image": "art-src/kits/infirmary-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/keep-kit-l2.glb": {
+   "md5": "8f7acd1d355a7a14ccb5ea2811224ecb",
+   "bytes": 3304032,
+   "image": "art-src/kits/keep-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/keep-kit-l3.glb": {
+   "md5": "e640f9e1369456eb32f18411b3785691",
+   "bytes": 2712212,
+   "image": "art-src/kits/keep-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/keep-kit-l4.glb": {
+   "md5": "631b0f4f243b6b861afb2585c023a948",
+   "bytes": 2620288,
+   "image": "art-src/kits/keep-kit-l4.png",
+   "usedBy": []
+  },
+  "kits/lumber-kit-l2.glb": {
+   "md5": "31789d597ddc4b1be100efdf4feecc7f",
+   "bytes": 2699336,
+   "image": "art-src/kits/lumber-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/lumber-kit-l3.glb": {
+   "md5": "2854cc90af1b54b5f2e357a5b676ba68",
+   "bytes": 2881120,
+   "image": "art-src/kits/lumber-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/scribe-kit-l2.glb": {
+   "md5": "da3b84cbbabac7d9207aa61a2d9e50ee",
+   "bytes": 2405252,
+   "image": "art-src/kits/scribe-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/scribe-kit-l3.glb": {
+   "md5": "3397b6015de18dfc41cc21ad5c568135",
+   "bytes": 3136100,
+   "image": "art-src/kits/scribe-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/seal-dais-kit-l2.glb": {
+   "md5": "e107497a9442c8dd61ee8bb81375bb50",
+   "bytes": 2664760,
+   "image": "art-src/kits/seal-dais-kit-l2.png",
+   "usedBy": []
+  },
+  "kits/seal-dais-kit-l3.glb": {
+   "md5": "ca9f92469ed2e04d0c9a36b2188e392a",
+   "bytes": 2497592,
+   "image": "art-src/kits/seal-dais-kit-l3.png",
+   "usedBy": []
+  },
+  "landmarks/cau-do.glb": {
+   "md5": "b1b8f6482305060d921211e7a05a3deb",
+   "bytes": 2833224,
+   "image": "art-src/landmarks/cau-do.png",
+   "usedBy": []
+  },
+  "landmarks/cau-go.glb": {
+   "md5": "f182b2f4e19df25ea687ddda0a73321d",
+   "bytes": 2648872,
+   "image": "art-src/landmarks/cau-go.png",
+   "usedBy": []
+  },
+  "landmarks/cau-tau.glb": {
+   "md5": "4fea366b471c3b5f697e75d2e3fd8010",
+   "bytes": 3496248,
+   "image": "art-src/landmarks/cau-tau.png",
+   "usedBy": []
+  },
+  "landmarks/choi-canh-doi.glb": {
+   "md5": "17451fbc27781701067d7a0ad75ba7b6",
+   "bytes": 3518396,
+   "image": "art-src/landmarks/choi-canh-doi.png",
+   "usedBy": []
+  },
+  "landmarks/da-ke.glb": {
+   "md5": "2fafdecefe87211481bc12c561721133",
+   "bytes": 2155252,
+   "image": "art-src/landmarks/da-ke.png",
+   "usedBy": []
+  },
+  "landmarks/goc-da-rong.glb": {
+   "md5": "cc8b7cc2e04209e552b2d8ba2fb99c87",
+   "bytes": 2727300,
+   "image": "art-src/landmarks/goc-da-rong.png",
+   "usedBy": []
+  },
+  "landmarks/hai-dang.glb": {
+   "md5": "35aba1622a24d941ef0ef9b7067fcde7",
+   "bytes": 2650812,
+   "image": "art-src/landmarks/hai-dang.png",
+   "usedBy": []
+  },
+  "landmarks/nha-rai-da.glb": {
+   "md5": "8f86c0655bafd36007c65d87e771de46",
+   "bytes": 3110324,
+   "image": "art-src/landmarks/nha-rai-da.png",
+   "usedBy": []
+  },
+  "landmarks/re-vom.glb": {
+   "md5": "c1447e1b31327aa7f0d6309f1b44110a",
+   "bytes": 3216044,
+   "image": "art-src/landmarks/re-vom.png",
+   "usedBy": []
+  },
+  "landmarks/thac-ho-sut.glb": {
+   "md5": "20a8de0314921160bff4514918b68036",
+   "bytes": 3560036,
+   "image": "art-src/landmarks/thac-ho-sut.png",
+   "usedBy": []
+  },
+  "landmarks/them-da-trang.glb": {
+   "md5": "c33b7edeb7b9d4c171b9756275b18ddb",
+   "bytes": 2664600,
+   "image": "art-src/landmarks/them-da-trang.png",
+   "usedBy": []
+  },
+  "landmarks/vach-thac-bac.glb": {
+   "md5": "33042e9e298d92528fc11e7617cce375",
+   "bytes": 2825616,
+   "image": "art-src/landmarks/vach-thac-bac.png",
    "usedBy": []
   },
   "loot/bag-basket.glb": {
@@ -356,6 +716,12 @@
     "spear+3d+model (1).glb"
    ]
   },
+  "projectiles/fire-feather.glb": {
+   "md5": "ce4bc175e5fa026426ba8c3ccccae5cf",
+   "bytes": 1984776,
+   "image": "art-src/projectiles/fire-feather.png",
+   "usedBy": []
+  },
   "projectiles/keep-bolt.glb": {
    "md5": "de73704e2d460d8049724695b3152edf",
    "bytes": 2338952,
@@ -364,6 +730,24 @@
    "downloadedAs": [
     "wooden+spear+3d+model.glb"
    ]
+  },
+  "projectiles/meteor.glb": {
+   "md5": "b138686fb045b2a1d04cd1ebb926c4af",
+   "bytes": 2083472,
+   "image": "art-src/projectiles/meteor.png",
+   "usedBy": []
+  },
+  "projectiles/pebble.glb": {
+   "md5": "911593b747896489c62e7e985f9f1c23",
+   "bytes": 1654976,
+   "image": "art-src/projectiles/pebble.png",
+   "usedBy": []
+  },
+  "projectiles/quill.glb": {
+   "md5": "7d60150e4e855d4dbfac6596eb2c1f82",
+   "bytes": 1835148,
+   "image": "art-src/projectiles/quill.png",
+   "usedBy": []
   },
   "projectiles/root-burst.glb": {
    "md5": "9d7025b95dd5cb17ce76bfd536897118",
@@ -374,6 +758,12 @@
     "rocky+twisted+roots+3d+model.glb"
    ]
   },
+  "projectiles/seed-drop.glb": {
+   "md5": "01e289006311f51761511264b257cb43",
+   "bytes": 1689496,
+   "image": "art-src/projectiles/seed-drop.png",
+   "usedBy": []
+  },
   "projectiles/shell.glb": {
    "md5": "eb655bba73459d0bff0add49156b1f86",
    "bytes": 2844692,
@@ -382,6 +772,18 @@
    "downloadedAs": [
     "ornate+bomb+3d+model.glb"
    ]
+  },
+  "props/cau-tre.glb": {
+   "md5": "336d8c475f6a74adba9aa73148e29ac2",
+   "bytes": 3302376,
+   "image": "art-src/props/cau-tre.png",
+   "usedBy": []
+  },
+  "props/go-lan.glb": {
+   "md5": "a6826e9df6ae30dc5d399411f5383e0d",
+   "bytes": 3017604,
+   "image": "art-src/props/go-lan.png",
+   "usedBy": []
   },
   "props/gold-mine-cart.glb": {
    "md5": "8225bca448c6f5a57802a3682b0dc7cb",
@@ -433,6 +835,48 @@
    "downloadedAs": [
     "wooden+post+3d+model.glb"
    ]
+  },
+  "props/rao-tre.glb": {
+   "md5": "b9751f0e69c8396161220fcb8c2b67d6",
+   "bytes": 3078720,
+   "image": "art-src/props/rao-tre.png",
+   "usedBy": []
+  },
+  "props/scaffold-bamboo.glb": {
+   "md5": "e5696de954d1844fa115ad0cc96dcb01",
+   "bytes": 3358460,
+   "image": "art-src/props/scaffold-bamboo.png",
+   "usedBy": []
+  },
+  "ruins/ruin-l.glb": {
+   "md5": "91be19e0d002394e3e24af1656d670a2",
+   "bytes": 3644128,
+   "image": "art-src/ruins/ruin-l.png",
+   "usedBy": []
+  },
+  "ruins/ruin-m.glb": {
+   "md5": "6a1d8532e929f622adae850cabb5128c",
+   "bytes": 3294208,
+   "image": "art-src/ruins/ruin-m.png",
+   "usedBy": []
+  },
+  "ruins/ruin-s.glb": {
+   "md5": "b1ba4adbb8bf40fd4bea1c7cedb67c3c",
+   "bytes": 3434688,
+   "image": "art-src/ruins/ruin-s.png",
+   "usedBy": []
+  },
+  "ruins/ruin-xl.glb": {
+   "md5": "5ae903bbaa6fc35be0df2104590b8f3e",
+   "bytes": 4002056,
+   "image": "art-src/ruins/ruin-xl.png",
+   "usedBy": []
+  },
+  "units/linh-giao-dai-spear.glb": {
+   "md5": "71cd358285ac7feb1b7edb961a6ff8b5",
+   "bytes": 1981132,
+   "image": "art-src/units/linh-giao-dai-spear.png",
+   "usedBy": []
   },
   "units/linh-giao-dai.glb": {
    "md5": "652540a6ddbcac5d4ff2124c5614ab34",
@@ -488,6 +932,12 @@
    "image": "art-src/workers/worker-kit-dong-rammer.png",
    "usedBy": []
   },
+  "workers/worker-kit-en-bow.glb": {
+   "md5": "233eea8f90e40f2da82c3ca8431c28ee",
+   "bytes": 2636176,
+   "image": "art-src/workers/worker-kit-en-bow.png",
+   "usedBy": []
+  },
   "workers/worker-kit-en-head.glb": {
    "md5": "17171573bed7106c18a36b065ec8c508",
    "bytes": 2256312,
@@ -506,10 +956,40 @@
    "image": "art-src/workers/worker-kit-gatekeeper-head.png",
    "usedBy": []
   },
+  "workers/worker-kit-lang-basket.glb": {
+   "md5": "7aafa7a4d53cae8c67dd8a07b46fd82a",
+   "bytes": 2298472,
+   "image": "art-src/workers/worker-kit-lang-basket.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-lang-head.glb": {
+   "md5": "caa86d7733fdf1b13bc20adea9ab7bc6",
+   "bytes": 2405552,
+   "image": "art-src/workers/worker-kit-lang-head.png",
+   "usedBy": []
+  },
   "workers/worker-kit-lua-head.glb": {
    "md5": "db3fa30c47212aaea82b19dc5bb84731",
    "bytes": 2299744,
    "image": "art-src/workers/worker-kit-lua-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-lua-shot.glb": {
+   "md5": "8b7847aa582af0d9f9f7a8a64aa7cd58",
+   "bytes": 2383384,
+   "image": "art-src/workers/worker-kit-lua-shot.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-ma-head.glb": {
+   "md5": "a3856e8545c16f439fdf8ee43aff1277",
+   "bytes": 2517328,
+   "image": "art-src/workers/worker-kit-ma-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-ma-seedlings.glb": {
+   "md5": "e4848318ca61b63277f85a2da2230ced",
+   "bytes": 2453552,
+   "image": "art-src/workers/worker-kit-ma-seedlings.png",
    "usedBy": []
   },
   "workers/worker-kit-miner-head.glb": {
@@ -524,10 +1004,22 @@
    "image": "art-src/workers/worker-kit-miner-pickaxe.png",
    "usedBy": []
   },
+  "workers/worker-kit-sam-drumstick.glb": {
+   "md5": "1073ada0ed8daa7e0bd1fb9c941ff799",
+   "bytes": 2345992,
+   "image": "art-src/workers/worker-kit-sam-drumstick.png",
+   "usedBy": []
+  },
   "workers/worker-kit-sam-head.glb": {
    "md5": "622507165466c731d22eb1533c70e8b1",
    "bytes": 2051388,
    "image": "art-src/workers/worker-kit-sam-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-sam-vest.glb": {
+   "md5": "bef584d92286939a830e884f43ead7da",
+   "bytes": 3164304,
+   "image": "art-src/workers/worker-kit-sam-vest.png",
    "usedBy": []
   },
   "workers/worker-kit-scholar-head.glb": {
@@ -547,11 +1039,36 @@
    "bytes": 2523788,
    "image": "art-src/workers/worker-kit-se-quiver.png",
    "usedBy": []
+  },
+  "workers/worker-kit-tieu-axe.glb": {
+   "md5": "86c6f12face786e5c0a0623b1684b07f",
+   "bytes": 2912488,
+   "image": "art-src/workers/worker-kit-tieu-axe.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-tieu-head.glb": {
+   "md5": "78ed669a6358464be21b872dfbca1f22",
+   "bytes": 2218476,
+   "image": "art-src/workers/worker-kit-tieu-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-tro-head.glb": {
+   "md5": "14577b83ace7fc624baf7b6cd03002d8",
+   "bytes": 2366940,
+   "image": "art-src/workers/worker-kit-tro-head.png",
+   "usedBy": []
+  },
+  "workers/worker-kit-tro-scroll.glb": {
+   "md5": "d3ee3384ce05b6086cb65ae507a3e7e4",
+   "bytes": 1973848,
+   "image": "art-src/workers/worker-kit-tro-scroll.png",
+   "usedBy": []
   }
  },
  "notMadeYet": {},
  "noOriginalOnThisMachine": {},
  "history": {
-  "tripo-2026-10-24": "40 Tripo GLBs from ~/Downloads/td-tripo-2d/3D mapped by eye to ids (AudioLab/work/_glb-map/MAPPING.md); 2D sources copied from ~/Downloads/td-tripo-2d. gold-mine-cart has no GLB yet."
+  "tripo-2026-10-24": "40 Tripo GLBs from ~/Downloads/td-tripo-2d/3D mapped by eye to ids (AudioLab/work/_glb-map/MAPPING.md); 2D sources copied from ~/Downloads/td-tripo-2d. gold-mine-cart has no GLB yet.",
+  "tripo-2026-10-28": "Round 2: 86 Tripo GLBs built by the owner from typing-game-handoff-2026-10-25/tripo-upload-dot2, matched 3/3 by three matchers and a judge (docs/games/3D_IMPORT_2026-10-28.md in the parent repo); 85 models placed, the second Cầu tàu copy kept as tripo-spares/cau-tau.alt.glb; cannon-kit-l2 was missing and came in later the same day (owner re-downloaded it, 3,701 tris, 8.5 provisional), so all 86 models of round 2 have a GLB."
  }
 }
