@@ -31,7 +31,7 @@ describe("the status panel", () => {
   it("shows gold, wood, food, seeds and lives, then the day's clock or the night's enemies left", () => {
     const w = world();
     const html = status(w);
-    for (const [label, value] of [["Vàng", "220"], ["Gỗ", "40"], ["Lúa", "0"], ["Hạt", "4"], ["Mạng", "20"]]) expect(html).toContain(`<small>${label}</small><b>${value}</b>`);
+    for (const [label, value] of [["Gold", "220"], ["Wood", "40"], ["Rice", "0"], ["Seeds", "4"], ["Mạng", "20"]]) expect(html).toContain(`<small>${label}</small><b>${value}</b>`);
     expect(html).toContain("<b>Ngày 1 · 1:15</b>");
     run(w, 61);
     expect(status(w)).toContain("<b>Ngày 1 · 1:14</b>"); // 73.98 s left rounds up
@@ -45,7 +45,7 @@ describe("the status panel", () => {
       const w = world();
       run(w, into);
       const html = status(w);
-      const promised = Number(/Gọi đêm sớm · \+(\d+) vàng/.exec(html)?.[1]);
+      const promised = Number(/Gọi đêm sớm · \+(\d+) Gold/.exec(html)?.[1]);
       const called = send(w, { t: "callNight" }).find((event) => event.t === "nightCalled");
       expect(called, "tick " + into).toMatchObject({ day: 1, bonus: promised });
       expect(promised).toBe(Math.ceil((30 * (4500 - into)) / 4500));
@@ -55,10 +55,10 @@ describe("the status panel", () => {
   it("the call button shows the time left and a bar that empties with the day, pulses in the last 10 s, and says Đã dừng when paused (owner, 26/10/2026)", () => {
     const w = world();
     const bar = (html: string) => Number(/<s style="width:(\d+)%">/.exec(html)?.[1]);
-    expect(status(w)).toContain("<b>Gọi đêm sớm · +30 vàng</b>");
+    expect(status(w)).toContain("<b>Gọi đêm sớm · +30 Gold</b>");
     expect([bar(status(w)), /<b>1:15<\/b>/.test(status(w)), status(w).includes("is-last")]).toEqual([100, true, false]);
     run(w, 1800);
-    expect([bar(status(w)), /<b>0:45<\/b>/.test(status(w)), /\+18 vàng/.test(status(w))]).toEqual([60, true, true]);
+    expect([bar(status(w)), /<b>0:45<\/b>/.test(status(w)), /\+18 Gold/.test(status(w))]).toEqual([60, true, true]);
     run(w, 4500 - 1800 - 600);
     expect([/<b>0:10<\/b>/.test(status(w)), status(w).includes('class="td-call is-last"')]).toEqual([true, true]);
     const paused = statusHtml(w, true, true, false, []);
@@ -93,9 +93,9 @@ describe("learning in the HUD (BUILD_1A6 §7)", () => {
 
   it("the status counts knowledge and the review book once there are any", () => {
     const w = world({ deck });
-    expect(status(w)).not.toContain("Tri thức");
+    expect(status(w)).not.toContain("Knowledge");
     review(w, 1, true);
-    expect(status(w)).toContain("Tri thức <b>0</b> · Sổ ôn <b>1</b>");
+    expect(status(w)).toContain("Knowledge <b>0</b> · Sổ ôn <b>1</b>");
   });
 
   it("the strip hides a quiz's word past what is typed, under its meaning; the learn mode adds meaning and IPA; other modes neither", () => {
@@ -124,8 +124,8 @@ describe("cards and buttons (BUILD_1A6 §8–§9)", () => {
       return dockHtml(w, sel);
     };
     const farm = card("farm");
-    for (const text of ["Chín <b>1</b> · Lớn <b>2</b> · Trống <b>1</b>", "Hạt giống <b>", "Mua 4 hạt · 30 vàng", 'class="is-on">Tự mua hạt']) expect(farm).toContain(text);
-    for (const text of ["Dân <b>5/7</b> · Thợ xây <b>3</b> · Lúa <b>0</b>", "Thuê dân · 25 vàng, 5 lúa", "Bán 10 Lúa · +10 vàng"]) expect(card("keep")).toContain(text);
+    for (const text of ["Chín <b>1</b> · Lớn <b>2</b> · Trống <b>1</b>", "Seeds <b>", "Mua 4 Seeds · 30 Gold", 'class="is-on">Tự mua Seeds']) expect(farm).toContain(text);
+    for (const text of ["Villager <b>5/7</b> · Builder <b>3</b> · Rice <b>0</b>", "Thuê Villager · 25 Gold, 5 Rice", "Bán 10 Rice · +10 Gold"]) expect(card("keep")).toContain(text);
     expect(card("archer")).toContain("Lượt mạnh <b>0/5</b>");
   });
 

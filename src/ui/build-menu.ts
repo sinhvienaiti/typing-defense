@@ -18,7 +18,7 @@ import { button, seg } from "./hud";
 import { agentView } from "./team-bar";
 
 const head = (title: string, sub: string): string => `<div class="td-row"><span><b>${title}</b> <small>${sub}</small></span>${button("close", "×", "", ' class="td-x" title="Esc"')}</div>`;
-const price = (gold: number, wood: number): string => `${gold} vàng · ${wood} gỗ`;
+const price = (gold: number, wood: number): string => `${gold} Gold · ${wood} Wood`;
 const opens = (w: World, key: string): string => "Mở ở Ngày " + opensOn(w, key);
 /** A building's "làm gì" line from the teaching table's chunk (none before it is in). */
 export type Does = (w: World, id: string) => string;
@@ -31,9 +31,9 @@ function keepRow(w: World): string {
   const next = B.level[0]! + 1;
   const top = w.sandbox ? levels.length : Math.min(levels.length, w.c.content.stage?.keepMax ?? levels.length);
   if (B.upTo[0]! > 0) return "";
-  if (next > top) return `<p><small>Lũy cao nhất ở bản đồ này</small></p>`;
+  if (next > top) return `<p><small>Fort cao nhất ở bản đồ này</small></p>`;
   const helper = w.c.content.helpers[levels[next - 1]!.slots - 2];
-  const label = locked(w, "keep" + next) ? "Nâng Lũy · " + opens(w, "keep" + next) : "Nâng Lũy · " + price(levels[next - 1]!.gold, levels[next - 1]!.wood);
+  const label = locked(w, "keep" + next) ? "Nâng Fort · " + opens(w, "keep" + next) : "Nâng Fort · " + price(levels[next - 1]!.gold, levels[next - 1]!.wood);
   return `<div class="td-row">${button("upgrade", label, "", locked(w, "keep" + next) ? " disabled" : "")}</div>` + (helper === undefined ? "" : `<p><small>Mở: ${helper.view.name}</small></p>`);
 }
 
@@ -49,15 +49,15 @@ function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
   const spec = w.c.buildings[B.def[b]!]!;
   const level = B.level[b]!;
   const undoLeft = Math.ceil(ECONOMY.undoWindowS - (w.tick - B.builtTick[b]!) / TICK_HZ);
-  const site = B.upTo[b]! > 0 ? `<p>Đang xây ${Math.floor(B.progress[b]! * 100)} %${B.builder[b]! < 0 ? " · chờ thợ" : ""}</p>` : "";
+  const site = B.upTo[b]! > 0 ? `<p>Đang xây ${Math.floor(B.progress[b]! * 100)} %${B.builder[b]! < 0 ? " · chờ Builder" : ""}</p>` : "";
   const up = b > 0 && B.ready[b] === 1 && B.upTo[b] === 0 && level < spec.gold.length;
   const sold = [Math.floor(B.spentGold[b]! * SELL.refund), Math.floor(B.spentWood[b]! * SELL.refund)];
-  const sell = b > 0 && B.ready[b] === 1 && !sel.undoable() ? button("sell", sel.armed(B.id(b)) ? "Bấm lần nữa: bán" : `Bán · +${sold[0]} vàng, +${sold[1]} gỗ`, "⇧ Del", sel.armed(B.id(b)) ? ' class="is-on"' : "") : "";
+  const sell = b > 0 && B.ready[b] === 1 && !sel.undoable() ? button("sell", sel.armed(B.id(b)) ? "Bấm lần nữa: bán" : `Bán · +${sold[0]} Gold, +${sold[1]} Wood`, "⇧ Del", sel.armed(B.id(b)) ? ' class="is-on"' : "") : "";
   const extra =
-    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Hạt giống <b>${w.seeds}</b> · tự mua ${FARM.seedGold} vàng một hạt</p>` +
-      `<div class="td-row">${button("seeds", "Mua " + FARM.pack.seeds + " hạt · " + FARM.pack.gold + " vàng")}${button("autoSeeds", "Tự mua hạt", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
-    : b === 0 ? `<p>Dân <b>${countNpcs(w, NPC_KIND.villager)}/${villagerCap(w)}</b> · Thợ xây <b>${countNpcs(w, NPC_KIND.builder)}</b> · Lúa <b>${w.food}</b></p>` +
-      `<div class="td-row">${button("hire", "Thuê dân · " + VILLAGERS.gold + " vàng, " + VILLAGERS.food + " lúa", "⇧ \\")}</div><div class="td-row td-stack">${button("sellFood", "Bán " + ECONOMY.sale.food + " Lúa · +" + ECONOMY.sale.gold + " vàng")}${button("sellWood", "Bán " + ECONOMY.sale.wood + " Gỗ · +" + ECONOMY.sale.woodGold + " vàng")}</div>` + keepRow(w)
+    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Seeds <b>${w.seeds}</b> · tự mua ${FARM.seedGold} Gold/Seeds</p>` +
+      `<div class="td-row">${button("seeds", "Mua " + FARM.pack.seeds + " Seeds · " + FARM.pack.gold + " Gold")}${button("autoSeeds", "Tự mua Seeds", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
+    : b === 0 ? `<p>Villager <b>${countNpcs(w, NPC_KIND.villager)}/${villagerCap(w)}</b> · Builder <b>${countNpcs(w, NPC_KIND.builder)}</b> · Rice <b>${w.food}</b></p>` +
+      `<div class="td-row">${button("hire", "Thuê Villager · " + VILLAGERS.gold + " Gold, " + VILLAGERS.food + " Rice", "⇧ \\")}</div><div class="td-row td-stack">${button("sellFood", "Bán " + ECONOMY.sale.food + " Rice · +" + ECONOMY.sale.gold + " Gold")}${button("sellWood", "Bán " + ECONOMY.sale.wood + " Wood · +" + ECONOMY.sale.woodGold + " Gold")}</div>` + keepRow(w)
     : spec.attack !== null && B.ready[b] === 1 ? `<p>Lượt mạnh <b>${B.charges[b]}/${POWER.max}</b> · ban đêm gõ lời gọi Bắn mạnh để nạp</p>`
     : "";
   return (

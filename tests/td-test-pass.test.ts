@@ -17,17 +17,17 @@ import { built, enemyAt, run, send, world } from "./td/fixtures";
 describe("the loss card's hint reads the run", () => {
   it("before the boss: no tower, no word typed, then Bắn mạnh with the Pháo's fire only once Tháp Pháo opens; at the peak, enemies that got in when they took more lives than the boss's blows", () => {
     const w = world({ sandbox: false });
-    expect(lossHint(w)).toContain("Xây Tháp Cung");
+    expect(lossHint(w)).toContain("Xây Archer Tower");
     built(w, "archer", -8, 12);
     expect(lossHint(w)).toContain("Gõ chữ trên thẻ tháp");
     w.stats[STAT.callWords] = 12;
     expect(lossHint(w)).toMatch(/Bắn mạnh.*xây thêm tháp/); // day 1: Tháp Pháo is still shut
     w.day = 3;
-    expect(lossHint(w)).toContain("Phát Chữ của Tháp Pháo");
+    expect(lossHint(w)).toContain("Word Shot của Cannon Tower");
     w.boss.stage = BOSS.fight;
     w.stats[STAT.livesBoss] = 12;
-    expect(lossHint(w, 3)).toContain("Quái lọt vào Lũy"); // 9 lives to leaks against 3 to its blows
-    expect(lossHint(w, 9)).not.toContain("Quái lọt vào Lũy");
+    expect(lossHint(w, 3)).toContain("Quái lọt vào Fort"); // 9 lives to leaks against 3 to its blows
+    expect(lossHint(w, 9)).not.toContain("Quái lọt vào Fort");
   });
 });
 

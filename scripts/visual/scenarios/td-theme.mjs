@@ -183,7 +183,7 @@ export default async function (page) {
   await page.sleep(800);
   const results = await page.eval(`(() => { const s = document.querySelector(".td-sheet.is-results"); return s && !s.hidden ? s.textContent : null; })()`);
   await shot("results");
-  shown.results = lost === true && results !== null && /Lũy/.test(results);
+  shown.results = lost === true && results !== null && /Fort/.test(results);
 
   const checks = { ready, ...Object.fromEntries(Object.entries(shown).map(([name, value]) => [name, value === true])), ...consoleChecks(page) };
   return finish(page, checks, { title, face: face && { checked: face.checked, fallback: face.fallback }, musicBefore, musicAfter, stored, pauseCard, results, shots });

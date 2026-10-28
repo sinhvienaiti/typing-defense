@@ -127,7 +127,7 @@ export default async function (page) {
     // Review R1: Dồn lửa lights whether a help ring holds it or not, round(E / 20) words (E 35: 2); the countdown on the bar.
     burstLitWithWords: burstMax >= 1 && burstWords === 2,
     vulnerableCountdownOnBar: /Dễ Tổn Thương \d s/.test(countdown),
-    chestOnTheCard: sheet !== null && sheet.text.includes("Rương") && sheet.text.includes("+150 vàng"),
+    chestOnTheCard: sheet !== null && sheet.text.includes("Chest") && sheet.text.includes("+150 Gold"),
     sprouts: strikes.some((e) => e.move === "summon" && e.hit),
     won: end.phase === "victory" && sheet !== null && sheet.stars >= 1,
     cardsClean: cardsClean(cards),
