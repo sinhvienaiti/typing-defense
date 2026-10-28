@@ -2,7 +2,7 @@
   "schema": 1,
   "kit": "@typing-game/game-kit",
   "kitVersion": "0.1.0",
-  "parentCommit": "623b1cdd3c8e425ed5bda78fe7e187d0d90aa473",
+  "parentCommit": "9c88d7e6d0b70dc6f4761ca840a73bfa83265f36",
   "parentDirty": false,
   "pinned": null,
   "modules": [
@@ -11,7 +11,8 @@
     "vocab",
     "learning",
     "tools",
-    "balance"
+    "balance",
+    "three"
   ],
   "files": {
     "README.md": "94882f021f43e84a332911e43b07fa0e8ed7a7706cf36b82d3e1506ff9eaff0f",
@@ -36,6 +37,16 @@
     "platform/index.ts": "e814e71ee98f9c080a9948956177ea4cf2e8d07221db78aa4cb2f6ea305a423d",
     "platform/rng.ts": "56a7f59c91c6d92e5fbc4173e523c78018a6f467e4de5ae9a7292ecf5afeb054",
     "platform/safe-storage.ts": "06d6f59c3e6eec2d48697fbece81c23803dbc69f126402206dffb58b372ddc3b",
+    "three/guide-scene.ts": "77a539294bd3e5ff9f917a39c90928f6f1d8b9c89e1904d7a1e4a64b4eb1acaa",
+    "three/hero.ts": "a4551f46882299bddf719b1d3db52a2034133298ad13e2c52920519103a2ad80",
+    "three/index.ts": "96e4fcc795d5952f0f5f81b13d12851bc690b30aa932ce6257c4f7e8162211cb",
+    "three/materials.ts": "50d17ccd0b09da1ebc4a408e8279526a657414539e423e380522e3272ac2bee5",
+    "three/model-contracts.ts": "2a8ce19dd625cc32375262b02111fbd15a2df03326a571066f359beceff965d5",
+    "three/model-loader.ts": "a4423cd4a69c0103b4caa0875fe6ff4ef08b09472f1647511986cb3e141db1eb",
+    "three/particles.ts": "a64acbbd76dc1bbdd42d842914c4798dc5eed10c38b3329d34424b3b1be1be57",
+    "three/stage.ts": "1703ed6d6a0e53b21cac0ddb997e8e45442b03f838af17a09a9592e9574097f2",
+    "three/textures.ts": "46448456beaf6f4d1a6f63685253fa8f8242c7adaaed152f5762a61d4714af21",
+    "three/util.ts": "a52b455ac4cb6e48670e558a30b7fb7d6bb0e34ddaaa0c586958f4a6c1b21ad5",
     "tools/cdp-run.mjs": "c4e7dc178e6677c17e6ac0d4e6d4c8d346f5b0c72b3ec6dd2eaa6ff9e42598d0",
     "tools/index.ts": "40084681fa63aa22baacc1e38f6476b51d6a5b20ba99f18980ad7c95b8249f3d",
     "tools/vite-shared-plugin.ts": "3939cb711114aa24c8c38ae98c74fa6f21c07e3c0f87b2af09fdc9eca6957a68",
