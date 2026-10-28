@@ -32,7 +32,7 @@ describe("the story's mode (§14)", () => {
     for (let k = 0; k < 5; k += 1) seen.push((mode = stepMode(mode, 1)));
     expect(seen).toEqual(["relax", "balanced", "challenge", "learn", null]);
     expect(stepMode(null, -1)).toBe("learn");
-    expect(MODE_CHOICES.map(modeName)).toEqual(["Theo hồ sơ", "Thư giãn", "Cân bằng", "Thử thách", "Học"]);
+    expect(MODE_CHOICES.map(modeName)).toEqual(["By profile", "Relaxed", "Balanced", "Challenge", "Learn"]);
   });
 });
 
@@ -56,7 +56,7 @@ describe("the best stars (§4.3, td.campaign)", () => {
     expect(bestHtml(0)).toBe("");
     expect(bestHtml(2)).toContain("★★☆");
     expect(recordLine(0, false)).toBe("");
-    expect(recordLine(2, false)).toBe('<p class="td-best">Kỷ lục <b>★★</b></p>');
-    expect(recordLine(3, true)).toContain("Kỷ lục mới");
+    expect(recordLine(2, false)).toBe('<p class="td-best">Best <b>★★</b></p>');
+    expect(recordLine(3, true)).toContain("New best");
   });
 });

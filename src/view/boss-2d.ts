@@ -292,7 +292,7 @@ export class BossView {
       ctx.beginPath();
       ctx.arc(x, z, r, Math.PI * (0.5 - t), Math.PI * (0.5 + t));
       ctx.stroke();
-      pen.text("−" + spec[blow].lives + " mạng", x, z + r + 2, 16, C.warn, 900, C.warn);
+      pen.text("−" + spec[blow].lives + (spec[blow].lives === 1 ? " life" : " lives"), x, z + r + 2, 16, C.warn, 900, C.warn);
     }
     if (e >= 0 && S.summonEnd >= 0) {
       const t = span(w.tick, S.summonEnd - Math.round(spec.summon.warnS * TICK_HZ), S.summonEnd);
@@ -387,7 +387,7 @@ export class BossView {
       ctx.beginPath();
       ctx.ellipse(x + 1, z - r * 0.6, 0.45 * f, 0.9 * f, 0, 0, Math.PI * 2);
       ctx.fill();
-      pen.text("Cháy ×1,25", x, z + r + 1.6, 12, "#c23b22", 800, "#c23b22"); // under it: the hits' numbers rise over it (test pass 27/10)
+      pen.text("Burn ×1.25", x, z + r + 1.6, 12, "#c23b22", 800, "#c23b22"); // under it: the hits' numbers rise over it (test pass 27/10)
     }
     // The stagger: stars going round over it, and the vulnerable ring counting down.
     if (w.tick < S.staggerUntil) {
@@ -423,7 +423,7 @@ export class BossView {
       if (B.used[b] === 0 || left <= 0) continue;
       const r = w.c.buildings[B.def[b]!]!.radius;
       this.circle(pen, B.x[b]!, B.z[b]!, r + 0.5, "rgba(120, 120, 120, 0.9)", 3);
-      pen.text("Tê " + Math.ceil(left) + " s", B.x[b]!, B.z[b]! + r + 1.6, 15, "#4a4a4a", 900, "#7a7a7a");
+      pen.text("Stun " + Math.ceil(left) + " s", B.x[b]!, B.z[b]! + r + 1.6, 15, "#4a4a4a", 900, "#7a7a7a");
     }
   }
 }

@@ -8,13 +8,13 @@
 import { MODE_CHOICES, saveSettings, SETTING_ROWS, type Settings } from "../app/prefs";
 import type { Mode } from "../content/types";
 
-export const PACE_LABEL = "Nhịp tự điều theo cách bạn gõ";
+export const PACE_LABEL = "Pace adapts to your typing";
 const PACE_ROW = SETTING_ROWS.length;
 const MODE_ROW = PACE_ROW + 1;
 const ROWS = MODE_ROW + 1;
-const MODE_NAMES: Readonly<Record<Mode, string>> = { relax: "Thư giãn", balanced: "Cân bằng", challenge: "Thử thách", learn: "Học" };
+const MODE_NAMES: Readonly<Record<Mode, string>> = { relax: "Relaxed", balanced: "Balanced", challenge: "Challenge", learn: "Learn" };
 /** The mode row's value: the mode's name, or "Theo hồ sơ" (a child plays Thư giãn, anyone else Cân bằng). */
-export const modeName = (mode: Mode | null): string => (mode === null ? "Theo hồ sơ" : MODE_NAMES[mode]);
+export const modeName = (mode: Mode | null): string => (mode === null ? "By profile" : MODE_NAMES[mode]);
 /** ← → or a click on the mode row: the next choice, round. */
 export const stepMode = (mode: Mode | null, by: number): Mode | null => MODE_CHOICES[(MODE_CHOICES.indexOf(mode) + by + MODE_CHOICES.length) % MODE_CHOICES.length]!;
 
@@ -93,10 +93,10 @@ export class SettingsCard {
     this.el.innerHTML =
       SETTING_ROWS.map(([key, label], k) =>
         `<div class="td-set-row${k === this.row ? " is-focus" : ""}" data-key="${key}"><span>${label}</span><i class="td-set-bar"><i style="width:${this.settings[key]}%"></i></i><b>${this.settings[key]}</b></div>`).join("") +
-      `<div class="td-set-row td-set-pace${this.row === PACE_ROW ? " is-focus" : ""}" data-key="pace"><span>${PACE_LABEL}<small>Áp dụng khi bắt đầu ván</small></span>` +
-      `<b class="td-set-switch${this.settings.pace ? " is-on" : ""}">${this.settings.pace ? "Bật" : "Tắt"}</b></div>` +
-      `<div class="td-set-row td-set-pace${this.row === MODE_ROW ? " is-focus" : ""}" data-key="mode"><span>Chế độ (truyện)<small>Áp dụng khi bắt đầu ván</small></span>` +
+      `<div class="td-set-row td-set-pace${this.row === PACE_ROW ? " is-focus" : ""}" data-key="pace"><span>${PACE_LABEL}<small>Applies to new runs</small></span>` +
+      `<b class="td-set-switch${this.settings.pace ? " is-on" : ""}">${this.settings.pace ? "On" : "Off"}</b></div>` +
+      `<div class="td-set-row td-set-pace${this.row === MODE_ROW ? " is-focus" : ""}" data-key="mode"><span>Story mode<small>Applies to new runs</small></span>` +
       `<b class="td-set-switch td-set-mode is-on">‹ ${modeName(this.settings.mode)} ›</b></div>` +
-      `<p class="td-set-hint">↑ ↓ chọn · ← → chỉnh · Enter xong</p><button class="vd-seal" type="button">Xong <kbd>Esc</kbd></button>`;
+      `<p class="td-set-hint">↑ ↓ select · ← → adjust · Enter done</p><button class="vd-seal" type="button">Done <kbd>Esc</kbd></button>`;
   }
 }

@@ -163,9 +163,9 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-card.is-quiz { border-left-color: var(--fam); border-right-color: var(--fam); }
 .td-card.is-quiz .m { color: #1f5bb5; font-weight: 800; }
 .td-card.is-mean { background: var(--vd-jade-wash); border-color: var(--vd-jade); box-shadow: 0 2px 0 var(--vd-jade); }
-/* R3 (BUILD_1B §11.2): a Từ Ôn, jade all round with its "Ôn" tag; the stamp of a redeemed one. */
+/* R3 (BUILD_1B §11.2): a review word, jade all round with its "Review" tag; the stamp of a redeemed one. */
 .td-card.is-review { border-color: var(--vd-jade); background: linear-gradient(180deg, #f4fffb, var(--vd-jade-wash)); }
-.td-card.is-review::after { content: "Ôn"; position: absolute; top: -11px; left: -9px; padding: 0 6px; border: 1.5px solid var(--vd-ink); border-radius: 999px; background: var(--vd-jade); color: #fff; font: 800 13px/1.35 var(--vd-title); }
+.td-card.is-review::after { content: "Review"; position: absolute; top: -11px; left: -9px; padding: 0 6px; border: 1.5px solid var(--vd-ink); border-radius: 999px; background: var(--vd-jade); color: #fff; font: 800 13px/1.35 var(--vd-title); }
 .td-stamp.is-redeem { color: var(--vd-jade-ink); }
 .td-card.is-mean::before { content: none; }
 .td-card-dot { position: absolute; top: -4px; right: -4px; width: 8px; height: 8px; border: 1.5px solid var(--vd-ink); border-radius: 50%; background: var(--agent); }

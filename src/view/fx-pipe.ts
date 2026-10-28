@@ -137,7 +137,7 @@ export class FxView {
         pen.ctx.beginPath();
         pen.ctx.arc(m.x, m.z, pin ? 6 - 5 * ease(age) : 4 + 2 * ease(age), 0, Math.PI * 2);
         pen.ctx.stroke();
-        pen.text(pin ? "Đứng sững!" : "Vỡ vòm!", m.x, m.z + 2.4 + age, 16, pin ? "#2f4f6f" : "#2b2118", 900); // under it: its card hangs above
+        pen.text(pin ? "Pinned!" : "Shield broken!", m.x, m.z + 2.4 + age, 16, pin ? "#2f4f6f" : "#2b2118", 900); // under it: its card hangs above
       } else {
         if (m.kind === 4 && age < 0.45) pen.text("✦", m.x, m.z, 40 * (1 - age), "rgba(127, 245, 224, " + (1 - age / 0.45).toFixed(2) + ")", 900);
         const n = m.text.length;
@@ -184,7 +184,7 @@ export class FxView {
     ctx.ellipse(cx + 70 * k, cy - 2 * k, 18 * k, 8 * k, 0, 0, Math.PI * 2);
     ctx.fill();
     Object.assign(ctx, { fillStyle: "#2b2118", font: "800 " + Math.round(15 * k) + 'px "Be Vietnam Pro", sans-serif', textAlign: "left", textBaseline: "alphabetic" });
-    ctx.fillText("Tối Thượng!", x + 12 * k, y + h - 10 * k);
+    ctx.fillText("Ultimate!", x + 12 * k, y + h - 10 * k);
     ctx.restore();
   }
 }

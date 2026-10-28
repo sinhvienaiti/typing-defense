@@ -1,17 +1,18 @@
-// Lời Gọi theme (SPLIT_PLAN step D7; TK 22.1, 23, 24): the title screen, its keys and settings, the build menu,
+// Wordwoven theme (SPLIT_PLAN step D7; TK 22.1, 23, 24): the title screen, its keys and settings, the build menu,
 // the pause card and the results card, pictured (td-theme-<name>-<size>.png):
-//   title     the village at dusk, lanterns lit one by one, the name in Baloo 2 and the five entries
+//   title     the painted backdrop (title-dusk.webp), the name in Baloo 2 and the five entries; nothing drawn in code
 //   glyphs    every Vietnamese vowel with every tone, and đ / Đ, in the title face (a sample the run adds)
 //   settings  the settings card (a volume changed by the keys and kept in storage)
-//   continue  the title again from the pause card: "Chơi tiếp" is open and takes the run back
+//   continue  the title again from the pause card: "Resume" is open and takes the run back
 //   day       the preset village by day, a word being typed     build-menu  Insert's build menu
 //   pause     Esc: the pause card                                night       the night, a power call up
 //   results   the Bastion lost: the results card
 // Checks: the title shows (no game step behind it), its name is in Baloo 2 and that face draws every
-// Vietnamese letter itself (no fallback width), arrows move the focus, Enter on Cài đặt opens the settings,
-// arrows change a volume that is stored under td.settings, Esc closes them, Enter on Bắt đầu starts the run;
-// the pause card shows on Esc and Chơi tiếp returns from the title; the results card comes with the defeat;
-// no console error. Without the painted backdrop file the title still paints (its CSS and SVG scene).
+// Vietnamese letter itself (no fallback width), arrows move the focus, Enter on Settings opens the settings,
+// arrows change a volume that is stored under td.settings, Esc closes them, Enter on Start starts the run;
+// the pause card shows on Esc and Resume returns from the title; the results card comes with the defeat;
+// no console error. The painted backdrop must load (`painted: true`): without its file the run fails (the page
+// shows one flat colour and warns; no code-drawn scene stands in, owner 28/10).
 //   OUT_DIR=… node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-theme.mjs --width=1280 --height=720
 import { DEV_URL } from "./common.mjs";
 import { KIND, boot, consoleChecks, finish, key, out, sandbox, send, sizeOf, state, td, typeFor, until } from "./td-1a6-common.mjs";
@@ -38,7 +39,7 @@ const TITLE = `(() => {
   return {
     name: name?.textContent ?? "", nameFont: name ? getComputedStyle(name).fontFamily : "",
     entries: entries.map((e) => ({ id: e.dataset.entry, text: e.textContent, focus: e.classList.contains("is-focus"), off: e.classList.contains("is-off") })),
-    painted: el.classList.contains("has-art"), lit: el.querySelectorAll(".tt-lamp.is-lit").length, lamps: el.querySelectorAll(".tt-lamp").length,
+    painted: el.classList.contains("has-art"), drawn: el.querySelectorAll("svg, .tt-seal, .tt-fly").length,
     settings: !!el.querySelector(".td-settings:not([hidden])"),
   };
 })()`;
@@ -64,7 +65,7 @@ export default async function (page) {
   };
   const shown = {};
 
-  // The title: lanterns light one by one; no step runs behind it.
+  // The title: the painted backdrop under the name and the menu; no step runs behind it.
   await page.send("Page.addScriptToEvaluateOnNewDocument", { source: "try { localStorage.removeItem('td.settings'); } catch {}" });
   await page.goto(base + "/", { settle: 300 });
   await page.eval("document.fonts.ready.then(() => true)");
@@ -72,7 +73,9 @@ export default async function (page) {
   const title = await page.eval(TITLE);
   const tick0 = await page.eval(td("return t.state().tick;"));
   await shot("title");
-  shown.title = title !== null && title.name === "Lời Gọi" && title.entries.length === 5 && title.lit >= 5;
+  shown.title = title !== null && title.name === "Wordwoven" && title.entries.length === 5;
+  // The painted title must be there and nothing code-drawn on it (owner, 28/10).
+  shown.painted = title?.painted === true && title.drawn === 0;
   shown.titleFace = title?.nameFont?.startsWith('"Baloo 2"') === true;
   shown.noStepBehind = tick0 === 0 || tick0 === null ? (await page.eval(td("return t.state().tick;"))) === tick0 : false;
   const face = await page.eval(FACE);
@@ -85,7 +88,7 @@ export default async function (page) {
   await shot("glyphs");
   await page.eval(`document.getElementById("glyphs")?.remove()`);
 
-  // Keys: arrows move the focus; Cài đặt opens; a volume moves and is stored; Esc closes.
+  // Keys: arrows move the focus; Settings opens; a volume moves and is stored; Esc closes.
   const focusOf = async () => (await page.eval(TITLE))?.entries.find((e) => e.focus)?.id ?? null;
   const first = await focusOf();
   await nav(page, "ArrowDown");
@@ -106,7 +109,7 @@ export default async function (page) {
   await nav(page, "Escape", 300);
   shown.settings = opened && musicBefore !== musicAfter && typeof stored?.music === "number" && (await page.eval(TITLE))?.settings === false;
 
-  // Bắt đầu starts the run.
+  // Start starts the run.
   while ((await focusOf()) !== "start" && toSettings++ < 12) await nav(page, "ArrowUp");
   await nav(page, "Enter", 600);
   const started = await page.eval(TITLE);
@@ -115,10 +118,10 @@ export default async function (page) {
   const t2 = await page.eval(td("return t.state().tick;"));
   shown.startRuns = started === null && t2 > t1;
 
-  // Pause card, then the title from it: Chơi tiếp takes the same run back.
+  // Pause card, then the title from it: Resume takes the same run back.
   await nav(page, "Escape", 300);
   const pauseCard = await page.eval(`(() => { const s = document.querySelector(".td-sheet.is-pause"); return s && !s.hidden ? s.textContent : null; })()`);
-  const back = await page.eval(`(() => { const b = [...document.querySelectorAll(".td-sheet.is-pause button")].find((b) => /màn đầu/i.test(b.textContent)); b?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 })); return !!b; })()`);
+  const back = await page.eval(`(() => { const b = [...document.querySelectorAll(".td-sheet.is-pause button")].find((b) => /title screen/i.test(b.textContent)); b?.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true, button: 0 })); return !!b; })()`);
   await page.sleep(600);
   const again = await page.eval(TITLE);
   await shot("continue");
@@ -127,7 +130,7 @@ export default async function (page) {
   while ((await focusOf()) !== "continue" && toSettings++ < 20) await nav(page, "ArrowDown");
   await nav(page, "Enter", 600);
   const resumed = (await page.eval(TITLE)) === null && (await page.eval(td("return t.state().tick;"))) > tickAt && (await page.eval(td("return t.ui().paused;"))) === false;
-  shown.pauseCard = pauseCard !== null && /Tạm dừng/.test(pauseCard);
+  shown.pauseCard = pauseCard !== null && /Paused/.test(pauseCard);
   shown.continueFromTitle = back && cont?.off === false && resumed;
 
   // The game's own pictures, on a fresh sandbox run (the scenarios' URL skips the title).
@@ -151,7 +154,7 @@ export default async function (page) {
   await key(page, "Insert", { pause: 300 });
   const menu = (await page.eval(`document.querySelector(".td-dock")?.textContent ?? ""`)) ?? "";
   await shot("build-menu");
-  shown.buildMenu = /Xây nhà/.test(menu);
+  shown.buildMenu = /Build/.test(menu);
   await key(page, "Escape");
   await nav(page, "Pause", 300);
   await shot("pause");

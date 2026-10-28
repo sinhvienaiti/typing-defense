@@ -73,12 +73,12 @@ export const SLICE_1A: Content = {
           { hp: 130, damage: [8, 12], periodS: 0.9, armorPct: 20 },
         ],
       },
-      view: { name: "Barracks", short: "L", color: MILITARY },
+      view: { name: "Barracks", short: "B", color: MILITARY },
     },
     {
       id: "gold-mine", family: "economy", footprint: "L", placement: "node", costs: [90, 190, 330], hp: [260, 310, 370],
       mine: { levels: [{ amount: 3, everyS: 8, pile: 60 }, { amount: 5, everyS: 8, pile: 90 }, { amount: 7, everyS: 8, pile: 120 }] },
-      view: { name: "Gold Mine", short: "M", color: MINE },
+      view: { name: "Gold Mine", short: "GM", color: MINE },
     },
     { id: "farm", family: "economy", footprint: "L", placement: "free", costs: [60, 130, 230], hp: [200, 240, 280], farm: true, view: { name: "Rice Field", short: "R", color: FARM } },
   ],
@@ -86,17 +86,17 @@ export const SLICE_1A: Content = {
     {
       id: "cuong-thi", tier: "swarm", hp: 35, armorPct: 0, resistPct: 0, speed: 3.8, altitude: "ground", leak: 1, gold: 4,
       blockWeight: 1, radiusM: 0.6, packSize: 5, melee: { damage: [2, 4], periodS: 1.0 },
-      view: { name: "Hopping Zombie", short: "CT", color: "#5b3a8c" },
+      view: { name: "Hopping Zombie", short: "HZ", color: "#5b3a8c" },
     },
     {
       id: "ma-troi", tier: "small", hp: 60, armorPct: 0, resistPct: 60, speed: 2.6, altitude: "low", leak: 1, gold: 8,
       blockWeight: 1, radiusM: 0.9, packSize: 1, splashTakenMul: 1.5,
-      view: { name: "Ghost Flame", short: "MT", color: "#8a63d2" },
+      view: { name: "Ghost Flame", short: "GF", color: "#8a63d2" },
     },
     {
       id: "thuong-luong", tier: "medium", hp: 420, armorPct: 60, resistPct: 0, speed: 1.9, altitude: "ground", leak: 3, gold: 20,
       blockWeight: 2, radiusM: 1.4, packSize: 6, melee: { damage: [10, 14], periodS: 1.2 },
-      view: { name: "River Serpent", short: "TL", color: "#3e2766" },
+      view: { name: "River Serpent", short: "RS", color: "#3e2766" },
     },
     {
       // BUILD_1B §6.5 round 1 (docs/td/BUILD_NOTES.md §7.1): 3,200 → 3,400 hit points, 0.9 → 0.8 m/s (G3); R1 review: 3,800; R2 (§7.3): 4,200.
@@ -107,7 +107,7 @@ export const SLICE_1A: Content = {
     {
       id: "mam-go", tier: "swarm", hp: 40, armorPct: 0, resistPct: 0, speed: 3.0, altitude: "ground", leak: 1, gold: 1,
       blockWeight: 1, radiusM: 0.5, packSize: 4, melee: { damage: [2, 3], periodS: 1.0 },
-      view: { name: "Sapling", short: "MG", color: "#5f9a3a" },
+      view: { name: "Sapling", short: "S", color: "#5f9a3a" },
     },
     // BUILD_1B §10 (R2; TK 22.6): Tanuki drums (Ngắt breaks it) only within 9 m of a tower's or the Bastion's rim (BUILD_NOTES
     // §7.3: by the rift no ring lit it), Nuppeppō splits in two unless a blast kills it. Melee: starting numbers. R2 review
@@ -116,17 +116,17 @@ export const SLICE_1A: Content = {
       id: "tanuki", tier: "small", hp: 110, armorPct: 0, resistPct: 30, speed: 2.4, altitude: "ground", leak: 1, gold: 12,
       blockWeight: 1, radiusM: 0.8, packSize: 1, melee: { damage: [3, 5], periodS: 1.0 },
       ability: { verb: "interrupt", cooldownS: 12, radiusM: 6, need: 4, reachM: 9, healPct: 25, stunS: 2, gold: 5 },
-      view: { name: "Raccoon Dog", short: "TN", color: "#9a6a3e" },
+      view: { name: "Raccoon Dog", short: "RD", color: "#9a6a3e" },
     },
     {
       id: "nuppeppo", tier: "small", hp: 90, armorPct: 0, resistPct: 0, speed: 2.6, altitude: "ground", leak: 1, gold: 6,
       blockWeight: 1, radiusM: 0.8, packSize: 3, melee: { damage: [2, 4], periodS: 1.0 }, split: { enemy: "nuppeppo-con", count: 2 },
-      view: { name: "Split Blob", short: "NP", color: "#d9a8a0" },
+      view: { name: "Split Blob", short: "SB", color: "#d9a8a0" },
     },
     {
       id: "nuppeppo-con", tier: "swarm", hp: 30, armorPct: 0, resistPct: 0, speed: 4.0, altitude: "ground", leak: 1, gold: 2,
       blockWeight: 1, radiusM: 0.5, packSize: 2, melee: { damage: [1, 3], periodS: 1.0 },
-      view: { name: "Little Blob", short: "np", color: "#e8c3bc" },
+      view: { name: "Little Blob", short: "lb", color: "#e8c3bc" },
     },
     // BUILD_1B §9.2, §10 (R3; sandbox only, never in the story's waves): the Đầu Đàn hurries its pack (+20 % within 6 m;
     // Neo pins it 3 s), the Troll carries a stone dome by the towers (Phá Khiên breaks it). Melee: starting numbers.
@@ -134,7 +134,7 @@ export const SLICE_1A: Content = {
       id: "cuong-thi-lead", tier: "medium", hp: 160, armorPct: 30, resistPct: 0, speed: 3.4, altitude: "ground", leak: 2, gold: 25,
       blockWeight: 1, radiusM: 0.8, packSize: 1, melee: { damage: [4, 6], periodS: 1.0 },
       ability: { verb: "anchor", cooldownS: 15, radiusM: 6, need: 4, reachM: 20, freezeS: 3, takenMul: 1.3, takenS: 6, auraSpeed: 1.2 },
-      view: { name: "Zombie Leader", short: "ĐĐ", color: "#3d2466" },
+      view: { name: "Zombie Leader", short: "ZL", color: "#3d2466" },
     },
     {
       id: "troll", tier: "heavy", hp: 600, armorPct: 30, resistPct: 30, speed: 2.0, altitude: "ground", leak: 3, gold: 30,

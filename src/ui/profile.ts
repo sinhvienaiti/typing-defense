@@ -4,9 +4,19 @@
  * advice line (the kit's skillAdvice), and the pace the next run will take. Until enough has been measured the
  * numbers lean on the mode's defaults, and the card says so. Keyboard first: Enter or Esc closes.
  */
-import { ADVICE_VI, blendSkill, skillAdvice, type SkillProfile } from "../kit/balance";
+import { blendSkill, skillAdvice, type AdviceId, type SkillProfile } from "../kit/balance";
 
-const fixed = (value: number, digits: number): string => value.toFixed(digits).replace(".", ",");
+const ADVICE: Readonly<Record<AdviceId, string>> = {
+  rest: "Your hands are slowing down. Take a short break.",
+  "slow-down": "Ease your pace for fewer errors and more Perfect calls.",
+  accuracy: "Focus on each letter. Speed will follow.",
+  steady: "Keep an even pace across every word.",
+  "new-words": "Read meanings and listen before typing unfamiliar words.",
+  crowd: "When foes crowd in, finish one word before picking another.",
+  "keep-going": "You're improving steadily. Keep it up!",
+};
+
+const fixed = (value: number, digits: number): string => value.toFixed(digits);
 
 export class ProfileCard {
   readonly el: HTMLElement;
@@ -28,15 +38,15 @@ export class ProfileCard {
     const measured = Math.min(view.confidence.e, view.confidence.a);
     const row = (label: string, value: string, note = ""): string => `<dt>${label}</dt><dd>${value}${note === "" ? "" : `<small>${note}</small>`}</dd>`;
     this.el.innerHTML =
-      `<h3>Hồ sơ gõ</h3><dl>` +
-      row("Tốc độ", Math.round(view.e) + " WPM") +
-      row("Độ chính xác", Math.round(view.a * 100) + " %") +
-      row("Nhận từ mới", fixed(view.recognize.new, 1) + " s") +
-      row("Độ đều", Math.round(Math.max(0, 1 - view.cv) * 100) + " %") +
-      row("Nhịp ván tới", k === null ? "Tắt" : "×" + fixed(k, 2), k === null ? "tự điều đang tắt" : k > 1.005 ? "nhanh hơn chuẩn" : k < 0.995 ? "chậm hơn chuẩn" : "chuẩn") +
-      `</dl><p class="td-profile-advice">${profile.trend.stages === 0 ? "Chơi một ngày đêm để game hiểu cách bạn gõ." : ADVICE_VI[skillAdvice(view)]}</p>` + // nothing measured: no praise (test pass 27/10)
-      `<p class="td-profile-note">${measured >= 1 ? "Đã đo " + profile.trend.stages + " ngày đêm." : profile.trend.stages === 0 ? "Chưa đo: số trên là mức mặc định, sẽ đúng dần sau mỗi ngày đêm." : "Đã đo " + profile.trend.stages + " ngày đêm: còn trộn với mức mặc định."}</p>` +
-      `<button class="vd-seal" type="button">Xong <kbd>Esc</kbd></button>`;
+      `<h3>Profile</h3><dl>` +
+      row("Speed", Math.round(view.e) + " WPM") +
+      row("Accuracy", Math.round(view.a * 100) + "%") +
+      row("New-word read", fixed(view.recognize.new, 1) + " s") +
+      row("Steadiness", Math.round(Math.max(0, 1 - view.cv) * 100) + "%") +
+      row("Next pace", k === null ? "Off" : "×" + fixed(k, 2), k === null ? "adaptive off" : k > 1.005 ? "above normal" : k < 0.995 ? "below normal" : "normal") +
+      `</dl><p class="td-profile-advice">${profile.trend.stages === 0 ? "Play a day and night to measure your typing." : ADVICE[skillAdvice(view)]}</p>` + // nothing measured: no praise (test pass 27/10)
+      `<p class="td-profile-note">${measured >= 1 ? "Measured over " + profile.trend.stages + (profile.trend.stages === 1 ? " day and night." : " days and nights.") : profile.trend.stages === 0 ? "No data yet: these are defaults, refined after each day and night." : "Measured over " + profile.trend.stages + (profile.trend.stages === 1 ? " day and night" : " days and nights") + ", still blended with defaults."}</p>` +
+      `<button class="vd-seal" type="button">Done <kbd>Esc</kbd></button>`;
     this.el.hidden = false;
   }
 
