@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1B.V4**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1C.C1**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -47,6 +47,21 @@ Mốc đang làm: **1B.V4**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
 | 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
+| 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) | 200 | 10.800 |
+| 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | — | 650 | 11.450 |
+| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | — | 200 | 11.650 |
+| 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 12.450 |
+| 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
+| 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
+| 1C.C8 Draconis và Mộc Tinh trên sân (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 400 | 13.900 |
+| 1C.C12 đồ bay về HUD, skin HUD (làn L4) (`BUILD_1C_MAP1.md` §3, §8) | — | 250 | 14.150 |
+| 1C.C10 thẻ chữ trên 3D (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 14.500 |
+| 1C.C7 quái, lính, dân, Helper, cây luật (làn L3) (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 15.300 |
+| 1C.C9 cảnh (làn L3) (`BUILD_1C_MAP1.md` §3, §8) | — | 450 | 15.750 |
+| 1C.C11 VFX năm pha (làn L4) (`BUILD_1C_MAP1.md` §3, §8) | — | 550 | 16.300 |
+| 1C.A1 A13 việc đầu có hướng dẫn, nối âm thật (`BUILD_1C_MAP1.md` §3, §8) | — | 50 | 16.350 |
+| 1C.C13 hiệu năng, bậc, mặc định Medium (`BUILD_1C_MAP1.md` §3, §8) | — | 50 | 16.400 |
+| 1C.C14 sửa sau kiểm cổng cuối (`BUILD_1C_MAP1.md` §3, §8) | — | 100 | 16.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 

@@ -246,20 +246,24 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
   /** Lines of the TD code as BUILD_1A6 §0 counts them: the game's TypeScript (src/kit aside), as `wc -l` does. */
   const codeLines = (): number => game.filter((source) => source.path.endsWith(".ts")).reduce((sum, source) => sum + (source.text.match(/\n/g) ?? []).length, 0);
 
-  it("the TD code stays under the hard ceiling of step 1B (BUILD_1B §16)", () => {
-    const ceiling = /Trần cứng 1B: \*\*(\d+)\.(\d{3})\*\*/.exec(readFileSync(join(ROOT, "docs/td/BUILD_1B.md"), "utf8"));
-    expect(ceiling, "BUILD_1B §16 names the hard ceiling").not.toBeNull();
+  /** The milestone being built (BUILD_NOTES §1.2): 1A.n, 1B.Rn, 1B.V4, and from 1C (map 1 in 3D) 1C.Cn. */
+  const milestone = (): string | undefined => /Mốc đang làm: \*\*(1[ABC]\.\w+)\*\*/.exec(readFileSync(join(ROOT, "docs/td/BUILD_NOTES.md"), "utf8"))?.[1];
+
+  it("the TD code stays under the hard ceiling of its step (BUILD_1B §16; from 1C, BUILD_1C_MAP1 §3)", () => {
+    const [step, doc] = milestone()?.startsWith("1C") === true ? ["1C", "docs/td/BUILD_1C_MAP1.md"] : ["1B", "docs/td/BUILD_1B.md"];
+    const ceiling = new RegExp("Trần cứng " + step + ": \\*\\*(\\d+)\\.(\\d{3})\\*\\*").exec(readFileSync(join(ROOT, doc), "utf8"));
+    expect(ceiling, doc + " names the hard ceiling of step " + step).not.toBeNull();
     expect(codeLines()).toBeLessThanOrEqual(Number(ceiling![1]! + ceiling![2]!));
   });
 
   it("the TD code stays inside the running total its milestone may reach (docs/td/BUILD_NOTES.md §1.2)", () => {
     const notes = readFileSync(join(ROOT, "docs/td/BUILD_NOTES.md"), "utf8");
-    const milestone = /Mốc đang làm: \*\*(1[AB]\.\w+)\*\*/.exec(notes)?.[1];
-    expect(milestone, "BUILD_NOTES §1.2 names the milestone being built").toBeDefined();
+    const step = milestone();
+    expect(step, "BUILD_NOTES §1.2 names the milestone being built").toBeDefined();
     // Its row: | 1A.n … | new lines | share | running total |
-    const row = new RegExp("^\\| " + milestone!.replace(".", "\\.") + " [^|]*\\|[^|]*\\|[^|]*\\| (\\d+)\\.(\\d{3}) \\|", "m").exec(notes);
-    expect(row, "BUILD_NOTES §1.2 has a row for " + milestone).not.toBeNull();
-    expect(codeLines(), milestone + " may reach " + row![1] + row![2] + " lines in all").toBeLessThanOrEqual(Number(row![1]! + row![2]!));
+    const row = new RegExp("^\\| " + step!.replace(".", "\\.") + " [^|]*\\|[^|]*\\|[^|]*\\| (\\d+)\\.(\\d{3}) \\|", "m").exec(notes);
+    expect(row, "BUILD_NOTES §1.2 has a row for " + step).not.toBeNull();
+    expect(codeLines(), step + " may reach " + row![1] + row![2] + " lines in all").toBeLessThanOrEqual(Number(row![1]! + row![2]!));
   });
 });
 

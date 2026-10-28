@@ -21,6 +21,10 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/BUILD_1B.md` (1B, written after the split, so its paths are current):
   map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
   ceiling 10,500, balance targets and gates.
+- `docs/td/BUILD_1C_MAP1.md` (C0, approved by the owner 28/10/2026): step 1C for map 1 only (3D on Medium and High, the
+  2D view as the Low tier and the fallback), the 1C line ceiling 16,500, the "/" and 3D chunk budgets, media and frame
+  budgets per tier, the module split under `src/view/3d/` and the order C1 → C2 → C4 → C3 → C6 → C10 → C13 → C14.
+  Built on branch `td-1c` (worktree `games/.wt-td-1c`), merged into `a2-days` step by step after review.
 - `docs/td/R3_PLAN.md`: the plan of 1B R3 "Học và dạy" (work items by file, order with the
   bundle budget first, data shapes, the spec points chosen as proposed, tests, scenarios, the
   balance plan, line budget and cut order) and the pre-R3 baseline on the Apple M4.
