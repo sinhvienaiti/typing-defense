@@ -2,10 +2,8 @@
  * The 2D map's particles (docs/td/BUILD_1B.md §16, §20): one fixed pool of 300 (no allocation a frame), at most 40 new
  * a frame. Kinds: dust that swells, wood chips, root spikes that grow then fade, leaves that fall, coins, embers, stones
  * (inked chunks) and rootlets that whip out from where they start (the boss's rise: R2 review, seen at 1280 × 720).
- * Positions are metres; the pen draws in the map's transform. R2 (§13.3): FxView draws Tối Thượng (Draconis' portrait
- * sliding in from the left, a shadow under each falling feather, the ember pool of its burn) and the direct calls'
- * outcomes (a broken drum bursting into letters, a heal ring spreading 6 m; R3: a pinned pack's ring closing in, a
- * broken dome bursting into stones), from the world and its events.
+ * Positions are metres; the pen draws in the map's transform. FxView (Tối Thượng, the direct calls' outcomes) lives in
+ * fx-pipe.ts, a lazy chunk (ticket 036).
  */
 import type { Pen } from "./boss-2d";
 

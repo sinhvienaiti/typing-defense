@@ -1,3 +1,10 @@
+/**
+ * The 2D view's effects chunk (ticket 036, VFX_STANDARD §5.4 V4a), loaded once the page is usable. FxPipe: shots and
+ * hits read from the combat ring for FxDraw. FxView (R2, BUILD_1B §13.3): Tối Thượng (Draconis' portrait sliding in
+ * from the left, a shadow under each falling feather, the ember pool of its burn) and the direct calls' outcomes (a
+ * broken drum bursting into letters, a heal ring spreading 6 m; R3: a pinned pack's ring closing in, a broken dome
+ * bursting into stones), from the world and its events; it emits into fx-2d.ts's particle pool.
+ */
 import { ULT } from "../content/rules";
 import { FX, type CombatRing, type RareEvent } from "../sim/events";
 import { PROJECTILE } from "../sim/stores/projectiles";

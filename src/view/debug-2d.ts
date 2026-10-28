@@ -764,7 +764,7 @@ export class DebugView {
         continue;
       }
       if (kind === PROJECTILE.feather) {
-        // A fire feather falling slantwise, its flame trail behind it (its shadow: fx-2d.ts).
+        // A fire feather falling slantwise, its flame trail behind it (its shadow: FxView in fx-pipe.ts).
         const back = 1.6 / (Math.hypot(P.tx[p]! - x, P.tz[p]! - z) || 1);
         this.polyline([x - (P.tx[p]! - x) * back, z - (P.tz[p]! - z) * back, x, z], "rgba(242, 99, 34, 0.85)", 0, 5);
         this.disc(x, z, 0.32, "#ffd36b", COLOR.seal, 1.5);
