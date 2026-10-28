@@ -1,11 +1,4 @@
-/**
- * Where word cards go (docs/td/TYPING_DEFENSE_DESIGN.md 23.4), as pure layout. A building's words stack in a column
- * above its roof, newest at the bottom: height is the clock (120 px over the word's life), each card at least 40 px
- * above the one below it, the column at most 240 px. Columns that overlap side by side push each other sideways only
- * (up to 240 px each: four call bubbles over villagers at neighbouring trees, BUILD_1A6 §9) and stay inside the safe
- * area, and off the HUD's side panels when there is room (review R2). Screen pixels throughout, so zoom never changes
- * the spacing.
- */
+/** Pure word-card layout (TK 23.4): clock rise up to 240 px; measured cards, including meanings, keep their full boxes. */
 export const COLUMN = { rise: 120, gap: 40, max: 240, push: 240, clear: 10 } as const;
 
 /** Heights (px above the roof) of a column's cards, newest first: `ages` and `lives` in seconds; `gap` at least 40 px. */
@@ -16,6 +9,15 @@ export function columnHeights(ages: readonly number[], lives: readonly number[],
     out[k] = Math.min(COLUMN.max, k === 0 ? clock : Math.max(clock, out[k - 1]! + gap));
   }
   return out;
+}
+
+/** Measured cards, newest lowest; departing meanings (slot −1) occupy space without lock scaling or a rise cap. */
+export function columnBox(cards: readonly { height: number; half: number; slot: number }[], lock: number): { heights: number[]; tallest: number; half: number } {
+  const gap = Math.max(COLUMN.gap, Math.ceil(1.2 * Math.max(...cards.map((card) => card.height))) + 4);
+  const heights = cards.map((_, k) => k * gap);
+  const tallest = Math.max(...cards.map((card, k) => heights[k]! + card.height * (card.slot >= 0 && card.slot === lock ? 1.2 : 1)));
+  const half = Math.max(...cards.map((card) => (card.slot >= 0 && card.slot === lock ? card.half * 1.2 + 18 : card.half))) + 9;
+  return { heights, tallest, half };
 }
 
 /** A column on screen: its roof's x, its vertical extent (top < bottom), its widest card's half width; `lo`–`hi` where it may stand; `at` where it stood last frame. */
