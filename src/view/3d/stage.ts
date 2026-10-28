@@ -2,11 +2,15 @@
  * The 3D stage of map 1 (1C step C2, docs/td/BUILD_1C_MAP1.md §6, §7): the WebGL renderer on the view's canvas, the
  * scene with its ground, actor and effect layers, the light rig and the post passes of StylePack Sách tranh (TK 23.12:
  * saturation ×1.15, Neutral tone, bloom 0.25 only where measured) per tier. Medium and High draw 3D; Low is the 2D view.
+ * Lit for the owner's epic bar (28/10/2026; docs/games/ART_DIRECTION_2026-10-28.md, Wordwoven): a strong warm key against
+ * a cool sky, a cool fill, a soft rim from behind the default view, soft contact shadows, and on High ambient occlusion
+ * (GTAO): never a flat even light.
  * Adapted from games/dragon-hold@02fe9c7 src/view/stage.ts (createStage, STAGE_QUALITY, GRADE_SHADER, projectToScreen):
  * retuned for the meadow (warm sun from the south-west, cool fill, pale mist), sized by the page, not by an observer.
  */
 import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { GTAOPass } from "three/examples/jsm/postprocessing/GTAOPass.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 import { UnrealBloomPass } from "three/examples/jsm/postprocessing/UnrealBloomPass.js";
@@ -15,9 +19,9 @@ import type { Tier } from "../view";
 
 export type Tier3D = Exclude<Tier, "low">;
 /** What each tier draws: pixel ratio cap, shadow map, FXAA after the grade, a bloom pass built (off until C13 measures it). */
-export const STAGE_TIERS: Readonly<Record<Tier3D, { dpr: number; shadow: number; fxaa: boolean; bloomPass: boolean }>> = {
-  medium: { dpr: 1, shadow: 1024, fxaa: true, bloomPass: false },
-  high: { dpr: 1.25, shadow: 2048, fxaa: true, bloomPass: true },
+export const STAGE_TIERS: Readonly<Record<Tier3D, { dpr: number; shadow: number; fxaa: boolean; bloomPass: boolean; ao: boolean }>> = {
+  medium: { dpr: 1, shadow: 1024, fxaa: true, bloomPass: false, ao: false },
+  high: { dpr: 1.25, shadow: 2048, fxaa: true, bloomPass: true, ao: true },
 };
 /** The sun's direction (towards it): low enough from the south-west that houses cast readable shadows. */
 export const SUN = new THREE.Vector3(-0.45, 0.78, 0.43).normalize();
@@ -30,7 +34,7 @@ const GRADE_SHADER = {
     tDiffuse: { value: null as THREE.Texture | null },
     uExposure: { value: 1.0 },
     uSaturation: { value: 1.15 },
-    uLift: { value: new THREE.Vector3(0.02, 0.02, 0.03) },
+    uLift: { value: new THREE.Vector3(0.012, 0.012, 0.022) },
     uShadowTint: { value: new THREE.Vector3(0.95, 0.97, 1.06) },
     uHighTint: { value: new THREE.Vector3(1.04, 1.02, 0.95) },
     uVignette: { value: 0.18 },
@@ -109,8 +113,8 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
   // TK 23.2's sizes at TK 23.6's default camera (55° at 58 m): a 1.85 m soldier ≈ 28 px, the 8 m Fort ≈ 125 px at 1080p.
   const camera = new THREE.PerspectiveCamera(38, 16 / 9, 1, 900);
 
-  const sky = new THREE.HemisphereLight("#e4eefc", "#7a8a55", 1.35);
-  const key = new THREE.DirectionalLight("#fff0d2", 2.6);
+  const sky = new THREE.HemisphereLight("#c3d4f6", "#4f5a3a", 0.9);
+  const key = new THREE.DirectionalLight("#ffdcae", 3.4);
   key.position.copy(SUN).multiplyScalar(150);
   key.castShadow = true;
   key.shadow.mapSize.set(T.shadow, T.shadow);
@@ -118,13 +122,23 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
   Object.assign(key.shadow.camera, { left: -reach, right: reach, top: reach, bottom: -reach, near: 30, far: 320 });
   key.shadow.bias = -0.0006;
   key.shadow.normalBias = 0.05;
-  const fill = new THREE.DirectionalLight("#a9bdf0", 0.5);
+  key.shadow.radius = 3;
+  const fill = new THREE.DirectionalLight("#8fa8e8", 0.35);
   fill.position.set(60, 50, -70);
+  // A soft rim from behind the default view (north), so houses and figures stand off the ground.
+  const rim = new THREE.DirectionalLight("#e6eeff", 1.1);
+  rim.position.set(-10, 45, -95);
   const layers = { ground: new THREE.Group(), actors: new THREE.Group(), fx: new THREE.Group() };
-  scene.add(sky, key, key.target, fill, layers.ground, layers.actors, layers.fx);
+  scene.add(sky, key, key.target, fill, rim, layers.ground, layers.actors, layers.fx);
 
   const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType }));
   composer.addPass(new RenderPass(scene, camera));
+  const ao = T.ao ? new GTAOPass(scene, camera, 1, 1) : null;
+  if (ao !== null) {
+    ao.blendIntensity = 0.85;
+    ao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.4, thickness: 1.5, scale: 1.0, samples: 12 });
+    composer.addPass(ao);
+  }
   const bloom = T.bloomPass ? new UnrealBloomPass(new THREE.Vector2(256, 256), 0.25, 0.5, 1.6) : null;
   if (bloom !== null) composer.addPass(Object.assign(bloom, { enabled: false }));
   const grade = new ShaderPass(GRADE_SHADER);
@@ -136,7 +150,7 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
   const scratch = new THREE.Vector4();
   const clean = new THREE.Matrix4();
   return {
-    renderer, scene, camera, layers, tier, size, lights: { sky, key, fill },
+    renderer, scene, camera, layers, tier, size, lights: { sky, key, fill, rim },
     resize(width: number, height: number, ratio: number): void {
       [size.width, size.height] = [Math.max(1, width), Math.max(1, height)];
       renderer.setPixelRatio(Math.min(ratio, T.dpr));
@@ -157,6 +171,7 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
     stats: () => ({ drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
     dispose(): void {
       bloom?.dispose();
+      ao?.dispose();
       grade.dispose();
       fxaa?.dispose();
       composer.dispose();

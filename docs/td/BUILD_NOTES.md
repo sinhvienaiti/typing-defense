@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1C.C3**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1C.C6**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -51,7 +51,7 @@ Mốc đang làm: **1C.C3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
 | 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3), phần B (mục 8.5): không thêm dòng `src` (bảng chỗ đặt bộ cấp là JSON) | 200 | 11.650 |
 | 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | 11.054 → 11.356 thật (mục 8.4) | 800 | 12.450 |
-| 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
+| 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | 11.356 → 11.612 thật (mục 8.7) | 700 | 13.150 |
 | 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
 | 1C.C8 Draconis và Mộc Tinh trên sân (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 400 | 13.900 |
 | 1C.C12 đồ bay về HUD, skin HUD (làn L4) (`BUILD_1C_MAP1.md` §3, §8) | — | 250 | 14.150 |
@@ -2009,3 +2009,34 @@ Làm trên bản sao, không sửa nguồn Tripo: `scripts/models/blender/td_mes
 - `keep-kit-l2` và `archer-kit-l2` nay dựng từ `.fix1.glb` (preset trỏ `reference` về ảnh 2D gốc để vẫn khớp màu); ảnh dựng lại Fort L2 và Archer Tower L2 đạt.
 - `models:index`: `usedBy` của hai bản sửa điền đúng. Lệnh cảnh báo (thoát 1) vì luật "nguồn đặt tên theo ảnh 2D" chưa biết bản sửa `.fixN.glb`: cần sửa script chung ở repo cha.
 - Ba chỗ còn lại cần mở trong Blender có giao diện, hoặc dựng lại bằng Tripo. Ở camera game ảnh hưởng nhỏ: màng tối ở sườn mái và giữa nan, hoa văn một mặt nòng.
+
+### 8.7 C6: nhà 3D theo dữ liệu sim, mốc cảnh, ánh sáng mới (29/10/2026)
+
+- Kit đã sync phiếu Codex 107 (`9347851`, điều phối viên): `ModelLibrary` nhận `kinds`; game truyền `buildings`, `kits`, `landmarks`, `projectiles`.
+- **`src/view/3d/houses.ts`:**
+  - mỗi nhà của sim dựng từ model `buildings/<id>` cộng bộ cấp của cấp đó theo `kits.json`; xoay 180° cho mặt trước (−Z của model) nhìn về camera mặc định ở phía nam; đặt ở `heightAt`;
+  - đang xây: giàn tre (`props/scaffold-bamboo`, co theo vòng chiếm chỗ); xong thì nhà mọc lên trong 1,2 s (có nảy nhẹ);
+  - lên cấp: bộ cấp mới rơi nảy 0,5 s;
+  - cờ cấp (`props/level-pennant`, cấp − 1 lá) ở `FX_banner`; nòng Cannon Tower ở `FX_turret` (cấp 3 thay bằng nòng vằn); đống vàng của Gold Mine 4 cỡ theo vàng chờ, ở `FX_pile`;
+  - bóng ma lúc đặt nhà: nhà mờ 45 % trên vòng xanh hay đỏ theo `canPlace`, ở `heightAt`;
+  - model chưa nạp xong thì chừa chỗ, dựng lại ở khung sau.
+- **Hai mốc cảnh:** vách Thác Bạc ở đầu suối (ngoài sân phía bắc, mặt thác nhìn vào sân), chòi canh trên Đồi Cầu Vồng (phía đông, nhìn vào sân).
+- **Ánh sáng theo mức "hoành tráng" chủ dự án đặt ngày 28/10** (tài liệu `ART_DIRECTION_2026-10-28.md` chưa có lúc làm):
+  - nắng ấm mạnh hơn (3,4) trên nền trời lạnh, tối hơn (0,9) để có tương phản ấm lạnh;
+  - ánh lam bù 0,35; một đèn viền mềm từ phía sau góc nhìn mặc định;
+  - bóng mềm hơn;
+  - High có ambient occlusion (GTAO); Medium chưa có (C13 đo);
+  - lớp phủ sữa của bước chỉnh màu giảm.
+- **Kịch bản:**
+  - `td-1c-houses` (mới) đạt ở 1280 × 720 và 1920 × 1080: hộp cát, năm nhà đặt sẵn và Fort ở cấp 1, 2, 3 (Fort tới 4), Gold Mine, một nhà đang xây dưới giàn tre, bóng ma; mỗi nhà hiện đúng số bộ cấp của `kits.json`; không lỗi console.
+  - `td-1b-build` có biến `Q` để chạy trên bản 3D: 18/18 ở cả hai cỡ (`Q=high`).
+- **Draw call:** High với cả sáu nhà ở cấp 3, một nhà đang xây và bóng ma là 152, vượt trần 150 (phần nhà trong bảng C0 §6 là 40). Mỗi GLB có nhiều lưới, và lượt bóng nhân đôi. C13 gộp lưới mỗi nhà theo vật liệu (hoặc instanced theo model).
+- **Còn để sau:** ô Rice Field theo trạng thái (phiếu 098), nhà tê vì rễ (C8), hiệu ứng bán nhà (ván bay, C11), đèn lồng Nhiệt và huy hiệu nhịp (C10, C12).
+
+| Đo | Sau C3 | Sau C6 |
+|---|---|---|
+| Gói "/" (gzip) | 84,41 kB | 84,40 kB |
+| Bộ chunk 3D | 145,28 kB | 155,73 kB (thêm GTAO) |
+| Dòng `.ts` ngoài kit | 11.356 | 11.612 (trần bước 13.150) |
+| Draw call, tam giác (High, sáu nhà cấp 3) | 9, 28 nghìn (sân trống) | 148–152, khoảng 640 nghìn |
+| Test | 383 | 383, ván vàng giữ nguyên |

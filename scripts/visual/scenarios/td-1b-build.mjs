@@ -26,7 +26,8 @@ export default async function (page) {
   const size = sizeOf(page);
   const shots = [];
   // The story from the title.
-  await page.goto(DEV_URL.replace(/\/$/, "") + "/?title=1", { settle: 600 });
+  // 1C: Q=medium|high runs it on the 3D view (BUILD_1C_MAP1 §8 C6).
+  await page.goto(DEV_URL.replace(/\/$/, "") + "/?title=1" + (process.env.Q ? "&q=" + process.env.Q : ""), { settle: 600 });
   await until(page, "return t.ready();", 30000);
   await key(page, "Enter"); // "Bắt đầu"
   await page.sleep(800);
