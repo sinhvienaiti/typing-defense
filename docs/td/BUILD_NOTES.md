@@ -2040,3 +2040,31 @@ Làm trên bản sao, không sửa nguồn Tripo: `scripts/models/blender/td_mes
 | Dòng `.ts` ngoài kit | 11.356 | 11.612 (trần bước 13.150) |
 | Draw call, tam giác (High, sáu nhà cấp 3) | 9, 28 nghìn (sân trống) | 148–152, khoảng 640 nghìn |
 | Test | 383 | 383, ván vàng giữ nguyên |
+
+### 8.8 StylePack "Epic": ánh sáng, chỉnh màu, màu đất (29/10/2026)
+
+Theo `docs/games/ART_DIRECTION_2026-10-28.md` (repo cha) §2.3, §2.4, §2.7, §7.1; chưa cần ảnh mới.
+
+- **`stage.ts`:**
+  - nắng ấm `#ffdca8` 3,9, cao 40° từ tây nam (làn L chốt hướng này), bóng sắc;
+  - trời ngọc `#a9d2d6` trên đất teal tối `#33463c` 0,75; viền lạnh 0,4 từ phía đối nắng; GTAO ở High;
+  - sương bạc vàng gần hơn (95–330 m), chờ màu dải sương của phông 114;
+  - chỉnh màu ACES (filmic), bão hòa 0,95, bóng teal, sáng vàng, vignette 0,15;
+  - `relight()`: mỗi vật liệu model giảm 13 % bão hòa ở vàng rơm và cam đồ chơi, tắt kim loại; áp cho nhà, bộ cấp, mốc cảnh, cầu.
+- **`ground.ts`:**
+  - cỏ quay hue sang ngọc teal và giảm bão hòa (YIQ), tối hơn đường một bậc;
+  - đường và mép mòn thành đất be nhạt, không còn cam;
+  - nước ngả bạc;
+  - bóng mây trôi (nhiễu chậm, 0,78–1 lần ánh sáng) trên đất, là một số hạng ánh sáng, không phải ảnh vẽ bằng mã.
+- **Đo trên ảnh** (`scripts/visual/scenarios/td-1c-look.mjs`, góc mặc định, ở 1280 và 1920):
+
+| Đo (§2.3) | Trước (`d354716`) | Sau | Luật |
+|---|---|---|---|
+| Hue trung vị của cỏ | 88° | 124° | 80–150° |
+| Bão hòa trung vị của cỏ | 0,84 | 0,40 | ≤ 0,55 |
+| Luma đường trừ luma cỏ | +0,19 | +0,21 | ≥ +0,15 |
+
+- **Cần sửa ở C10:** luma đường nay 0,71, mà §2.5 đòi nền dưới thẻ chữ ≤ 0,6. C10 thêm nền tối dưới thẻ, hoặc giảm sáng đường ở chỗ có thẻ.
+- **Điểm M (tự chấm, thang §1.3):** trước 3, sau 4. Bảng màu đúng bible, bóng dài, nhà bớt đồ chơi. Nhưng sân vẫn phẳng: không có mốc lớn trong khung, không có ba tầng sâu, không có trời. Mức 8 cần phiếu 114 (trời, phông, rùa trời), 122 (đất v2, vách đá vôi để dựng tháp và mép cao nguyên), 123, 116–118. Một giám khảo độc lập cần chấm lại.
+- Tờ so: `tmp/lane-l/td-1c-look-sheet-1280x720.jpg`, `-1920x1080.jpg` trong worktree. Hàng 1: góc mặc định trước và sau. Hàng 2: F2 trước và sau. Hàng 3: ảnh mẫu của chủ dự án.
+- "/" 84,41 kB, bộ chunk 3D 156,36 kB, 11.648 dòng, 383 test, ván vàng giữ nguyên.

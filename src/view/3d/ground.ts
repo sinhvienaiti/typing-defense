@@ -12,7 +12,7 @@ import * as THREE from "three";
 import type { MapDef } from "../../content/types";
 import { loadModel, ModelLibrary } from "../../kit/three/model-loader";
 import type { Lane } from "../../sim/lanes";
-import type { Tier3D } from "./stage";
+import { relight, type Tier3D } from "./stage";
 
 /** The border round the field, m (BUILD_1C_MAP1 §8 C3), the masks' size and a tile's size. */
 export const BORDER_M = 40;
@@ -132,7 +132,7 @@ export function decalSpots(map: MapDef, lanes: readonly Lane[]): [number, number
 
 const SHADER_HEAD = /* glsl */ `
 uniform sampler2D tGrass, tClover, tRoad, tTrail, tBank, tYard, tMask, tDir;
-uniform float uExtent;
+uniform float uExtent, uTime;
 varying vec2 vGround;
 float gnoise(vec2 p) {
   vec2 i = floor(p), f = fract(p);
@@ -140,6 +140,14 @@ float gnoise(vec2 p) {
   float c = fract(sin(dot(i + vec2(0, 1), vec2(127.1, 311.7))) * 43758.5453), d = fract(sin(dot(i + vec2(1, 1), vec2(127.1, 311.7))) * 43758.5453);
   vec2 u = f * f * (3.0 - 2.0 * f);
   return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+/** Turns a colour's hue by \`turn\` rad in YIQ and scales its chroma by \`sat\` (the grass to jade-teal, ART_DIRECTION §2.3). */
+vec3 jade(vec3 c, float turn, float sat) {
+  float y = dot(c, vec3(0.299, 0.587, 0.114));
+  float i = dot(c, vec3(0.596, -0.274, -0.322)), q = dot(c, vec3(0.211, -0.523, 0.312));
+  float h = atan(q, i) + turn, ch = sqrt(i * i + q * q) * sat;
+  i = ch * cos(h); q = ch * sin(h);
+  return vec3(y + 0.956 * i + 0.621 * q, y - 0.272 * i - 0.647 * q, y - 1.106 * i + 1.703 * q);
 }
 /** The road tile with its ruts along the road: four fixed turns (45° apart, seamless), the two nearest the road's blended. */
 vec3 roadTile(vec2 p, vec2 dir) {
@@ -165,15 +173,24 @@ const SHADER_PAINT = /* glsl */ `
   vec4 m = texture2D(tMask, muv);
   float n1 = gnoise(gp * 0.045), n2 = gnoise(gp * 0.13 + 3.0), n3 = gnoise(gp * 0.6 + 7.0);
   vec3 grass = mix(texture2D(tGrass, tuv).rgb, texture2D(tClover, tuv * 0.75 + 0.37).rgb, smoothstep(0.52, 0.78, n1));
-  // The ground is the quietest layer (TK 23.1): a little less saturated, with olive and sunlit patches against the carpet look.
-  grass = mix(vec3(dot(grass, vec3(0.299, 0.587, 0.114))), grass, 0.8) * (0.84 + 0.14 * n2);
-  grass = mix(grass, grass * vec3(1.06, 1.0, 0.78), smoothstep(0.6, 0.85, gnoise(gp * 0.03 + 11.0)) * 0.6);
+  // Jade-teal grass (§2.3: hue 80–150°, saturation ≤ 0.55, no lime), a step darker than the roads, with warm sunlit and cool
+  // patches so it never reads as one carpet.
+  grass = jade(grass, -0.6, 0.7) * (0.8 + 0.14 * n2);
+  grass = mix(grass, grass * vec3(1.08, 1.03, 0.82), smoothstep(0.6, 0.85, gnoise(gp * 0.03 + 11.0)) * 0.55);
   // Ragged edges: the masks' soft rims broken up by noise, so no yard or road edge is a clean circle or ribbon.
   float rag = (n3 - 0.5) * 0.5 + (n2 - 0.5) * 0.3;
-  vec3 col = mix(grass, texture2D(tTrail, tuv + 0.5).rgb * 0.95, smoothstep(0.25, 0.75, m.a + rag) * 0.85);
-  col = mix(col, roadTile(gp, texture2D(tDir, muv).rg * 2.0 - 1.0), smoothstep(0.3, 0.7, m.r + rag * 0.6));
+  // Roads and their worn edges: pale beige earth, not orange, at least 0.15 luma over the grass (§2.3).
+  vec3 trail = texture2D(tTrail, tuv + 0.5).rgb;
+  trail = mix(vec3(dot(trail, vec3(0.299, 0.587, 0.114))), trail, 0.6);
+  vec3 road = roadTile(gp, texture2D(tDir, muv).rg * 2.0 - 1.0);
+  road = mix(vec3(dot(road, vec3(0.299, 0.587, 0.114))), road, 0.5) * 1.1;
+  vec3 col = mix(grass, trail, smoothstep(0.25, 0.75, m.a + rag) * 0.85);
+  col = mix(col, road, smoothstep(0.3, 0.7, m.r + rag * 0.6));
   col = mix(col, texture2D(tBank, tuv).rgb, smoothstep(0.2, 0.6, m.g + rag * 0.5));
   col = mix(col, texture2D(tYard, tuv * 1.25).rgb, smoothstep(0.35, 0.65, m.b + rag));
+  // Cloud shadows drifting over the field (§1.2, §2.7: 0.78–1 of the light), a lighting term on the ground only.
+  float cloud = gnoise(gp * 0.011 + uTime * vec2(0.0045, 0.0018)) * 0.65 + gnoise(gp * 0.027 - uTime * 0.003) * 0.35;
+  col *= mix(1.0, 0.78, smoothstep(0.5, 0.72, cloud));
   diffuseColor.rgb *= col;
 `;
 
@@ -203,7 +220,8 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
   const { mask, dir } = groundMasks(map, lanes);
   const data = (bytes: Uint8Array<ArrayBuffer>): THREE.DataTexture => Object.assign(new THREE.DataTexture(bytes, MASK_PX, MASK_PX), { magFilter: THREE.LinearFilter, minFilter: THREE.LinearFilter, needsUpdate: true });
   const tiles = Object.fromEntries(Object.entries(FALLBACK).map(([key, color]) => [key, { value: flat(color) as THREE.Texture }]));
-  const uniforms = { ...Object.fromEntries(Object.entries(tiles).map(([key, u]) => ["t" + key[0]!.toUpperCase() + key.slice(1), u])), tMask: { value: data(mask) }, tDir: { value: data(dir) }, uExtent: { value: extent } };
+  const time = { value: 0 };
+  const uniforms = { ...Object.fromEntries(Object.entries(tiles).map(([key, u]) => ["t" + key[0]!.toUpperCase() + key.slice(1), u])), tMask: { value: data(mask) }, tDir: { value: data(dir) }, uExtent: { value: extent }, uTime: time };
   const material = new THREE.MeshLambertMaterial({ color: 0xffffff });
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -216,8 +234,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
 
   // The stream: a strip winding inside its rect, from the cliff's foot to the far border.
   const water = new THREE.Group();
-  const waterMaterial = new THREE.MeshLambertMaterial({ color: "#8cbfcf", emissive: "#2a5664", emissiveIntensity: 0.3, transparent: true, opacity: 0.82 });
-  const time = { value: 0 };
+  const waterMaterial = new THREE.MeshLambertMaterial({ color: "#a9c9cf", emissive: "#2a5664", emissiveIntensity: 0.3, transparent: true, opacity: 0.82 }); // silver (§2.3)
   waterMaterial.onBeforeCompile = (shader) => {
     shader.uniforms["uTime"] = time;
     shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vWater;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvWater = (modelMatrix * vec4(transformed, 1.0)).xz;");
@@ -282,6 +299,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
   void new ModelLibrary({ manifests: "/assets/typing-defense/models/manifest.json" }).url("props", "cau-go", tier).then((url) => (url === null ? null : loadModel(url))).then((gltf) => {
     if (!gltf) return;
     for (const rect of map.bridges) {
+      relight(gltf.scene);
       const bridge = gltf.scene.clone(true);
       bridge.position.set((rect.x0 + rect.x1) / 2, -0.25, (rect.z0 + rect.z1) / 2);
       bridge.rotation.y = Math.PI / 2; // its deck runs along the model's length: across the stream
@@ -300,7 +318,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
         mesh.geometry.dispose();
         (mesh.material as THREE.Material).dispose();
       }
-      for (const u of Object.values(uniforms)) if (u.value instanceof THREE.Texture) u.value.dispose();
+      for (const u of Object.values(uniforms)) if ((u as { value: unknown }).value instanceof THREE.Texture) ((u as { value: THREE.Texture }).value).dispose();
     },
   };
 }

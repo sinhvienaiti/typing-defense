@@ -14,7 +14,7 @@ import type { World } from "../../sim/world";
 import type { Hand } from "../view";
 import { heightAt } from "./ground";
 import KITS from "./kits.json";
-import type { Tier3D } from "./stage";
+import { relight, type Tier3D } from "./stage";
 
 /** The kinds of this game's manifest beyond the kit's own (Codex 107). */
 const KINDS = ["buildings", "kits", "landmarks", "projectiles"];
@@ -61,6 +61,7 @@ export class Houses {
       void this.library.url(kind, id, this.tier).then((url) => (url === null ? null : loadModel(url))).then((gltf) => {
         if (!gltf) return void this.models.set(key, null);
         gltf.scene.traverse((o) => void ((o as THREE.Mesh).isMesh && ((o.castShadow = true), (o.receiveShadow = true))));
+        relight(gltf.scene);
         this.models.set(key, gltf.scene);
       }, () => void this.models.set(key, null));
     }
