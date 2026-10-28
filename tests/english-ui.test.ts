@@ -8,12 +8,8 @@ const VIETNAMESE = /[ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚÝàáâãèéêìíòóôõ�
 // Proper names of unique characters keep their Vietnamese spelling (AGENTS.md, "Language, names and art
 // level"; NAMES_EN.md, Wordwoven): exactly these, nothing else. The rest of each literal is still checked.
 const PROPER_NAMES = ["Draconis", "Mộc Tinh", "Bà Cú Mực", "Chấm", "Phẩy", "Gạch"];
-// The title's code-drawn seal keeps its old text until ticket 113's title art replaces the decorations
-// (coordinator, 29/10: the decorations get no new English text). Only this exact markup in title.ts.
-const TITLE_SEAL = { file: "src/ui/title.ts", text: '<span class="tt-seal" aria-hidden="true">Văn<br>Điền</span>' };
 const withoutNames = (text: string): string => PROPER_NAMES.reduce((rest, name) => rest.split(name).join(""), text.normalize("NFC"));
-const isVietnamese = (file: string, text: string): boolean =>
-  VIETNAMESE.test(withoutNames(file === TITLE_SEAL.file ? text.split(TITLE_SEAL.text).join("") : text));
+const isVietnamese = (_file: string, text: string): boolean => VIETNAMESE.test(withoutNames(text));
 
 function files(dir: string): string[] {
   return readdirSync(join(ROOT, dir), { withFileTypes: true }).flatMap((entry) => {
@@ -54,11 +50,9 @@ it("keeps source literals and generated labels in English, preserving vocabulary
   expect(problems, "Vietnamese UI literals (vocabulary vi and proper names remain allowed)").toEqual([]);
 });
 
-it("lets only the listed proper names and the old title seal through", () => {
+it("lets only the listed proper names through", () => {
   for (const ok of ["Mộc Tinh is awake", "Upgrade Fort to free Chấm", "Bà Cú Mực, Phẩy and Gạch", "Draconis"]) expect(isVietnamese("src/ui/hud.ts", ok), ok).toBe(false);
   for (const bad of ["Mộc Tinh choáng", "Chậm", "Mộc", "Bà Cú", "Gạch đá", "Bắt đầu"]) expect(isVietnamese("src/ui/hud.ts", bad), bad).toBe(true);
-  expect(isVietnamese("src/ui/title.ts", TITLE_SEAL.text)).toBe(false);
-  expect(isVietnamese("src/ui/hud.ts", TITLE_SEAL.text)).toBe(true);
-  expect(isVietnamese("src/ui/title.ts", '<span class="tt-seal">Văn Điền</span>')).toBe(true);
+  expect(isVietnamese("src/ui/title.ts", '<span class="tt-seal" aria-hidden="true">Văn<br>Điền</span>')).toBe(true);
 });
 
