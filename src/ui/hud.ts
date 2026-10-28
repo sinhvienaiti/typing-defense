@@ -23,10 +23,10 @@ export const BOSS_LINES = { rise: "Tên ta ở đâu?", roots: "Rễ ơi, mọc 
 export const PANELS = ["chip", "sandbox", "team", "strip", "dock", "actions", "boss", "tip"] as const;
 
 export const REASON: Readonly<Record<string, string>> = {
-  phase: "Ván đã kết thúc", capTotal: "Đã đủ 16 nhà", capType: "Đã đủ nhà loại này", bounds: "Ngoài sân", node: "Mỏ chỉ đặt trên quặng trống",
+  phase: "Ván đã kết thúc", capTotal: "Đã đủ 16 nhà", capType: "Đã đủ nhà loại này", bounds: "Ngoài sân", node: "Gold Mine chỉ đặt trên quặng trống",
   water: "Không xây trên nước", road: "Sát đường quá", keep: "Trong vòng 11 m quanh Fort", overlap: "Chạm nhà khác", tree: "Vướng cây", rally: "Barracks phải gần đường",
   path: "Chặn lối đi", gold: "Thiếu Gold", wood: "Thiếu Wood", food: "Thiếu Rice", noSlot: "Ô này còn khóa", notDay: "Chỉ gọi đêm được ban ngày",
-  undoWindow: "Hết 5 s hoàn tác", finished: "Xây xong rồi, không hoàn tác", blocked: "Không đứng được ở đó", rallyFar: "Xa trại quá", rallyOffRoad: "Điểm tập kết phải ở đường",
+  undoWindow: "Hết 5 s hoàn tác", finished: "Xây xong rồi, không hoàn tác", blocked: "Không đứng được ở đó", rallyFar: "Xa Barracks quá", rallyOffRoad: "Điểm tập kết phải ở đường",
   noBuilding: "Không có nhà đó", noBarracks: "Không phải Barracks", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
   noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ Villager rồi", notRipe: "Ô này chưa chín",
   locked: "Chưa mở tới ngày này", keepMax: "Fort đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",

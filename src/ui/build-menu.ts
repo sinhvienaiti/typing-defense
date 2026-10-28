@@ -54,7 +54,7 @@ function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
   const sold = [Math.floor(B.spentGold[b]! * SELL.refund), Math.floor(B.spentWood[b]! * SELL.refund)];
   const sell = b > 0 && B.ready[b] === 1 && !sel.undoable() ? button("sell", sel.armed(B.id(b)) ? "Bấm lần nữa: bán" : `Bán · +${sold[0]} Gold, +${sold[1]} Wood`, "⇧ Del", sel.armed(B.id(b)) ? ' class="is-on"' : "") : "";
   const extra =
-    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Seeds <b>${w.seeds}</b> · tự mua ${FARM.seedGold} Gold/Seeds</p>` +
+    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Seeds <b>${w.seeds}</b> · tự mua ${FARM.seedGold} Gold/Seed</p>` +
       `<div class="td-row">${button("seeds", "Mua " + FARM.pack.seeds + " Seeds · " + FARM.pack.gold + " Gold")}${button("autoSeeds", "Tự mua Seeds", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
     : b === 0 ? `<p>Villager <b>${countNpcs(w, NPC_KIND.villager)}/${villagerCap(w)}</b> · Builder <b>${countNpcs(w, NPC_KIND.builder)}</b> · Rice <b>${w.food}</b></p>` +
       `<div class="td-row">${button("hire", "Thuê Villager · " + VILLAGERS.gold + " Gold, " + VILLAGERS.food + " Rice", "⇧ \\")}</div><div class="td-row td-stack">${button("sellFood", "Bán " + ECONOMY.sale.food + " Rice · +" + ECONOMY.sale.gold + " Gold")}${button("sellWood", "Bán " + ECONOMY.sale.wood + " Wood · +" + ECONOMY.sale.woodGold + " Gold")}</div>` + keepRow(w)
@@ -93,6 +93,6 @@ export function dockHtml(w: World, sel: Selection, does?: Does): string {
     const attrs = ' class="td-kind' + (sel.kind === k + 1 ? " is-on" : "") + (shut || w.gold < spec.gold[0]! * 1000 || w.wood < spec.wood[0]! ? " is-poor" : "") + '"';
     return button("pick:" + (k + 1), `<kbd>${k + 1}</kbd>${spec.def.view.name}<span>${shut ? opens(w, spec.id) : price(spec.gold[0]!, spec.wood[0]!)}</span>`, "", attrs);
   });
-  const sub = w.c.buildings[sel.kind]!.placement === "node" ? "Mỏ chỉ đặt trên quặng" : "";
+  const sub = w.c.buildings[sel.kind]!.placement === "node" ? "Chỉ đặt trên quặng" : "";
   return head("Xây nhà", sub) + rows.join("") + doesHtml(does?.(w, w.c.buildings[sel.kind]!.id)) + `<p><small>Tab: chỗ kế · Enter: xây · Esc: hủy</small></p>`;
 }
