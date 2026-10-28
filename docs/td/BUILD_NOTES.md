@@ -49,7 +49,7 @@ Mốc đang làm: **1C.C2**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
 | 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
 | 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
-| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | — | 200 | 11.650 |
+| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3) không thêm dòng `src`; phần B còn lại | 200 | 11.650 |
 | 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 12.450 |
 | 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
 | 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
@@ -1915,3 +1915,20 @@ Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kế
 
 - Ván vàng `"same":true` cả hai. `td-1c-view` đạt 10/10 ở 1280 × 720 và 1920 × 1080 (Vite 4150, `heavy.sh --gpu`), lỗi console duy nhất là lỗi của chunk bị chặn.
 - Đo khung sân trống ở High và Medium: làm cùng lượt chụp tờ khung của C3 (một lượt test mỗi làn).
+
+### 8.3 C4 phần A: đưa model map 1 vào manifest, hạ texture, đo media (29/10/2026)
+
+- **Đường ống chạy trong worktree:** các thư mục media của `art-src/` (trừ `art-src/3d/SOURCES.json`, được Git theo dõi) và `art-src/3d/<loại>` là liên kết tới checkout chính, như `public/assets`. `models:prepare` và `models:blender` phải có `--out games/.wt-td-1c/public/assets/typing-defense/models --url-base /assets/typing-defense/models --contracts games/.wt-td-1c/scripts/models/model-contracts.ts`: không có thì công cụ lấy tên thư mục `.wt-td-1c` làm id game (lượt đầu ghi nhầm vào `public/assets/.wt-td-1c/`, đã xóa).
+- **Vào manifest:** `enemies/thuong-luong`, `enemies/nuppeppo`, `enemies/mam-go` (đã rig từ 24/10). `helpers/helper-owlet` chưa vào: hợp đồng model của game chưa có loại `helpers` (thuộc C5, cùng clip Helper).
+- **Barracks dựng lại** từ nguồn mới (24/10 08:52, bản hai tầng có sàn canh): cao 4,19 m, chân 4,58 m (vòng Ø 4,6 m), 11.755 tam giác; trước là bản tạm cao 1,80 m. Thấp hơn dải 4,5–5 m 7 % (không phóng riêng chiều cao), trong ngưỡng 20 % của `td-scale`. Socket `FX_lantern_4` rơi xuống tầng trống (y 0,75 m) trong khi bốn đèn kia ở 2,9 m: C6 sửa.
+- **Hạ texture** trong `scripts/models/model-contracts.ts` (`textureMax`, của game): nhà 1024 / 512 (trước 2048 / 1024), đạo cụ, đạn, đồ rơi, đồ gắn 512 / 256 (trước 1024 / 512); nhân vật giữ nguyên. Đóng gói lại cả 37 mục.
+- **Thử rồi bỏ:** hạ trần tam giác của bậc Medium (nhà 6.000, quái 3.500, lính 4.000, đồ nhỏ 2.000) chỉ bớt 0,18 MB (3,98 → 3,80 MB), vì ở Medium phần nặng là lưới có xương và clip của nhân vật; không đáng rủi ro hình, nên trả lại số cũ.
+- **`scripts/td/media-budget.mjs`** (mới): cộng byte theo bậc của 57 model map 1 cần (manifest) và các thư mục `ground`, `scenery`, `vfx`, so với `BUILD_1C_MAP1.md` §5; in mục còn thiếu; thoát 1 khi vượt (`--strict`: cả khi thiếu).
+
+| Model map 1 (32/57 có trong manifest) | High | Medium |
+|---|---:|---:|
+| Trước (texture cũ) | 11,86 MB | 5,26 MB |
+| Sau phần A | 7,15 MB (trần 7,5) | 3,98 MB (trần 3,6) |
+
+- **Medium vượt trần, và còn thiếu 25 mục** (13 bộ cấp, `cannon-barrel-l3`, giàn tre, xe goòng, lông lửa, hạt Mộc Tinh, ba mốc cảnh, Mộc Tinh, Draconis, `worker-base`, Helper). Dự báo khi đủ: Medium khoảng 7–8 MB chỉ riêng model. Cần quyết lại §5 (xem phần B).
+- **Phần B (để trước C6):** preset cho 13 bộ cấp (mỗi bộ phải khớp với nhà gốc: thay hay chồng lên, socket dời theo ghi chú của `3D_IMPORT_2026-10-28.md`), giàn tre theo 4 cỡ vòng, xe goòng, lông lửa xoay 90°, hạt Mộc Tinh, `vach-thac-bac` sáng +25 %, `cau-go` đúng rect cầu, `choi-canh-doi`; `models:index` và `usedBy`.

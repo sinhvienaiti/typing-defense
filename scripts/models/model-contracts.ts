@@ -47,7 +47,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Building_Idle", "Building_Fire", "Building_Work", "Building_Hit", "Building_Ruin"],
     triangles: { min: 2_000, max: 15_000 },
-    textureMax: { high: 2048, medium: 1024 },
+    textureMax: { high: 1024, medium: 512 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   // Separate parts placed on a building: cannon barrel, mine cart, gold piles, level pennant.
   props: {
@@ -57,7 +57,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Prop_Idle", "Prop_Fire", "Prop_Work"],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   projectiles: {
     kind: "projectiles",
@@ -66,7 +66,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: [],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   loot: {
     kind: "loot",
@@ -75,7 +75,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Loot_Open"],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   // Walking heroes (TK 23.9): skinned, front -Z, feet on the ground at the
   // origin, in-place clips (no root motion), one-shots start and end on Idle.
@@ -119,7 +119,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: [],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
 };
 
