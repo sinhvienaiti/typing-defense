@@ -14,7 +14,7 @@ Nguồn: bản kiểm kê map 1 (`docs/games/map1/audit-2026-10-28.json`, mục 
 | Trần dòng | Trần cứng 1C **16.500** (10.500 của R3 + 6.000; 400 dòng V4a trả lại vì làn V4a dừng ở bước 1). Hôm nay 10.555 |
 | Gói "/" | Vẫn ≤ 85 kB gzip (lối vào + màn đầu). Trước 1C 83,78 kB (chừa 1,22 kB sau khi gộp 036; trên `a5cc147` chỉ chừa 0,09 kB). C1 thêm ≤ 0,5 kB (đo: +0,42 kB, còn chừa 0,79 kB) |
 | Chunk 3D | `view/3d/view-3d.ts` cùng three.js, nạp lười, không bao giờ trong bộ khởi động; ≤ 260 kB gzip (C1: 117 kB) |
-| Media map 1 | High ≤ 12 MB, Medium ≤ 9 MB (chủ dự án 28/10, thay ≤ 6 MB), Low 0 byte model. Lần chơi đầu nạp Medium; trang chỉ chờ bộ khởi động ≤ 3,5 MB; tới Đêm 1 ≤ 6 MB |
+| Media map 1 | High ≤ 16 MB (chủ dự án 28/10, thay ≤ 12 MB; bậc người chơi tự chọn), Medium ≤ 9 MB (chủ dự án 28/10, thay ≤ 6 MB), Low 0 byte model. Lần chơi đầu nạp Medium; trang chỉ chờ bộ khởi động ≤ 3,5 MB; tới Đêm 1 ≤ 6 MB |
 | Khung (Mac mini M4, 1920 × 1080) | High: trung bình ≤ 5,5 ms, p95 ≤ 8,5 ms, ≤ 150 draw call. Medium: ≤ 4,5 ms, p95 ≤ 7 ms, ≤ 100 draw call. Không khung nào quá 50 ms |
 | Thứ tự làn L | C1 → C2 → C4 → C3 → C6 → (mốc giữa 06/11) → C10 → C13 → C14 |
 
@@ -93,13 +93,15 @@ Cách đếm như `BUILD_1A6.md` §0: `.ts` trong `src`, trừ `src/kit`; test, 
 - **Tải theo ngày:** phần còn lại nạp ngầm theo thứ tự mở khóa của truyện (Barracks Ngày 2; Cannon Tower, Gold Mine, Fort cấp 2 Ngày 3; nâng cấp Ngày 4; Fort cấp 3 Ngày 5); bộ boss nạp cuối.
 - **Byte tới Đêm 1 ≤ 6 MB** (HOSTING_PLAN §7): bộ khởi động, phần Ngày 1 cần và JS, CSS, từ vựng.
 
+**Quyết định của chủ dự án (28/10/2026, khoảng 23:55, qua điều phối viên), thay trần High cũ (≤ 12 MB):** **High tổng ≤ 16 MB.** High là bậc người chơi tự chọn trong Cài đặt (từ C13); lần chơi đầu vẫn là Medium. C4 phần B đo phần model High 10,08 MB khi có 53/57 model; dự báo khi đủ cảnh và VFX khoảng 15–16 MB. Các dòng High theo phần nay chỉ theo dõi.
+
 | Phần | High | Medium | Low |
 |---|---:|---:|---:|
-| Model GLB của map 1 | ≤ 7,5 MB | theo dõi | 0 |
-| Ô đất, decal, ô Rice Field (phiếu 095, 097, 098) | ≤ 1,5 MB | theo dõi | 0 |
-| Atlas cảnh (màu + pháp tuyến), ba lớp phông, trời | ≤ 2,5 MB | theo dõi | 0 |
-| Tờ VFX (043, 099, 100) | ≤ 0,5 MB | theo dõi | 0 |
-| **Cộng** | **≤ 12 MB** | **≤ 9 MB** | ảnh màn đầu 0,34 MB như nay |
+| Model GLB của map 1 | theo dõi | theo dõi | 0 |
+| Ô đất, decal, ô Rice Field (phiếu 095, 097, 098) | theo dõi | theo dõi | 0 |
+| Atlas cảnh (màu + pháp tuyến), ba lớp phông, trời | theo dõi | theo dõi | 0 |
+| Tờ VFX (043, 099, 100) | theo dõi | theo dõi | 0 |
+| **Cộng** | **≤ 16 MB** | **≤ 9 MB** | ảnh màn đầu 0,34 MB như nay |
 | **Bộ khởi động** | — | **≤ 3,5 MB** | — |
 | **Tới Đêm 1** (thêm JS, CSS, từ vựng) | — | **≤ 6 MB** | — |
 
@@ -107,7 +109,7 @@ Cách đếm như `BUILD_1A6.md` §0: `.ts` trong `src`, trừ `src/kit`; test, 
 - **Thêm tới Đêm 1** (`NIGHT_1`): bộ cấp 2 của Fort, Archer Tower, Rice Field, lông lửa, tờ VFX; cộng JS, CSS (gzip của `dist`) và từ vựng.
 - **Cách hạ:** texture Medium ≤ 1024² cho nhà, ≤ 512² cho đạo cụ nhỏ và đồ gắn; nén meshopt (không dùng Draco); gộp texture trùng. Ảnh 2D là WebP.
 - **Chỉ model map 1 vào gói deploy** (C13; phần `deploy.config` là của làn T, A9). Model hộp cát (Troll) nạp khi hộp cát gọi.
-- **Đo:** `scripts/td/media-budget.mjs` cộng `bytes` của bậc trong `models/manifest.json` cho các mục map 1, cộng các thư mục `ground`, `scenery`, `vfx`; hỏng khi vượt High tổng, một dòng High, Medium tổng, bộ khởi động hay mức tới Đêm 1. Chạy trước mỗi lần xin `media:push`.
+- **Đo:** `scripts/td/media-budget.mjs` cộng `bytes` của bậc trong `models/manifest.json` cho các mục map 1, cộng các thư mục `ground`, `scenery`, `vfx`; hỏng khi vượt High tổng (16 MB), Medium tổng (9 MB), bộ khởi động (3,5 MB) hay mức tới Đêm 1 (6 MB). Chạy trước mỗi lần xin `media:push`.
 
 ## 6. Draw call và khung theo bậc
 

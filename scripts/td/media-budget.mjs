@@ -3,7 +3,7 @@
  * Map 1's media per tier against docs/td/BUILD_1C_MAP1.md §5 (1C step C4): the models map 1 loads (their High or
  * Medium file in public/assets/typing-defense/models/manifest.json), the ground tiles and decals (C3), the scenery
  * atlas and backdrops (C9) and the VFX sheets (C11), each read from public/assets/typing-defense/<part>/ by its
- * ".high." or ".medium." name. The owner's decision of 28/10 (BUILD_1C_MAP1 §5): Medium in all ≤ 9 MB, the starter set
+ * ".high." or ".medium." name. The owner's decisions of 28/10 (BUILD_1C_MAP1 §5): High in all ≤ 16 MB, Medium ≤ 9 MB, the starter set
  * the page waits for ≤ 3.5 MB, and the bytes up to Night 1 (the starter set, what Day 1 adds, JS, CSS and vocabulary)
  * ≤ 6 MB. Prints a table and the models map 1 needs that the manifest does not list yet; exits 1 when a line is passed
  * (with --strict also when a model is missing).
@@ -15,13 +15,13 @@ import { gzipSync } from "node:zlib";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 const ASSETS = join(ROOT, "public/assets/typing-defense");
-/** BUILD_1C_MAP1 §5, MB (10^6 bytes); Medium's parts are only watched since the owner's decision of 28/10. */
+/** BUILD_1C_MAP1 §5, MB (10^6 bytes): the owner's decisions of 28/10, High in all ≤ 16 MB and Medium ≤ 9 MB; the parts are only watched. */
 export const BUDGET = {
-  models: { high: 7.5, medium: null },
-  ground: { high: 1.5, medium: null },
-  scenery: { high: 2.5, medium: null },
-  vfx: { high: 0.5, medium: null },
-  total: { high: 12, medium: 9 },
+  models: { high: null, medium: null },
+  ground: { high: null, medium: null },
+  scenery: { high: null, medium: null },
+  vfx: { high: null, medium: null },
+  total: { high: 16, medium: 9 },
 };
 /** Medium only: the starter set and the bytes up to Night 1 (owner 28/10). */
 export const FIRST = { starter: 3.5, night1: 6 };
@@ -79,7 +79,7 @@ export function measure() {
   const starter = medium(STARTER) + rows.medium.ground + rows.medium.scenery;
   const night1 = starter + medium(NIGHT_1) + rows.medium.vfx + codeBytes();
   const over = [];
-  for (const [part, limits] of Object.entries(BUDGET)) if (mb(rows.high[part]) > limits.high) over.push(part + " high");
+  if (mb(rows.high.total) > BUDGET.total.high) over.push("total high");
   if (mb(rows.medium.total) > BUDGET.total.medium) over.push("total medium");
   if (mb(starter) > FIRST.starter) over.push("starter set");
   if (mb(night1) > FIRST.night1) over.push("up to Night 1");
@@ -91,7 +91,7 @@ if (process.argv[1] === import.meta.filename) {
   if (process.argv.includes("--json")) console.log(JSON.stringify(result, null, 1));
   else {
     console.log("| Phần | High (MB) | trần | Medium (MB) | trần |\n|---|---:|---:|---:|---:|");
-    for (const part of Object.keys(BUDGET)) console.log(`| ${part} | ${mb(result.rows.high[part]).toFixed(2)} | ${BUDGET[part].high} | ${mb(result.rows.medium[part]).toFixed(2)} | ${BUDGET[part].medium ?? "—"} |`);
+    for (const part of Object.keys(BUDGET)) console.log(`| ${part} | ${mb(result.rows.high[part]).toFixed(2)} | ${BUDGET[part].high ?? "—"} | ${mb(result.rows.medium[part]).toFixed(2)} | ${BUDGET[part].medium ?? "—"} |`);
     console.log(`| starter set (Medium) | | | ${mb(result.starter).toFixed(2)} | ${FIRST.starter} |\n| up to Night 1 (Medium, with JS, CSS, vocabulary) | | | ${mb(result.night1).toFixed(2)} | ${FIRST.night1} |`);
     console.log(`\nmodels: ${result.listed}/${MAP1_MODELS.length} of map 1's listed; missing: ${result.missing.join(", ") || "none"}`);
     console.log(result.over.length === 0 ? "media budget: within BUILD_1C_MAP1 §5" : "media budget: over in " + result.over.join(", "));

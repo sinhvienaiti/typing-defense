@@ -511,7 +511,7 @@
   "kits/archer-kit-l2.fix1.glb": {
    "md5": "1cdc61ec40b89d2624e296b69f5332dd",
    "bytes": 2650160,
-   "image": null,
+   "image": "art-src/kits/archer-kit-l2.png",
    "usedBy": [
     "kits/archer-kit-l2"
    ]
@@ -617,7 +617,7 @@
   "kits/keep-kit-l2.fix1.glb": {
    "md5": "7ce3dd8c6268a2e3b788a91ea65dead0",
    "bytes": 3304080,
-   "image": null,
+   "image": "art-src/kits/keep-kit-l2.png",
    "usedBy": [
     "kits/keep-kit-l2"
    ]
