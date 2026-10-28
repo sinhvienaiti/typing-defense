@@ -121,7 +121,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
 };
 
 export type ModelManifestEntry = {
-  kind: ModelKind;
+  kind: string;
   id: string;
   /** URLs per tier (made absolute against the manifest's URL when parsed). */
   tiers: Partial<Record<ModelTier, { url: string; bytes: number }>>;
@@ -138,7 +138,7 @@ export type ModelManifest = {
   models: Record<string, ModelManifestEntry>;
 };
 
-export function modelKey(kind: ModelKind, id: string): string {
+export function modelKey(kind: string, id: string): string {
   return kind + "/" + id;
 }
 

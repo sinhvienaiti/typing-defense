@@ -1,5 +1,5 @@
 // Source: games/space-typing/src/render3d/model-loader.ts (kit copy: manifest URLs are a parameter, several manifests, URLs resolved; log fixes in shared/game-kit/DRIFT.md)
-import { isModelKind, modelKey, type ModelKind, type ModelManifest, type ModelManifestEntry, type ModelTier } from "./model-contracts";
+import { isModelKind, modelKey, type ModelManifest, type ModelManifestEntry, type ModelTier } from "./model-contracts";
 
 /**
  * Finds and loads models listed in model manifests (a game's own, then any
@@ -36,8 +36,8 @@ export function resolveModelUrl(url: string, manifestUrl: string): string {
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value);
 const strings = (value: unknown): string[] => (Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []);
 
-function parseEntry(raw: unknown, manifestUrl: string): ModelManifestEntry | null {
-  if (!isRecord(raw) || !isModelKind(raw.kind) || typeof raw.id !== "string" || raw.id.length === 0 || !isRecord(raw.tiers)) return null;
+function parseEntry(raw: unknown, manifestUrl: string, extraKinds: readonly string[] = []): ModelManifestEntry | null {
+  if (!isRecord(raw) || typeof raw.kind !== "string" || (!isModelKind(raw.kind) && !extraKinds.includes(raw.kind)) || typeof raw.id !== "string" || raw.id.length === 0 || !isRecord(raw.tiers)) return null;
   const tiers: Partial<Record<ModelTier, { url: string; bytes: number }>> = {};
   for (const name of ["high", "medium"] as const) {
     const file = raw.tiers[name];
@@ -60,16 +60,17 @@ function parseEntry(raw: unknown, manifestUrl: string): ModelManifestEntry | nul
 
 /**
  * A manifest's JSON fetched from `manifestUrl`: null unless it is version 1
- * with a models object. Entries of an unknown kind, or with no usable tier,
+ * with a models object. Kinds include Space's and any extraKinds.
+ * Entries of an unknown kind, or with no usable tier,
  * are dropped (counted in `dropped`); an entry is filed under its own
  * kind/id, whatever key it had.
  */
-export function parseModelManifest(json: unknown, manifestUrl: string): (ModelManifest & { dropped: number }) | null {
+export function parseModelManifest(json: unknown, manifestUrl: string, extraKinds: readonly string[] = []): (ModelManifest & { dropped: number }) | null {
   if (!isRecord(json) || json.version !== 1 || !isRecord(json.models)) return null;
   const models: Record<string, ModelManifestEntry> = {};
   let dropped = 0;
   for (const raw of Object.values(json.models)) {
-    const entry = parseEntry(raw, manifestUrl);
+    const entry = parseEntry(raw, manifestUrl, extraKinds);
     if (entry === null) dropped += 1;
     else models[modelKey(entry.kind, entry.id)] = entry;
   }
@@ -92,6 +93,8 @@ export type ManifestFetch = (url: string, init?: { cache?: RequestCache }) => Pr
 export type ModelLibraryOptions = {
   /** Manifest URLs, first wins when two list the same model. */
   manifests: string | readonly string[];
+  /** Additional kinds beyond Space's MODEL_KINDS. */
+  kinds?: readonly string[];
   fetcher?: ManifestFetch;
   /** A manifest that failed is asked again after this long (ms). */
   retryMs?: number;
@@ -102,6 +105,7 @@ export type ModelLibraryOptions = {
 /** One game's view of its model manifests. */
 export class ModelLibrary {
   readonly urls: readonly string[];
+  private readonly extraKinds: readonly string[];
   private readonly fetcher: ManifestFetch;
   private readonly retryMs: number;
   private readonly now: () => number;
@@ -110,6 +114,11 @@ export class ModelLibrary {
   constructor(options: ModelLibraryOptions) {
     this.urls = typeof options.manifests === "string" ? [options.manifests] : [...options.manifests];
     if (this.urls.length === 0) throw new Error("models: no manifest URL");
+    this.extraKinds = [...(options.kinds ?? [])];
+    for (const kind of this.extraKinds) {
+      // Compare the full match: $ also accepts a trailing newline.
+      if (kind.match(/^[a-z][a-z0-9-]*$/)?.[0] !== kind) throw new Error('models: invalid kind "' + kind + '"');
+    }
     this.fetcher = options.fetcher ?? ((url, init) => fetch(url, init));
     this.retryMs = options.retryMs ?? 30_000;
     this.now = options.now ?? (() => Date.now());
@@ -125,7 +134,7 @@ export class ModelLibrary {
       try {
         const response = await this.fetcher(url, { cache: "no-cache" });
         if (!response.ok || !(response.headers.get("content-type") ?? "").includes("json")) return null;
-        result = parseModelManifest(await response.json(), url);
+        result = parseModelManifest(await response.json(), url, this.extraKinds);
         return result;
       } catch {
         return null;
@@ -143,7 +152,7 @@ export class ModelLibrary {
   }
 
   /** The first manifest's entry for kind/id, or null. */
-  async entry(kind: ModelKind, id: string): Promise<ModelManifestEntry | null> {
+  async entry(kind: string, id: string): Promise<ModelManifestEntry | null> {
     const key = modelKey(kind, id);
     for (const manifest of await this.manifests()) {
       const entry = manifest?.models[key];
@@ -152,7 +161,7 @@ export class ModelLibrary {
     return null;
   }
 
-  async url(kind: ModelKind, id: string, quality: VisualQuality): Promise<string | null> {
+  async url(kind: string, id: string, quality: VisualQuality): Promise<string | null> {
     const entry = await this.entry(kind, id);
     return entry === null ? null : pickModelTier(entry, quality);
   }
