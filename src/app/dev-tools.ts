@@ -26,6 +26,8 @@ export type DevContext = {
   /** Painted, and the chunks this page wants are in or given up. */
   ready(): boolean;
   chunks(): Record<string, boolean>;
+  /** The map view: its kind, and in 3D its tier, last frame's draw calls and triangles and the camera (1C). */
+  view(): Record<string, number | string>;
   header(): PaceHeader & { expected: number };
   mode(): Mode;
   replayed(): { day: number; tick: number; hash: string; matched: boolean } | null;
@@ -42,6 +44,7 @@ export function installDevTools(ctx: DevContext): void {
     ready: () => ctx.ready(),
     // Which lazy chunks are in (td-1b-chunks: a failed one comes in when wanted again).
     chunks: () => ctx.chunks(),
+    view: () => ctx.view(),
     // What a Node replay of log() needs besides the log (scripts/td/replay.ts).
     flags: () => ({ sandbox: ctx.sandbox, seed: world.seed, content: world.c.hash, deck: deck.hash, vocabulary: ctx.source, expected: ctx.header().expected, pace: { k: ctx.header().k, director: ctx.header().director }, mode: ctx.mode(), learn: ctx.learn() }),
     send: (command: CommandBody) => session.send(command),

@@ -203,6 +203,8 @@ const panel = new Chunk("sandbox", async () => (await import("./app/sandbox")).s
 function act(action: string): void {
   const [name, dx, dy] = action.split(":");
   if (name === "pan") view.panBy(Number(dx) * 60, Number(dy) * 60);
+  else if (name === "turn") view.turn?.(Number(dx) * 50, Number(dy) * 23);
+  else if (name === "cam" && (dx === "home" || dx === "near" || dx === "overview")) view.look?.(dx);
   else if (name === "mute" && audio !== null) audio.muted = !audio.muted;
   else if (name === "pause" && mapOnly) mapOnly = false; // the HUD's Ⅱ brings the results back too
   else selection.act(action);
@@ -252,7 +254,7 @@ function prefetch(): void {
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
     ready: () => painted && (look.kind === "2d" || view3d.settled) && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
     chunks: () => ({ view3d: view.kind === "3d", sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
-    header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
+    view: () => view.stats?.() ?? { kind: view.kind }, header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
   }));
 }
@@ -275,7 +277,7 @@ installKeys(window, {
   allowUntrusted: params.get("untrusted") === "1",
 });
 /** The pointer acts on the view that is up (the 3D view has a canvas of its own). */
-const camera = { panBy: (dx: number, dy: number) => view.panBy(dx, dy), zoomAt: (x: number, y: number, k: number) => view.zoomAt(x, y, k), unproject: (x: number, y: number) => view.unproject(x, y) };
+const camera = { panBy: (dx: number, dy: number) => view.panBy(dx, dy), turn: (dx: number, dy: number) => view.turn?.(dx, dy), zoomAt: (x: number, y: number, k: number) => view.zoomAt(x, y, k), unproject: (x: number, y: number) => view.unproject(x, y) };
 const hand: Parameters<typeof installPointer>[2] = {
   pointer: (p) => selection.pointer(p),
   // A call's bubble (a word card, or a dim one on the map) sends the agent there (BUILD_1A6 §8).
@@ -349,7 +351,7 @@ prefetch();
 /** Back to the 2D view (no WebGL, the chunk given up, a lost context), told in the HUD; the run goes on. */
 const to2d = (text: string): void => void ((view = flat), (canvas.style.visibility = ""), tellLost(text), resize());
 if (look.kind === "3d") void view3d.get().then((m) => {
-  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D"))) ?? null;
+  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D"))) ?? null;
   if (deep === null) return to2d("Bản 3D chưa mở được: chơi bản 2D · F5 để thử lại");
   installPointer(deep.canvas, camera, hand);
   view = deep;

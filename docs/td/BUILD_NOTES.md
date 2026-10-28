@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1C.C1**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1C.C2**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -48,7 +48,7 @@ Mốc đang làm: **1C.C1**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
 | 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
-| 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | — | 650 | 11.450 |
+| 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
 | 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | — | 200 | 11.650 |
 | 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 12.450 |
 | 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
@@ -1897,3 +1897,21 @@ Kế hoạch và ngân sách: `docs/td/BUILD_1C_MAP1.md` (C0, chủ dự án duy
 | Test | 355 / 33 file | 360 / 34 file |
 | Ván vàng | `f2a21037` | `"same":true` cả hai (19.660 và 5.695 tick) |
 
+### 8.2 C2: sân khấu và camera RTS (29/10/2026, Mac mini M4)
+
+Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kết và dải nghĩa) gộp vào `td-1c` (`27853b6`, không xung đột): 373 test, "/" 84,16 kB, 10.766 dòng, ván vàng giữ nguyên.
+
+- `src/view/3d/stage.ts` (chép từ `games/dragon-hold@02fe9c7` `src/view/stage.ts`, ghi nguồn): renderer, cảnh với ba lớp (đất, nhân vật, hiệu ứng), trời, nắng tây nam có bóng, ánh lam bù, sương nhạt; hậu kỳ Sách tranh (tone Neutral, bão hòa ×1,15, tách tông, vignette nhẹ, FXAA); bậc Medium (DPR 1, bóng 1024) và High (DPR 1,25, bóng 2048, có lượt bloom 0,25 nhưng tắt tới khi C13 đo); `stats()` đếm draw call và tam giác của khung.
+- `src/view/3d/camera.ts` (chép từ `camera.ts` của Rồng): `CameraRig` nhìn một điểm của sân theo hướng, góc nghiêng và khoảng cách, tất cả có làm mượt; mặc định 55° ở 58 m, điểm nhìn lệch 18 m từ Fort vào giữa sân; zoom 22–120 m về điểm dưới con trỏ; nghiêng 30–85°; pan trong sân cộng 8 m; rung ≤ 6 px trong 120 ms chỉ dời phép chiếu (thẻ chữ không rung); `groundAt` lấy điểm đất dưới một điểm màn hình. Trường nhìn 38° cho đúng cỡ TK §23.2 (Lính 1,85 m ≈ 28 px, Fort 8 m ≈ 125 px ở 1080p). Kit Lời Gọi không có `feedback`, nên rung là bản đơn giản thay cho `Trauma` của Rồng.
+- Điều khiển (TK §23.6): kéo trái hay giữa để pan; **kéo phải để xoay và nghiêng** (`app/input.ts` trước bỏ qua kéo phải); lăn để zoom; mũi tên pan; **Shift + mũi tên** xoay 15° và nghiêng 5°; **F1** góc mặc định, **F2** góc gần và thấp (40° ở 30 m, đề xuất của C2 vì TK chỉ định nghĩa F3), **F3** "Toàn cảnh" 85° ở 100 m. Ở 2D các phím này không làm gì. `MapView` có thêm `turn?`, `look?`, `stats?`; `__td.view()` trả loại view, bậc, draw call, tam giác và tư thế camera.
+- `tests/td-3d-camera.test.ts` (5 test, Node, không WebGL): xuống đất rồi chiếu lại lệch < 0,5 px ở 3 góc nghiêng × 4 hướng (hơn 200 điểm); cỡ TK §23.2 ở góc mặc định; zoom giữ điểm dưới con trỏ trong 0,5 m và kẹp 22–120 m; pan theo hướng và trong sân; F1, F3, nghiêng 30–85°.
+
+| Đo | Sau C1 (gộp 091, 103) | Sau C2 |
+|---|---|---|
+| Gói "/" (gzip) | 84,16 kB | 84,28 kB (chừa 0,72 kB) |
+| Chunk `view-3d` | 117,05 kB | 124,55 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 10.766 | 11.054 (trần bước 11.450) |
+| Test | 373 / 36 file | 378 / 37 file |
+
+- Ván vàng `"same":true` cả hai. `td-1c-view` đạt 10/10 ở 1280 × 720 và 1920 × 1080 (Vite 4150, `heavy.sh --gpu`), lỗi console duy nhất là lỗi của chunk bị chặn.
+- Đo khung sân trống ở High và Medium: làm cùng lượt chụp tờ khung của C3 (một lượt test mỗi làn).

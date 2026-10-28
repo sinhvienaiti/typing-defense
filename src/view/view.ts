@@ -27,7 +27,16 @@ export interface MapView {
   keepOut(w: World): Rect[];
   panBy(dx: number, dy: number): void;
   zoomAt(px: number, py: number, factor: number): void;
+  /** 3D only: a right drag or Shift + arrows turn the heading and tilt (CSS px). */
+  turn?(dx: number, dy: number): void;
+  /** 3D only: F1–F3 (TK 23.6). */
+  look?(name: CameraView): void;
+  /** What the view drew last frame and where its camera is (__td.view()). */
+  stats?(): Record<string, number | string>;
 }
+
+/** F1 the default view, F2 a close low one, F3 "Toàn cảnh" (TK 23.6). */
+export type CameraView = "home" | "near" | "overview";
 
 export type Tier = "low" | "medium" | "high";
 /** The stages the 3D view draws (1C: map 1 only). */

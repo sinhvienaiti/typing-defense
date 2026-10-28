@@ -14,6 +14,8 @@ export const KEY_ACTIONS: Readonly<Record<string, string>> = {
   Insert: "build", Backslash: "build", ShiftInsert: "hire", ShiftBackslash: "hire", Delete: "undo", ShiftDelete: "sell", Escape: "escape", Pause: "pause", F9: "sandbox", Space: "space",
   Equal: "ult", // BUILD_1B §8.2: Tối Thượng (no IME uses it)
   ArrowLeft: "pan:1:0", ArrowRight: "pan:-1:0", ArrowUp: "pan:0:1", ArrowDown: "pan:0:-1",
+  // 1C (TK 23.6): Shift + arrows turn and tilt the 3D camera, F1–F3 its views; the 2D view has neither.
+  ShiftArrowLeft: "turn:-1:0", ShiftArrowRight: "turn:1:0", ShiftArrowUp: "turn:0:-1", ShiftArrowDown: "turn:0:1", F1: "cam:home", F2: "cam:near", F3: "cam:overview",
 };
 
 /** A letter 0–25, "backspace", an action, or null: the page leaves the key alone. */
@@ -22,7 +24,7 @@ export function keyAction(event: KeyboardEvent, allowUntrusted = false): number 
   const letter = typedLetter(event);
   if (letter !== null) return letter.charCodeAt(0) - 97;
   const action = event.code === "Backspace" ? "backspace" : KEY_ACTIONS[(event.shiftKey ? "Shift" : "") + event.code];
-  return action === undefined || (event.repeat && !action.startsWith("pan")) ? null : action;
+  return action === undefined || (event.repeat && !/^(pan|turn):/.test(action)) ? null : action;
 }
 
 /** A Space within this many ms of a letter the game took is a typist's space between words: swallowed (review R2). */
@@ -48,9 +50,9 @@ export function installKeys(target: Window, keys: { send(command: CommandBody): 
 }
 
 type Spot = { x: number; z: number };
-type Camera = { panBy(dx: number, dy: number): void; zoomAt(x: number, y: number, factor: number): void; unproject(x: number, y: number): Spot };
+type Camera = { panBy(dx: number, dy: number): void; turn(dx: number, dy: number): void; zoomAt(x: number, y: number, factor: number): void; unproject(x: number, y: number): Spot };
 
-/** On the map a press that moves under 6 px is a click (at a field point and a screen point); a left or middle drag pans, the wheel zooms; off the map the pointer is null. */
+/** On the map a press that moves under 6 px is a click (at a field point and a screen point); a left or middle drag pans, a right drag turns (3D), the wheel zooms; off the map the pointer is null. */
 export function installPointer(canvas: HTMLCanvasElement, camera: Camera, hand: { pointer(p: Spot | null): void; click(p: Spot, right: boolean, screen: { x: number; y: number }): void }): void {
   let down: { x: number; y: number; button: number; drag: boolean } | null = null;
   canvas.addEventListener("contextmenu", (event) => event.preventDefault());
@@ -65,8 +67,9 @@ export function installPointer(canvas: HTMLCanvasElement, camera: Camera, hand: 
     const dx = event.clientX - down.x;
     const dy = event.clientY - down.y;
     down.drag ||= dx * dx + dy * dy >= 36;
-    if (!down.drag || down.button === 2) return; // a right drag turns the camera in 3D (1C)
-    camera.panBy(dx, dy);
+    if (!down.drag) return;
+    if (down.button === 2) camera.turn(dx, dy);
+    else camera.panBy(dx, dy);
     down.x = event.clientX;
     down.y = event.clientY;
   });
