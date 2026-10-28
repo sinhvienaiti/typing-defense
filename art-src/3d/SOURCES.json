@@ -1,6 +1,6 @@
 {
  "version": 1,
- "rule": "art-src/<path>/<name>.png -> art-src/3d/<path>/<name>.glb (ships: art-src/ships/ship-NN-<id>-2d.png -> art-src/3d/ships/ship-NN-<id>.glb; skills/ and items/ hold Text to 3D models with no 2D image). Owner originals from Tripo/Meshy, never edited; pipelines read them and write processed copies elsewhere. Regenerate: pnpm models:index --root games/typing-defense",
+ "rule": "art-src/<path>/<name>.png -> art-src/3d/<path>/<name>.glb (ships: art-src/ships/ship-NN-<id>-2d.png -> art-src/3d/ships/ship-NN-<id>.glb; skills/ and items/ hold Text to 3D models with no 2D image). Owner originals from Tripo/Meshy, never edited; pipelines read them and write processed copies elsewhere. Regenerate: pnpm models:index --root games/.wt-td-1c",
  "files": {
   "animals/chuon-chuon-tre.glb": {
    "md5": "0d0789b67e24418232361bf2d2f1622a",
@@ -147,7 +147,9 @@
    "md5": "9304f2a0466c2acf999da6e8f8254662",
    "bytes": 3723220,
    "image": "art-src/buildings/archer.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/archer"
+   ],
    "downloadedAs": [
     "watchtower+3d+model.glb"
    ]
@@ -156,7 +158,9 @@
    "md5": "8580fe779b5a63a54bf4a9704e9a9a66",
    "bytes": 4190920,
    "image": "art-src/buildings/barracks.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/barracks"
+   ],
    "downloadedAs": [
     "thatched+hut+3d+model (1).glb"
    ]
@@ -165,7 +169,9 @@
    "md5": "cfb7d08f10d78ae1ac3742d1a24efee7",
    "bytes": 2439340,
    "image": "art-src/buildings/cannon-barrel.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/cannon-barrel"
+   ],
    "downloadedAs": [
     "antique+brass+telescope+3d+model.glb"
    ]
@@ -174,7 +180,9 @@
    "md5": "43283dd15cf73aa7e68598e5d16a7ee1",
    "bytes": 3160808,
    "image": "art-src/buildings/cannon.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/cannon"
+   ],
    "downloadedAs": [
     "round+wooden+arena+3d+model.glb"
    ]
@@ -195,7 +203,9 @@
    "md5": "0d001b99d2d5bd642f9859c632a57437",
    "bytes": 3004116,
    "image": "art-src/buildings/farm.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/farm"
+   ],
    "downloadedAs": [
     "thatched+hut+3d+model.glb"
    ]
@@ -204,7 +214,9 @@
    "md5": "4f7674d08df3ce38043936af2dbd1254",
    "bytes": 3331388,
    "image": "art-src/buildings/gold-mine.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/gold-mine"
+   ],
    "downloadedAs": [
     "mine+entrance+3d+model.glb"
    ]
@@ -219,7 +231,9 @@
    "md5": "238645401744fc019302f0a37e913186",
    "bytes": 3822380,
    "image": "art-src/buildings/keep.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/keep"
+   ],
    "downloadedAs": [
     "round+tower+3d+model.glb"
    ]
@@ -240,7 +254,9 @@
    "md5": "1a74c3880b97fb7d247c66d0756a23b0",
    "bytes": 3355216,
    "image": "art-src/buildings/seal-dais.png",
-   "usedBy": [],
+   "usedBy": [
+    "buildings/seal-dais"
+   ],
    "downloadedAs": [
     "stone+circular+platform+3d+model.glb"
    ]
@@ -258,7 +274,9 @@
    "md5": "d381f0d6a029ae1898b7b28e7f7b413b",
    "bytes": 2892276,
    "image": "art-src/enemies/cuong-thi-lead-hat.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/cuong-thi-lead-hat"
+   ],
    "downloadedAs": [
     "ornamental+hat+3d+model.glb"
    ]
@@ -369,7 +387,9 @@
    "md5": "b9952a91c6eac5cd8f1cb001f02f0b96",
    "bytes": 2110236,
    "image": "art-src/helpers/helper-brush.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-brush"
+   ],
    "downloadedAs": [
     "paintbrush+3d+model.glb"
    ]
@@ -378,7 +398,9 @@
    "md5": "ac6b92d5954dd2e46d8d628fb74bd3de",
    "bytes": 2028064,
    "image": "art-src/helpers/helper-cham-glasses.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-cham-glasses"
+   ],
    "downloadedAs": [
     "purple+round+glasses+3d+model.glb"
    ]
@@ -387,7 +409,9 @@
    "md5": "b484a7a081df389b6aa210e7b17b19c6",
    "bytes": 2727108,
    "image": "art-src/helpers/helper-cham-scarf.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-cham-scarf"
+   ],
    "downloadedAs": [
     "polka+dot+scarf+3d+model.glb"
    ]
@@ -396,7 +420,9 @@
    "md5": "84695d958ffb75d55d23930b656ab6b9",
    "bytes": 1963360,
    "image": "art-src/helpers/helper-drum.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-drum"
+   ],
    "downloadedAs": [
     "wooden+drum+3d+model.glb"
    ]
@@ -411,7 +437,9 @@
    "md5": "f6355a5494ab8d1e34e17f36d9d566f9",
    "bytes": 2020556,
    "image": "art-src/helpers/helper-gach-wingband.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-gach-wingband"
+   ],
    "downloadedAs": [
     "striped+cushion+3d+model.glb"
    ]
@@ -420,7 +448,9 @@
    "md5": "e1419ab4fe55495e090f49bf5d870f17",
    "bytes": 2426416,
    "image": "art-src/helpers/helper-hammer.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-hammer"
+   ],
    "downloadedAs": [
     "wooden+hammer+3d+model.glb"
    ]
@@ -438,7 +468,9 @@
    "md5": "df1cd00430f6dbf67e26a9cacca96a3b",
    "bytes": 2435612,
    "image": "art-src/helpers/helper-phay-tail.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/helper-phay-tail"
+   ],
    "downloadedAs": [
     "fantasy+feathered+tail+3d+model.glb"
    ]
@@ -480,67 +512,89 @@
    "md5": "6cc3271005aae485e85c3d13f2784c6b",
    "bytes": 2652564,
    "image": "art-src/kits/archer-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/archer-kit-l2"
+   ]
   },
   "kits/archer-kit-l3.glb": {
    "md5": "c00d5d570e0626f3b42ec5a4b59cbb90",
    "bytes": 2806208,
    "image": "art-src/kits/archer-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/archer-kit-l3"
+   ]
   },
   "kits/barracks-kit-l2.glb": {
    "md5": "55f0019e3265c3391c281c1e6cb9241e",
    "bytes": 3140092,
    "image": "art-src/kits/barracks-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/barracks-kit-l2"
+   ]
   },
   "kits/barracks-kit-l3.glb": {
    "md5": "6552c26f58afaaee33c6cffe98d9bf84",
    "bytes": 2783228,
    "image": "art-src/kits/barracks-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/barracks-kit-l3"
+   ]
   },
   "kits/cannon-barrel-l3.glb": {
    "md5": "a3bf43ec06cb7574d25fa0ab79e306ae",
    "bytes": 2464612,
    "image": "art-src/kits/cannon-barrel-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "props/cannon-barrel-l3"
+   ]
   },
   "kits/cannon-kit-l2.glb": {
    "md5": "29ab9206cd352a51bd817b07801ed397",
    "bytes": 2617532,
    "image": "art-src/kits/cannon-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/cannon-kit-l2"
+   ]
   },
   "kits/cannon-kit-l3.glb": {
    "md5": "f536af6b24d78b7e9da065496cb845d9",
    "bytes": 2919628,
    "image": "art-src/kits/cannon-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/cannon-kit-l3"
+   ]
   },
   "kits/farm-kit-l2.glb": {
    "md5": "b7a272e60c38dd706d4920750d20e230",
    "bytes": 2885136,
    "image": "art-src/kits/farm-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/farm-kit-l2"
+   ]
   },
   "kits/farm-kit-l3.glb": {
    "md5": "bc193c9be6e3426fbe42c3732eabb8e7",
    "bytes": 2706132,
    "image": "art-src/kits/farm-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/farm-kit-l3"
+   ]
   },
   "kits/gold-mine-kit-l2.glb": {
    "md5": "9560f7f122228d2e5aba9da75fdc37c8",
    "bytes": 2965552,
    "image": "art-src/kits/gold-mine-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/gold-mine-kit-l2"
+   ]
   },
   "kits/gold-mine-kit-l3.glb": {
    "md5": "d973178be6c4cb819ad7ada05689af9b",
    "bytes": 2819268,
    "image": "art-src/kits/gold-mine-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/gold-mine-kit-l3"
+   ]
   },
   "kits/infirmary-kit-l2.glb": {
    "md5": "8875c8f402fc014a656051716a55d92a",
@@ -558,19 +612,25 @@
    "md5": "8f7acd1d355a7a14ccb5ea2811224ecb",
    "bytes": 3304032,
    "image": "art-src/kits/keep-kit-l2.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/keep-kit-l2"
+   ]
   },
   "kits/keep-kit-l3.glb": {
    "md5": "e640f9e1369456eb32f18411b3785691",
    "bytes": 2712212,
    "image": "art-src/kits/keep-kit-l3.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/keep-kit-l3"
+   ]
   },
   "kits/keep-kit-l4.glb": {
    "md5": "631b0f4f243b6b861afb2585c023a948",
    "bytes": 2620288,
    "image": "art-src/kits/keep-kit-l4.png",
-   "usedBy": []
+   "usedBy": [
+    "kits/keep-kit-l4"
+   ]
   },
   "kits/lumber-kit-l2.glb": {
    "md5": "31789d597ddc4b1be100efdf4feecc7f",
@@ -618,7 +678,9 @@
    "md5": "f182b2f4e19df25ea687ddda0a73321d",
    "bytes": 2648872,
    "image": "art-src/landmarks/cau-go.png",
-   "usedBy": []
+   "usedBy": [
+    "props/cau-go"
+   ]
   },
   "landmarks/cau-tau.glb": {
    "md5": "4fea366b471c3b5f697e75d2e3fd8010",
@@ -630,7 +692,9 @@
    "md5": "17451fbc27781701067d7a0ad75ba7b6",
    "bytes": 3518396,
    "image": "art-src/landmarks/choi-canh-doi.png",
-   "usedBy": []
+   "usedBy": [
+    "landmarks/choi-canh-doi"
+   ]
   },
   "landmarks/da-ke.glb": {
    "md5": "2fafdecefe87211481bc12c561721133",
@@ -678,13 +742,17 @@
    "md5": "33042e9e298d92528fc11e7617cce375",
    "bytes": 2825616,
    "image": "art-src/landmarks/vach-thac-bac.png",
-   "usedBy": []
+   "usedBy": [
+    "landmarks/vach-thac-bac"
+   ]
   },
   "loot/bag-basket.glb": {
    "md5": "fda7dd2dc77cf173c6477696a3802aa6",
    "bytes": 3700900,
    "image": "art-src/loot/bag-basket.png",
-   "usedBy": [],
+   "usedBy": [
+    "loot/bag-basket"
+   ],
    "downloadedAs": [
     "woven+basket+3d+model.glb"
    ]
@@ -693,7 +761,9 @@
    "md5": "32ce85b417b22f334cf261a8c2908e40",
    "bytes": 2922092,
    "image": "art-src/loot/bag-cloth.png",
-   "usedBy": [],
+   "usedBy": [
+    "loot/bag-cloth"
+   ],
    "downloadedAs": [
     "money+bag+3d+model.glb"
    ]
@@ -702,7 +772,9 @@
    "md5": "8df99ddaf52ed1ef9e2b736660a208e5",
    "bytes": 3003792,
    "image": "art-src/loot/chest-boss.png",
-   "usedBy": [],
+   "usedBy": [
+    "loot/chest-boss"
+   ],
    "downloadedAs": [
     "treasure+chest+3d+model.glb"
    ]
@@ -711,7 +783,9 @@
    "md5": "e5238ca50f19ae387d24f4bc7fe61811",
    "bytes": 2099524,
    "image": "art-src/projectiles/arrow.png",
-   "usedBy": [],
+   "usedBy": [
+    "projectiles/arrow"
+   ],
    "downloadedAs": [
     "spear+3d+model (1).glb"
    ]
@@ -720,13 +794,17 @@
    "md5": "ce4bc175e5fa026426ba8c3ccccae5cf",
    "bytes": 1984776,
    "image": "art-src/projectiles/fire-feather.png",
-   "usedBy": []
+   "usedBy": [
+    "projectiles/fire-feather"
+   ]
   },
   "projectiles/keep-bolt.glb": {
    "md5": "de73704e2d460d8049724695b3152edf",
    "bytes": 2338952,
    "image": "art-src/projectiles/keep-bolt.png",
-   "usedBy": [],
+   "usedBy": [
+    "projectiles/keep-bolt"
+   ],
    "downloadedAs": [
     "wooden+spear+3d+model.glb"
    ]
@@ -753,7 +831,9 @@
    "md5": "9d7025b95dd5cb17ce76bfd536897118",
    "bytes": 2333868,
    "image": "art-src/projectiles/root-burst.png",
-   "usedBy": [],
+   "usedBy": [
+    "projectiles/root-burst"
+   ],
    "downloadedAs": [
     "rocky+twisted+roots+3d+model.glb"
    ]
@@ -762,13 +842,17 @@
    "md5": "01e289006311f51761511264b257cb43",
    "bytes": 1689496,
    "image": "art-src/projectiles/seed-drop.png",
-   "usedBy": []
+   "usedBy": [
+    "projectiles/seed-drop"
+   ]
   },
   "projectiles/shell.glb": {
    "md5": "eb655bba73459d0bff0add49156b1f86",
    "bytes": 2844692,
    "image": "art-src/projectiles/shell.png",
-   "usedBy": [],
+   "usedBy": [
+    "projectiles/shell"
+   ],
    "downloadedAs": [
     "ornate+bomb+3d+model.glb"
    ]
@@ -789,13 +873,17 @@
    "md5": "8225bca448c6f5a57802a3682b0dc7cb",
    "bytes": 2547248,
    "image": "art-src/props/gold-mine-cart.png",
-   "usedBy": []
+   "usedBy": [
+    "props/gold-mine-cart"
+   ]
   },
   "props/gold-pile-1.glb": {
    "md5": "ef6da06514000d379134750bc1f1ccfe",
    "bytes": 1826764,
    "image": "art-src/props/gold-pile-1.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/gold-pile-1"
+   ],
    "downloadedAs": [
     "gold+coins+3d+model.glb"
    ]
@@ -804,7 +892,9 @@
    "md5": "adc0d37d88c7126accf90aeca991bb4b",
    "bytes": 2218868,
    "image": "art-src/props/gold-pile-2.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/gold-pile-2"
+   ],
    "downloadedAs": [
     "gold+coins+3d+model (1).glb"
    ]
@@ -813,7 +903,9 @@
    "md5": "82f349f4e873990952fd59b7aed77260",
    "bytes": 2396188,
    "image": "art-src/props/gold-pile-3.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/gold-pile-3"
+   ],
    "downloadedAs": [
     "gold+coins+pile+3d+model.glb"
    ]
@@ -822,7 +914,9 @@
    "md5": "47b48a5e4f736f7dca8311c97cff6230",
    "bytes": 2533344,
    "image": "art-src/props/gold-pile-4.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/gold-pile-4"
+   ],
    "downloadedAs": [
     "gold+coin+pile+3d+model.glb"
    ]
@@ -831,7 +925,9 @@
    "md5": "93a480ad5f75d57c71d8af0dfef867e1",
    "bytes": 1797372,
    "image": "art-src/props/level-pennant.png",
-   "usedBy": [],
+   "usedBy": [
+    "props/level-pennant"
+   ],
    "downloadedAs": [
     "wooden+post+3d+model.glb"
    ]
@@ -846,7 +942,9 @@
    "md5": "e5696de954d1844fa115ad0cc96dcb01",
    "bytes": 3358460,
    "image": "art-src/props/scaffold-bamboo.png",
-   "usedBy": []
+   "usedBy": [
+    "props/scaffold-bamboo"
+   ]
   },
   "ruins/ruin-l.glb": {
    "md5": "91be19e0d002394e3e24af1656d670a2",
@@ -888,7 +986,9 @@
    "md5": "62d906f2c3d2a2b06e5164ed238e8200",
    "bytes": 2624372,
    "image": "art-src/units/linh-giao-spear.png",
-   "usedBy": [],
+   "usedBy": [
+    "attachments/linh-giao-spear"
+   ],
    "downloadedAs": [
     "spear+3d+model.glb"
    ]

@@ -6,7 +6,9 @@
     "props",
     "projectiles",
     "loot",
-    "attachments"
+    "attachments",
+    "kits",
+    "landmarks"
   ],
   "models": {
     "buildings/keep": {
@@ -1734,6 +1736,607 @@
             4.3,
             4.5
           ]
+        }
+      }
+    },
+    "kits/keep-kit-l2": {
+      "source": "kits/keep-kit-l2.glb",
+      "triangles": 7800,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Fort cấp 2: vòng tường đồng tâm trên sân đá ngoài của Fort (3D_IMPORT 28/10: tách hai đảo lưới, khép khe trái vào chòi nỏ).",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "footprint",
+          "metres": 12.0
+        },
+        "pivot": "footprint",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/keep-kit-l3": {
+      "source": "kits/keep-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Fort cấp 3: chòi hai tầng chụp lên chòi cũ; FX_top, FX_perch, FX_word dời lên tầng trên.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 3.8
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "sockets": {
+          "FX_top": {
+            "ray": "-y",
+            "x": 0,
+            "z": 0
+          },
+          "FX_word": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.25,
+              0
+            ]
+          },
+          "FX_perch": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.6,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "kits/keep-kit-l4": {
+      "source": "kits/keep-kit-l4.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Fort cấp 4: đình mái ngói vàng trên Fort cấp 3.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 3.6
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "sockets": {
+          "FX_top": {
+            "ray": "-y",
+            "x": 0,
+            "z": 0
+          },
+          "FX_word": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.25,
+              0
+            ]
+          },
+          "FX_perch": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.6,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "kits/archer-kit-l2": {
+      "source": "kits/archer-kit-l2.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Archer Tower cấp 2: mái chóp, xà hiên, lan can trên sàn canh.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 3.2
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "sockets": {
+          "FX_top": {
+            "ray": "-y",
+            "x": 0,
+            "z": 0
+          },
+          "FX_word": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.25,
+              0
+            ]
+          },
+          "FX_perch": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.6,
+              0
+            ]
+          }
+        }
+      }
+    },
+    "kits/archer-kit-l3": {
+      "source": "kits/archer-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Archer Tower cấp 3: tầng mới trên chóp mái cấp 2; FX_top, FX_perch, FX_word, FX_crew, FX_muzzle lên tầng mới.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 2.8
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "sockets": {
+          "FX_top": {
+            "ray": "-y",
+            "x": 0,
+            "z": 0
+          },
+          "FX_word": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.25,
+              0
+            ]
+          },
+          "FX_perch": {
+            "from": "FX_top",
+            "offset": [
+              0,
+              0.6,
+              0
+            ]
+          },
+          "FX_crew": {
+            "frac": [
+              0,
+              -0.55,
+              0
+            ]
+          },
+          "FX_muzzle": {
+            "frac": [
+              0,
+              -0.3,
+              -1
+            ]
+          }
+        }
+      }
+    },
+    "kits/cannon-kit-l2": {
+      "source": "kits/cannon-kit-l2.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Cannon Tower cấp 2: vòng đá có khấc, mái che nửa sau; mặt hở ra trước, nòng giữa vòng.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 4.4
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/cannon-kit-l3": {
+      "source": "kits/cannon-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Cannon Tower cấp 3: cột cờ chân đá ở góc sau trái tường ụ (FX_banner), mặt cờ về camera.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "height",
+          "metres": 3.2
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/barracks-kit-l2": {
+      "source": "kits/barracks-kit-l2.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Barracks cấp 2: chòi canh bốn cột ở sân trống góc sau phải trong rào.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 1.9
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/barracks-kit-l3": {
+      "source": "kits/barracks-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Barracks cấp 3: mái ngói đỏ thấp thay mái rơm (nâng trục mái nếu nóc rơm xuyên).",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 3.6
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/gold-mine-kit-l2": {
+      "source": "kits/gold-mine-kit-l2.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Gold Mine cấp 2: tời quay trên vai đá bên phải.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 1.8
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/gold-mine-kit-l3": {
+      "source": "kits/gold-mine-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Gold Mine cấp 3: guồng nước áp mặt đá bên trái, mặt guồng hướng ra ngoài (xoay 90°).",
+      "static": {
+        "yaw": 0,
+        "size": {
+          "measure": "height",
+          "metres": 2.6
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/farm-kit-l2": {
+      "source": "kits/farm-kit-l2.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Rice Field cấp 2: đống rơm và giá phơi ở bờ góc sau trái.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 2.2
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "kits/farm-kit-l3": {
+      "source": "kits/farm-kit-l3.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Rice Field cấp 3: cối giã bập bênh giữa bờ trái.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 2.4
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "props/cannon-barrel-l3": {
+      "source": "kits/cannon-barrel-l3.glb",
+      "triangles": 2000,
+      "reviewed": false,
+      "note": "Cannon Tower cấp 3: nòng vằn, cùng trục và cỡ với props/cannon-barrel (1C C4 phần B). Hoa văn chỉ ở một mặt: ART_FIX_QUEUE.",
+      "static": {
+        "yaw": 180,
+        "size": {
+          "measure": "length",
+          "metres": 3.0
+        },
+        "pivot": "centre",
+        "colour": {
+          "match": true,
+          "strength": 0.6,
+          "minGain": 1.0,
+          "maxGain": 1.5,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "sockets": {
+          "FX_muzzle": {
+            "frac": [
+              0,
+              0,
+              -1
+            ]
+          }
+        }
+      }
+    },
+    "props/scaffold-bamboo": {
+      "source": "props/scaffold-bamboo.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Giàn tre khi xây (1C C4 phần B): cỡ vòng M; runtime co theo vòng S, M, L, XL.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 4.8
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "projectiles/fire-feather": {
+      "source": "projectiles/fire-feather.glb",
+      "triangles": 2000,
+      "reviewed": false,
+      "note": "Lông lửa Fire Feather Rain (1C C4 phần B): nằm ngang, mặt phiến lên trên (3D_IMPORT: xoay 90°).",
+      "static": {
+        "yaw": 0,
+        "rotate": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          -1,
+          0,
+          1,
+          0
+        ],
+        "size": {
+          "measure": "length",
+          "metres": 1.0
+        },
+        "pivot": "centre",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "projectiles/seed-drop": {
+      "source": "projectiles/seed-drop.glb",
+      "triangles": 2000,
+      "reviewed": false,
+      "note": "Hạt Mộc Tinh (1C C4 phần B): dùng tạm, múi quá sâu (ART_REPLACE_LATER).",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "height",
+          "metres": 0.6
+        },
+        "pivot": "centre",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "landmarks/vach-thac-bac": {
+      "source": "landmarks/vach-thac-bac.glb",
+      "triangles": 7800,
+      "reviewed": false,
+      "note": "Vách Thác Bạc (1C C4 phần B): ngoài sân ở đầu suối phía bắc; sáng +25 %; khe thác giữa mặt trước.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "width",
+          "metres": 22.0
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.25,
+          "maxGain": 1.5,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "landmarks/choi-canh-doi": {
+      "source": "landmarks/choi-canh-doi.glb",
+      "triangles": 7700,
+      "reviewed": false,
+      "note": "Chòi canh đồi (1C C4 phần B): trên Đồi Cầu Vồng, phía đông ngoài sân.",
+      "static": {
+        "yaw": 90,
+        "size": {
+          "measure": "height",
+          "metres": 5.0
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
         }
       }
     }

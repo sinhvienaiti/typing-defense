@@ -49,7 +49,7 @@ Mốc đang làm: **1C.C3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
 | 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
 | 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
-| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3) không thêm dòng `src`; phần B còn lại | 200 | 11.650 |
+| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3), phần B (mục 8.5): không thêm dòng `src` (bảng chỗ đặt bộ cấp là JSON) | 200 | 11.650 |
 | 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | 11.054 → 11.356 thật (mục 8.4) | 800 | 12.450 |
 | 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
 | 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
@@ -1958,3 +1958,38 @@ Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kế
 | Chi phí vẽ một khung (trang, không phải đo GPU) | — | trung bình 0,22–0,36 ms, p95 0,4–0,7 ms |
 
 - Ván vàng giữ nguyên. `td-1c-ground` (mới) đạt ở 1280 × 720 và 1920 × 1080: bản 3D High và Medium, đủ 8 file đất và cầu đã tải, draw call trong trần, không lỗi console. Đo khung ở đây chỉ là số của trang trong lượt chụp; lượt `--perf` thật thuộc C13.
+
+### 8.5 C4 phần B: bộ cấp, đạo cụ, mốc cảnh (29/10/2026)
+
+- **20 mục mới trong preset** (`scripts/models/presets/typing-defense-static.json`), qua `models:blender` và đều đạt:
+  - 13 bộ cấp: Fort L2–L4, Archer Tower, Cannon Tower, Barracks, Gold Mine, Rice Field mỗi nhà L2 và L3;
+  - `props/cannon-barrel-l3` (cùng trục và cỡ với `cannon-barrel`), `props/scaffold-bamboo` (cỡ vòng M; runtime co theo vòng), `props/gold-mine-cart`;
+  - `projectiles/fire-feather` (xoay nằm ngang), `projectiles/seed-drop`;
+  - `landmarks/vach-thac-bac` (rộng 22 m, sáng +25 %, giữ khe thác), `landmarks/choi-canh-doi` (cao 5 m).
+- **Hợp đồng model của game** có thêm hai loại: `kits` và `landmarks` (≤ 8.000 tam giác, texture 512/256).
+- **Chỗ đặt bộ cấp trên nhà gốc:** `src/view/3d/kits.json`, mỗi cấp liệt kê mọi bộ nó hiện, theo hệ của three.js. "Trái" và "phải" trong ghi chú của `3D_IMPORT_2026-10-28` là trái và phải của ảnh: trái là +X của model.
+- **Kiểm chỗ đặt:** `scripts/models/blender/td_kit_compose.py` dựng mỗi nhà ở từng cấp từ đúng bảng đó (19 ảnh, góc 55° và góc trước). Sau một lượt sửa:
+  - Archer Tower L2 thay mái rơm bằng mái ngói, L3 thêm một tầng;
+  - Fort L2 có vòng tường, L3 và L4 chồng lên đỉnh;
+  - Cannon Tower L2 có vòng đá và mái nửa sau, L3 có cột cờ ở góc sau trái và nòng vằn;
+  - Barracks L2 có chòi canh trong sân rào bên phải, L3 có mái ngói đỏ phủ mái rơm;
+  - Gold Mine L2 có tời trên vai đá phải, L3 có guồng áp mặt đá trái;
+  - Rice Field L2 có đống rơm ở góc sau trái, L3 có cối giã ở bờ trái.
+- **Chưa làm** (sửa lưới hay vẽ texture; ghi để sửa sau, không chặn C6):
+  - `keep-kit-l2`: tách hai đảo lưới, khép khe trái vào chòi nỏ;
+  - `keep-kit-l3`: xóa màng xám dưới mái tầng trên;
+  - `archer-kit-l2`: xóa sàn ván đè sàn canh, socket đèn lồng trên xà hiên;
+  - `cannon-barrel-l3`: chép hoa văn xoáy sang mặt trên và mặt sau;
+  - `gold-mine-kit-l3`: tô tối màng giữa các nan guồng.
+- **`models:index`** với preset: `art-src/3d/SOURCES.json` nay có 157 file (trước 71; thêm các file Tripo đợt 2 đã có trên máy), `usedBy` điền cho 50 file mà preset dựng.
+- **Đo media** (`scripts/td/media-budget.mjs`, 53/57 model, còn thiếu Mộc Tinh, Draconis, `worker-base`, Helper):
+
+| | High | Medium |
+|---|---:|---:|
+| Model | 10,08 MB | 5,61 MB |
+| Cộng (cả đất) | 11,22 MB (trần 12) | 5,92 MB (trần 9) |
+| Bộ khởi động | — | 2,09 MB (trần 3,5) |
+| Tới Đêm 1 (thêm JS, CSS, từ vựng) | — | 2,71 MB (trần 6) |
+
+- **High vượt dòng model** (7,5 MB). Khi đủ 4 model còn thiếu (khoảng +2 MB), cảnh (dòng 2,5) và VFX (dòng 0,5), High sẽ khoảng 15–16 MB so với trần 12: cần quyết lại (bản bàn giao).
+- `pnpm check` 383/383, ván vàng giữ nguyên.
