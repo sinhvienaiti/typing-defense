@@ -14,7 +14,7 @@ Nguồn: bản kiểm kê map 1 (`docs/games/map1/audit-2026-10-28.json`, mục 
 | Trần dòng | Trần cứng 1C **16.500** (10.500 của R3 + 6.000; 400 dòng V4a trả lại vì làn V4a dừng ở bước 1). Hôm nay 10.555 |
 | Gói "/" | Vẫn ≤ 85 kB gzip (lối vào + màn đầu). Trước 1C 83,78 kB (chừa 1,22 kB sau khi gộp 036; trên `a5cc147` chỉ chừa 0,09 kB). C1 thêm ≤ 0,5 kB (đo: +0,42 kB, còn chừa 0,79 kB) |
 | Chunk 3D | `view/3d/view-3d.ts` cùng three.js, nạp lười, không bao giờ trong bộ khởi động; ≤ 260 kB gzip (C1: 117 kB) |
-| Media map 1 | High ≤ 12 MB, Medium ≤ 6 MB, Low 0 byte model. Lần chơi đầu nạp Medium; trang chỉ chờ bộ khởi động ≤ 3,5 MB |
+| Media map 1 | High ≤ 12 MB, Medium ≤ 9 MB (chủ dự án 28/10, thay ≤ 6 MB), Low 0 byte model. Lần chơi đầu nạp Medium; trang chỉ chờ bộ khởi động ≤ 3,5 MB; tới Đêm 1 ≤ 6 MB |
 | Khung (Mac mini M4, 1920 × 1080) | High: trung bình ≤ 5,5 ms, p95 ≤ 8,5 ms, ≤ 150 draw call. Medium: ≤ 4,5 ms, p95 ≤ 7 ms, ≤ 100 draw call. Không khung nào quá 50 ms |
 | Thứ tự làn L | C1 → C2 → C4 → C3 → C6 → (mốc giữa 06/11) → C10 → C13 → C14 |
 
@@ -86,19 +86,28 @@ Cách đếm như `BUILD_1A6.md` §0: `.ts` trong `src`, trừ `src/kit`; test, 
 
 **Hôm nay:** manifest model có 34 mục: High 13,68 MB, Medium 6,07 MB. Trong đó có mục không thuộc truyện map 1 (`heroes/lam` 1,30 / 0,83 MB; `enemies/troll` 0,59 / 0,36 MB, chỉ hộp cát), và còn thiếu bộ cấp L2/L3, River Serpent, Split Blob, Sapling, Helper, Mộc Tinh, Draconis, giàn tre, xe goòng, lông lửa, ba mốc cảnh (C4). Vì vậy C4 phải hạ texture trước khi thêm model.
 
+**Quyết định của chủ dự án (28/10/2026, khoảng 23:20, qua điều phối viên), thay trần Medium cũ (≤ 6 MB):** C4 phần A đo được phần model Medium đã 3,98 MB khi mới có 32/57 model, dự báo 7–8 MB khi đủ, vì ở Medium phần nặng là lưới có xương và clip của nhân vật. Nay:
+
+- **Medium tổng ≤ 9 MB.**
+- **Bộ khởi động ≤ 3,5 MB:** trang chỉ chờ chừng này trước khi vào ván.
+- **Tải theo ngày:** phần còn lại nạp ngầm theo thứ tự mở khóa của truyện (Barracks Ngày 2; Cannon Tower, Gold Mine, Fort cấp 2 Ngày 3; nâng cấp Ngày 4; Fort cấp 3 Ngày 5); bộ boss nạp cuối.
+- **Byte tới Đêm 1 ≤ 6 MB** (HOSTING_PLAN §7): bộ khởi động, phần Ngày 1 cần và JS, CSS, từ vựng.
+
 | Phần | High | Medium | Low |
 |---|---:|---:|---:|
-| Model GLB của map 1 | ≤ 7,5 MB | ≤ 3,6 MB | 0 |
-| Ô đất, decal, ô Rice Field (phiếu 095, 097, 098) | ≤ 1,5 MB | ≤ 0,8 MB | 0 |
-| Atlas cảnh (màu + pháp tuyến), ba lớp phông, trời | ≤ 2,5 MB | ≤ 1,2 MB | 0 |
-| Tờ VFX (043, 099, 100) | ≤ 0,5 MB | ≤ 0,4 MB | 0 |
-| **Cộng** | **≤ 12 MB** | **≤ 6 MB** | ảnh màn đầu 0,34 MB như nay |
+| Model GLB của map 1 | ≤ 7,5 MB | theo dõi | 0 |
+| Ô đất, decal, ô Rice Field (phiếu 095, 097, 098) | ≤ 1,5 MB | theo dõi | 0 |
+| Atlas cảnh (màu + pháp tuyến), ba lớp phông, trời | ≤ 2,5 MB | theo dõi | 0 |
+| Tờ VFX (043, 099, 100) | ≤ 0,5 MB | theo dõi | 0 |
+| **Cộng** | **≤ 12 MB** | **≤ 9 MB** | ảnh màn đầu 0,34 MB như nay |
+| **Bộ khởi động** | — | **≤ 3,5 MB** | — |
+| **Tới Đêm 1** (thêm JS, CSS, từ vựng) | — | **≤ 6 MB** | — |
 
-- **Lần chơi đầu nạp Medium** (từ C13 là mặc định). Trang chỉ chờ **bộ khởi động ≤ 3,5 MB**: đất, cảnh, Fort, Rice Field, Archer Tower, Draconis, Helper, dân, Hopping Zombie. Phần còn lại nạp ngầm trong Ngày 1 theo thứ tự mở khóa; bộ boss (Mộc Tinh, River Serpent, Split Blob) nạp cuối.
-- **Byte đã tải tới lúc vào Đêm 1 ≤ 6 MB** (HOSTING_PLAN §7, gồm JS, CSS, font, từ vựng, âm).
+- **Bộ khởi động** (danh sách ở `scripts/td/media-budget.mjs`, `STARTER`): đất, cảnh, Fort, Rice Field, Archer Tower, giàn tre, cờ cấp, hai Wooden Bridge, hai mốc cảnh, Draconis, Helper và đồ gắn, dân, Hopping Zombie, mũi tên và nỏ của Fort.
+- **Thêm tới Đêm 1** (`NIGHT_1`): bộ cấp 2 của Fort, Archer Tower, Rice Field, lông lửa, tờ VFX; cộng JS, CSS (gzip của `dist`) và từ vựng.
 - **Cách hạ:** texture Medium ≤ 1024² cho nhà, ≤ 512² cho đạo cụ nhỏ và đồ gắn; nén meshopt (không dùng Draco); gộp texture trùng. Ảnh 2D là WebP.
 - **Chỉ model map 1 vào gói deploy** (C13; phần `deploy.config` là của làn T, A9). Model hộp cát (Troll) nạp khi hộp cát gọi.
-- **Đo:** cộng `bytes` của bậc trong `models/manifest.json` cho các mục map 1, cộng file atlas và ô đất. C4 thêm `scripts/td/media-budget.mjs`; script hỏng khi vượt một dòng của bảng. Chạy trước mỗi lần xin `media:push`.
+- **Đo:** `scripts/td/media-budget.mjs` cộng `bytes` của bậc trong `models/manifest.json` cho các mục map 1, cộng các thư mục `ground`, `scenery`, `vfx`; hỏng khi vượt High tổng, một dòng High, Medium tổng, bộ khởi động hay mức tới Đêm 1. Chạy trước mỗi lần xin `media:push`.
 
 ## 6. Draw call và khung theo bậc
 
