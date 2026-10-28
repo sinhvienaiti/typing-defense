@@ -1,19 +1,22 @@
 /**
  * The 3D view of map 1 (1C, docs/td/BUILD_1C_MAP1.md §7): the chunk view.ts loads, with three.js. It assembles the parts
  * under src/view/3d (C2: the stage and the RTS camera; C3: the ground, the stream and the bridges; C6: the houses and the
- * landmarks) on a canvas
+ * landmarks; C10: the word cards' anchors and their typing feel, words.ts) on a canvas
  * of its own over the 2D one, and answers the page as a MapView: project and unproject through the camera, the pointer's
  * pan, turn and zoom, F1–F3. It reads the world and never changes it. `open` gives null without WebGL (the page keeps
  * 2D); a lost context calls `lost`.
  */
 import * as THREE from "three";
+import type { RareEvent } from "../../sim/events";
 import type { World } from "../../sim/world";
 import type { CameraView, Hand, MapView } from "../view";
+import type { WordCards } from "../words/cards";
 import type { Rect } from "../words/lanes";
 import { CAMERA, CameraRig, groundAt } from "./camera";
 import { createGround, type Ground } from "./ground";
 import { Houses } from "./houses";
 import { createStage, type Stage, type Tier3D } from "./stage";
+import { WordFeel } from "./words";
 
 const DEG = Math.PI / 180;
 
@@ -22,31 +25,35 @@ export class View3D implements MapView {
   private readonly ground: Ground;
   private readonly houses: Houses;
   private readonly rig: CameraRig;
+  private readonly words: WordFeel;
   private readonly hit = new THREE.Vector3();
   private last = -1;
 
-  /** A canvas after `after` for the world's map, or null when the browser gives no WebGL 2 context. */
-  static open(after: HTMLElement, tier: Tier3D, w: World, lost: () => void): View3D | null {
+  /** A canvas after `after` for the world's map, or null when the browser gives no WebGL 2 context; `cards` feel the keys there. */
+  static open(after: HTMLElement, tier: Tier3D, w: World, lost: () => void, cards: WordCards): View3D | null {
     const canvas = document.createElement("canvas");
     canvas.id = "tdCanvas3d";
     canvas.setAttribute("aria-label", "Bản đồ");
     try {
       const stage = createStage(canvas, tier, w.map.halfM);
       after.after(canvas);
-      return new View3D(stage, w, lost);
+      return new View3D(stage, w, lost, cards);
     } catch (error) {
       console.warn("typing defense: no WebGL, the map stays 2D", error);
       return null;
     }
   }
 
-  private constructor(private readonly stage: Stage, w: World, lost: () => void) {
+  private constructor(private readonly stage: Stage, w: World, lost: () => void, private readonly cards: WordCards) {
     this.canvas.addEventListener("webglcontextlost", (event) => (event.preventDefault(), lost()));
     const [x, z] = w.map.keep;
     this.rig = new CameraRig(stage.camera, w.map.halfM, { x, z });
     this.rig.view("home", true);
     this.ground = createGround(stage.layers.ground, w.map, w.lanes.slice(0, -1), stage.tier, stage.renderer); // the last lane is the fly route
     this.houses = new Houses(stage.layers.actors, w.map, stage.tier);
+    this.words = new WordFeel(stage, this.houses, w.map);
+    stage.overlay(this.words.pool.scene);
+    cards.feel = this.words;
   }
 
   get canvas(): HTMLCanvasElement {
@@ -58,20 +65,29 @@ export class View3D implements MapView {
     this.place(performance.now(), 0);
   }
 
-  /** The boss's and Tối Thượng's layers read their events here from C8 and C11. */
-  read(): void {}
+  /** The chain's steps (C10); the boss's and Tối Thượng's layers read their events here from C8 and C11. */
+  read(events: readonly RareEvent[], w: World, now: number): void {
+    this.words.read(events, w, now);
+  }
 
   draw(w: World, hand: Hand): void {
     const now = performance.now();
     this.houses.update(w, hand, now);
-    this.place(now, this.last < 0 ? 0 : (now - this.last) / 1000);
+    const dt = this.last < 0 ? 0 : (now - this.last) / 1000;
+    this.place(now, dt);
     this.last = now;
     this.ground.update(now / 1000);
+    this.words.update(w, now, Math.min(0.1, dt));
     this.stage.render();
   }
 
   project(x: number, z: number): { x: number; y: number } {
     return this.stage.project(x, 0, z);
+  }
+
+  /** Call c's card anchor, 0.6 m over its house's FX_top (`core`: its FX_core), through the camera (C10). */
+  anchor(w: World, c: number, core: boolean): { x: number; y: number } {
+    return this.words.anchor(w, c, core);
   }
 
   unproject(px: number, py: number): { x: number; z: number } {
@@ -110,10 +126,12 @@ export class View3D implements MapView {
 
   stats(): Record<string, number | string> {
     const { yaw, pitch, distance, x, z } = this.rig.pose;
-    return { kind: this.kind, tier: this.stage.tier, ...this.stage.stats(), yaw, pitch, distance, x, z, houses: JSON.stringify(this.houses.report()) };
+    return { kind: this.kind, tier: this.stage.tier, ...this.stage.stats(), ...this.words.stats(), yaw, pitch, distance, x, z, houses: JSON.stringify(this.houses.report()) };
   }
 
   dispose(): void {
+    this.cards.feel = null;
+    this.words.dispose();
     this.ground.dispose();
     this.stage.dispose();
     this.canvas.remove();

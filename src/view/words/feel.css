@@ -1,0 +1,46 @@
+/*
+ * C10 typing feel of the word cards (docs/td/BUILD_1C_MAP1.md §8; docs/games/TYPING_BREAK_STUDY.md T1, T2; ART_DIRECTION
+ * §8.2). The letter just typed (.k, its copy in data-c) is stamped: the copy drops from above-left, tilted, 3× → 2.25× →
+ * 1.6× → 1× in four frames, and the letter itself shows from the fourth; an ink press rings it: a white disc, a thick white
+ * ring, a dark ring, then a thin arc turning away, done at 150 ms (frame steps, not tweens). --tier, the chain's tier
+ * (cards.ts), makes the stamp bigger and turns it gold. Reduced motion: no drop, a shorter ring.
+ */
+.td-words { --tier: 0; }
+.td-words .td-card .k { position: relative; animation: td-key-hold 50ms step-end; }
+@keyframes td-key-hold { from { color: transparent; } }
+.td-words .td-card .k::before, .td-words .td-card .k::after { position: absolute; pointer-events: none; opacity: 0; }
+.td-words .td-card .k::before {
+  --s: calc(3 + 0.25 * var(--tier));
+  --glow: color-mix(in srgb, #7ff5e0, #ffc75c calc(var(--tier) * 25%));
+  content: attr(data-c); left: 0; bottom: 0; transform-origin: 40% 100%;
+  color: #fff; -webkit-text-stroke: 1.2px var(--vd-jade-ink); text-shadow: 0 1px 0 var(--vd-jade-ink), 0 0 4px var(--glow), 0 0 12px var(--glow);
+  animation: td-key-stamp 67ms step-end;
+}
+@keyframes td-key-stamp {
+  0% { opacity: 1; transform: translate(-0.3em, -0.9em) rotate(-8deg) scale(var(--s)); }
+  25% { opacity: 1; transform: translate(-0.2em, -0.55em) rotate(-6deg) scale(calc(var(--s) * 0.75)); }
+  50% { opacity: 1; transform: translate(-0.08em, -0.22em) rotate(-3deg) scale(calc(var(--s) * 0.54)); color: #c8fff4; }
+  75% { opacity: 1; transform: none; color: var(--vd-jade); -webkit-text-stroke: 0; text-shadow: 0 0 6px var(--glow); }
+  100% { opacity: 0; }
+}
+.td-words .td-card .k::after {
+  content: ""; left: 50%; top: 54%; width: 1.7em; height: 1.7em; margin: -0.85em 0 0 -0.85em; box-sizing: border-box; border-radius: 50%;
+  animation: td-key-press 150ms step-end;
+}
+@keyframes td-key-press {
+  0% { opacity: 1; background: rgba(255, 255, 255, 0.95); box-shadow: 0 0 10px 3px var(--glow, #7ff5e0); transform: scale(0.85); }
+  11% { opacity: 1; border: 0.22em solid #fff; box-shadow: 0 0 8px rgba(127, 245, 224, 0.8); transform: scale(1); }
+  33% { opacity: 1; border: 0.26em solid rgba(14, 28, 26, 0.85); transform: scale(1.1); }
+  55% { opacity: 1; border: 0.08em solid; border-color: #fff #fff transparent transparent; transform: scale(1.22); }
+  66% { opacity: 0.9; border: 0.08em solid; border-color: rgba(14, 28, 26, 0.85) rgba(14, 28, 26, 0.85) transparent transparent; transform: scale(1.24) rotate(40deg); }
+  77% { opacity: 0.6; border: 0.07em solid; border-color: rgba(14, 28, 26, 0.85) rgba(14, 28, 26, 0.85) transparent transparent; transform: scale(1.25) rotate(80deg); }
+  88% { opacity: 0.3; border: 0.06em solid; border-color: rgba(14, 28, 26, 0.85) rgba(14, 28, 26, 0.85) transparent transparent; transform: scale(1.26) rotate(120deg); }
+  100% { opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .td-words .td-card .k::before { animation: none; }
+  .td-words .td-card .k::after { animation-duration: 100ms; }
+}
+/* The chain count over the card a word was typed on (src/view/3d/words.ts): a number, no words; gold from tier 2. */
+.td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; color: #e9fff9; font: 800 22px/1 var(--vd-title); -webkit-text-stroke: 1.5px var(--vd-ink); text-shadow: 0 2px 0 var(--vd-ink), 0 0 12px rgba(25, 201, 168, 0.95); }
+.td-combo.is-gold { color: #ffe3a0; text-shadow: 0 2px 0 var(--vd-ink), 0 0 14px rgba(255, 199, 92, 0.95); }

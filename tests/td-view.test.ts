@@ -60,7 +60,7 @@ describe("1C: three.js only in the 3D view's chunk (BUILD_1C_MAP1 §4)", () => {
   });
 
   it("main.ts calls only MapView's members on the view it draws through", () => {
-    const members = new Set(["kind", "resize", "read", "draw", "project", "unproject", "callAt", "keepOut", "panBy", "zoomAt", "turn", "look", "stats"]);
+    const members = new Set(["kind", "resize", "read", "draw", "project", "anchor", "unproject", "callAt", "keepOut", "panBy", "zoomAt", "turn", "look", "stats"]);
     const used = [...code("src/main.ts").matchAll(/\bview\.(\w+)/g)].map((m) => m[1]!);
     expect(used.length).toBeGreaterThan(8);
     expect(used.filter((name) => !members.has(name))).toEqual([]);

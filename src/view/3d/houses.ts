@@ -26,8 +26,9 @@ const DROP_MS = 500;
 const SCAFFOLD_M = 4.8;
 const GREEN = new THREE.Color("#38d39f");
 const RED = new THREE.Color("#ff4a4a");
+const SCRATCH = new THREE.Vector3();
 
-type House = { group: THREE.Group; def: string; level: number; ready: boolean; complete: boolean; body: THREE.Object3D | null; kits: THREE.Object3D[]; extras: THREE.Object3D[]; scaffold: THREE.Object3D | null; grownAt: number; droppedAt: number; pile: number; seen: boolean };
+type House = { group: THREE.Group; def: string; level: number; ready: boolean; complete: boolean; body: THREE.Object3D | null; kits: THREE.Object3D[]; extras: THREE.Object3D[]; scaffold: THREE.Object3D | null; grownAt: number; droppedAt: number; pile: number; seen: boolean; kickAt?: number };
 
 const ease = (t: number): number => {
   const c = 1.70158; // easeOutBack: a little overshoot
@@ -99,7 +100,10 @@ export class Houses {
       // The grow-in and the kits' drop.
       if (house.body) {
         const g = house.grownAt < 0 ? 1 : ease((now - house.grownAt) / GROW_MS);
-        house.body.scale.set(0.8 + 0.2 * g, g, 0.8 + 0.2 * g);
+        // C10: a word shot's kick (VFX_STANDARD L18): the house dips 9 % and springs back in about 120 ms.
+        const k = now - (house.kickAt ?? -1e9);
+        const kick = k < 200 ? 0.09 * Math.exp(-k / 45) * Math.cos(k / 22) : 0;
+        house.body.scale.set((0.8 + 0.2 * g) * (1 + kick * 0.4), g * (1 - kick), (0.8 + 0.2 * g) * (1 + kick * 0.4));
       }
       const d = house.droppedAt < 0 ? 1 : Math.min(1, (now - house.droppedAt) / DROP_MS);
       const drop = 2.5 * (1 - ease(d));
@@ -228,6 +232,24 @@ export class Houses {
       if (left > 0 && (tries.n += 1) < 200) setTimeout(place, 150);
     };
     place();
+  }
+
+  /** C10: the socket `name` of house `id` in world space, the highest of its body's and its kits' (null while its model is not in). */
+  point(id: number, name: string, out: THREE.Vector3): THREE.Vector3 | null {
+    const house = this.houses.get(id);
+    if (!house?.body || !house.ready) return null;
+    let found = false;
+    house.group.traverse((o) => {
+      if (o.name !== name || !o.parent?.visible) return;
+      const y = o.getWorldPosition(SCRATCH).y;
+      if (!found || y > out.y) [found] = [true, out.copy(SCRATCH)];
+    });
+    return found ? out : null;
+  }
+
+  kick(id: number, now: number): void {
+    const house = this.houses.get(id);
+    if (house) house.kickAt = now;
   }
 
   /** Live houses and the parts each shows (scenarios, tests): def, level, ready, kits in, extras in. */

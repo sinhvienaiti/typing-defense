@@ -19,6 +19,8 @@ export interface MapView {
   draw(w: World, hand: Hand): void;
   /** Screen point (CSS px) of a ground point. */
   project(x: number, z: number): { x: number; y: number };
+  /** 3D only (C10): where call c's word cards stand, over its house's FX_top (`core`: where its letters fly). */
+  anchor?(w: World, c: number, core: boolean): { x: number; y: number };
   /** The ground point under a screen point (CSS px). */
   unproject(px: number, py: number): { x: number; z: number };
   /** The call whose bubble on the map is under the CSS point, −1 none. */

@@ -169,7 +169,7 @@ window.addEventListener("pagehide", () => {
   learner?.flush(performance.now());
 });
 const selection = new Selection(world, (command) => session.send(command));
-const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
+const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z), (w, c, core) => view.anchor?.(w, c, core) ?? null);
 cards.child = profile.audience === "child";
 /** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
 let runLearn = retry?.learn ?? NO_LEARN;
@@ -351,7 +351,7 @@ prefetch();
 /** Back to the 2D view (no WebGL, the chunk given up, a lost context), told in the HUD; the run goes on. */
 const to2d = (text: string): void => void ((view = flat), (canvas.style.visibility = ""), tellLost(text), resize());
 if (look.kind === "3d") void view3d.get().then((m) => {
-  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D"))) ?? null;
+  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D")), cards) ?? null;
   if (deep === null) return to2d("Bản 3D chưa mở được: chơi bản 2D · F5 để thử lại");
   installPointer(deep.canvas, camera, hand);
   view = deep;

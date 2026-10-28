@@ -164,6 +164,9 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
   if (fxaa !== null) composer.addPass(fxaa);
 
   const size = { width: 1, height: 1 };
+  /** C10: effects drawn over the graded frame (fx-pool.ts): their hot cores skip the tone map, no depth test, no shadow pass. */
+  let overlay: THREE.Scene | null = null;
+  let overlayCalls = 0;
   const scratch = new THREE.Vector4();
   const clean = new THREE.Matrix4();
   return {
@@ -180,12 +183,21 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
       camera.updateProjectionMatrix();
     },
     project: (x: number, y: number, z: number) => projectToScreen(camera, size.width, size.height, x, y, z, scratch, clean),
+    overlay: (scene: THREE.Scene): void => void (overlay = scene),
     render(): void {
       renderer.info.reset();
       composer.render();
+      const before = renderer.info.render.calls;
+      if (overlay !== null && overlay.children.some((o) => o.visible)) {
+        renderer.autoClear = false;
+        renderer.setRenderTarget(null);
+        renderer.render(overlay, camera);
+        renderer.autoClear = true;
+      }
+      overlayCalls = renderer.info.render.calls - before;
     },
     /** Draw calls and triangles of the last frame (shadow and post passes included). */
-    stats: () => ({ drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles }),
+    stats: () => ({ drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles, fxCalls: overlayCalls }),
     dispose(): void {
       bloom?.dispose();
       ao?.dispose();

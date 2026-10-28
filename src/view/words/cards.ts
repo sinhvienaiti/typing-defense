@@ -19,6 +19,7 @@ import type { World } from "../../sim/world";
 import { gloss, wordText } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
 import { KEY } from "../../typing/router";
+import "./feel.css";
 import { besidePanels, columnBox, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
 export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", perfect: "Hoàn hảo", good: "Tốt", ok: "Vừa", sloppy: "Ẩu" };
@@ -48,7 +49,7 @@ export const pips = (w: World, c: number): string => (w.calls.words[c]! > 1 ? "�
 
 const POOL = 20;
 const STAMPS = 10;
-const MS = { hit: 220, fold: 200, mean: 1000, stamp: 900, shake: 220, spring: 150 } as const;
+const MS = { hit: 220, fold: 200, mean: 1000, stamp: 900, spring: 150 } as const;
 const SAFE = { side: 8, top: 64, bottom: 8 } as const;
 
 /** "mean": typed, the card shows the word's meaning for 1 s in its call's column, then folds. */
@@ -57,8 +58,20 @@ type Card = {
   el: HTMLElement; text: HTMLElement; bar: HTMLElement; pips: HTMLElement; sub: HTMLElement; id: number; slot: number; b: number; call: number;
   word: string; mean: string; quiz: boolean; learn: boolean; dots: string; tier: number; ax: number; ay: number;
   typed: number; pink: boolean; late: boolean; lockedAt: number; half: number; height: number; x: number; y: number; seen: number;
-  leave: Leave; leaveAt: number; tx: number; ty: number; shakeUntil: number; pinkUntil: number;
+  leave: Leave; leaveAt: number; tx: number; ty: number; pinkUntil: number;
+  /** C10 pose (ms): the last right key, the lock, the last slip; `scale` eased to its lock size. */
+  keyAt?: number; lockAt?: number; slipAt?: number; scale?: number;
 };
+/** C10: a card as the 3D view's typing feel sees it (src/view/3d/words.ts). */
+export type CardView = Readonly<Pick<Card, "el" | "text" | "word" | "x" | "y" | "half" | "height" | "call" | "leave" | "slot">>;
+/** C10 (BUILD_1C_MAP1 §8): the 3D view hears each key on a card (`typed` letters after it), each word typed, and the cards after layout. */
+export interface CardFeel {
+  key(card: CardView, result: number, typed: number, now: number): void;
+  done(card: CardView, now: number): void;
+  frame(cards: readonly CardView[], now: number): void;
+}
+/** The screen point (CSS px) a call's cards stand on (`core`: where its letters go), null to keep the 2D roof. */
+export type Anchor = (w: World, c: number, core: boolean) => { x: number; y: number } | null;
 /** A grade's stamp; over a meaning card it rides above it as the card takes its place (`card`, else null). */
 type Stamp = { el: HTMLElement; at: number; x: number; y: number; half: number; card: Card | null };
 
@@ -68,10 +81,14 @@ function element(root: HTMLElement, className: string, html = ""): HTMLElement {
   return el;
 }
 
-const place = (el: HTMLElement, x: number, y: number, scale: string, opacity: number): void => {
-  el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + scale + ")";
+const place = (el: HTMLElement, x: number, y: number, scale: string, opacity: number, turn = 0): void => {
+  el.style.transform = "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px) scale(" + scale + ")" + (Math.abs(turn) > 0.05 ? " rotate(" + turn.toFixed(2) + "deg)" : "");
   el.style.opacity = opacity.toFixed(2);
 };
+
+/** The squeeze and pop of a typed card (`t` ms after its word): flat for two frames, then 1.24× easing back. */
+const pop = (t: number): string => (t < 0 || t > 200 ? "1" : t < 34 ? "1.16,0.84" : (1 + 0.24 * Math.exp(-(t - 34) / 45)).toFixed(3));
+const decay = (t: number, tau: number): number => (t >= 0 && t < 6 * tau ? Math.exp(-t / tau) : 0);
 
 export class WordCards {
   private readonly cards: Card[];
@@ -83,8 +100,10 @@ export class WordCards {
   /** Học (R3): a child's profile, and the times a deck word was seen (app/learn.ts; null until it is in). */
   child = false;
   seen: ((item: number) => number) | null = null;
+  /** C10: the 3D view's typing feel while it draws. */
+  feel: CardFeel | null = null;
 
-  constructor(root: HTMLElement, private readonly project: (x: number, z: number) => { x: number; y: number }) {
+  constructor(private readonly root: HTMLElement, private readonly project: (x: number, z: number) => { x: number; y: number }, private readonly anchor?: Anchor) {
     this.cards = Array.from({ length: POOL }, () => {
       const el = element(root, "td-card", '<i class="td-card-dot"></i><span></span><span class="td-card-bar"></span><b class="td-card-pips"></b><small class="td-card-mean"></small>');
       const [text, bar, dots, sub] = [1, 2, 3, 4].map((k) => el.children[k] as HTMLElement);
@@ -98,14 +117,23 @@ export class WordCards {
     // A Từ Ôn redeemed (its review event comes just before its wordHit) is stamped "Chuộc lại" in place of its grade (R3).
     const redeemed = events.filter((e) => e.t === "review" && e.redeemed).map((e) => (e.t === "review" ? e.item : -1));
     for (const event of events) {
+      if (event.t === "chain") this.root.style.setProperty("--tier", String(event.tier)); // C10: the stamps grow with the chain (feel.css)
       const card = "word" in event ? this.byId.get(event.word) : undefined;
       if (card === undefined) continue;
       // A wrong key shakes the card and the letter wanted stays pink until it comes (test pass 27/10: 0.15 s was missed).
-      if (event.t === "wordKey") [card.shakeUntil, card.pinkUntil] = event.result === KEY.wrong ? [now + MS.shake, Infinity] : [card.shakeUntil, 0];
-      else if (event.t === "wordHit") {
+      if (event.t === "wordKey") {
+        const wrong = event.result === KEY.wrong;
+        card.pinkUntil = wrong ? Infinity : 0;
+        if (wrong) card.slipAt = now;
+        else card.keyAt = now;
+        if (event.result === KEY.lock || event.result === KEY.switch) card.lockAt = now;
+        const s = w.words.slotOf(event.word);
+        this.feel?.key(card, event.result, s >= 0 ? w.words.typed[s]! : card.word.length, now);
+      } else if (event.t === "wordHit") {
+        this.feel?.done(card, now);
         this.byId.delete(event.word);
         const c = w.calls.slotOf(event.call);
-        const to = c >= 0 ? this.project(w.calls.x[c]!, w.calls.z[c]!) : card;
+        const to = c >= 0 ? (this.anchor?.(w, c, true) ?? this.project(w.calls.x[c]!, w.calls.z[c]!)) : card;
         Object.assign(card, { leave: card.mean === "" ? "hit" : "mean", leaveAt: now, tx: to.x, ty: to.y, slot: -1, ax: NaN, ay: NaN });
         card.el.className = "td-card is-gone";
         if (card.mean !== "") {
@@ -129,7 +157,7 @@ export class WordCards {
     const back = w.words.kind[s] === KIND.review;
     Object.assign(card, {
       id, b: c, call: w.calls.id(c), word: wordText(w.typing.deck, word), mean: gloss(w.typing.deck, word), quiz: kind === CALL_KIND.quiz,
-      learn: back || meaningShown(w.mode, this.child, this.seen === null ? null : this.seen(word)), dots: "", typed: -1, late: false, lockedAt: -1, leave: "", shakeUntil: 0, pinkUntil: 0,
+      learn: back || meaningShown(w.mode, this.child, this.seen === null ? null : this.seen(word)), dots: "", typed: -1, late: false, lockedAt: -1, leave: "", pinkUntil: 0,
     });
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     card.el.style.setProperty("--agent", "transparent");
@@ -142,11 +170,12 @@ export class WordCards {
 
   /** Letters as spans: typed (t), the first one or two by tier (l), the next after a wrong key (p); a quiz hides what is not typed past its first letter. */
   private render(card: Card, typed: number, pink: boolean, tier: number, dots: string): void {
+    const fresh = typed !== card.typed; // a new letter: only it is stamped (a slip or a dot changed re-renders too)
     card.tier = tier;
     const letters = [...card.word].map((ch, k) => {
-      const kind = (k < typed ? " t" : "") + (k === typed - 1 ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
+      const kind = (k < typed ? " t" : "") + (fresh && k === typed - 1 ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
       const shown = card.quiz && k >= Math.max(1, typed) ? "_" : ch;
-      return kind === "" ? shown : '<span class="' + kind.trim() + '">' + shown + "</span>";
+      return kind === "" ? shown : '<span class="' + kind.trim() + '"' + (fresh && k === typed - 1 ? ' data-c="' + shown + '"' : "") + ">" + shown + "</span>"; // data-c: the stamp's copy (feel.css)
     });
     card.text.innerHTML = card.quiz ? '<span class="m">' + (card.mean || "Hỏi bài") + "</span> · " + letters.join(" ") : letters.join("");
     card.pips.textContent = dots;
@@ -199,6 +228,7 @@ export class WordCards {
       (lanes.get(c) ?? lanes.set(c, []).get(c)!).push(card);
     }
     this.layout(w, lanes, lock, now, dt, width, height, panels, keep);
+    this.feel?.frame(this.cards.filter((k) => k.id >= 0), now);
     for (const card of this.cards) {
       // A word gone with no result read (the run was reset) folds away.
       if (card.id >= 0 && card.leave === "" && card.seen !== this.frame) {
@@ -224,7 +254,7 @@ export class WordCards {
     for (const [c, cards] of lanes) {
       // A call's word does not run out: it sits on the roof, never rises with a clock.
       const { heights, tallest, half } = columnBox(cards, lock);
-      const roof = c >= 0 ? this.project(C.x[c]!, C.z[c]! - ROOF_M) : { x: cards[0]!.ax, y: cards[0]!.ay };
+      const roof = c >= 0 ? (this.anchor?.(w, c, false) ?? this.project(C.x[c]!, C.z[c]! - ROOF_M)) : { x: cards[0]!.ax, y: cards[0]!.ay };
       const roofY = Math.min(height - SAFE.bottom, Math.max(roof.y, SAFE.top + tallest));
       boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half, at: roof.x + (this.offsets.get(c) ?? 0) });
       columns.push({ b: c, cards, heights, roofY });
@@ -250,12 +280,19 @@ export class WordCards {
         const locked = s >= 0 && lock === s;
         const typing = locked && W.typed[s]! >= 2;
         const expire = column.b >= 0 ? C.expire[column.b]! : -1;
-        card.y = column.roofY - column.heights[k]! - card.height;
-        card.x = boxes[index]!.x + offset + (typing ? 18 : 0) + (now < card.shakeUntil ? Math.sin(now * 0.25) * 6 : 0);
+        // C10 pose: the lock size eased (30 ms) with a burst over it (TYPING_BREAK_STUDY T3), a 3 px tick per right key, a slip's
+        // shake and tilt dying in 90 ms (ART_DIRECTION §8.2: readable, not a red flash), a typed card's squeeze and pop while it shows its meaning.
+        const size = typing ? 1.2 : locked ? 1.1 : 1;
+        card.scale = size + ((card.scale ?? size) - size) * Math.exp(-dt / 30);
+        const slip = decay(now - (card.slipAt ?? -1e9), 90);
+        const wave = Math.sin((now - (card.slipAt ?? 0)) * 0.14);
+        card.y = column.roofY - column.heights[k]! - card.height - 3 * decay(now - (card.keyAt ?? -1e9), 40);
+        card.x = boxes[index]!.x + offset + 18 * Math.max(0, (card.scale - 1.1) / 0.1) + slip * 12 * wave;
         const left = expire < 0 || s < 0 ? 0 : Math.max(0, (expire - w.tick) / Math.max(1, expire - C.born[column.b]!));
         card.bar.style.transform = "scaleX(" + left.toFixed(3) + ")";
         if (C.kind[column.b] === CALL_KIND.direct) card.el.style.setProperty("--t", (100 * left).toFixed(0) + "%"); // the window's clock ring
-        place(card.el, card.x - card.half, card.y, typing ? "1.2" : locked ? "1.1" : "1", lock >= 0 && !locked ? 0.7 : 1);
+        const scale = card.leave === "mean" ? pop(now - card.leaveAt) : (card.scale + 0.06 * decay(now - (card.lockAt ?? -1e9), 35)).toFixed(3);
+        place(card.el, card.x - card.half, card.y, scale, lock >= 0 && !locked ? 0.7 : 1, slip * 3.5 * wave);
       });
     });
   }
@@ -269,7 +306,7 @@ export class WordCards {
     if (p >= 1) {
       Object.assign(card, { id: -1, leave: "" });
       card.el.style.opacity = "0";
-    } else if (card.leave === "hit") place(card.el, card.x + (card.tx - card.x) * p - card.half, card.y + (card.ty - card.y) * p, (1 - 0.7 * p).toFixed(3), 1 - 0.4 * p);
-    else place(card.el, card.x - card.half, card.y, "1," + (1 - p).toFixed(3), 1 - p);
+    } else if (card.leave === "hit") place(card.el, card.x + (card.tx - card.x) * p * p - card.half, card.y + (card.ty - card.y) * p * p, now - card.leaveAt < 120 ? pop(now - card.leaveAt) : (1 - 0.7 * p).toFixed(3), 1 - 0.4 * p);
+    else place(card.el, card.x - card.half, card.y, (1 - p * p).toFixed(3) + ",1", 1 - p * p); // squeezed sideways, faster at the end (TYPING_BREAK_STUDY T7)
   }
 }
