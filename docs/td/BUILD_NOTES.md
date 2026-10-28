@@ -1857,3 +1857,4 @@ Làn V4a của `docs/games/VFX_STANDARD.md` (repo cha) §5.4, nhánh `td-vfx`. P
 
 - Ván vàng không đổi (`f2a21037`; 19.660 và 5.695 tick; sau gộp vào `a2-days` vẫn `"same":true` cả hai ván). Ván vàng qua ống: 133 lần bắn, 102 lần trúng, không mất sự kiện.
 - Phần vẽ trên `FxDraw` (lóe ở tháp và Draconis, cầu lửa, trúng đòn) là bước sau; gói "/" nay chừa 1,15 kB, nhưng phần vẽ nằm trong chunk `fx`, không vào gói khởi động.
+- **Làn V4a dừng ở bước 1** (28/10, khi gộp vào `a2-days`): map 1 lên 3D (bước 1C), view 2D chỉ còn là bậc Low và đường lùi; phần vẽ trên `FxDraw` không làm ở 2D, thiết kế năm pha của V4a dùng tiếp ở C11.
