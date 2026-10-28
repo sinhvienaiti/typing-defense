@@ -1,6 +1,6 @@
 /**
  * The 3D view of map 1 (1C, docs/td/BUILD_1C_MAP1.md §7): the chunk view.ts loads, with three.js. It assembles the parts
- * under src/view/3d (C2: the stage and the RTS camera; the field is still one flat plane until C3's ground) on a canvas
+ * under src/view/3d (C2: the stage and the RTS camera; C3: the ground, the stream and the bridges) on a canvas
  * of its own over the 2D one, and answers the page as a MapView: project and unproject through the camera, the pointer's
  * pan, turn and zoom, F1–F3. It reads the world and never changes it. `open` gives null without WebGL (the page keeps
  * 2D); a lost context calls `lost`.
@@ -10,15 +10,14 @@ import type { World } from "../../sim/world";
 import type { CameraView, MapView } from "../view";
 import type { Rect } from "../words/lanes";
 import { CAMERA, CameraRig, groundAt } from "./camera";
+import { createGround, type Ground } from "./ground";
 import { createStage, type Stage, type Tier3D } from "./stage";
 
-/** The Văn Điền meadow (debug-2d.ts paddy) until C3's ground. */
-const GRASS = 0x93c45a;
 const DEG = Math.PI / 180;
 
 export class View3D implements MapView {
   readonly kind = "3d";
-  private readonly ground = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshLambertMaterial({ color: GRASS }));
+  private readonly ground: Ground;
   private readonly rig: CameraRig;
   private readonly hit = new THREE.Vector3();
   private last = -1;
@@ -43,10 +42,7 @@ export class View3D implements MapView {
     const [x, z] = w.map.keep;
     this.rig = new CameraRig(stage.camera, w.map.halfM, { x, z });
     this.rig.view("home", true);
-    this.ground.rotation.x = -Math.PI / 2;
-    this.ground.receiveShadow = true;
-    this.ground.scale.set(w.map.halfM * 2 + 80, w.map.halfM * 2 + 80, 1); // the field and C3's 40 m border
-    stage.layers.ground.add(this.ground);
+    this.ground = createGround(stage.layers.ground, w.map, w.lanes.slice(0, -1), stage.tier, stage.renderer); // the last lane is the fly route
   }
 
   get canvas(): HTMLCanvasElement {
@@ -65,6 +61,7 @@ export class View3D implements MapView {
     const now = performance.now();
     this.place(now, this.last < 0 ? 0 : (now - this.last) / 1000);
     this.last = now;
+    this.ground.update(now / 1000);
     this.stage.render();
   }
 
@@ -112,8 +109,7 @@ export class View3D implements MapView {
   }
 
   dispose(): void {
-    this.ground.geometry.dispose();
-    this.ground.material.dispose();
+    this.ground.dispose();
     this.stage.dispose();
     this.canvas.remove();
   }

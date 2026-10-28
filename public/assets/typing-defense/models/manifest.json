@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-28T15:31:38.740Z",
+  "generatedAt": "2026-10-28T15:34:55.894Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
@@ -885,6 +885,28 @@
         1.7515,
         1.7608,
         3
+      ]
+    },
+    "props/cau-go": {
+      "kind": "props",
+      "id": "cau-go",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/cau-go/cau-go.high.glb?v=073ac4a8d1",
+          "bytes": 161744
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/cau-go/cau-go.medium.glb?v=bd60fcfcee",
+          "bytes": 94412
+        }
+      },
+      "triangles": 4026,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.0182,
+        1.5795,
+        4.4423
       ]
     },
     "props/gold-pile-1": {

@@ -1,0 +1,306 @@
+/**
+ * Map 1's ground (1C step C3, docs/td/BUILD_1C_MAP1.md §8; MAP_FACTORY §8.1, decor rules §6.4): the 96 m field and a
+ * 40 m border as one heightfield (flat where the sim walks; the stream's bed; the border rising to Đồi Cầu Vồng in the
+ * east and the cliff of Thác Bạc at the stream's head, outside the field), painted by a shader that tiles Codex 095's
+ * meadow tiles (8 m) through masks baked from the sim's map: roads along groundLanes with worn edges and ruts turned with
+ * the road, the stream's banks, the stone yard round the Fort and the ore. The stream winds a little inside its rect;
+ * the two Wooden Bridges (props/cau-go) sit on the bridge rects; Codex 097's decals lie by the decor rules (flowers and
+ * clover in the grass, pebbles by the road, worn earth at the gate and the Fort; soil and leaves come with the trees, C7).
+ * Missing tiles keep flat colours. Pure parts (heights, masks, decal spots) take no DOM, for the tests.
+ */
+import * as THREE from "three";
+import type { MapDef } from "../../content/types";
+import { loadModel, ModelLibrary } from "../../kit/three/model-loader";
+import type { Lane } from "../../sim/lanes";
+import type { Tier3D } from "./stage";
+
+/** The border round the field, m (BUILD_1C_MAP1 §8 C3), the masks' size and a tile's size. */
+export const BORDER_M = 40;
+const MASK_PX = 512;
+const TILE_M = 8;
+const FADE = { road: 0.5, worn: 1.6, bank: 1.3, yard: 1.5 } as const;
+export const BED_M = -0.55;
+const WATER_Y = -0.18;
+
+const smooth = (a: number, b: number, x: number): number => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+/** A seeded hash in [0, 1): the same ground on every load. */
+const hash = (x: number, z: number): number => {
+  const s = Math.sin(x * 127.1 + z * 311.7) * 43758.5453;
+  return s - Math.floor(s);
+};
+const bump = (x: number, z: number, cx: number, cz: number, r: number, h: number): number => h * smooth(r, 0, Math.sqrt((x - cx) ** 2 + (z - cz) ** 2));
+
+/** Where the stream's water runs: its rect's middle, winding ±0.35 m. */
+export const streamX = (rect: { x0: number; x1: number }, z: number): number => (rect.x0 + rect.x1) / 2 + 0.35 * Math.sin(z * 0.11 + 0.6);
+
+/** Ground height, m: 0 on the field (where the sim walks), the stream's bed, the border rising, the hill and the cliff. */
+export function heightAt(map: MapDef, x: number, z: number): number {
+  const h = map.halfM;
+  const out = Math.max(Math.abs(x), Math.abs(z)) - h;
+  if (out <= 0 && !map.water.some((r) => x > r.x0 - 1 && x < r.x1 + 1)) return 0;
+  const rim = smooth(0, 8, out); // nothing rises on the field itself
+  let y = out <= 0 ? 0 : 4.5 * smooth(0, BORDER_M, out) ** 1.4 + 0.8 * (hash(Math.round(x / 6), Math.round(z / 6)) - 0.5) * smooth(0, 10, out);
+  y += bump(x, z, h + 20, -6, 26, 9) * rim; // Đồi Cầu Vồng, east of the field
+  for (const rect of map.water) {
+    const head = rect.z0 <= -h ? -h - 14 : -Infinity; // Thác Bạc's cliff stands where the stream comes in
+    if (head > -Infinity) y += bump(x, z, (rect.x0 + rect.x1) / 2, head, 22, 16) * rim;
+    const half = (rect.x1 - rect.x0) / 2;
+    const across = Math.abs(x - streamX(rect, z));
+    if (z > head + 6) y = Math.min(y, BED_M + (0 - BED_M) * smooth(half - 0.9, half + 0.25, across) + Math.max(0, y) * smooth(half, half + 6, across));
+  }
+  return y;
+}
+
+type Masks = { mask: Uint8Array<ArrayBuffer>; dir: Uint8Array<ArrayBuffer>; extent: number; size: number };
+/**
+ * The paint masks over [−extent, extent]², `size` px a side: RGBA = road, bank, stone yard, worn edge (0–255); and the
+ * road's direction as (cos 2θ, sin 2θ) in RG, so the ruts turn with it.
+ */
+export function groundMasks(map: MapDef, lanes: readonly Lane[], size = MASK_PX): Masks {
+  const extent = map.halfM + BORDER_M;
+  const px = (2 * extent) / size;
+  const dist = new Float32Array(size * size).fill(Infinity);
+  const ang = new Float32Array(size * size);
+  const at = (m: number): number => Math.floor((m + extent) / px);
+  const reach = map.roadHalfM + FADE.worn + 1;
+  for (const lane of lanes) {
+    for (let i = 0; i + 1 < lane.xs.length; i += 1) {
+      const [ax, az, bx, bz] = [lane.xs[i]!, lane.zs[i]!, lane.xs[i + 1]!, lane.zs[i + 1]!];
+      const [dx, dz] = [bx - ax, bz - az];
+      const len2 = dx * dx + dz * dz || 1;
+      for (let row = Math.max(0, at(Math.min(az, bz) - reach)); row <= Math.min(size - 1, at(Math.max(az, bz) + reach)); row += 1) {
+        for (let col = Math.max(0, at(Math.min(ax, bx) - reach)); col <= Math.min(size - 1, at(Math.max(ax, bx) + reach)); col += 1) {
+          const [x, z] = [(col + 0.5) * px - extent, (row + 0.5) * px - extent];
+          const t = Math.min(1, Math.max(0, ((x - ax) * dx + (z - az) * dz) / len2));
+          const d = Math.sqrt((x - ax - t * dx) ** 2 + (z - az - t * dz) ** 2);
+          const k = row * size + col;
+          if (d < dist[k]!) [dist[k], ang[k]] = [d, Math.atan2(dz, dx)];
+        }
+      }
+    }
+  }
+  const mask = new Uint8Array(size * size * 4);
+  const dir = new Uint8Array(size * size * 4);
+  const yards: [number, number, number][] = [[map.keep[0], map.keep[1], 7], ...map.nodes.map((n): [number, number, number] => [n.x, n.z, 2.2 + 0.5 * n.richness])];
+  for (let row = 0; row < size; row += 1) {
+    for (let col = 0; col < size; col += 1) {
+      const k = row * size + col;
+      const [x, z] = [(col + 0.5) * px - extent, (row + 0.5) * px - extent];
+      const d = dist[k]!;
+      const road = smooth(map.roadHalfM + FADE.road, map.roadHalfM - FADE.road, d);
+      let bank = 0;
+      for (const rect of map.water) {
+        const outX = Math.max(rect.x0 - x, x - rect.x1, 0);
+        bank = Math.max(bank, smooth(FADE.bank, 0, outX));
+      }
+      const yard = Math.max(...yards.map(([cx, cz, r]) => smooth(r + FADE.yard, r, Math.sqrt((x - cx) ** 2 + (z - cz) ** 2))));
+      const worn = smooth(map.roadHalfM + FADE.worn, map.roadHalfM, d);
+      mask.set([road * 255, bank * 255, yard * 255, worn * 255], k * 4);
+      const a = 2 * ang[k]!;
+      dir.set([(Math.cos(a) * 0.5 + 0.5) * 255, (Math.sin(a) * 0.5 + 0.5) * 255, 0, 255], k * 4);
+    }
+  }
+  return { mask, dir, extent, size };
+}
+
+/** Decal spots by the decor rules: [x, z, sheet 0|1, cell 0–7, turn rad, metres]. Sheet a: worn earth 0–1, clearing 7; b: flowers 0–1, pebbles 4–5, clover 7. */
+export function decalSpots(map: MapDef, lanes: readonly Lane[]): [number, number, number, number, number, number][] {
+  const out: [number, number, number, number, number, number][] = [];
+  const near = (x: number, z: number, d: number): boolean => lanes.some((l) => l.xs.some((lx, i) => (lx - x) ** 2 + (l.zs[i]! - z) ** 2 < d * d));
+  const wet = (x: number, d: number): boolean => map.water.some((r) => x > r.x0 - d && x < r.x1 + d); // the stream runs on past its rect
+  const add = (x: number, z: number, sheet: number, cell: number, seed: number, m = 4): void => void out.push([x, z, sheet, cell, hash(seed, 7.3) * Math.PI * 2, m * (0.8 + 0.4 * hash(seed, 1.9))]);
+  const h = map.halfM;
+  for (let i = 0; out.length < 34 && i < 400; i += 1) { // flowers and clover in the grass, off roads and water
+    const [x, z] = [(hash(i, 2.1) * 2 - 1) * (h + 10), (hash(i, 5.7) * 2 - 1) * (h + 10)];
+    if (!near(x, z, map.roadHalfM + 3) && !wet(x, 2) && Math.hypot(x - map.keep[0], z - map.keep[1]) > 10) add(x, z, 1, [0, 1, 7, 7][i % 4]!, i);
+  }
+  lanes.forEach((lane, l) => { // pebbles along the road's edge
+    for (let i = 40 + l * 17; i < lane.xs.length - 1; i += 55) {
+      const [dx, dz] = [lane.xs[i + 1]! - lane.xs[i]!, lane.zs[i + 1]! - lane.zs[i]!];
+      const side = (i % 2 === 0 ? 1 : -1) * (map.roadHalfM + 1.1) / (Math.hypot(dx, dz) || 1);
+      add(lane.xs[i]! - dz * side, lane.zs[i]! + dx * side, 1, 4 + (i % 2), i + l * 1000, 2.6);
+    }
+  });
+  add(map.gate[0], map.gate[1] + 3, 0, 0, 901, 5);
+  add(map.keep[0] + 2, map.keep[1] - 9, 0, 1, 902, 4);
+  map.nodes.forEach((n, i) => add(n.x + 2.5, n.z + 2, 0, 7, 950 + i, 3.5));
+  return out;
+}
+
+const SHADER_HEAD = /* glsl */ `
+uniform sampler2D tGrass, tClover, tRoad, tTrail, tBank, tYard, tMask, tDir;
+uniform float uExtent;
+varying vec2 vGround;
+float gnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  float a = fract(sin(dot(i, vec2(127.1, 311.7))) * 43758.5453), b = fract(sin(dot(i + vec2(1, 0), vec2(127.1, 311.7))) * 43758.5453);
+  float c = fract(sin(dot(i + vec2(0, 1), vec2(127.1, 311.7))) * 43758.5453), d = fract(sin(dot(i + vec2(1, 1), vec2(127.1, 311.7))) * 43758.5453);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(a, b, u.x), mix(c, d, u.x), u.y);
+}
+/** The road tile with its ruts along the road: four fixed turns (45° apart, seamless), the two nearest the road's blended. */
+vec3 roadTile(vec2 p, vec2 dir) {
+  float theta = atan(dir.y, dir.x) * 0.5;
+  vec3 sum = vec3(0.0);
+  float total = 0.0;
+  for (int k = 0; k < 4; k++) {
+    float a = float(k) * 0.785398;
+    float diff = abs(mod(theta - a + 1.570796, 3.141593) - 1.570796);
+    float w = pow(max(0.0, 1.0 - diff / 0.785398), 4.0); // mostly one turn: two blended ones blur the ruts
+    vec2 t = vec2(cos(a), sin(a));
+    vec2 uv = vec2(dot(p, vec2(-t.y, t.x)), dot(p, t)) / ${TILE_M.toFixed(1)};
+    sum += texture2D(tRoad, uv).rgb * w;
+    total += w;
+  }
+  return sum / max(total, 1e-3);
+}
+`;
+const SHADER_PAINT = /* glsl */ `
+  vec2 gp = vGround;
+  vec2 tuv = gp / ${TILE_M.toFixed(1)};
+  vec2 muv = (gp + uExtent) / (2.0 * uExtent);
+  vec4 m = texture2D(tMask, muv);
+  float n1 = gnoise(gp * 0.045), n2 = gnoise(gp * 0.13 + 3.0), n3 = gnoise(gp * 0.6 + 7.0);
+  vec3 grass = mix(texture2D(tGrass, tuv).rgb, texture2D(tClover, tuv * 0.75 + 0.37).rgb, smoothstep(0.52, 0.78, n1));
+  // The ground is the quietest layer (TK 23.1): a little less saturated, with olive and sunlit patches against the carpet look.
+  grass = mix(vec3(dot(grass, vec3(0.299, 0.587, 0.114))), grass, 0.8) * (0.84 + 0.14 * n2);
+  grass = mix(grass, grass * vec3(1.06, 1.0, 0.78), smoothstep(0.6, 0.85, gnoise(gp * 0.03 + 11.0)) * 0.6);
+  // Ragged edges: the masks' soft rims broken up by noise, so no yard or road edge is a clean circle or ribbon.
+  float rag = (n3 - 0.5) * 0.5 + (n2 - 0.5) * 0.3;
+  vec3 col = mix(grass, texture2D(tTrail, tuv + 0.5).rgb * 0.95, smoothstep(0.25, 0.75, m.a + rag) * 0.85);
+  col = mix(col, roadTile(gp, texture2D(tDir, muv).rg * 2.0 - 1.0), smoothstep(0.3, 0.7, m.r + rag * 0.6));
+  col = mix(col, texture2D(tBank, tuv).rgb, smoothstep(0.2, 0.6, m.g + rag * 0.5));
+  col = mix(col, texture2D(tYard, tuv * 1.25).rgb, smoothstep(0.35, 0.65, m.b + rag));
+  diffuseColor.rgb *= col;
+`;
+
+/** Flat colours until (or instead of) the tiles: grass, clover, road, worn, bank, yard. */
+const FALLBACK: Record<string, string> = { grass: "#8fbf55", clover: "#86b84f", road: "#c8a06a", trail: "#b89a68", bank: "#8d8f74", yard: "#b3aea0" };
+const TILE_FILES: Record<string, string> = { grass: "grass-a", clover: "grass-b-clover", road: "dirt-road", trail: "trail-worn", bank: "stream-bank", yard: "stone-yard" };
+
+function flat(color: string): THREE.DataTexture {
+  const c = new THREE.Color(color);
+  const t = new THREE.DataTexture(new Uint8Array([c.r * 255, c.g * 255, c.b * 255, 255]), 1, 1);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.needsUpdate = true;
+  return t;
+}
+
+export type Ground = ReturnType<typeof createGround>;
+
+/** The ground meshes for `map` into `layer`; tiles, decals and the bridges load after, at `tier`. */
+export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly Lane[], tier: Tier3D, renderer: THREE.WebGLRenderer) {
+  const extent = map.halfM + BORDER_M;
+  const steps = Math.round(extent); // 2 m a quad
+  const geometry = new THREE.PlaneGeometry(extent * 2, extent * 2, steps, steps).rotateX(-Math.PI / 2);
+  const pos = geometry.attributes["position"]!;
+  for (let i = 0; i < pos.count; i += 1) pos.setY(i, heightAt(map, pos.getX(i), pos.getZ(i)));
+  geometry.computeVertexNormals();
+
+  const { mask, dir } = groundMasks(map, lanes);
+  const data = (bytes: Uint8Array<ArrayBuffer>): THREE.DataTexture => Object.assign(new THREE.DataTexture(bytes, MASK_PX, MASK_PX), { magFilter: THREE.LinearFilter, minFilter: THREE.LinearFilter, needsUpdate: true });
+  const tiles = Object.fromEntries(Object.entries(FALLBACK).map(([key, color]) => [key, { value: flat(color) as THREE.Texture }]));
+  const uniforms = { ...Object.fromEntries(Object.entries(tiles).map(([key, u]) => ["t" + key[0]!.toUpperCase() + key.slice(1), u])), tMask: { value: data(mask) }, tDir: { value: data(dir) }, uExtent: { value: extent } };
+  const material = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  material.onBeforeCompile = (shader) => {
+    Object.assign(shader.uniforms, uniforms);
+    shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vGround;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvGround = (modelMatrix * vec4(transformed, 1.0)).xz;");
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\n" + SHADER_HEAD).replace("#include <map_fragment>", SHADER_PAINT);
+  };
+  const terrain = new THREE.Mesh(geometry, material);
+  terrain.receiveShadow = true;
+  terrain.name = "td-ground";
+
+  // The stream: a strip winding inside its rect, from the cliff's foot to the far border.
+  const water = new THREE.Group();
+  const waterMaterial = new THREE.MeshLambertMaterial({ color: "#8cbfcf", emissive: "#2a5664", emissiveIntensity: 0.3, transparent: true, opacity: 0.82 });
+  const time = { value: 0 };
+  waterMaterial.onBeforeCompile = (shader) => {
+    shader.uniforms["uTime"] = time;
+    shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vWater;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvWater = (modelMatrix * vec4(transformed, 1.0)).xz;");
+    // Silver flecks drifting downstream: noise, not a repeating wave.
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\nuniform float uTime;\nvarying vec2 vWater;\n" + SHADER_HEAD.slice(SHADER_HEAD.indexOf("float gnoise"), SHADER_HEAD.indexOf("/** The road"))).replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\nfloat flow = gnoise(vec2(vWater.x * 2.3, vWater.y * 0.7 - uTime * 0.9)) * gnoise(vec2(vWater.x * 5.0 + 3.0, vWater.y * 1.9 - uTime * 1.6));\ntotalEmissiveRadiance += vec3(0.36, 0.4, 0.42) * smoothstep(0.42, 0.7, flow);");
+  };
+  for (const rect of map.water) {
+    const z0 = rect.z0 <= -map.halfM ? -map.halfM - 4 : rect.z0;
+    const z1 = rect.z1 >= map.halfM ? extent : rect.z1;
+    const rows = Math.ceil((z1 - z0) / 1.5);
+    const strip = new THREE.PlaneGeometry(1, 1, 1, rows).rotateX(-Math.PI / 2);
+    const p = strip.attributes["position"]!;
+    const half = (rect.x1 - rect.x0) / 2 - 0.35;
+    for (let i = 0; i < p.count; i += 1) {
+      const z = z0 + (p.getZ(i) + 0.5) * (z1 - z0);
+      p.setXYZ(i, streamX(rect, z) + Math.sign(p.getX(i)) * half, WATER_Y, z);
+    }
+    strip.computeVertexNormals();
+    water.add(new THREE.Mesh(strip, waterMaterial));
+  }
+
+  // Decals: one instanced quad set per sheet, each quad showing one of the sheet's 4 × 2 cells.
+  const spots = decalSpots(map, lanes);
+  const decals = [0, 1].map((sheet) => {
+    const mine = spots.filter((s) => s[2] === sheet);
+    const quad = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
+    const cell = new Float32Array(mine.length * 2);
+    mine.forEach((s, i) => cell.set([(s[3] % 4) * 0.25, s[3] < 4 ? 0.5 : 0], i * 2));
+    quad.setAttribute("aCell", new THREE.InstancedBufferAttribute(cell, 2));
+    const decalMaterial = new THREE.MeshLambertMaterial({ transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, alphaTest: 0.02 });
+    decalMaterial.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nattribute vec2 aCell;").replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\nvMapUv = uv * vec2(0.25, 0.5) + aCell;\n#endif");
+    };
+    const mesh = new THREE.InstancedMesh(quad, decalMaterial, mine.length);
+    const m = new THREE.Matrix4();
+    mine.forEach(([x, z, , , turn, size], i) => mesh.setMatrixAt(i, m.compose(new THREE.Vector3(x, heightAt(map, x, z) + 0.03, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), turn), new THREE.Vector3(size, 1, size))));
+    mesh.receiveShadow = true;
+    mesh.renderOrder = 1;
+    mesh.visible = false; // until its sheet is in
+    return mesh;
+  });
+
+  const bridges = new THREE.Group();
+  layer.add(terrain, water, ...decals, bridges);
+
+  // Media: tiles and decals by tier (a missing file keeps the flat colour, a missing sheet no decals); the bridges.
+  const loader = new THREE.TextureLoader();
+  const anisotropy = Math.min(tier === "high" ? 8 : 4, renderer.capabilities.getMaxAnisotropy());
+  const texture = (file: string, repeat: boolean): Promise<THREE.Texture | null> =>
+    loader.loadAsync(`/assets/typing-defense/ground/${file}.${tier}.webp`).then((t) => {
+      t.colorSpace = THREE.SRGBColorSpace;
+      if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
+      t.anisotropy = anisotropy;
+      return t;
+    }, () => null);
+  for (const [key, file] of Object.entries(TILE_FILES)) void texture(file, true).then((t) => t && (tiles[key]!.value = t));
+  ["ground-decals-a", "ground-decals-b"].forEach((file, sheet) => void texture(file, false).then((t) => {
+    if (t === null) return;
+    Object.assign(decals[sheet]!.material as THREE.MeshLambertMaterial, { map: t, needsUpdate: true });
+    decals[sheet]!.visible = true;
+  }));
+  void new ModelLibrary({ manifests: "/assets/typing-defense/models/manifest.json" }).url("props", "cau-go", tier).then((url) => (url === null ? null : loadModel(url))).then((gltf) => {
+    if (!gltf) return;
+    for (const rect of map.bridges) {
+      const bridge = gltf.scene.clone(true);
+      bridge.position.set((rect.x0 + rect.x1) / 2, -0.25, (rect.z0 + rect.z1) / 2);
+      bridge.rotation.y = Math.PI / 2; // its deck runs along the model's length: across the stream
+      bridge.traverse((o: THREE.Object3D) => void ((o as THREE.Mesh).isMesh && ((o.castShadow = true), (o.receiveShadow = true))));
+      bridges.add(bridge);
+    }
+  }, () => undefined);
+
+  return {
+    terrain,
+    update(seconds: number): void {
+      time.value = seconds;
+    },
+    dispose(): void {
+      for (const mesh of [terrain, ...water.children, ...decals] as THREE.Mesh[]) {
+        mesh.geometry.dispose();
+        (mesh.material as THREE.Material).dispose();
+      }
+      for (const u of Object.values(uniforms)) if (u.value instanceof THREE.Texture) u.value.dispose();
+    },
+  };
+}

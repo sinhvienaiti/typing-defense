@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1C.C2**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1C.C3**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -50,7 +50,7 @@ Mốc đang làm: **1C.C2**. Test `td-boundary` đọc dòng này và cột "C�
 | 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
 | 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
 | 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3) không thêm dòng `src`; phần B còn lại | 200 | 11.650 |
-| 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 12.450 |
+| 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | 11.054 → 11.356 thật (mục 8.4) | 800 | 12.450 |
 | 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | — | 700 | 13.150 |
 | 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
 | 1C.C8 Draconis và Mộc Tinh trên sân (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 400 | 13.900 |
@@ -1932,3 +1932,29 @@ Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kế
 
 - **Medium vượt trần, và còn thiếu 25 mục** (13 bộ cấp, `cannon-barrel-l3`, giàn tre, xe goòng, lông lửa, hạt Mộc Tinh, ba mốc cảnh, Mộc Tinh, Draconis, `worker-base`, Helper). Dự báo khi đủ: Medium khoảng 7–8 MB chỉ riêng model. Cần quyết lại §5 (xem phần B).
 - **Phần B (để trước C6):** preset cho 13 bộ cấp (mỗi bộ phải khớp với nhà gốc: thay hay chồng lên, socket dời theo ghi chú của `3D_IMPORT_2026-10-28.md`), giàn tre theo 4 cỡ vòng, xe goòng, lông lửa xoay 90°, hạt Mộc Tinh, `vach-thac-bac` sáng +25 %, `cau-go` đúng rect cầu, `choi-canh-doi`; `models:index` và `usedBy`.
+
+### 8.4 C3: mặt đất map 1 (29/10/2026, Mac mini M4)
+
+- **`src/view/3d/ground.ts`:** một lưới cao độ 176 m (sân 96 m, viền 40 m, ô 2 m): phẳng ở mọi chỗ sim đi (`heightAt` = 0); lòng suối −0,55 m trong rect nước; viền dâng dần, Đồi Cầu Vồng ở phía đông, vách Thác Bạc ở đầu suối phía bắc, có khe cho dòng nước (đều ngoài sân).
+- **Shader đất** (`MeshLambertMaterial` + `onBeforeCompile`, giữ ánh sáng, bóng, sương) lát sáu ô của phiếu 095 (8 m một ô) theo mặt nạ nướng từ bản đồ sim (512², 0,34 m/px):
+  - đường theo `groundLanes` có mép mòn (`trail-worn`); vệt bánh xe của `dirt-road` xoay theo hướng đường (bốn góc 45° cố định, liền mép; lấy chủ yếu một góc để vệt không nhòe);
+  - bờ suối (`stream-bank`); sân đá quanh Fort (7 m) và quanh quặng (`stone-yard`);
+  - mép các mặt nạ bị nhiễu bẻ cho không tròn đều; cỏ bớt bão hòa 20 % và có mảng ô liu, mảng nắng (TK §23.1: đất là lớp lặng nhất).
+- **Suối:** dải nước uốn ±0,35 m trong rect, ánh bạc trôi xuôi bằng nhiễu.
+- **Hai Wooden Bridge** (`props/cau-go`): đưa qua `models:blender` ở bước này (preset mới, dài 4,4 m, rộng 2 m, cao 1,6 m), đặt ở tâm hai rect cầu, xoay 90° cho cầu bắc qua suối.
+- **Decal phiếu 097** (hai tờ 4 × 2, hai draw call instanced), 49 chỗ theo luật decor: hoa, cỏ ba lá trên cỏ xa đường và nước; sỏi dọc mép đường; đất mòn ở cổng và trước Fort; đất trống cạnh quặng. Đất dưới tán và lá rụng chờ cây ở C7.
+- **Media:** `scripts/td/prepare-ground.mjs` (ImageMagick) làm ô 1024² (High) và 512² (Medium), tờ decal 1024 × 512 và 512 × 256 vào `public/assets/typing-defense/ground/` (liên kết tới checkout chính). Thiếu file thì giữ màu phẳng. Ground High 1,13 MB (trần 1,5), Medium 0,31 MB (trần 0,8).
+- **Camera:** điểm nhìn mặc định lùi về 12 m từ Fort (trước 18 m), để Fort nằm ở phần ba dưới màn, không dưới HUD.
+- **`tests/td-3d-ground.test.ts`** (5 test): sân phẳng chỗ sim đi, viền và vách cao; nước và lòng suối nằm trong rect, hai bờ cách rect 1,5 m phẳng; mép mặt nạ đường cách `roadHalfM` < 0,25 m dọc mọi làn (lấy mẫu song tuyến như GPU); sân đá phủ vòng Fort và quặng; decal theo luật và giống nhau mỗi lần nạp.
+
+| Đo | Sau C2 | Sau C3 |
+|---|---|---|
+| Gói "/" (gzip) | 84,28 kB | 84,41 kB (chừa 0,59 kB; three nay là chunk dùng chung với GLTFLoader, danh sách tải trước trong lối vào dài thêm) |
+| Bộ chunk 3D | 124,55 kB | 145,28 kB (`view-3d` + `three`; trần 260) |
+| Dòng `.ts` ngoài kit | 11.054 | 11.356 (trần bước 12.450) |
+| Test | 378 / 37 file | 383 / 38 file |
+| Draw call, tam giác (High, góc mặc định) | — | 9, 27.866 (trần 150) |
+| Draw call (Medium, góc mặc định) | — | 9 (trần 100) |
+| Chi phí vẽ một khung (trang, không phải đo GPU) | — | trung bình 0,22–0,36 ms, p95 0,4–0,7 ms |
+
+- Ván vàng giữ nguyên. `td-1c-ground` (mới) đạt ở 1280 × 720 và 1920 × 1080: bản 3D High và Medium, đủ 8 file đất và cầu đã tải, draw call trong trần, không lỗi console. Đo khung ở đây chỉ là số của trang trong lượt chụp; lượt `--perf` thật thuộc C13.

@@ -1705,6 +1705,37 @@
           }
         }
       }
+    },
+    "props/cau-go": {
+      "source": "landmarks/cau-go.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Wooden Bridge của map 1 (1C C3): hai cầu của sim là rect 3 × 3 m qua suối (x −25,5…−22,5). Mặt cầu chạy theo trục dài (−Z) của model, dài 4,4 m (gác 0,7 m lên mỗi bờ), rộng khoảng 2 m; view xoay 90° cho cầu bắc theo X.",
+      "static": {
+        "yaw": 0,
+        "size": {
+          "measure": "length",
+          "metres": 4.4
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        },
+        "expect": {
+          "length": [
+            4.3,
+            4.5
+          ]
+        }
+      }
     }
   }
 }

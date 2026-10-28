@@ -23,8 +23,8 @@ export const CAMERA = {
   pitchMinDeg: 30, pitchMaxDeg: 85, nearM: 22, farM: 120,
   /** F1 (TK 23.6), F2 (đề xuất C2: close and low, to read a house), F3 "Toàn cảnh". */
   views: { home: { pitchDeg: 55, distanceM: 58 }, near: { pitchDeg: 40, distanceM: 30 }, overview: { pitchDeg: 85, distanceM: 100 } },
-  /** The default look point lies this far towards the field's middle from the Fort, so the Fort sits low in the view. */
-  homeLeadM: 18,
+  /** The default look point lies this far towards the field's middle from the Fort, so the Fort sits in the view's lower third. */
+  homeLeadM: 12,
   panMarginM: 8, turnDegPerPx: 0.3, tiltDegPerPx: 0.22, turnStepDeg: 15, tiltStepDeg: 5,
   /** Easing rate, 1/s; the shake's size and length (TK 23.6). */
   ease: 9, shakePx: 6, shakeMs: 120,
