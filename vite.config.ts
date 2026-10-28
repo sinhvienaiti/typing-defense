@@ -1,9 +1,4 @@
-import { join } from "node:path";
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
-import { serveSharedFolders } from "./src/kit/tools/vite-shared-plugin";
-
-const root = fileURLToPath(new URL(".", import.meta.url));
 
 const env = (name: string): string | undefined => process.env[name]?.trim() || undefined;
 
@@ -32,8 +27,6 @@ const hmrHost = env("DEV_HMR_HOST");
 
 export default defineConfig({
   base: "/",
-  // Dev only: /vocabulary/ and /typing-texts/ read-only from the parent repo's shared/.
-  plugins: [serveSharedFolders({ sharedRoot: join(root, "..", "..", "shared") })],
   server: {
     host: env("DEV_HOST") ?? "127.0.0.1",
     port: 3006,

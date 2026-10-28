@@ -4,7 +4,7 @@
  * the same log). The input is the file a td-1a scenario writes next to its
  * screenshots: { seed, sandbox, content, deck, vocabulary, expected, pace, mode, learn, tick, hash, log } (the run
  * header, E and pace k with the director on or off, BALANCE.md §4.1, and R3's study lists; a file from before has none).
- * The deck is rebuilt from shared/vocabulary (or the built-in list the page
+ * The deck is rebuilt from the pinned copy in public/vocabulary (or the built-in list the page
  * fell back to) and must have the browser's deck hash.
  *   node --import tsx scripts/td/replay.ts <OUT_DIR>/td-1a6-day-replay-1280x720.json
  * Prints one JSON line; exits 1 when the content or the hash differs.
@@ -28,7 +28,7 @@ if (file === undefined) {
 }
 const run = JSON.parse(readFileSync(file, "utf8")) as BrowserRun;
 // Flagged words dropped, as the page's loader (src/kit/vocab) drops them.
-const level = (n: number) => filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries);
+const level = (n: number) => filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../public/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries);
 const deck = run.vocabulary === "fallback" ? fallbackDeck() : deckFromLevels(Array.from({ length: VOCAB_LEVELS }, (_, index) => level(index + 1)));
 const world = createWorld({ seed: run.seed, sandbox: run.sandbox, deck, expected: run.expected, pace: run.pace, mode: run.mode, learn: run.learn });
 replayTo(world, run.log, run.tick); // with what a tactical pause ordered at that tick
