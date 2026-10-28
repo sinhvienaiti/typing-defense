@@ -107,14 +107,14 @@ export default async function (page) {
   await page.sleep(300);
   const farmCard = (await page.eval(`document.querySelector(".td-dock")?.textContent ?? ""`)) ?? "";
   await shot("06-farm-card");
-  shown.farmCard = /Chín|Lớn|Trống/.test(farmCard) && /Mua 4 hạt/.test(farmCard);
+  shown.farmCard = /Chín|Lớn|Trống/.test(farmCard) && /Mua 4 Seeds/.test(farmCard);
   await click(page, 0, 43.5);
   await page.sleep(300);
   const keepCard = (await page.eval(`document.querySelector(".td-dock")?.textContent ?? ""`)) ?? "";
   const keepCut = (await overflowing(page, ".td-dock button")) ?? ["?"];
   await shot("07-keep-card");
   // Both sales read in full (1B R1 review fix: side by side they ran past their buttons at 1280 × 720).
-  shown.keepCard = /Dân/.test(keepCard) && /Bán 10 Lúa/.test(keepCard) && /Bán 10 Gỗ/.test(keepCard) && keepCut.length === 0;
+  shown.keepCard = /Villager/.test(keepCard) && /Bán 10 Rice/.test(keepCard) && /Bán 10 Wood/.test(keepCard) && keepCut.length === 0;
   await key(page, "Escape");
 
   // 08: the learn mode, the hero back in the village: meanings on the cards as they light.

@@ -23,14 +23,14 @@ export const BOSS_LINES = { rise: "Tên ta ở đâu?", roots: "Rễ ơi, mọc 
 export const PANELS = ["chip", "sandbox", "team", "strip", "dock", "actions", "boss", "tip"] as const;
 
 export const REASON: Readonly<Record<string, string>> = {
-  phase: "Ván đã kết thúc", capTotal: "Đã đủ 16 nhà", capType: "Đã đủ nhà loại này", bounds: "Ngoài sân", node: "Mỏ chỉ đặt trên quặng trống",
-  water: "Không xây trên nước", road: "Sát đường quá", keep: "Trong vòng 11 m quanh Lũy", overlap: "Chạm nhà khác", tree: "Vướng cây", rally: "Trại Lính phải gần đường",
-  path: "Chặn lối đi", gold: "Thiếu vàng", wood: "Thiếu gỗ", food: "Thiếu lúa", noSlot: "Ô này còn khóa", notDay: "Chỉ gọi đêm được ban ngày",
-  undoWindow: "Hết 5 s hoàn tác", finished: "Xây xong rồi, không hoàn tác", blocked: "Không đứng được ở đó", rallyFar: "Xa trại quá", rallyOffRoad: "Điểm tập kết phải ở đường",
-  noBuilding: "Không có nhà đó", noBarracks: "Không phải Trại Lính", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
-  noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ dân rồi", notRipe: "Ô này chưa chín",
-  locked: "Chưa mở tới ngày này", keepMax: "Lũy đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",
-  ultEmpty: "Tối Thượng chưa đầy", ultBusy: "Mưa lông đang rơi", ultFar: "Xa Draconis quá (20 m)", ultNone: "Chưa có quái gần Draconis (14 m)",
+  phase: "Ván đã kết thúc", capTotal: "Đã đủ 16 nhà", capType: "Đã đủ nhà loại này", bounds: "Ngoài sân", node: "Gold Mine chỉ đặt trên quặng trống",
+  water: "Không xây trên nước", road: "Sát đường quá", keep: "Trong vòng 11 m quanh Fort", overlap: "Chạm nhà khác", tree: "Vướng cây", rally: "Barracks phải gần đường",
+  path: "Chặn lối đi", gold: "Thiếu Gold", wood: "Thiếu Wood", food: "Thiếu Rice", noSlot: "Ô này còn khóa", notDay: "Chỉ gọi đêm được ban ngày",
+  undoWindow: "Hết 5 s hoàn tác", finished: "Xây xong rồi, không hoàn tác", blocked: "Không đứng được ở đó", rallyFar: "Xa Barracks quá", rallyOffRoad: "Điểm tập kết phải ở đường",
+  noBuilding: "Không có nhà đó", noBarracks: "Không phải Barracks", badValue: "Giá trị không hợp lệ", noSandbox: "Chỉ có trong hộp cát", badKey: "Phím không hợp lệ",
+  noUpgrade: "Không nâng cấp được", notReady: "Nhà chưa xây xong", noTree: "Không có cây đó", villagerCap: "Đủ Villager rồi", notRipe: "Ô này chưa chín",
+  locked: "Chưa mở tới ngày này", keepMax: "Fort đã cao nhất ở bản đồ này", bossBusy: "Mộc Tinh đã thức",
+  ultEmpty: "Tối Thượng chưa đầy", ultBusy: "Fire Feather Rain đang rơi", ultFar: "Xa Draconis quá (20 m)", ultNone: "Chưa có quái gần Draconis (14 m)",
 };
 
 export const button = (act: string, label: string, key = "", attrs = ""): string => `<button data-act="${act}"${attrs}>${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`;
@@ -54,10 +54,10 @@ export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: b
   return (
     `<div class="td-row"><span class="td-title"><b>Lời Gọi</b><small>${sandbox ? "Hộp cát · bản thử 1B" : "Bản đồ 1 · Đồng Cỏ Thác Bạc"}</small></span>` +
     button("pause", paused ? "▶" : "Ⅱ", "", ' class="td-x" title="Tạm dừng (Pause)"') + button("mute", muted ? "<s>Âm</s>" : "Âm", "", ' class="td-x"') + (sandbox ? button("sandbox", "F9", "", ' class="td-x" title="Hộp cát"') : "") + "</div>" +
-    `<div class="td-row">${stat("Vàng", String(Math.floor(w.gold / 1000)))}${stat("Gỗ", String(w.wood))}${stat("Lúa", String(w.food))}${stat("Hạt", String(w.seeds))}${stat("Mạng", lives)}</div>` +
+    `<div class="td-row">${stat("Gold", String(Math.floor(w.gold / 1000)))}${stat("Wood", String(w.wood))}${stat("Rice", String(w.food))}${stat("Seeds", String(w.seeds))}${stat("Mạng", lives)}</div>` +
     `<p class="td-phase"><b>${phase}</b></p>` +
-    (w.knowledge > 0 || w.typing.reviewN > 0 ? `<p class="td-learn">Tri thức <b>${w.knowledge}</b> · Sổ ôn <b>${w.typing.reviewN}</b></p>` : "") +
-    (w.phase === "defeat" ? `<p class="td-warn">Lũy đã mất hết mạng</p>` : w.phase === "day" ? earlyHtml(w, left, clock, paused) : "") +
+    (w.knowledge > 0 || w.typing.reviewN > 0 ? `<p class="td-learn">Knowledge <b>${w.knowledge}</b> · Sổ ôn <b>${w.typing.reviewN}</b></p>` : "") +
+    (w.phase === "defeat" ? `<p class="td-warn">Fort đã mất hết mạng</p>` : w.phase === "day" ? earlyHtml(w, left, clock, paused) : "") +
     notices.map((notice) => `<p class="td-warn">${notice}</p>`).join("")
   );
 }
@@ -67,7 +67,7 @@ export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: b
  * empties with them, a pulse in the last 10 s; paused, "Đã dừng" where the time was.
  */
 const earlyHtml = (w: World, left: number, clock: string, paused: boolean): string =>
-  button("night", `<b>Gọi đêm sớm · +${earlyCallBonus(w)} vàng</b><i><s style="width:${Math.round((100 * Math.max(0, w.phaseEnd - w.tick)) / dayTicks(w.mode, w.pace.k))}%"></s></i><b>${paused ? "Đã dừng" : clock}</b>`,
+  button("night", `<b>Gọi đêm sớm · +${earlyCallBonus(w)} Gold</b><i><s style="width:${Math.round((100 * Math.max(0, w.phaseEnd - w.tick)) / dayTicks(w.mode, w.pace.k))}%"></s></i><b>${paused ? "Đã dừng" : clock}</b>`,
     "⇧ Enter", ` class="td-call${left <= 10 && !paused ? " is-last" : ""}"`);
 
 /**
@@ -97,8 +97,8 @@ export function stripHtml(w: World, note: string, tactical = false): string {
 export function actionsHtml(w: World, tactical: boolean): string {
   const shut = ultShut(w);
   const charge = Math.floor(w.ult.charge);
-  const ult = shut ? "Tối Thượng · Mở ở Đêm " + opensOn(w, "ult") : w.ult.on === 1 ? "Mưa lông lửa" : charge >= ULT.max ? "Tối Thượng" : "Tối Thượng " + Math.floor(charge / 5) * 5 + " %";
-  return button("build", "Xây", "Insert / \\") + button("hire", "Thuê dân", "⇧ \\") + button("ult", ult, "=", shut || charge < ULT.max || w.ult.on === 1 ? " disabled" : "") +
+  const ult = shut ? "Tối Thượng · Mở ở Đêm " + opensOn(w, "ult") : w.ult.on === 1 ? "Fire Feather Rain" : charge >= ULT.max ? "Tối Thượng" : "Tối Thượng " + Math.floor(charge / 5) * 5 + " %";
+  return button("build", "Xây", "Insert / \\") + button("hire", "Thuê Villager", "⇧ \\") + button("ult", ult, "=", shut || charge < ULT.max || w.ult.on === 1 ? " disabled" : "") +
     (MODES[w.mode].pause ? button("space", tactical ? "Chạy tiếp" : "Tạm dừng", "Space") : "");
 }
 
@@ -201,16 +201,16 @@ export class BossBanner {
     const e = bossSlot(w);
     let main: string;
     if (S.stage === BOSS.warned) main = w.phase === "night" ? `<b>Mộc Tinh</b> <small>đang ngủ${chip}</small>` : `<b>Đêm ${stage.boss.night} · Boss</b> <small>Mộc Tinh thức dậy${chip}</small>`;
-    else if (S.stage === BOSS.lull) main = `<b>Mộc Tinh tới sau ${Math.max(0, Math.ceil((S.lullEnd - w.tick) / TICK_HZ))} s</b>${heavyNear(w) ? " · chờ quái gần Lũy" : ""}`;
+    else if (S.stage === BOSS.lull) main = `<b>Mộc Tinh tới sau ${Math.max(0, Math.ceil((S.lullEnd - w.tick) / TICK_HZ))} s</b>${heavyNear(w) ? " · chờ quái gần Fort" : ""}`;
     else if (S.stage === BOSS.emerge) main = `<b>Mộc Tinh đang trồi lên</b>`;
-    else if (e < 0) main = `<b>Mộc Tinh rút lui</b> <small>+${w.c.content.boss!.chestGold} vàng</small>`;
+    else if (e < 0) main = `<b>Mộc Tinh rút lui</b> <small>+${w.c.content.boss!.chestGold} Gold</small>`;
     else {
       const hp = w.enemies.hp[e]! / S.hpMax;
       const left = Math.max(0, Math.round(w.lanes[w.enemies.route[e]!]!.length - w.enemies.dist[e]!));
       const phase = S.stage === BOSS.retreat ? "rút lui" : w.tick < S.staggerUntil ? `choáng · Dễ Tổn Thương ${Math.ceil((S.staggerUntil - w.tick) / TICK_HZ)} s` : "pha " + S.phase;
       const pct = (share: number): string => (100 * share).toFixed(1) + "%";
       const ghost = this.ghostOf(hp, now);
-      main = `<div class="td-row"><b>Mộc Tinh</b><small>${phase} · còn ${left} m tới Lũy</small></div>` +
+      main = `<div class="td-row"><b>Mộc Tinh</b><small>${phase} · còn ${left} m tới Fort</small></div>` +
         `<div class="td-bar${now - this.bigAt < 160 ? " is-hit" : ""}"><i class="td-ghost" style="width:${pct(ghost)}"></i><i class="td-hp" style="width:${pct(hp)}"></i>` +
         `<s style="left:${w.c.content.boss!.stagger.atPct}%"></s><s class="td-retreat" style="left:${w.c.content.boss!.retreatPct}%"><small>rút lui</small></s></div>`;
     }

@@ -17,7 +17,7 @@ export function teamHtml(w: World, selected: number): string {
   const portraits = A.live().map((a) => {
     const view = agentView(w, a);
     const opensAt = w.c.content.buildings[0]!.keep!.levels.findIndex((level) => level.slots > a) + 1;
-    if (a >= slotsOpen(w)) return `<button class="td-agent is-locked" disabled title="Mở ở Lũy cấp ${opensAt}">${view.short}<small>Lũy ${opensAt}</small></button>`;
+    if (a >= slotsOpen(w)) return `<button class="td-agent is-locked" disabled title="Mở ở Fort cấp ${opensAt}">${view.short}<small>Fort ${opensAt}</small></button>`;
     const goal = A.goal[a]!;
     const badge = goal < 0 ? "" : `<em style="--fam:${buildingView(w, goal).color}" title="${buildingView(w, goal).name}">${buildingView(w, goal).short}</em>`;
     // Draconis' lantern carries Tối Thượng's charge in a ring (BUILD_1B §13.3), in steps of 5 % so the HTML changes seldom.

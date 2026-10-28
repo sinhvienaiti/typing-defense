@@ -39,11 +39,11 @@ export function lossHint(w: World, blows = 0): string {
   const s = w.stats;
   const need = (S.hpMax * w.c.content.boss!.retreatPct) / 100;
   const tower = w.buildings.live().some((b) => w.c.buildings[w.buildings.def[b]!]!.def.family === "attack");
-  if (S.stage < BOSS.lull) return !tower ? "Xây Tháp Cung cạnh đường: Lũy một mình không giữ nổi." : s[STAT.callWords] === 0 ? "Gõ chữ trên thẻ tháp (Bắn mạnh) khi quái tới gần." : "Gõ Bắn mạnh khi quái tới gần tháp" + (locked(w, "cannon") ? "; xây thêm tháp cạnh đường." : "; Phát Chữ của Tháp Pháo cạnh Draconis làm quái cháy.");
-  if (s[STAT.livesBoss]! - blows > blows || S.stage < BOSS.fight) return "Quái lọt vào Lũy lúc Mộc Tinh tới: gõ Bắn mạnh ở tháp gần Lũy.";
+  if (S.stage < BOSS.lull) return !tower ? "Xây Archer Tower cạnh đường: Fort một mình không giữ nổi." : s[STAT.callWords] === 0 ? "Gõ chữ trên thẻ tháp (Bắn mạnh) khi quái tới gần." : "Gõ Bắn mạnh khi quái tới gần tháp" + (locked(w, "cannon") ? "; xây thêm tháp cạnh đường." : "; Word Shot của Cannon Tower cạnh Draconis làm quái cháy.");
+  if (s[STAT.livesBoss]! - blows > blows || S.stage < BOSS.fight) return "Quái lọt vào Fort lúc Mộc Tinh tới: gõ Bắn mạnh ở tháp gần Fort.";
   if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Thêm tháp trên nhánh rễ sáng.";
   if (S.phase === 2 && s[STAT.burstTyped]! < s[STAT.burstWords]!) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
-  if (s[STAT.rootsHits]! >= 6) return "Đặt Tháp Cung xa đường hơn: rễ không với tới.";
+  if (s[STAT.rootsHits]! >= 6) return "Đặt Archer Tower xa đường hơn: rễ không với tới.";
   return "Dồn tháp và Draconis lên nhánh rễ sáng, gõ Bắn mạnh khi nó tới gần.";
 }
 
@@ -92,8 +92,8 @@ export class Sheet {
       (kind === "pause"
         ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ bạn. Chữ trên thẻ vẫn ở đó.</p>`
         : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
-          : `<h2>Lũy đã vỡ</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
-          `<dl>` + (won ? row("Rương", "+" + stats[STAT.goldChest]! / 1000 + " vàng") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Tri thức", w.knowledge) + `</dl>` +
+          : `<h2>Fort đã vỡ</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
+          `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Knowledge", w.knowledge) + `</dl>` +
           (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);

@@ -294,7 +294,7 @@ function showHud(): void {
   const noCard = card !== "" && sheet === null && sheets.failed;
   const notices = [
     selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", now < imeUntil ? "Tắt bộ gõ tiếng Việt để gõ" : "", over && mapOnly ? "Esc hoặc Enter: xem lại thẻ kết" : "",
-    world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Gỗ thừa: bán gỗ ở thẻ Lũy" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
+    world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Wood thừa: bán Wood ở thẻ Fort" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
     now < lost.until ? lost.text : "",
     noCard ? (card === "pause" ? "Tạm dừng · Esc để chạy tiếp (thẻ tạm dừng chưa tải được) · F5 để thử lại" : "Hết ải · F5 để chơi lại (thẻ kết chưa tải được)") : "",
     card === "results" && retryChunk.failed ? "Chơi lại Ngày n chưa tải được · F5 để thử lại" : "",

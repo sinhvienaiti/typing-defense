@@ -49,6 +49,8 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-row, .td-actions, .td-strip, .td-agents, .td-chain { display: flex; align-items: center; gap: 6px; }
 .td-row { margin-top: 6px; }
 .td-row > button { flex: 1; min-width: 0; padding: 3px 2px; }
+/* The sandbox's spawn rows size each button by its label: "Zombie Leader" is never cut (English names, 28/10). */
+.td-sandbox .td-row:has([data-act^="sb:spawn"]) > button { flex: auto; }
 .td-row > .td-x { flex: none; padding: 2px 8px; }
 .td-row > small:first-child { flex: 0 0 4.4em; }
 .td-row.td-wide { flex-wrap: wrap; row-gap: 4px; }
@@ -110,7 +112,7 @@ body.is-paused #tdCanvas { filter: saturate(0.55) sepia(0.3) brightness(0.9); }
 .td-panel p { margin: 6px 0 0; }
 .td-kind { display: flex; width: 100%; margin-top: 6px; }
 .td-kind kbd { margin: 0 8px 0 0; }
-.td-kind span { margin-left: auto; opacity: 0.75; }
+.td-kind span { margin-left: auto; padding-left: 8px; font-size: 0.9em; opacity: 0.75; } /* "Cannon Tower" keeps a gap before its price */
 .td-panel .td-hint { padding: 3px 8px; border-radius: 6px; background: var(--vd-jade-wash); font-weight: 700; }
 /* The boss bar (BUILD_1B §13.1): top middle; its one line of words under it, never in the middle of the screen. */
 .td-boss { left: 50%; top: 10px; width: min(calc(420px * var(--hud, 1)), calc(100vw - 620px * var(--hud, 1))); min-width: 300px; transform: translateX(-50%); text-align: center; }

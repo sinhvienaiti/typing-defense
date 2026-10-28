@@ -269,7 +269,7 @@ describe("Tối Thượng on the HUD (BUILD_1B §8.2, §13.3)", () => {
     expect(actionsHtml(w, false)).toContain('data-act="ult">Tối Thượng<kbd>=</kbd>');
     expect(teamHtml(w, 0)).toContain('class="td-ult is-full" style="--ult:100%"');
     w.ult.on = 1;
-    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Mưa lông lửa');
+    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Fire Feather Rain');
   });
 });
 

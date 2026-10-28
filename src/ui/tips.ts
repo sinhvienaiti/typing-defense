@@ -13,25 +13,25 @@ export type Tip = { line: string; chip: string };
 
 /** One row a phase, day1 … night5; each line ≤ 14 syllables, each chip ≤ 8 (tests/td-tips.test.ts). */
 export const TIPS: Readonly<Record<string, Tip>> = {
-  day1: { line: "Lúa chín, bác nông dân gọi. Đưa Draconis tới, gõ chữ trên bong bóng.", chip: "Gõ chữ đầu để chọn · Esc để thôi" },
-  night1: { line: "Đêm xuống, tháp gọi khi quái tới gần. Gõ là bắn Phát Chữ.", chip: "Bỏ qua lời gọi không mất gì" },
-  day2: { line: "Gỗ để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt.", chip: "Shift + \\ thuê dân" },
-  night2: { line: "Ma Trơi bay qua đầu lính. Tháp Cung và Draconis bắn được.", chip: "" },
-  day3: { line: "Nâng Lũy thì Chấm ra giúp. Thư Đồng làm việc nhanh hơn.", chip: "1–4 chọn người · Enter gửi đi" },
+  day1: { line: "Rice chín, bác Farmer gọi. Đưa Draconis tới, gõ chữ trên bong bóng.", chip: "Gõ chữ đầu để chọn · Esc để thôi" },
+  night1: { line: "Đêm xuống, tháp gọi khi quái tới gần. Gõ là bắn Word Shot.", chip: "Bỏ qua lời gọi không mất gì" },
+  day2: { line: "Wood để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt.", chip: "Shift + \\ thuê Villager" },
+  night2: { line: "Ghost Flame bay qua đầu Soldier. Archer Tower và Draconis bắn được.", chip: "" },
+  day3: { line: "Nâng Fort thì Chấm ra giúp. Helper làm việc nhanh hơn.", chip: "1–4 chọn người · Enter gửi đi" },
   night3: { line: "Lông lửa đầy thì bấm = khi quái tới gần. Gõ chữ, mưa to hơn.", chip: "= Tối Thượng khi quái gần" },
   day4: { line: "Nhà cấp 2 mạnh hơn. Bán lại được sáu phần mười.", chip: "Bán: bấm hai lần" },
-  night4: { line: "Tanuki đánh trống hồi máu. Gõ chữ trên đầu nó để Ngắt.", chip: "Chữ trên quái: gõ để phá chiêu" },
+  night4: { line: "Raccoon Dog đánh trống hồi máu. Gõ chữ trên đầu nó để Ngắt.", chip: "Chữ trên quái: gõ để phá chiêu" },
   day5: { line: "Đêm nay Mộc Tinh thức dậy. Dồn tháp lên nhánh rễ sáng.", chip: "Boss rút ở 50 % máu" },
   night5: { line: "Rễ trồi làm nhà tê. Lửa của chữ mới làm nó cháy.", chip: "Choáng: gõ Bắn mạnh ngay" },
 };
 
 /** What each building does; `taught`: the row that says it, after which its card drops the line. */
 export const DOES: Readonly<Record<string, { line: string; taught?: string }>> = {
-  farm: { line: "Gieo hạt; lúa chín thì gọi Gặt.", taught: "day1" },
-  archer: { line: "Bắn quái gần, cả quái bay.", taught: "night1" },
-  barracks: { line: "Lính chặn quái trên đường cho tháp bắn." },
-  "gold-mine": { line: "Đặt trên quặng; vàng đầy nửa thì gọi Đào." },
-  cannon: { line: "Đạn nổ trúng cả bầy dưới đất." },
+  farm: { line: "(Ruộng) Gieo Seeds; Rice chín thì gọi Gặt.", taught: "day1" },
+  archer: { line: "(Tháp Cung) Bắn quái gần, cả quái bay.", taught: "night1" },
+  barracks: { line: "(Trại Lính) Soldier chặn quái trên đường cho tháp bắn." },
+  "gold-mine": { line: "(Mỏ Vàng) Đặt trên quặng; Gold đầy nửa thì gọi Đào." },
+  cannon: { line: "(Tháp Pháo) Đạn nổ trúng cả bầy dưới đất." },
 };
 
 /** A row's place in the stage: day 1 is 0, night 1 is 1 …; −1 for no row. */
