@@ -1993,3 +1993,19 @@ Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kế
 
 - **High vượt dòng model** (7,5 MB). Khi đủ 4 model còn thiếu (khoảng +2 MB), cảnh (dòng 2,5) và VFX (dòng 0,5), High sẽ khoảng 15–16 MB so với trần 12: cần quyết lại (bản bàn giao).
 - `pnpm check` 383/383, ván vàng giữ nguyên.
+
+### 8.6 Năm chỗ sửa lưới và texture của bộ cấp (29/10/2026)
+
+Làm trên bản sao, không sửa nguồn Tripo: `scripts/models/blender/td_mesh_fix.py` đọc `art-src/3d/kits/<id>.glb`, ghi `<id>.fix1.glb` cạnh nó, kèm ảnh trước và sau cùng số tam giác. Codex không chạy được Blender trong sandbox (phiếu 085), nên việc này do Claude làm.
+
+| Bộ | Kết quả | Tam giác (nguồn) |
+|---|---|---|
+| `keep-kit-l2` | **Đã sửa.** Hai đảo lưới: vòng chính có cổng và chòi nỏ (4.924 mặt), cung tường trái (2.954 mặt). Xoay cung trái 9,5° quanh tâm vòng: khe giữa đầu cung và chòi nỏ (253–261°) khép lại; khe trước phải cho bục giữ nguyên. | 7.878 → 7.878 |
+| `archer-kit-l2` | **Đã sửa.** Bỏ sàn ván đáy (64 mặt nằm ngang ở đáy) để không đè sàn canh của Archer Tower cấp 1; thêm `FX_lantern_0..4` trên xà hiên mặt trước. | 3.652 → 3.588 |
+| `cannon-barrel-l3` | **Không giữ.** Nướng màu nửa có hoa văn quanh trục nòng (bốn bản xoay 90°) làm cả nòng tối đi và miệng đồng thành nâu; nguồn cũ giữ nguyên. | 1.922 |
+| `keep-kit-l3` | **Chưa sửa được bằng script.** Không mặt nào có độ bão hòa thấp (màng "xám" không xám trong texture); tấm phẳng lớn duy nhất nằm ngang, không phải tấm xiên mà ghi chú tả. | 3.510 |
+| `gold-mine-kit-l3` | **Chưa sửa được bằng script.** Không có tấm phẳng riêng ở mặt giữa guồng để tách khỏi nan; màu màng trùng màu gỗ tối. | 3.667 |
+
+- `keep-kit-l2` và `archer-kit-l2` nay dựng từ `.fix1.glb` (preset trỏ `reference` về ảnh 2D gốc để vẫn khớp màu); ảnh dựng lại Fort L2 và Archer Tower L2 đạt.
+- `models:index`: `usedBy` của hai bản sửa điền đúng. Lệnh cảnh báo (thoát 1) vì luật "nguồn đặt tên theo ảnh 2D" chưa biết bản sửa `.fixN.glb`: cần sửa script chung ở repo cha.
+- Ba chỗ còn lại cần mở trong Blender có giao diện, hoặc dựng lại bằng Tripo. Ở camera game ảnh hưởng nhỏ: màng tối ở sườn mái và giữa nan, hoa văn một mặt nòng.

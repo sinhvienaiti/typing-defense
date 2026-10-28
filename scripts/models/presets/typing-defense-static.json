@@ -1740,10 +1740,10 @@
       }
     },
     "kits/keep-kit-l2": {
-      "source": "kits/keep-kit-l2.glb",
+      "source": "kits/keep-kit-l2.fix1.glb",
       "triangles": 7800,
       "reviewed": false,
-      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Fort cấp 2: vòng tường đồng tâm trên sân đá ngoài của Fort (3D_IMPORT 28/10: tách hai đảo lưới, khép khe trái vào chòi nỏ).",
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Fort cấp 2: vòng tường đồng tâm trên sân đá ngoài của Fort (3D_IMPORT 28/10: tách hai đảo lưới, khép khe trái vào chòi nỏ). Nguồn là bản sửa kits/keep-kit-l2.fix1.glb (td_mesh_fix.py): cung tường trái xoay 9,5° quanh tâm vòng, khép khe bên trái vào chòi nỏ; khe trước phải cho bục giữ nguyên.",
       "static": {
         "yaw": 90,
         "size": {
@@ -1762,7 +1762,8 @@
           "metallic": 0.0,
           "roughnessMin": 0.5
         }
-      }
+      },
+      "reference": "kits/keep-kit-l2.png"
     },
     "kits/keep-kit-l3": {
       "source": "kits/keep-kit-l3.glb",
@@ -1861,10 +1862,10 @@
       }
     },
     "kits/archer-kit-l2": {
-      "source": "kits/archer-kit-l2.glb",
+      "source": "kits/archer-kit-l2.fix1.glb",
       "triangles": 4000,
       "reviewed": false,
-      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Archer Tower cấp 2: mái chóp, xà hiên, lan can trên sàn canh.",
+      "note": "Bộ cấp map 1 (1C C4 phần B); chỗ đặt trên nhà gốc ở src/view/3d/kits.json. Archer Tower cấp 2: mái chóp, xà hiên, lan can trên sàn canh. Nguồn là bản sửa kits/archer-kit-l2.fix1.glb (td_mesh_fix.py): bỏ sàn ván đáy (64 mặt) để không đè sàn canh cấp 1; năm đèn lồng trên xà hiên mặt trước.",
       "static": {
         "yaw": 90,
         "size": {
@@ -1904,9 +1905,45 @@
               0.6,
               0
             ]
+          },
+          "FX_lantern_0": {
+            "frac": [
+              -0.6,
+              0.2,
+              -0.92
+            ]
+          },
+          "FX_lantern_1": {
+            "frac": [
+              -0.3,
+              0.2,
+              -0.92
+            ]
+          },
+          "FX_lantern_2": {
+            "frac": [
+              0,
+              0.2,
+              -0.92
+            ]
+          },
+          "FX_lantern_3": {
+            "frac": [
+              0.3,
+              0.2,
+              -0.92
+            ]
+          },
+          "FX_lantern_4": {
+            "frac": [
+              0.6,
+              0.2,
+              -0.92
+            ]
           }
         }
-      }
+      },
+      "reference": "kits/archer-kit-l2.png"
     },
     "kits/archer-kit-l3": {
       "source": "kits/archer-kit-l3.glb",

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-28T16:16:32.728Z",
+  "generatedAt": "2026-10-28T16:26:27.460Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
@@ -712,16 +712,21 @@
       "id": "archer-kit-l2",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.high.glb?v=b2a2cf8687",
-          "bytes": 128744
+          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.high.glb?v=565828f586",
+          "bytes": 128180
         },
         "medium": {
-          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.medium.glb?v=fe4781ca23",
-          "bytes": 72628
+          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.medium.glb?v=d2197b4428",
+          "bytes": 72064
         }
       },
-      "triangles": 3652,
+      "triangles": 3588,
       "sockets": [
+        "FX_lantern_0",
+        "FX_lantern_1",
+        "FX_lantern_2",
+        "FX_lantern_3",
+        "FX_lantern_4",
         "FX_perch",
         "FX_top",
         "FX_word"
@@ -942,21 +947,21 @@
       "id": "keep-kit-l2",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.high.glb?v=7e4599f4ba",
-          "bytes": 205672
+          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.high.glb?v=7f7dae5d48",
+          "bytes": 205584
         },
         "medium": {
-          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.medium.glb?v=363e29e00f",
-          "bytes": 122412
+          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.medium.glb?v=0f62bf9d0a",
+          "bytes": 122480
         }
       },
       "triangles": 7800,
       "sockets": [],
       "clips": [],
       "size": [
-        12.0388,
-        5.8104,
-        10.7338
+        12.0117,
+        5.7805,
+        10.7122
       ]
     },
     "kits/keep-kit-l3": {

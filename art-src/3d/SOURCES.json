@@ -508,13 +508,19 @@
    "image": "art-src/heroes/tre.png",
    "usedBy": []
   },
+  "kits/archer-kit-l2.fix1.glb": {
+   "md5": "1cdc61ec40b89d2624e296b69f5332dd",
+   "bytes": 2650160,
+   "image": null,
+   "usedBy": [
+    "kits/archer-kit-l2"
+   ]
+  },
   "kits/archer-kit-l2.glb": {
    "md5": "6cc3271005aae485e85c3d13f2784c6b",
    "bytes": 2652564,
    "image": "art-src/kits/archer-kit-l2.png",
-   "usedBy": [
-    "kits/archer-kit-l2"
-   ]
+   "usedBy": []
   },
   "kits/archer-kit-l3.glb": {
    "md5": "c00d5d570e0626f3b42ec5a4b59cbb90",
@@ -608,13 +614,19 @@
    "image": "art-src/kits/infirmary-kit-l3.png",
    "usedBy": []
   },
+  "kits/keep-kit-l2.fix1.glb": {
+   "md5": "7ce3dd8c6268a2e3b788a91ea65dead0",
+   "bytes": 3304080,
+   "image": null,
+   "usedBy": [
+    "kits/keep-kit-l2"
+   ]
+  },
   "kits/keep-kit-l2.glb": {
    "md5": "8f7acd1d355a7a14ccb5ea2811224ecb",
    "bytes": 3304032,
    "image": "art-src/kits/keep-kit-l2.png",
-   "usedBy": [
-    "kits/keep-kit-l2"
-   ]
+   "usedBy": []
   },
   "kits/keep-kit-l3.glb": {
    "md5": "e640f9e1369456eb32f18411b3785691",
