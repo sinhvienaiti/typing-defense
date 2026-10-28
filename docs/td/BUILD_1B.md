@@ -605,7 +605,7 @@ export const LEARN = { returnS: [25, 45], reviewShare: 0.25, returns: 2, plan: {
 
 ## 16. File và ngân sách dòng
 
-Cách đếm như BUILD_1A6 §0: `.ts` trong `src`, trừ `src/kit`; test, bot, kịch bản không tính. Hiện **7.499** (trước 1B). Trần cứng 1B: **10.500**; mỗi đợt có trần riêng. Cột là mức tối đa từng file; trần cộng dồn mới là cổng. Phản biện 24/10 đưa lịch mở, hai hàng boss của bảng dạy, Chơi lại Ngày n, đà của boss vào R1 (R1 +100 dòng, R3 bớt tương ứng); trần 1B giữ 10.500.
+Cách đếm như BUILD_1A6 §0: `.ts` trong `src`, trừ `src/kit`; test, bot, kịch bản không tính. Hiện **7.499** (trước 1B). Trần cứng 1B: **10.900** (10.500 tới hết R3; +400 cho VFX 2D V4a, điều phối viên 28/10); mỗi đợt có trần riêng. Cột là mức tối đa từng file; trần cộng dồn mới là cổng. Phản biện 24/10 đưa lịch mở, hai hàng boss của bảng dạy, Chơi lại Ngày n, đà của boss vào R1 (R1 +100 dòng, R3 bớt tương ứng); trần 1B khi đó giữ 10.500.
 
 | File | R1 | R2 | R3 | Ghi chú |
 |---|---|---|---|---|

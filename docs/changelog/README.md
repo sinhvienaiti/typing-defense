@@ -4,6 +4,8 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 28/10/2026 | 1B.V4 bước 1 (VFX 2D, phiếu Codex 036): ống `FX.fire`/`FX.hit` cho view 2D (`FxPipe`, `FxDraw`), `FxView` vào chunk lười `fx`; gói "/" 83,85 kB gzip, 10.555 dòng | [2026-10-28-td-fx-pipe](./2026-10-28-td-fx-pipe.md) |
+| 28/10/2026 | Tên danh từ tiếng Anh (phiếu Codex 050): 28 tên công trình, quái, đơn vị, tài nguyên theo `NAMES_EN.md`; câu và menu vẫn tiếng Việt; Claude kiểm bố cục ở 1280 × 720 và 1920 × 1080 | [2026-10-28-english-names](./2026-10-28-english-names.md) |
 | 27/10/2026 | Các việc còn mở sau đợt test, bước A1 (các đêm và boss): pha 2 luôn diễn ra, lặng Đêm 5 chờ Thuồng Luồng, Đêm 4 có áp lực, hệ số k boss và Thử thách; Đêm 3 nhàn: nguyên nhân thật, chưa sửa (chủ dự án) | [2026-10-27-open-items](./2026-10-27-open-items.md) |
 | 27/10/2026 | Đợt test 27/10: gộp 43 lỗi của ba người test, sửa mọi lỗi nặng trừ Đêm 4 nhàn (đo 6 biến thể, để lượt cân bằng) và phần áp lực Thuồng Luồng; thẻ chữ tránh chỗ hành động, Phát Chữ và lúc hạ quái, thẻ kết, Xem bản đồ, Neo và Phá Khiên trong vòng giúp, Tối Thượng từ Đêm 3 | [2026-10-27-test-pass](./2026-10-27-test-pass.md) |
 | 26–27/10/2026 | 1B R3 cân bằng cuối (bước 9) và cổng cứng §21 (bước 10): Rễ hút sinh khí, từ 4–8 chữ cho E 45–64, sàn k 0,70, hệ số k máu boss; sáu lượt đo; §20 trên Mac xen kẽ với mốc; 44/44 lượt kịch bản; còn trượt Ẩu 77 % và B4 bộ 1 | [2026-10-26-td-r3-balance](./2026-10-26-td-r3-balance.md) |

@@ -42,6 +42,7 @@ import type { Sheet, SheetAction } from "./ui/sheets";
 import { teamHtml } from "./ui/team-bar";
 import type { TitleChoice, TitleScreen } from "./ui/title";
 import type { TypingAudio, UiSound } from "./view/audio-min";
+import type { FxPipe } from "./view/fx-pipe";
 import { DebugView } from "./view/debug-2d";
 import { WordCards } from "./view/words/cards";
 
@@ -147,6 +148,9 @@ let runHeader = retry?.header ?? header();
 let startMode: Mode = retry?.mode ?? freshMode();
 const session = new Session({ seed, sandbox, deck, expected: runHeader.expected, pace: runHeader, mode: startMode });
 const world = session.world;
+/** Shots and hits for the 2D view (ticket 036) and FxView, a chunk once the page is usable. */
+const fxChunk = new Chunk("fx", () => import("./view/fx-pipe"));
+let fx: FxPipe | null = null;
 /** The replay's end (__td.retry()); another rule or vocabulary since the run was kept: the run starts over. */
 const replayed = retry === null ? null : replay!.replayRetry(world, session, deck, retry, () => (window.location.search = freshRun(params.get("learn") === "1")));
 const tally = new SkillTally(world);
@@ -230,6 +234,7 @@ const dev = new Chunk("dev", () => import("./app/dev-tools"));
 /** Once the page is usable: sound, the cards' chunk, the results card's buttons, the sandbox panel and __td, so none of them holds up the start. */
 function prefetch(): void {
   wantSound(false);
+  void fxChunk.get().then((m) => m && ((view.fx = new m.FxView(view.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
   wantSheet();
   wantTips();
   void retryChunk.get();
@@ -237,8 +242,8 @@ function prefetch(): void {
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && sound.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
-    chunks: () => ({ sound: audio !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
+    ready: () => painted && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    chunks: () => ({ sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
   }));
@@ -356,7 +361,8 @@ runFrameLoop({
       cards.read(fresh, world, now);
       if ((world.boss.stage > 0) !== bossTop > 0) resize();
       view.boss.read(fresh, world, now);
-      view.fx.read(fresh, world, now);
+      view.fx?.read(fresh, world, now);
+      fx?.read(world.events.ring);
       banner.read(fresh, world, now);
       audio?.read(fresh, world, now);
       audio?.frame(titleUp ? null : world, now);

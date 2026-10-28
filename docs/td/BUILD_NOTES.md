@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1B.R3**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16, 10.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1B.V4**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -46,6 +46,7 @@ Mốc đang làm: **1B.R3**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.R1 Mộc Tinh tới (`BUILD_1B.md` §16, §17; đếm như 1A.7) | 7.499 → 8.829 thật (mục 7.1); sửa review R1: 8.883 thật (mục 7.2; 50 dòng lấy từ phần R2) | 1.401 | 8.900 |
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
 | 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
+| 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -1841,3 +1842,18 @@ Bốn việc về Ngày và cổng §12 (dòng 18–21 của đợt test). Đủ
 - **Không giữ, về chủ dự án**: gói việc 1, 2, 4. Chặt bắt đầu ban Đêm gọi lúc rạng sáng (sáng Ngày 2–4 có 192/200 dân chặt dở mà không lời gọi), gặt ban Đêm không lời gọi (lời gọi Gặt ban Đêm lấy chỗ của Bắn mạnh; với k > 1 lúa chín đúng lúc toán đầu tới, Khá mất 4,22 mạng ở Đêm 1, Phát Chữ 82 so với 331 của Chuẩn), lề Cân bằng 1,8 s. Trên 20 seed: 5a 8,48 → 7,95 s, 5b 29,5 → 30,1 %, 5c 23,0 → 15,5 %, Khá Đêm 1 4,22 → 2,00 mạng; nhưng mọi bot gõ thắng 91–100 % nên phải chỉnh boss, và hai biến thể (máu 4.550, kHp 0,35 hay 0,32, kHp2 12, trần 1,40, Rễ hút 20 s) đều để Chậm chắc ở 71/80 = 88,75 % (dải chặt ≤ 88 %), cùng B1 bộ 1 (Biên S Mới 70 %) và B4 bộ 2 (sát thương/s lên boss Chuẩn 32,6 < Ẩu 39,3–39,9) trượt. Gói lưu ở `a2-days/a2-package-v2.patch`; cần thêm 21 byte ở "/" (còn 4).
 - **Đọc**: số Ngày của luật gỗ (`TREE.wood`, `woodShare`, `woodGold`, `MINE.wordGold`, số từ Chặt) không dời 5b quá 0,3 điểm: 55–62 % số tick Ngày có lời gọi bị ngân sách 8 s/20 s giữ, nên 5b do ngân sách và các tick không lời gọi quyết. Dải chặt 78–88 % trên 80 ván có sai số chuẩn ~4,2 điểm mỗi bot: mọi đổi luật trước Đêm 5 là gieo lại sáu bot.
 - **Vẫn trượt trên 20 seed**: 5a Cân bằng 8,48 s, 5b 29,5 %.
+
+
+### 7.11 1B.V4 "VFX 2D", bước 1: ống `FX.fire`/`FX.hit` (28/10/2026, Mac mini M4)
+
+Làn V4a của `docs/games/VFX_STANDARD.md` (repo cha) §5.4, nhánh `td-vfx`. Phiếu Codex 036 (`docs/codex-queue/036-td-fx-pipe.md` của repo cha): `src/view/fx-pipe.ts` mới là một chunk lười giữ `FxPipe` (đọc `FX.fire`, `FX.hit` từ `CombatRing` cho giao diện vẽ `FxDraw`) và `FxView` chuyển nguyên văn từ `fx-2d.ts` (để gói "/" không vượt trần khi nối chunk). Chi tiết: `docs/changelog/2026-10-28-td-fx-pipe.md`.
+
+| Commit | Việc | "/" gzip (chừa) | `?title=0` | Chunk `fx-pipe` | Dòng `.ts` | Test |
+|---|---|---|---|---|---|---|
+| `f4cd046` | trước (trần 10.900 từ 1B.V4) | 84,98 (84.975 byte; 25) | 83,53 | không có | 10.499 | 350 |
+| `bc3d949` | phiếu 036: `FxPipe`, `FxDraw`, `FxView` vào chunk `fx` | 83,85 (83.848 byte; 1,15 kB) | 82,40 | 1,96 kB | 10.550 | 355 |
+| `65cbcb7` | chú thích đầu `fx-2d.ts` sang `fx-pipe.ts` | 83,85 | 82,40 | 1,96 kB | 10.555 | 355 |
+| gộp vào `a2-days` | `td-vfx` gộp sau tên tiếng Anh của phiếu 050 (`a5cc147`); không xung đột, đoạn này ghi tay số đo sau gộp | 83,78 (83.784 byte; 1,22 kB) | 82,33 | 1,96 kB | 10.555 | 355 / 33 file |
+
+- Ván vàng không đổi (`f2a21037`; 19.660 và 5.695 tick; sau gộp vào `a2-days` vẫn `"same":true` cả hai ván). Ván vàng qua ống: 133 lần bắn, 102 lần trúng, không mất sự kiện.
+- Phần vẽ trên `FxDraw` (lóe ở tháp và Draconis, cầu lửa, trúng đòn) là bước sau; gói "/" nay chừa 1,15 kB, nhưng phần vẽ nằm trong chunk `fx`, không vào gói khởi động.

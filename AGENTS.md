@@ -158,7 +158,7 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   `ability.reachM` of an attack building's rim), Nuppeppō's split in
   `deaths.ts`, Thư Đồng's panic `panicNear` in `agents.ts`; numbers `ULT`,
   `SHARDS`, `DIRECT`, `PANIC` in `rules.ts`, Tanuki and Nuppeppō in
-  `slice-1a.ts`. Their 2D layers: `FxView` in `src/view/fx-2d.ts` (portrait,
+  `slice-1a.ts`. Their 2D layers: `FxView` in `src/view/fx-pipe.ts` (portrait,
   feather shadows, embers, heal ring; the particle pool's stones and rootlets of the
   boss's rise); the charge ring on Draconis' lantern
   (`team-bar.ts`), the action button (`hud.ts`). Sandbox ops `spawn`, `ult`.
@@ -172,7 +172,7 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
 - 1B R3 part B: the three verbs in `sim/systems/direct.ts` (`AbilitySpec` a union in `content/types.ts`, compiled with
   a `verb` index; `verbOf`, `domesUp`, `domeMul`), the leader's aura and lead (`DIRECT.leadM`) in `move.ts`, the dome on
   shots in `projectile.ts` (shots keep their launch point `ox`, `oz`), ×1.3 in `combat.ts` (`takenUntil`); their marks in
-  `view/debug-2d.ts` (`lead`, the dome), outcomes in `view/fx-2d.ts`, sounds in `view/audio-min.ts`, the call's icon and name
+  `view/debug-2d.ts` (`lead`, the dome), outcomes in `view/fx-pipe.ts` (`FxView`), sounds in `view/audio-min.ts`, the call's icon and name
   by verb (`callLabel` in `view/words/cards.ts`). Bots' Học: `learnStore`, `learnHeader`, `StageRun` (`timedFresh`) and the
   `standard@book20` row in `tests/td/flow.ts`. Play-test file: `playtestFile` in `app/retry.ts`; B9: `tests/td/b9.ts`.
 - 1B R3 balance: Rễ hút sinh khí is `keepBlow(w, "drain")` in `sim/systems/boss.ts` (numbers `boss.drain` in `slice-1a.ts`;

@@ -25,7 +25,7 @@ import { plotAt } from "../sim/systems/economy";
 import type { World } from "../sim/world";
 import { wordText } from "../typing/decks";
 import { BossView, type Pen } from "./boss-2d";
-import { FxView } from "./fx-2d";
+import type { FxView } from "./fx-pipe";
 import { CALL_COLOR, callLabel, pips, ROOF_M } from "./words/cards";
 import type { Rect } from "./words/lanes";
 
@@ -90,7 +90,7 @@ export class DebugView {
   private readonly hits: [number, number, number][] = [];
   /** Mộc Tinh's layers (BUILD_1B §13.1) and R2's Tối Thượng and direct calls (§13.3); main.ts hands them each frame's events. */
   readonly boss = new BossView();
-  readonly fx = new FxView(this.boss.fx);
+  fx: FxView | null = null;
   private readonly pen: Pen = { ctx: null as unknown as CanvasRenderingContext2D, px: (pixels) => this.px(pixels), text: (label, x, z, size, color, weight, edge) => this.text(label, x, z, size, color, weight, edge) };
 
   constructor(private readonly canvas: HTMLCanvasElement) {
@@ -154,13 +154,13 @@ export class DebugView {
     this.nodes(w);
     this.trees(w);
     this.boss.under(this.pen, w, now);
-    this.fx.under(this.pen, w, now);
+    this.fx?.under(this.pen, w, now);
     this.buildings(w, hand, now);
     this.ghost(w, hand);
     this.soldiers(w);
     this.enemies(w, now);
     this.boss.over(this.pen, w, now);
-    this.fx.over(this.pen, now);
+    this.fx?.over(this.pen, now);
     this.boss.marks(this.pen, w);
     this.npcs(w);
     this.agents(w, hand);
@@ -172,7 +172,7 @@ export class DebugView {
     ctx.setTransform(this.scale, 0, 0, this.scale, this.ox, this.oy);
     this.calls(w, hand);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
-    this.fx.portrait(ctx, this.canvas.height, this.ratio, now);
+    this.fx?.portrait(ctx, this.canvas.height, this.ratio, now);
     [this.ox, this.oy] = [this.ox - qx, this.oy - qy];
   }
 
@@ -764,7 +764,7 @@ export class DebugView {
         continue;
       }
       if (kind === PROJECTILE.feather) {
-        // A fire feather falling slantwise, its flame trail behind it (its shadow: fx-2d.ts).
+        // A fire feather falling slantwise, its flame trail behind it (its shadow: FxView in fx-pipe.ts).
         const back = 1.6 / (Math.hypot(P.tx[p]! - x, P.tz[p]! - z) || 1);
         this.polyline([x - (P.tx[p]! - x) * back, z - (P.tz[p]! - z) * back, x, z], "rgba(242, 99, 34, 0.85)", 0, 5);
         this.disc(x, z, 0.32, "#ffd36b", COLOR.seal, 1.5);
@@ -781,7 +781,7 @@ export class DebugView {
       this.polyline([x - dx * back, z - dz * back, x, z], kind === PROJECTILE.bolt ? COLOR.paper : COLOR.ink, 0, kind === PROJECTILE.bolt ? 3 : 2);
     }
     // A word shot gone since last frame has landed: its letters burst out of a jade flash (FxView), and the cards keep off it.
-    for (const [p, [x, z, text]] of this.flying) if (!live.has(p)) this.flying.delete(p), this.fx.wordHit(x, z, text, now), this.hits.push([x, z, now]);
+    for (const [p, [x, z, text]] of this.flying) if (!live.has(p)) this.flying.delete(p), this.fx?.wordHit(x, z, text, now), this.hits.push([x, z, now]);
     while (this.hits.length > 0 && now - this.hits[0]![2] > 700) this.hits.shift();
   }
 

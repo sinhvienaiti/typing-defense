@@ -37,7 +37,7 @@ const clamp01 = (t: number): number => Math.max(0, Math.min(1, t));
 const span = (tick: number, from: number, to: number): number => clamp01((tick - from) / Math.max(1, to - from));
 
 export class BossView {
-  /** The map's one particle pool (fx-2d.ts's FxView emits into it too); drawn under the buildings. */
+  /** The map's one particle pool (FxView in fx-pipe.ts emits into it too); drawn under the buildings. */
   readonly fx = new Particles();
   private leafAt2 = 0; // the last leaf it shed (ms)
   private bigHitAt = -1e9;
