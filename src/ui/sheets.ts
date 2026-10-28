@@ -93,7 +93,7 @@ export class Sheet {
         ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ bạn. Chữ trên thẻ vẫn ở đó.</p>`
         : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
           : `<h2>Fort đã vỡ</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
-          `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + row("Knowledge", w.knowledge) + `</dl>` +
+          `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + (w.mode === "learn" || w.knowledge > 0 ? row("Knowledge", w.knowledge) : "") + `</dl>` +
           (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);

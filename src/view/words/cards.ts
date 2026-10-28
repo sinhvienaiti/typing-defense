@@ -19,7 +19,7 @@ import type { World } from "../../sim/world";
 import { gloss, wordText } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
 import { KEY } from "../../typing/router";
-import { besidePanels, COLUMN, columnHeights, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
+import { besidePanels, columnBox, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
 export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", perfect: "Hoàn hảo", good: "Tốt", ok: "Vừa", sloppy: "Ẩu" };
 /** By call kind (CALL_KIND): power, build, harvest, chop, mine, quiz; R2: Chữ Chiêu, a direct call (Ngắt). */
@@ -223,13 +223,10 @@ export class WordCards {
     const columns: { b: number; cards: Card[]; heights: number[]; roofY: number }[] = [];
     for (const [c, cards] of lanes) {
       // A call's word does not run out: it sits on the roof, never rises with a clock.
-      const gap = Math.max(COLUMN.gap, Math.ceil(1.2 * Math.max(...cards.map((card) => card.height))) + 4);
-      const heights = columnHeights(cards.map(() => 0), cards.map(() => 1), [], gap);
+      const { heights, tallest, half } = columnBox(cards, lock);
       const roof = c >= 0 ? this.project(C.x[c]!, C.z[c]! - ROOF_M) : { x: cards[0]!.ax, y: cards[0]!.ay };
-      // A locked card grows up to ×1.2 from its bottom edge: the column's box reaches its scaled top (review R3).
-      const tallest = Math.max(...cards.map((card, k) => heights[k]! + card.height * (card.slot >= 0 && card.slot === lock ? 1.2 : 1)));
       const roofY = Math.min(height - SAFE.bottom, Math.max(roof.y, SAFE.top + tallest));
-      boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half: Math.max(...cards.map((card) => (card.slot >= 0 && card.slot === lock ? card.half * 1.2 + 18 : card.half))) + 9, at: roof.x + (this.offsets.get(c) ?? 0) });
+      boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half, at: roof.x + (this.offsets.get(c) ?? 0) });
       columns.push({ b: c, cards, heights, roofY });
     }
     // Off the side panels and the action when the columns still part there (review R2: a fourth bubble pushed over the

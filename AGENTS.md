@@ -254,8 +254,8 @@ URL=http://127.0.0.1:3006/ OUT_DIR=tmp/visual node src/kit/tools/cdp-run.mjs scr
 # Chrome draws with the GPU: run cdp-run as above, under the parent's .local/bin/heavy.sh --gpu (BUILD_NOTES §7.6).
 ```
 
-The dev server serves `/vocabulary/` and `/typing-texts/` read-only from the
-parent repo's `shared/` (kit plugin in `vite.config.ts`).
+Vite serves `/vocabulary/` from the pinned copy in `public/vocabulary/`.
+The game does not use `/typing-texts/` or mount folders from the parent repo.
 
 ## Hard rules
 

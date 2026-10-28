@@ -1,6 +1,6 @@
 /**
- * Helpers for the Typing Defense typing tests: the real vocabulary read from
- * shared/vocabulary (BUILD_NOW §3.5), small decks of chosen words, a call
+ * Helpers for the Typing Defense typing tests: the pinned vocabulary read from
+ * public/vocabulary (BUILD_NOW §3.5), small decks of chosen words, a call
  * made bright with a chosen word, and keys sent the way the input sends them.
  */
 import { readFileSync } from "node:fs";
@@ -20,7 +20,7 @@ import { send } from "./fixtures";
 const levels = new Map<number, { id: string; en: string }[]>();
 const level = (n: number) => {
   // Flagged words dropped, as the page's loader (src/kit/vocab) drops them.
-  if (!levels.has(n)) levels.set(n, filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../../../shared/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries));
+  if (!levels.has(n)) levels.set(n, filterVocabularyEntries(JSON.parse(readFileSync(new URL("../../public/vocabulary/levels/" + String(n).padStart(3, "0") + ".json", import.meta.url), "utf8")).entries));
   return levels.get(n)!;
 };
 
