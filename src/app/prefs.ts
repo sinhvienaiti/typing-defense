@@ -14,7 +14,7 @@ type Storage = Pick<typeof safeLocalStorage, "readJson" | "writeJson">;
 
 const KEY = "td.settings";
 const DEFAULTS: Settings = { master: 80, music: 60, sfx: 80, pace: true, mode: null };
-export const SETTING_ROWS: readonly (readonly [Volume, string])[] = [["master", "Âm lượng chung"], ["music", "Nhạc"], ["sfx", "Tiếng trận và gõ"]];
+export const SETTING_ROWS: readonly (readonly [Volume, string])[] = [["master", "Master volume"], ["music", "Music"], ["sfx", "Combat and keys"]];
 /** The modes the settings card steps through, null ("theo hồ sơ") first. */
 export const MODE_CHOICES: readonly (Mode | null)[] = [null, "relax", "balanced", "challenge", "learn"];
 

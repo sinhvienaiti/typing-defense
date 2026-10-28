@@ -17,16 +17,16 @@ export function teamHtml(w: World, selected: number): string {
   const portraits = A.live().map((a) => {
     const view = agentView(w, a);
     const opensAt = w.c.content.buildings[0]!.keep!.levels.findIndex((level) => level.slots > a) + 1;
-    if (a >= slotsOpen(w)) return `<button class="td-agent is-locked" disabled title="Mở ở Fort cấp ${opensAt}">${view.short}<small>Fort ${opensAt}</small></button>`;
+    if (a >= slotsOpen(w)) return `<button class="td-agent is-locked" disabled title="Fort level ${opensAt}">${view.short}<small>Fort ${opensAt}</small></button>`;
     const goal = A.goal[a]!;
     const badge = goal < 0 ? "" : `<em style="--fam:${buildingView(w, goal).color}" title="${buildingView(w, goal).name}">${buildingView(w, goal).short}</em>`;
     // Draconis' lantern carries Tối Thượng's charge in a ring (BUILD_1B §13.3), in steps of 5 % so the HTML changes seldom.
     const charge = Math.floor(w.ult.charge / 5) * 5;
-    const ring = a === 0 ? `<b class="td-ult${charge >= ULT.max ? " is-full" : ""}" style="--ult:${charge}%" title="Tối Thượng ${charge} %"></b>` : "";
+    const ring = a === 0 ? `<b class="td-ult${charge >= ULT.max ? " is-full" : ""}" style="--ult:${charge}%" title="Ultimate ${charge} %"></b>` : "";
     return `<button class="td-agent${a === selected ? " is-on" : ""}" data-act="agent:${a}" style="--c:${view.color}" title="${view.name}">${ring}<i>${a + 1}</i>${view.short}${badge}</button>`;
   });
   return (
-    `<div class="td-row"><span><b>${selected + 1} · ${agentView(w, selected).name}</b></span><span class="td-load" title="Lời gọi đang sáng / tối đa">Đang gọi ${bright}/${MODES[w.mode].open}</span></div>` +
+    `<div class="td-row"><span><b>${selected + 1} · ${agentView(w, selected).name}</b></span><span class="td-load" title="Lit calls / limit">Calling ${bright}/${MODES[w.mode].open}</span></div>` +
     `<div class="td-agents">${portraits.join("")}</div>`
   );
 }

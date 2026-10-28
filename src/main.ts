@@ -106,7 +106,7 @@ function showTitle(canContinue: boolean): void {
   titleUp = true;
   void titleChunk.get().then((shown) => {
     title = shown;
-    if (shown === null) return void ((titleUp = false), tellLost("Màn đầu chưa tải được: vào thẳng ván · F5 để thử lại"));
+    if (shown === null) return void ((titleUp = false), tellLost("Title screen failed to load: starting the run · F5 to retry"));
     if (titleUp) shown.show(canContinue, bestStars()[SLICE_1A.id] ?? 0);
   });
 }
@@ -141,7 +141,7 @@ const freshRun = (learn: boolean, story = false): string => {
 const { deck, source } = await loadDeck();
 byId("tdHud").replaceChildren(); // the loading note
 const replay = retryLoad === null ? null : await retryLoad;
-if (kept !== null && replay === null) tellLost("Chơi lại Ngày n chưa tải được: ván mới từ đầu · F5 để thử lại");
+if (kept !== null && replay === null) tellLost("Day retry failed to load: new run from the start · F5 to retry");
 const retry = kept === null || replay === null ? null : replay.readRetry(kept, seed, sandbox);
 let runHeader = retry?.header ?? header();
 /** The run's mode at its start (the replay's header): Học with ?learn=1 or the title's choice, else the settings' (freshMode). */
@@ -220,9 +220,9 @@ const sheets = new Chunk("sheets", async () => {
     else if (action === "map") mapOnly = true;
     else if (action === "again") window.location.search = freshRun(false);
     else if (action === "retry" || action === "copy") void retryChunk.get().then((m) => {
-      if (m === null) return tellLost((action === "copy" ? "Chép số chơi thử" : "Chơi lại Ngày n") + " chưa tải được · F5 để thử lại");
+      if (m === null) return tellLost((action === "copy" ? "Copy playtest data" : "Day retry") + " failed to load · F5 to retry");
       const run = { world, session, seed, sandbox, deck, mode: startMode, header: runHeader, learn: runLearn, fresh: freshRun };
-      if (action === "copy") (lost?.text.startsWith("Đã lưu") && performance.now() < lost.until) || (m.copyNumbers(run, profile, source), tellLost("Đã lưu file chơi thử và chép số"));
+      if (action === "copy") (lost?.text.startsWith("Saved") && performance.now() < lost.until) || (m.copyNumbers(run, profile, source), tellLost("Saved the playtest file; numbers copied"));
       else m.retryDay(run);
     });
     else if (action === "title") showTitle(world.phase !== "defeat");
@@ -298,12 +298,12 @@ function showHud(): void {
   }
   const noCard = card !== "" && sheet === null && sheets.failed;
   const notices = [
-    selection.tactical ? "Tạm dừng chiến thuật · Space để chạy tiếp" : "", now < imeUntil ? "Tắt bộ gõ tiếng Việt để gõ" : "", over && mapOnly ? "Esc hoặc Enter: xem lại thẻ kết" : "",
-    world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Wood thừa: bán Wood ở thẻ Fort" : "", source === "fallback" ? "Từ dự phòng (máy chủ không có từ vựng)" : "",
+    selection.tactical ? "Tactical pause · Space resumes" : "", now < imeUntil ? "Turn off Vietnamese input to type" : "", over && mapOnly ? "Esc or Enter: back to results" : "",
+    world.phase === "day" && world.wood >= 150 && world.gold < 50000 ? "Spare Wood: sell it on the Fort card" : "", source === "fallback" ? "Offline word list (server words unavailable)" : "",
     now < lost.until ? lost.text : "",
-    noCard ? (card === "pause" ? "Tạm dừng · Esc để chạy tiếp (thẻ tạm dừng chưa tải được) · F5 để thử lại" : "Hết ải · F5 để chơi lại (thẻ kết chưa tải được)") : "",
-    card === "results" && retryChunk.failed ? "Chơi lại Ngày n chưa tải được · F5 để thử lại" : "",
-    sandbox && selection.panel && panel.failed ? "Bảng hộp cát chưa tải được · F5 để thử lại" : "",
+    noCard ? (card === "pause" ? "Paused · Esc resumes (pause card failed to load) · F5 to retry" : "Run over · F5 to play again (results card failed to load)") : "",
+    card === "results" && retryChunk.failed ? "Day retry failed to load · F5 to retry" : "",
+    sandbox && selection.panel && panel.failed ? "Sandbox panel failed to load · F5 to retry" : "",
   ];
   hud.update([
     statusHtml(world, sandbox, selection.halted, audio?.muted === true, notices.filter((notice) => notice !== ""), banner.hit(now)),

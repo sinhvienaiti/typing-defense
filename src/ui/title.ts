@@ -18,15 +18,15 @@ type EntryId = TitleChoice | "settings" | "profile";
 
 const ART = "/assets/typing-defense/ui/title-dusk.webp";
 const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
-  ["start", "Bắt đầu", "Bản đồ 1 · Đồng Cỏ Thác Bạc"],
-  ["continue", "Chơi tiếp", "Về lại ván đang dở · Esc"],
-  ["settings", "Cài đặt", "Âm lượng nhạc và tiếng"],
-  ["learn", "Học", "Chế độ Học: hiện nghĩa, Space để dừng"],
-  ["profile", "Hồ sơ gõ", "Tốc độ, độ chính xác, một lời khuyên"],
+  ["start", "Start", "Map 1 · Silverfall Meadow"],
+  ["continue", "Resume", "Resume your run · Esc"],
+  ["settings", "Settings", "Music and sound volume"],
+  ["learn", "Learn", "Learn: meanings shown, Space pauses"],
+  ["profile", "Profile", "Speed, accuracy, a typing tip"],
 ];
 const LAMP_MS = 380;
 /** The best stars on "Bắt đầu" (none before a win). */
-export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Kỷ lục ${best} sao">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
+export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Best ${best} stars">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
 
 /** A seeded wobble for the painted scene: the same shapes every load. */
 const wob = (k: number): number => {
@@ -158,10 +158,10 @@ export class TitleScreen {
     this.el.innerHTML =
       `<div class="tt-art"></div>${scene()}${garland()}` +
       Array.from({ length: 14 }, (_, k) => `<i class="tt-fly" style="left:${f(8 + wob(k + 70) * 84)}%;top:${f(66 + wob(k + 90) * 30)}%;animation-delay:${f(wob(k + 5) * 5)}s"></i>`).join("") +
-      `<header class="tt-head"><h1 class="tt-name">Lời Gọi</h1><span class="tt-seal" aria-hidden="true">Văn<br>Điền</span>` +
-      `<p class="tt-sub">Giữ làng tre bằng những lời gọi · <i>Wordwoven</i></p></header>` +
-      `<nav class="tt-menu vd-sheet" aria-label="Màn đầu">${ENTRIES.map(([id, label, sub], k) => `<div class="tt-entry" role="button" data-entry="${id}"><kbd>${k + 1}</kbd><b>${label}</b><small>${sub}</small></div>`).join("")}</nav>` +
-      `<p class="tt-keys">↑ ↓ chọn · Enter vào · 1–5 chọn nhanh</p>`;
+      `<header class="tt-head"><h1 class="tt-name">Wordwoven</h1><span class="tt-seal" aria-hidden="true">Văn<br>Điền</span>` +
+      `<p class="tt-sub">Defend your village, one word at a time.</p></header>` +
+      `<nav class="tt-menu vd-sheet" aria-label="Title">${ENTRIES.map(([id, label, sub], k) => `<div class="tt-entry" role="button" data-entry="${id}"><kbd>${k + 1}</kbd><b>${label}</b><small>${sub}</small></div>`).join("")}</nav>` +
+      `<p class="tt-keys">↑ ↓ select · Enter play · 1–5 quick pick</p>`;
     this.menu = this.el.querySelector(".tt-menu")!;
     this.entries = [...this.el.querySelectorAll<HTMLElement>(".tt-entry")];
     if (!learn) this.off.add("learn");
@@ -237,7 +237,7 @@ export class TitleScreen {
     void this.card(id).then((card) => {
       this.pending = false;
       // Its chunk did not load (logged): the menu stays and says so under the entry (test pass 27/10: nothing showed).
-      if (card === null) return (this.entries[at]!.querySelector("small")!.textContent = "Chưa tải được · F5 để thử lại"), this.hooks.sound("off");
+      if (card === null) return (this.entries[at]!.querySelector("small")!.textContent = "Load failed · F5 to retry"), this.hooks.sound("off");
       if (this.el.hidden) return;
       this.hooks.sound("pick");
       this.entries.forEach((entry) => (entry.hidden = true));

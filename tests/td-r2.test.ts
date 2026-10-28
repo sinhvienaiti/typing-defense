@@ -261,12 +261,12 @@ describe("Nuppeppō and the sandbox's R2 commands (BUILD_1B §10, §14)", () => 
 describe("Tối Thượng on the HUD (BUILD_1B §8.2, §13.3)", () => {
   it("the action button shows the day it opens, the charge in steps of 5 %, the rain; Draconis' lantern carries the charge as a ring", () => {
     const w = world({ sandbox: false });
-    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Tối Thượng · Mở ở Đêm 3');
+    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Ultimate · Night 3');
     [w.day, w.ult.charge, w.phase] = [3, 47.3, "night"];
-    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Tối Thượng 45 %<kbd>=</kbd>');
+    expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Ultimate 45%<kbd>=</kbd>');
     expect(teamHtml(w, 0)).toContain('class="td-ult" style="--ult:45%"');
     w.ult.charge = ULT.max;
-    expect(actionsHtml(w, false)).toContain('data-act="ult">Tối Thượng<kbd>=</kbd>');
+    expect(actionsHtml(w, false)).toContain('data-act="ult">Ultimate<kbd>=</kbd>');
     expect(teamHtml(w, 0)).toContain('class="td-ult is-full" style="--ult:100%"');
     w.ult.on = 1;
     expect(actionsHtml(w, false)).toContain('data-act="ult" disabled>Fire Feather Rain');

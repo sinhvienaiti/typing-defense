@@ -13,25 +13,25 @@ export type Tip = { line: string; chip: string };
 
 /** One row a phase, day1 … night5; each line ≤ 14 syllables, each chip ≤ 8 (tests/td-tips.test.ts). */
 export const TIPS: Readonly<Record<string, Tip>> = {
-  day1: { line: "Rice chín, bác Farmer gọi. Đưa Draconis tới, gõ chữ trên bong bóng.", chip: "Gõ chữ đầu để chọn · Esc để thôi" },
-  night1: { line: "Đêm xuống, tháp gọi khi quái tới gần. Gõ là bắn Word Shot.", chip: "Bỏ qua lời gọi không mất gì" },
-  day2: { line: "Wood để xây nhà; cây mọc lại mỗi sáng. Bấm cây để chặt.", chip: "Shift + \\ thuê Villager" },
-  night2: { line: "Ghost Flame bay qua đầu Soldier. Archer Tower và Draconis bắn được.", chip: "" },
-  day3: { line: "Nâng Fort thì Chấm ra giúp. Helper làm việc nhanh hơn.", chip: "1–4 chọn người · Enter gửi đi" },
-  night3: { line: "Lông lửa đầy thì bấm = khi quái tới gần. Gõ chữ, mưa to hơn.", chip: "= Tối Thượng khi quái gần" },
-  day4: { line: "Nhà cấp 2 mạnh hơn. Bán lại được sáu phần mười.", chip: "Bán: bấm hai lần" },
-  night4: { line: "Raccoon Dog đánh trống hồi máu. Gõ chữ trên đầu nó để Ngắt.", chip: "Chữ trên quái: gõ để phá chiêu" },
-  day5: { line: "Đêm nay Mộc Tinh thức dậy. Dồn tháp lên nhánh rễ sáng.", chip: "Boss rút ở 50 % máu" },
-  night5: { line: "Rễ trồi làm nhà tê. Lửa của chữ mới làm nó cháy.", chip: "Choáng: gõ Bắn mạnh ngay" },
+  day1: { line: "Rice is ripe: Farmer calls. Send Draconis; type the bubble's words.", chip: "First letter selects · Esc exits" },
+  night1: { line: "At night, towers call for help. Type to fire a Word Shot.", chip: "Skipped calls cost nothing" },
+  day2: { line: "Build with Wood; trees regrow each dawn. Click a tree to chop.", chip: "Shift + \\ hires Villager" },
+  night2: { line: "Ghost Flame flies over Soldiers. Archer Tower and Draconis can hit it.", chip: "" },
+  day3: { line: "Upgrade Fort to free Chấm. Helpers speed up work.", chip: "1–4 select · Enter send" },
+  night3: { line: "Charge full: press = near foes. Type for more fire feathers.", chip: "= Ultimate near foes" },
+  day4: { line: "Level 2 buildings are stronger. Sell for a 60% refund.", chip: "Sell: click twice" },
+  night4: { line: "Raccoon Dog drums to heal. Type its word to Stop it.", chip: "Type foe words to break skills" },
+  day5: { line: "Tonight Mộc Tinh awakens. Line the glowing root with towers.", chip: "Boss flees at 50% HP" },
+  night5: { line: "Rising roots stun buildings. Fresh words set him ablaze.", chip: "Stunned: type Power now" },
 };
 
 /** What each building does; `taught`: the row that says it, after which its card drops the line. */
 export const DOES: Readonly<Record<string, { line: string; taught?: string }>> = {
-  farm: { line: "(Ruộng) Gieo Seeds; Rice chín thì gọi Gặt.", taught: "day1" },
-  archer: { line: "(Tháp Cung) Bắn quái gần, cả quái bay.", taught: "night1" },
-  barracks: { line: "(Trại Lính) Soldier chặn quái trên đường cho tháp bắn." },
-  "gold-mine": { line: "(Mỏ Vàng) Đặt trên quặng; Gold đầy nửa thì gọi Đào." },
-  cannon: { line: "(Tháp Pháo) Đạn nổ trúng cả bầy dưới đất." },
+  farm: { line: "Sow Seeds; ripe Rice calls for Reap.", taught: "day1" },
+  archer: { line: "Hits nearby foes, even flyers.", taught: "night1" },
+  barracks: { line: "Soldiers block foes on roads for towers to shoot." },
+  "gold-mine": { line: "Needs ore; half-full Gold calls for Dig." },
+  cannon: { line: "Blasts hit groups of ground foes." },
 };
 
 /** A row's place in the stage: day 1 is 0, night 1 is 1 …; −1 for no row. */
