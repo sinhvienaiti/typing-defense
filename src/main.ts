@@ -16,7 +16,8 @@
  * BUILD_1B §11; app/learn.ts, a chunk asked for at once, with the portal bridge) plans the run's study lists before its
  * first step, counts the words seen, sends the learning events and keeps the review book across runs; one that cannot
  * load plays with no lists. The teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top,
- * what a building does on its card.
+ * what a building does on its card. 1C (docs/td/BUILD_1C_MAP1.md): the world is drawn through a MapView (view/view.ts), the
+ * 2D view or, when the tier asks for it, map 1's 3D view, a chunk with three.js that falls back to 2D.
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
@@ -44,6 +45,7 @@ import type { TitleChoice, TitleScreen } from "./ui/title";
 import type { TypingAudio, UiSound } from "./view/audio-min";
 import type { FxPipe } from "./view/fx-pipe";
 import { DebugView } from "./view/debug-2d";
+import { load3d, pickView, type MapView } from "./view/view";
 import { WordCards } from "./view/words/cards";
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -57,7 +59,13 @@ const params = new URLSearchParams(window.location.search);
 const sandbox = params.get("sandbox") === "1";
 const seed = Number(params.get("seed") ?? "1") >>> 0 || 1;
 const canvas = byId<HTMLCanvasElement>("tdCanvas");
-const view = new DebugView(canvas);
+const flat = new DebugView(canvas);
+/** The view the world is drawn through: 2D, or map 1's 3D view once its chunk is in and WebGL opens; 2D again if that fails. */
+let view: MapView = flat;
+const look = pickView(params, SLICE_1A.id);
+/** The 3D view's chunk, asked for at once when the tier wants it; the 2D canvas stays hidden meanwhile and the run waits at tick 0. */
+const view3d = new Chunk("view3d", load3d);
+if (look.kind === "3d") void ((canvas.style.visibility = "hidden"), view3d.get());
 let painted = false;
 const settings = loadSettings();
 /** Sound and music, a chunk fetched once the page is usable (prefetch): nothing sounds before a key or a click anyway (TypingAudio.resume). */
@@ -234,7 +242,7 @@ const dev = new Chunk("dev", () => import("./app/dev-tools"));
 /** Once the page is usable: sound, the cards' chunk, the results card's buttons, the sandbox panel and __td, so none of them holds up the start. */
 function prefetch(): void {
   wantSound(false);
-  void fxChunk.get().then((m) => m && ((view.fx = new m.FxView(view.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
+  void fxChunk.get().then((m) => m && ((flat.fx = new m.FxView(flat.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
   wantSheet();
   wantTips();
   void retryChunk.get();
@@ -242,8 +250,8 @@ function prefetch(): void {
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
-    chunks: () => ({ sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
+    ready: () => painted && (look.kind === "2d" || view3d.settled) && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    chunks: () => ({ view3d: view.kind === "3d", sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
   }));
@@ -266,7 +274,9 @@ installKeys(window, {
   onVietnamese: () => (imeUntil = performance.now() + 8000),
   allowUntrusted: params.get("untrusted") === "1",
 });
-installPointer(canvas, view, {
+/** The pointer acts on the view that is up (the 3D view has a canvas of its own). */
+const camera = { panBy: (dx: number, dy: number) => view.panBy(dx, dy), zoomAt: (x: number, y: number, k: number) => view.zoomAt(x, y, k), unproject: (x: number, y: number) => view.unproject(x, y) };
+const hand: Parameters<typeof installPointer>[2] = {
   pointer: (p) => selection.pointer(p),
   // A call's bubble (a word card, or a dim one on the map) sends the agent there (BUILD_1A6 §8).
   click: (p, right, at) => {
@@ -274,7 +284,8 @@ installPointer(canvas, view, {
     if (call >= 0) selection.toCall(call);
     else selection.click(p, right);
   },
-});
+};
+installPointer(canvas, camera, hand);
 
 /** The story won: its stars kept in td.campaign, once (BUILD_1B §4.3, R3; a replayed day's win too). */
 let won: ReturnType<typeof keepStars> | null = null;
@@ -335,6 +346,15 @@ const recent: RareEvent[] = [];
 resize();
 showHud();
 prefetch();
+/** Back to the 2D view (no WebGL, the chunk given up, a lost context), told in the HUD; the run goes on. */
+const to2d = (text: string): void => void ((view = flat), (canvas.style.visibility = ""), tellLost(text), resize());
+if (look.kind === "3d") void view3d.get().then((m) => {
+  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D"))) ?? null;
+  if (deep === null) return to2d("Bản 3D chưa mở được: chơi bản 2D · F5 để thử lại");
+  installPointer(deep.canvas, camera, hand);
+  view = deep;
+  resize();
+});
 
 /** The last 600 frames' costs in ms (BUILD_NOW §7 gate 5): the steps with the HUD and sound, then the 2D view with the cards. */
 const costs = { update: [] as number[], draw: [] as number[] };
@@ -349,7 +369,7 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted || titleUp || (world.tick === 0 && !learnChunk.settled);
+      session.paused = selection.halted || titleUp || (world.tick === 0 && (!learnChunk.settled || (look.kind === "3d" && !view3d.settled)));
       session.orders = selection.tactical; // the hand's orders act at once, typing waits
       session.frame(now);
       if (!sandbox && won === null && world.phase === "victory") won = keepStars(world.c.content.id, world.lives);
@@ -360,8 +380,7 @@ runFrameLoop({
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));
       cards.read(fresh, world, now);
       if ((world.boss.stage > 0) !== bossTop > 0) resize();
-      view.boss.read(fresh, world, now);
-      view.fx?.read(fresh, world, now);
+      view.read(fresh, world, now);
       fx?.read(world.events.ring);
       banner.read(fresh, world, now);
       audio?.read(fresh, world, now);

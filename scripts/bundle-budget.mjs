@@ -4,6 +4,8 @@
  * takes keys (at "/" the title: showTitle), and everything those import, read from Vite's manifest. The chunks fetched
  * once the page is usable (sound, the pause and results cards, the title's settings and Hồ sơ gõ cards, the sandbox
  * panel) are printed apart with the total, and so is the headroom left under the budget. Run after `vite build`.
+ * 1C (docs/td/BUILD_1C_MAP1.md §4): map 1's 3D view with three.js is a chunk of its own, never in a start page's set, and
+ * it and what it imports stay within their own budget.
  */
 import { existsSync, readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
@@ -15,6 +17,9 @@ const BUDGET_KB = 85;
  */
 const PAGES = { "/": ["index.html", "src/ui/title.ts"], "/?title=0": ["index.html", "src/app/learn.ts"] };
 const MANIFEST = "dist/.vite/manifest.json";
+/** 1C: the 3D view's chunk (src/view/view.ts load3d) and its budget, kB gzip with what it imports. */
+const VIEW_3D = "src/view/3d/view-3d.ts";
+const VIEW_3D_KB = 260;
 
 const fail = (text) => {
   console.error("bundle budget: " + text);
@@ -56,5 +61,21 @@ for (const [page, keys] of Object.entries(PAGES)) {
     console.error(`bundle budget: ${page} needs ${kb(start).toFixed(2)} kB gzip before it is usable, over ${BUDGET_KB} kB`);
     over = true;
   }
+}
+if (manifest[VIEW_3D] === undefined) fail(`${VIEW_3D} is no chunk of the build: the 3D view must stay a chunk of its own (src/view/view.ts load3d)`);
+// What the 3D view adds: its chunk and the chunks it imports, the entry chunk (already in) aside.
+const deep = closure([VIEW_3D]).filter((file) => file !== manifest["index.html"].file);
+const deepKb = kb(deep.reduce((sum, file) => sum + gz(file), 0));
+console.log(`bundle budget (BUILD_1C_MAP1 §4) 3D view: ${deepKb.toFixed(2)} kB gzip (${deep.map(name).join(" + ")}) ≤ ${VIEW_3D_KB} kB, headroom ${(VIEW_3D_KB - deepKb).toFixed(2)} kB`);
+for (const [page, keys] of Object.entries(PAGES)) {
+  const inStart = closure(keys).filter((file) => deep.includes(file));
+  if (inStart.length > 0) {
+    console.error(`bundle budget: ${page}'s start set holds the 3D view's ${inStart.join(", ")}`);
+    over = true;
+  }
+}
+if (deepKb > VIEW_3D_KB) {
+  console.error(`bundle budget: the 3D view needs ${deepKb.toFixed(2)} kB gzip, over ${VIEW_3D_KB} kB`);
+  over = true;
 }
 if (over) process.exit(1);

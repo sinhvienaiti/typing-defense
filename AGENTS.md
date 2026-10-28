@@ -206,7 +206,12 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
   meters and the pace directors inside the sim (hashed, `pace` events); "Hồ sơ gõ" is `src/ui/profile.ts`.
   A replay needs the header: `flags()` and the replay files carry `expected` and `pace`.
-- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` included).
+- 1C (`docs/td/BUILD_1C_MAP1.md`, branch `td-1c`): the page draws through `MapView` (`src/view/view.ts`: `pickView` by
+  `?view=2d|3d` and `?q=low|medium|high`, Low and 2D by default until C13; `load3d`). `DebugView` is the Low tier and the
+  fallback; map 1's 3D view is `src/view/3d/` (C1: `view-3d.ts`, still empty), a chunk of its own with three.js that
+  only `load3d` reaches (`tests/td-view.test.ts`; `scripts/bundle-budget.mjs` checks its 260 kB budget). Scenario
+  `scripts/visual/scenarios/td-1c-view.mjs`: 2D plays, 3D opens, a blocked chunk and a lost context fall back.
+- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` and, from 1C, `three` included).
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`
   (the sandbox bot, 3 nights) and `tests/golden/td-1b-boss.json` (the sandbox
   preset, Mộc Tinh called on day 1, until it retreats).

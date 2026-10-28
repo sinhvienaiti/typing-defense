@@ -12,8 +12,8 @@ Nguồn: bản kiểm kê map 1 (`docs/games/map1/audit-2026-10-28.json`, mục 
 |---|---|
 | Phạm vi | Chỉ map 1. 2D (`view/debug-2d.ts`) là bậc Low và đường lùi. Sim, gõ, nội dung không đổi: hai ván vàng giữ `f2a21037` |
 | Trần dòng | Trần cứng 1C **16.500** (10.500 của R3 + 6.000; 400 dòng V4a trả lại vì làn V4a dừng ở bước 1). Hôm nay 10.555 |
-| Gói "/" | Vẫn ≤ 85 kB gzip (lối vào + màn đầu). Hôm nay 83,78 kB (chừa 1,22 kB sau khi gộp 036; trên `a5cc147` chỉ chừa 0,09 kB). C1 thêm ≤ 0,5 kB |
-| Chunk 3D | `view/3d/view-3d.ts` cùng three.js, nạp lười, không bao giờ trong bộ khởi động; ≤ 260 kB gzip |
+| Gói "/" | Vẫn ≤ 85 kB gzip (lối vào + màn đầu). Trước 1C 83,78 kB (chừa 1,22 kB sau khi gộp 036; trên `a5cc147` chỉ chừa 0,09 kB). C1 thêm ≤ 0,5 kB (đo: +0,42 kB, còn chừa 0,79 kB) |
+| Chunk 3D | `view/3d/view-3d.ts` cùng three.js, nạp lười, không bao giờ trong bộ khởi động; ≤ 260 kB gzip (C1: 117 kB) |
 | Media map 1 | High ≤ 12 MB, Medium ≤ 6 MB, Low 0 byte model. Lần chơi đầu nạp Medium; trang chỉ chờ bộ khởi động ≤ 3,5 MB |
 | Khung (Mac mini M4, 1920 × 1080) | High: trung bình ≤ 5,5 ms, p95 ≤ 8,5 ms, ≤ 150 draw call. Medium: ≤ 4,5 ms, p95 ≤ 7 ms, ≤ 100 draw call. Không khung nào quá 50 ms |
 | Thứ tự làn L | C1 → C2 → C4 → C3 → C6 → (mốc giữa 06/11) → C10 → C13 → C14 |

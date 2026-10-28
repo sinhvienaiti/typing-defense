@@ -4,7 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
-| 28/10/2026 | 1C cho map 1 (nhánh `td-1c`): C0 kế hoạch và ngân sách đã duyệt (trần 16.500 dòng, chunk 3D lười, media High ≤ 12 MB và Medium ≤ 6 MB, khung theo bậc, chia module, thứ tự C1–C14) | [2026-10-28-td-1c-map1](./2026-10-28-td-1c-map1.md) |
+| 28/10/2026 | 1C cho map 1 (nhánh `td-1c`): C0 kế hoạch và ngân sách đã duyệt (trần 16.500 dòng, chunk 3D lười, media High ≤ 12 MB và Medium ≤ 6 MB, khung theo bậc, chia module, thứ tự C1–C14); C1 giao diện `MapView`, view 3D rỗng trong chunk riêng 117 kB, lùi về 2D; gói "/" 84,21 kB, 10.767 dòng | [2026-10-28-td-1c-map1](./2026-10-28-td-1c-map1.md) |
 | 28/10/2026 | 1B.V4 bước 1 (VFX 2D, phiếu Codex 036): ống `FX.fire`/`FX.hit` cho view 2D (`FxPipe`, `FxDraw`), `FxView` vào chunk lười `fx`; gói "/" 83,85 kB gzip, 10.555 dòng; gộp vào `a2-days` (83,78 kB) và dừng làn V4a: 2D chỉ còn bậc Low và đường lùi, năm pha của V4a sang C11 | [2026-10-28-td-fx-pipe](./2026-10-28-td-fx-pipe.md) |
 | 28/10/2026 | Tên danh từ tiếng Anh (phiếu Codex 050): 28 tên công trình, quái, đơn vị, tài nguyên theo `NAMES_EN.md`; câu và menu vẫn tiếng Việt; Claude kiểm bố cục ở 1280 × 720 và 1920 × 1080 | [2026-10-28-english-names](./2026-10-28-english-names.md) |
 | 27/10/2026 | Các việc còn mở sau đợt test, bước A1 (các đêm và boss): pha 2 luôn diễn ra, lặng Đêm 5 chờ Thuồng Luồng, Đêm 4 có áp lực, hệ số k boss và Thử thách; Đêm 3 nhàn: nguyên nhân thật, chưa sửa (chủ dự án) | [2026-10-27-open-items](./2026-10-27-open-items.md) |

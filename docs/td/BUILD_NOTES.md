@@ -47,7 +47,7 @@ Mốc đang làm: **1C.C1**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
 | 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
-| 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) | 200 | 10.800 |
+| 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
 | 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | — | 650 | 11.450 |
 | 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | — | 200 | 11.650 |
 | 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 12.450 |
@@ -1873,3 +1873,27 @@ Làn V4a của `docs/games/VFX_STANDARD.md` (repo cha) §5.4, nhánh `td-vfx`. P
 - Ván vàng không đổi (`f2a21037`; 19.660 và 5.695 tick; sau gộp vào `a2-days` vẫn `"same":true` cả hai ván). Ván vàng qua ống: 133 lần bắn, 102 lần trúng, không mất sự kiện.
 - Phần vẽ trên `FxDraw` (lóe ở tháp và Draconis, cầu lửa, trúng đòn) là bước sau; gói "/" nay chừa 1,15 kB, nhưng phần vẽ nằm trong chunk `fx`, không vào gói khởi động.
 - **Làn V4a dừng ở bước 1** (28/10, khi gộp vào `a2-days`): map 1 lên 3D (bước 1C), view 2D chỉ còn là bậc Low và đường lùi; phần vẽ trên `FxDraw` không làm ở 2D, thiết kế năm pha của V4a dùng tiếp ở C11.
+
+
+## 8. 1C "Map 1 lên 3D" (`BUILD_1C_MAP1.md`, nhánh `td-1c`)
+
+Kế hoạch và ngân sách: `docs/td/BUILD_1C_MAP1.md` (C0, chủ dự án duyệt 28/10/2026). Làn L, worktree `games/.wt-td-1c`. Chi tiết từng bước: `docs/changelog/2026-10-28-td-1c-map1.md`.
+
+### 8.1 C1: giao diện view, view 3D rỗng (28/10/2026, Mac mini M4)
+
+- `src/view/view.ts` (lối vào): `MapView` (resize, read, draw, project, unproject, callAt, keepOut, panBy, zoomAt), `Hand`, `pickView` (`?view=2d|3d`, `?q=low|medium|high`; mặc định Low tới C13; chỉ `w1-silverfall` có 3D), `load3d` (`import()` duy nhất tới `src/view/3d/`).
+- `DebugView` nay `implements MapView` (thêm `kind`, `read` gom lớp boss và `FxView`). `main.ts` vẽ qua `view: MapView`; phần riêng của 2D (`FxView`, pool hạt boss) gọi qua `flat`.
+- `src/view/3d/view-3d.ts` (chunk riêng, có three.js): `View3D.open` dựng canvas `#tdCanvas3d` sau canvas 2D, mặt sân phẳng, ánh sáng trời và nắng, camera mặc định TK §23.6 (55° ở 58 m, zoom 22–120 m) có pan và zoom về con trỏ. Không có WebGL 2 thì trả `null`; mất context thì về 2D.
+- Khi trang muốn 3D: canvas 2D ẩn, ván chờ chunk ở tick 0 (như Học), `__td.ready()` chờ nó, `__td.chunks().view3d` báo bản 3D đang vẽ. Chunk lỗi hay mất context: HUD báo một dòng, ván chạy tiếp ở 2D.
+- Kit: thêm module `three` vào `kit.config.json`, chép bằng `node scripts/sync-game-kit.mjs --target games/.wt-td-1c` (11 file, kit không đổi); view 3D dùng `clamp` của `kit/three/util`.
+- `scripts/bundle-budget.mjs` in cỡ chunk 3D (≤ 260 kB gzip) và hỏng khi chunk này lọt vào bộ khởi động. `tests/td-view.test.ts`: `pickView`; `three` chỉ ở `src/view/3d/`; `src/view/3d/` chỉ tới được qua `import()` của `view.ts`; `main.ts` chỉ gọi thành viên của `MapView` trên `view`.
+
+| Đo | Trước (`df63008`) | Sau C1 |
+|---|---|---|
+| Gói "/" (gzip) | 83.784 byte (chừa 1,22 kB) | 84.207 byte (+423; chừa 0,79 kB) |
+| Gói `?title=0` | 82.335 byte | 82.758 byte |
+| Chunk `view-3d` (gồm three) | không có | 117.050 byte gzip (468.069 byte thô), không import chunk nào khác |
+| Dòng `.ts` ngoài kit | 10.555 | 10.767 (`view.ts` 50, `view-3d.ts` 137, `main.ts` +19, `debug-2d.ts` +6) |
+| Test | 355 / 33 file | 360 / 34 file |
+| Ván vàng | `f2a21037` | `"same":true` cả hai (19.660 và 5.695 tick) |
+
