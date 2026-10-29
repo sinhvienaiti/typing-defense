@@ -351,8 +351,8 @@ prefetch();
 /** Back to the 2D view (no WebGL, the chunk given up, a lost context), told in the HUD; the run goes on. */
 const to2d = (text: string): void => void ((view = flat), (canvas.style.visibility = ""), tellLost(text), resize());
 if (look.kind === "3d") void view3d.get().then((m) => {
-  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("Bản 3D dừng: chơi tiếp bản 2D")), cards) ?? null;
-  if (deep === null) return to2d("Bản 3D chưa mở được: chơi bản 2D · F5 để thử lại");
+  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("3D view stopped: playing on in 2D")), cards) ?? null;
+  if (deep === null) return to2d("3D view could not open: playing in 2D · F5 to try again");
   installPointer(deep.canvas, camera, hand);
   view = deep;
   resize();

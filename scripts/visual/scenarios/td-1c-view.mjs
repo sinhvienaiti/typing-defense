@@ -10,7 +10,7 @@ const td = (code) => "(() => { const t = window.__td; if (!t) return null; " + c
 const LOOK = td(`const c2 = document.getElementById("tdCanvas"), c3 = document.getElementById("tdCanvas3d");
   return { view3d: t.chunks().view3d, tick: t.state().tick, flat: getComputedStyle(c2).visibility,
     deep: c3 && { width: c3.width, height: c3.height, css: [c3.clientWidth, c3.clientHeight] },
-    notices: [...document.querySelectorAll("#tdHud *")].map((e) => e.textContent).filter((s) => /Bản 3D/.test(s ?? "")).slice(-1)[0] ?? "" };`);
+    notices: [...document.querySelectorAll("#tdHud *")].map((e) => e.textContent).filter((s) => /3D view/.test(s ?? "")).slice(-1)[0] ?? "" };`);
 
 /** The colour of one CSS pixel of the composited page (a 1 × 1 PNG: after its filter byte the bytes are the pixel). */
 async function pixel(page, x, y) {
@@ -100,8 +100,8 @@ export default async function (page) {
     deepOpens: runs.deep.view3d === true && runs.deep.loaded === true && runs.deep.flat === "hidden" && runs.deep.deep?.css?.[0] === page.width && runs.deep.deep?.css?.[1] === page.height && runs.deep.steps > 30 && green(runs.deep.ground),
     deepPointer: runs.deep.afterPointer?.view3d === true,
     highOpens: runs.high.view3d === true && runs.high.steps > 30 && runs.high.deep?.width >= page.width,
-    lostFallsBack: runs.lost.view3d === false && runs.lost.deep === null && runs.lost.flat === "visible" && runs.lost.steps > 30 && /Bản 3D dừng/.test(runs.lost.notices) && green(runs.lost.ground),
-    blockedFallsBack: runs.blocked.view3d === false && runs.blocked.deep === null && runs.blocked.flat === "visible" && runs.blocked.steps > 30 && /Bản 3D chưa mở được/.test(runs.blocked.notices),
+    lostFallsBack: runs.lost.view3d === false && runs.lost.deep === null && runs.lost.flat === "visible" && runs.lost.steps > 30 && /3D view stopped/.test(runs.lost.notices) && green(runs.lost.ground),
+    blockedFallsBack: runs.blocked.view3d === false && runs.blocked.deep === null && runs.blocked.flat === "visible" && runs.blocked.steps > 30 && /3D view could not open/.test(runs.blocked.notices),
     noErrors2dOr3d: errors().slice(0, before3d).length === 0 && errors3d.length === 0,
     onlyTheBlockedChunksError: blockErrors.length > 0 && blockErrors.every((line) => /view3d chunk|view-3d|ERR_BLOCKED/.test(line)),
     noExceptions: page.exceptions.length === 0,

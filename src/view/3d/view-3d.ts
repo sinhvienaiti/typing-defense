@@ -33,7 +33,7 @@ export class View3D implements MapView {
   static open(after: HTMLElement, tier: Tier3D, w: World, lost: () => void, cards: WordCards): View3D | null {
     const canvas = document.createElement("canvas");
     canvas.id = "tdCanvas3d";
-    canvas.setAttribute("aria-label", "Bản đồ");
+    canvas.setAttribute("aria-label", "Map");
     try {
       const stage = createStage(canvas, tier, w.map.halfM);
       after.after(canvas);
