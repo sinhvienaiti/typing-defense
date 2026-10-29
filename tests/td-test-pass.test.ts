@@ -17,17 +17,17 @@ import { built, enemyAt, run, send, world } from "./td/fixtures";
 describe("the loss card's hint reads the run", () => {
   it("before the boss: no tower, no word typed, then Bắn mạnh with the Pháo's fire only once Tháp Pháo opens; at the peak, enemies that got in when they took more lives than the boss's blows", () => {
     const w = world({ sandbox: false });
-    expect(lossHint(w)).toContain("Xây Archer Tower");
+    expect(lossHint(w)).toContain("Build Archer Tower");
     built(w, "archer", -8, 12);
-    expect(lossHint(w)).toContain("Gõ chữ trên thẻ tháp");
+    expect(lossHint(w)).toContain("Type tower card words");
     w.stats[STAT.callWords] = 12;
-    expect(lossHint(w)).toMatch(/Bắn mạnh.*xây thêm tháp/); // day 1: Tháp Pháo is still shut
+    expect(lossHint(w)).toMatch(/Power.*add towers/); // day 1: Tháp Pháo is still shut
     w.day = 3;
-    expect(lossHint(w)).toContain("Word Shot của Cannon Tower");
+    expect(lossHint(w)).toContain("Cannon Tower's Word Shot");
     w.boss.stage = BOSS.fight;
     w.stats[STAT.livesBoss] = 12;
-    expect(lossHint(w, 3)).toContain("Quái lọt vào Fort"); // 9 lives to leaks against 3 to its blows
-    expect(lossHint(w, 9)).not.toContain("Quái lọt vào Fort");
+    expect(lossHint(w, 3)).toContain("Foes reached Fort"); // 9 lives to leaks against 3 to its blows
+    expect(lossHint(w, 9)).not.toContain("Foes reached Fort");
   });
 });
 
@@ -52,7 +52,7 @@ describe("Tối Thượng opens on the night of its day (BUILD_1B §12)", () => 
     [w.day, w.ult.charge] = [3, ULT.max];
     const at = { qx: Math.round(w.agents.x[0]! * 4), qz: Math.round(w.agents.z[0]! * 4) };
     expect(send(w, { t: "ult", ...at }).find((e) => e.t === "rejected")).toMatchObject({ reason: "locked" });
-    expect(actionsHtml(w, false)).toContain("Tối Thượng · Mở ở Đêm 3");
+    expect(actionsHtml(w, false)).toContain("Ultimate · Night 3");
     w.phase = "night";
     expect(send(w, { t: "ult", ...at }).some((e) => e.t === "ult")).toBe(true);
     const sandbox = world();
@@ -119,8 +119,8 @@ describe("Mộc Tinh's teaching lines", () => {
     banner.read([strike("drain")], w, 0);
     const lineAt = (now: number) => (banner.read([], w, now), /<p class="td-say">([^<]*)<\/p>/.exec(banner.html({ ...w, boss: { ...w.boss, stage: BOSS.fight } } as never, now))?.[1] ?? "");
     banner.read([strike("roots")], w, 1350);
-    expect(lineAt(1400)).toContain("Sinh khí làng này");
-    expect(lineAt(2600)).toMatch(/Rễ hút 1 mạng mỗi 30 s/);
-    expect(lineAt(5600)).toContain("Rễ ơi, mọc lên!");
+    expect(lineAt(1400)).toContain("This village's life");
+    expect(lineAt(2600)).toMatch(/Roots drain 1 life every 30 s/);
+    expect(lineAt(5600)).toContain("Roots, rise!");
   });
 });

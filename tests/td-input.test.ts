@@ -250,7 +250,7 @@ describe("the mouse and the commands it sends", () => {
     sel.click({ x: -8, z: 12 }, false);
     expect([sel.building, sel.ghost()]).toEqual([true, { x: -8, z: 12, reason: "" }]);
     sel.pointer({ x: -8, z: 36 });
-    expect(sel.ghost()!.reason).toBe("Trong vòng 11 m quanh Fort");
+    expect(sel.ghost()!.reason).toBe("Within 11 m of Fort");
     sel.click({ x: -8, z: 12 }, false);
     expect(keys().find((event) => event.t === "built")).toMatchObject({ def: def(w, "archer") });
     sel.click({ x: 60, z: 0 }, false); // off the field: nothing to build there

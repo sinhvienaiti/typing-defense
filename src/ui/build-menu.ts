@@ -19,7 +19,7 @@ import { agentView } from "./team-bar";
 
 const head = (title: string, sub: string): string => `<div class="td-row"><span><b>${title}</b> <small>${sub}</small></span>${button("close", "×", "", ' class="td-x" title="Esc"')}</div>`;
 const price = (gold: number, wood: number): string => `${gold} Gold · ${wood} Wood`;
-const opens = (w: World, key: string): string => "Mở ở Ngày " + opensOn(w, key);
+const opens = (w: World, key: string): string => "opens Day " + opensOn(w, key);
 /** A building's "làm gì" line from the teaching table's chunk (none before it is in). */
 export type Does = (w: World, id: string) => string;
 const doesHtml = (line: string | undefined): string => (line === undefined || line === "" ? "" : `<p class="td-does">${line}</p>`);
@@ -31,17 +31,17 @@ function keepRow(w: World): string {
   const next = B.level[0]! + 1;
   const top = w.sandbox ? levels.length : Math.min(levels.length, w.c.content.stage?.keepMax ?? levels.length);
   if (B.upTo[0]! > 0) return "";
-  if (next > top) return `<p><small>Fort cao nhất ở bản đồ này</small></p>`;
+  if (next > top) return `<p><small>Fort at this map's max level</small></p>`;
   const helper = w.c.content.helpers[levels[next - 1]!.slots - 2];
-  const label = locked(w, "keep" + next) ? "Nâng Fort · " + opens(w, "keep" + next) : "Nâng Fort · " + price(levels[next - 1]!.gold, levels[next - 1]!.wood);
-  return `<div class="td-row">${button("upgrade", label, "", locked(w, "keep" + next) ? " disabled" : "")}</div>` + (helper === undefined ? "" : `<p><small>Mở: ${helper.view.name}</small></p>`);
+  const label = locked(w, "keep" + next) ? "Upgrade Fort · " + opens(w, "keep" + next) : "Upgrade Fort · " + price(levels[next - 1]!.gold, levels[next - 1]!.wood);
+  return `<div class="td-row">${button("upgrade", label, "", locked(w, "keep" + next) ? " disabled" : "")}</div>` + (helper === undefined ? "" : `<p><small>Unlocks ${helper.view.name}</small></p>`);
 }
 
 /** A farm's plots by stage (§4.1): "Chín 1 · Lớn 2 · Trống 1". */
 function plotsLine(w: World, b: number): string {
   const count = [0, 0, 0];
   for (let p = 0; p < FARM.plots; p += 1) count[w.buildings.plot[b * FARM.plots + p]!]! += 1;
-  return ["Trống", "Lớn", "Chín"].map((name, stage) => `${name} <b>${count[stage]}</b>`).reverse().join(" · ");
+  return ["Empty", "Growing", "Ripe"].map((name, stage) => `${name} <b>${count[stage]}</b>`).reverse().join(" · ");
 }
 
 function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
@@ -49,25 +49,25 @@ function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
   const spec = w.c.buildings[B.def[b]!]!;
   const level = B.level[b]!;
   const undoLeft = Math.ceil(ECONOMY.undoWindowS - (w.tick - B.builtTick[b]!) / TICK_HZ);
-  const site = B.upTo[b]! > 0 ? `<p>Đang xây ${Math.floor(B.progress[b]! * 100)} %${B.builder[b]! < 0 ? " · chờ Builder" : ""}</p>` : "";
+  const site = B.upTo[b]! > 0 ? `<p>Building ${Math.floor(B.progress[b]! * 100)}%${B.builder[b]! < 0 ? " · need Builder" : ""}</p>` : "";
   const up = b > 0 && B.ready[b] === 1 && B.upTo[b] === 0 && level < spec.gold.length;
   const sold = [Math.floor(B.spentGold[b]! * SELL.refund), Math.floor(B.spentWood[b]! * SELL.refund)];
-  const sell = b > 0 && B.ready[b] === 1 && !sel.undoable() ? button("sell", sel.armed(B.id(b)) ? "Bấm lần nữa: bán" : `Bán · +${sold[0]} Gold, +${sold[1]} Wood`, "⇧ Del", sel.armed(B.id(b)) ? ' class="is-on"' : "") : "";
+  const sell = b > 0 && B.ready[b] === 1 && !sel.undoable() ? button("sell", sel.armed(B.id(b)) ? "Click again to sell" : `Sell · +${sold[0]} Gold, +${sold[1]} Wood`, "⇧ Del", sel.armed(B.id(b)) ? ' class="is-on"' : "") : "";
   const extra =
-    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Seeds <b>${w.seeds}</b> · tự mua ${FARM.seedGold} Gold/Seed</p>` +
-      `<div class="td-row">${button("seeds", "Mua " + FARM.pack.seeds + " Seeds · " + FARM.pack.gold + " Gold")}${button("autoSeeds", "Tự mua Seeds", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
+    spec.farm && B.ready[b] === 1 ? `<p>${plotsLine(w, b)}</p><p>Seeds <b>${w.seeds}</b> · auto-buy ${FARM.seedGold} Gold/Seed</p>` +
+      `<div class="td-row">${button("seeds", "Buy " + FARM.pack.seeds + " Seeds · " + FARM.pack.gold + " Gold")}${button("autoSeeds", "Auto Seeds", "", w.autoSeeds ? ' class="is-on"' : "")}</div>`
     : b === 0 ? `<p>Villager <b>${countNpcs(w, NPC_KIND.villager)}/${villagerCap(w)}</b> · Builder <b>${countNpcs(w, NPC_KIND.builder)}</b> · Rice <b>${w.food}</b></p>` +
-      `<div class="td-row">${button("hire", "Thuê Villager · " + VILLAGERS.gold + " Gold, " + VILLAGERS.food + " Rice", "⇧ \\")}</div><div class="td-row td-stack">${button("sellFood", "Bán " + ECONOMY.sale.food + " Rice · +" + ECONOMY.sale.gold + " Gold")}${button("sellWood", "Bán " + ECONOMY.sale.wood + " Wood · +" + ECONOMY.sale.woodGold + " Gold")}</div>` + keepRow(w)
-    : spec.attack !== null && B.ready[b] === 1 ? `<p>Lượt mạnh <b>${B.charges[b]}/${POWER.max}</b> · ban đêm gõ lời gọi Bắn mạnh để nạp</p>`
+      `<div class="td-row">${button("hire", "Hire Villager · " + VILLAGERS.gold + " Gold, " + VILLAGERS.food + " Rice", "⇧ \\")}</div><div class="td-row td-stack">${button("sellFood", "Sell " + ECONOMY.sale.food + " Rice · +" + ECONOMY.sale.gold + " Gold")}${button("sellWood", "Sell " + ECONOMY.sale.wood + " Wood · +" + ECONOMY.sale.woodGold + " Gold")}</div>` + keepRow(w)
+    : spec.attack !== null && B.ready[b] === 1 ? `<p>Charges <b>${B.charges[b]}/${POWER.max}</b> · type Power calls at night to charge</p>`
     : "";
   return (
-    head(spec.def.view.name, "Cấp " + level + (B.sturdy[b] === 1 ? " · nền chắc" : "")) + doesHtml(does?.(w, spec.id)) + site + extra +
+    head(spec.def.view.name, "Lv. " + level + (B.sturdy[b] === 1 ? " · sturdy" : "")) + doesHtml(does?.(w, spec.id)) + site + extra +
     `<div class="td-row">` +
-    (w.agents.goal[sel.agent] === b ? "" : button("send", "Gửi " + agentView(w, sel.agent).name, "Enter")) +
-    (b > 0 && undoLeft > 0 && sel.undoable() ? button("undo", "Hoàn tác · " + undoLeft + " s", "Del") : "") + sell +
+    (w.agents.goal[sel.agent] === b ? "" : button("send", "Send " + agentView(w, sel.agent).name, "Enter")) +
+    (b > 0 && undoLeft > 0 && sel.undoable() ? button("undo", "Undo · " + undoLeft + " s", "Del") : "") + sell +
     `</div>` +
-    (up ? `<div class="td-row">${locked(w, "upgrade") ? button("upgrade", "Nâng cấp · " + opens(w, "upgrade"), "", " disabled") : button("upgrade", "Nâng cấp · " + price(spec.gold[level]! - spec.gold[level - 1]!, spec.wood[level]! - spec.wood[level - 1]!))}</div>` : "") +
-    (w.sandbox && b > 0 ? seg("Cấp", "sb:level", ["1", "2", "3"], ["L1", "L2", "L3"], String(level)) : "")
+    (up ? `<div class="td-row">${locked(w, "upgrade") ? button("upgrade", "Upgrade · " + opens(w, "upgrade"), "", " disabled") : button("upgrade", "Upgrade · " + price(spec.gold[level]! - spec.gold[level - 1]!, spec.wood[level]! - spec.wood[level - 1]!))}</div>` : "") +
+    (w.sandbox && b > 0 ? seg("Lv.", "sb:level", ["1", "2", "3"], ["L1", "L2", "L3"], String(level)) : "")
   );
 }
 
@@ -77,10 +77,10 @@ function cardHtml(w: World, sel: Selection, b: number, does?: Does): string {
  */
 function callHtml(w: World, sel: Selection, c: number): string {
   const C = w.calls;
-  const why = inRing(w, C.x[c]!, C.z[c]!) ? "Trong vòng giúp: sáng khi bớt lời gọi đang sáng." : "Ngoài vòng giúp: đưa người tới gần để thẻ sáng và gõ được.";
+  const why = inRing(w, C.x[c]!, C.z[c]!) ? "In range: lights up when a call slot is free." : "Out of range: send someone near to light this card and type.";
   return (
-    head(callLabel(w, c).join(" "), C.words[c]! - C.done[c]! + " từ · đang mờ") +
-    `<p>${why}</p><div class="td-row">${button("send", "Gửi " + agentView(w, sel.agent).name, "Enter")}</div>`
+    head(callLabel(w, c).join(" "), C.words[c]! - C.done[c]! + " words · dim") +
+    `<p>${why}</p><div class="td-row">${button("send", "Send " + agentView(w, sel.agent).name, "Enter")}</div>`
   );
 }
 
@@ -93,6 +93,6 @@ export function dockHtml(w: World, sel: Selection, does?: Does): string {
     const attrs = ' class="td-kind' + (sel.kind === k + 1 ? " is-on" : "") + (shut || w.gold < spec.gold[0]! * 1000 || w.wood < spec.wood[0]! ? " is-poor" : "") + '"';
     return button("pick:" + (k + 1), `<kbd>${k + 1}</kbd>${spec.def.view.name}<span>${shut ? opens(w, spec.id) : price(spec.gold[0]!, spec.wood[0]!)}</span>`, "", attrs);
   });
-  const sub = w.c.buildings[sel.kind]!.placement === "node" ? "Chỉ đặt trên quặng" : "";
-  return head("Xây nhà", sub) + rows.join("") + doesHtml(does?.(w, w.c.buildings[sel.kind]!.id)) + `<p><small>Tab: chỗ kế · Enter: xây · Esc: hủy</small></p>`;
+  const sub = w.c.buildings[sel.kind]!.placement === "node" ? "Ore sites only" : "";
+  return head("Build", sub) + rows.join("") + doesHtml(does?.(w, w.c.buildings[sel.kind]!.id)) + `<p><small>Tab next · Enter build · Esc cancel</small></p>`;
 }

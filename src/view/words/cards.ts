@@ -22,16 +22,16 @@ import { KEY } from "../../typing/router";
 import "./feel.css";
 import { besidePanels, columnBox, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
-export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Chớp", perfect: "Hoàn hảo", good: "Tốt", ok: "Vừa", sloppy: "Ẩu" };
+export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Flash", perfect: "Perfect", good: "Good", ok: "OK", sloppy: "Sloppy" };
 /** By call kind (CALL_KIND): power, build, harvest, chop, mine, quiz; R2: Chữ Chiêu, a direct call (Ngắt). */
 export const CALL_COLOR = ["#D9479B", "#8B5A2B", "#E0B33A", "#2F7D32", "#C98A2E", "#3B7DDD", "#F2994A", "#C23B22"] as const;
 export const CALL_ICON = ["🏹", "🔨", "🌾", "🪓", "⛏️", "📖", "🔥", "✋"] as const;
-export const CALL_NAME = ["Bắn mạnh", "Xây", "Gặt", "Chặt", "Đào", "Hỏi bài", "Chữ Chiêu", "Ngắt"] as const;
+export const CALL_NAME = ["Power", "Build", "Reap", "Chop", "Dig", "Quiz", "Spell", "Stop"] as const;
 /** Call c's icon and name; a direct call's by its enemy's verb (R3: Ngắt, Neo, Phá Khiên). */
 export function callLabel(w: World, c: number): [string, string] {
   const kind = w.calls.kind[c]!;
   const verb = kind === CALL_KIND.direct ? verbOf(w, c) : 0;
-  return verb > 0 ? [["", "⚓", "🛡️"][verb]!, ["", "Neo", "Phá Khiên"][verb]!] : [CALL_ICON[kind]!, CALL_NAME[kind]!];
+  return verb > 0 ? [["", "⚓", "🛡️"][verb]!, ["", "Pin", "Shatter"][verb]!] : [CALL_ICON[kind]!, CALL_NAME[kind]!];
 }
 /**
  * BUILD_1B §11.1 (R3): the meaning under a word before it is typed: always in Học and Thư giãn and for a child, else
@@ -143,7 +143,7 @@ export class WordCards {
           Object.assign(card, { half: card.el.offsetWidth / 2, height: card.el.offsetHeight });
         }
         const stamp = this.stamps.reduce((oldest, next) => (next.at < oldest.at ? next : oldest));
-        stamp.el.textContent = redeemed.includes(event.item) ? "Chuộc lại" : GRADE_NAME[event.grade];
+        stamp.el.textContent = redeemed.includes(event.item) ? "Redeemed" : GRADE_NAME[event.grade];
         stamp.el.className = "td-stamp is-" + (redeemed.includes(event.item) ? "redeem" : event.grade);
         Object.assign(stamp, { at: now, x: card.x, y: card.y - 30, half: stamp.el.offsetWidth / 2, card: card.leave === "mean" ? card : null });
       }
@@ -177,7 +177,7 @@ export class WordCards {
       const shown = card.quiz && k >= Math.max(1, typed) ? "_" : ch;
       return kind === "" ? shown : '<span class="' + kind.trim() + '"' + (fresh && k === typed - 1 ? ' data-c="' + shown + '"' : "") + ">" + shown + "</span>"; // data-c: the stamp's copy (feel.css)
     });
-    card.text.innerHTML = card.quiz ? '<span class="m">' + (card.mean || "Hỏi bài") + "</span> · " + letters.join(" ") : letters.join("");
+    card.text.innerHTML = card.quiz ? '<span class="m">' + (card.mean || "Quiz") + "</span> · " + letters.join(" ") : letters.join("");
     card.pips.textContent = dots;
     Object.assign(card, { typed, pink, dots, half: card.el.offsetWidth / 2, height: card.el.offsetHeight });
   }

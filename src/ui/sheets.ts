@@ -22,11 +22,11 @@ type Button = readonly [action: SheetAction, label: string, key: string];
  */
 export type ResultsOf = { story: boolean; retried: number; canRetry?: boolean; best?: number; record?: boolean; blows?: number };
 
-const PAUSE: readonly Button[] = [["resume", "Chơi tiếp", "Esc"], ["settings", "Cài đặt", ""], ["title", "Về màn đầu", ""]];
+const PAUSE: readonly Button[] = [["resume", "Resume", "Esc"], ["settings", "Settings", ""], ["title", "Title screen", ""]];
 
 export { starsFor };
 /** The won card's record line: the best stars kept, "mới" when this win set them (none in the sandbox). */
-export const recordLine = (best: number, record: boolean): string => (best <= 0 ? "" : `<p class="td-best">Kỷ lục${record ? " mới" : ""} <b>${"★".repeat(best)}</b></p>`);
+export const recordLine = (best: number, record: boolean): string => (best <= 0 ? "" : `<p class="td-best">${record ? "New best" : "Best"} <b>${"★".repeat(best)}</b></p>`);
 
 /**
  * The loss card's hint, read off the run (BALANCE §4.3): before the boss, what the run lacked (a tower, a typed word; the
@@ -39,12 +39,12 @@ export function lossHint(w: World, blows = 0): string {
   const s = w.stats;
   const need = (S.hpMax * w.c.content.boss!.retreatPct) / 100;
   const tower = w.buildings.live().some((b) => w.c.buildings[w.buildings.def[b]!]!.def.family === "attack");
-  if (S.stage < BOSS.lull) return !tower ? "Xây Archer Tower cạnh đường: Fort một mình không giữ nổi." : s[STAT.callWords] === 0 ? "Gõ chữ trên thẻ tháp (Bắn mạnh) khi quái tới gần." : "Gõ Bắn mạnh khi quái tới gần tháp" + (locked(w, "cannon") ? "; xây thêm tháp cạnh đường." : "; Word Shot của Cannon Tower cạnh Draconis làm quái cháy.");
-  if (s[STAT.livesBoss]! - blows > blows || S.stage < BOSS.fight) return "Quái lọt vào Fort lúc Mộc Tinh tới: gõ Bắn mạnh ở tháp gần Fort.";
-  if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Thêm tháp trên nhánh rễ sáng.";
-  if (S.phase === 2 && s[STAT.burstTyped]! < s[STAT.burstWords]!) return "Lúc nó choáng, gõ Bắn mạnh ngay.";
-  if (s[STAT.rootsHits]! >= 6) return "Đặt Archer Tower xa đường hơn: rễ không với tới.";
-  return "Dồn tháp và Draconis lên nhánh rễ sáng, gõ Bắn mạnh khi nó tới gần.";
+  if (S.stage < BOSS.lull) return !tower ? "Build Archer Towers by roads: Fort needs help." : s[STAT.callWords] === 0 ? "Type tower card words (Power) as foes approach." : "Type Power as foes approach towers" + (locked(w, "cannon") ? "; add towers by roads." : "; Cannon Tower's Word Shot near Draconis burns foes.");
+  if (s[STAT.livesBoss]! - blows > blows || S.stage < BOSS.fight) return "Foes reached Fort as Mộc Tinh arrived: type Power at nearby towers.";
+  if (S.mergeHp >= 0 && S.hpMax - S.mergeHp < need / 2) return "Add towers along the glowing root.";
+  if (S.phase === 2 && s[STAT.burstTyped]! < s[STAT.burstWords]!) return "When he's stunned, type Power at once.";
+  if (s[STAT.rootsHits]! >= 6) return "Move Archer Towers off-road, out of root range.";
+  return "Group towers and Draconis on the glowing root; type Power as he nears.";
 }
 
 export class Sheet {
@@ -78,8 +78,8 @@ export class Sheet {
     // The sandbox too: its skipTo runs replay alike (BUILD_1B §19 td-1b-night5); not while app/retry.ts is missing (R3 step 1).
     const retry = !won && w.day >= 2 && run.canRetry !== false;
     this.buttons = kind === "pause" ? PAUSE : [
-      ...(retry ? [["retry", "Chơi lại Ngày " + w.day, "Enter"] as const] : []),
-      ["again", retry ? "Chơi lại từ đầu" : "Chơi lại", retry ? "" : "Enter"], ["copy", "Chép số chơi thử", ""], ["map", "Xem bản đồ", "Esc"], ["title", "Về màn đầu", ""],
+      ...(retry ? [["retry", "Retry Day " + w.day, "Enter"] as const] : []),
+      ["again", retry ? "Restart" : "Retry", retry ? "" : "Enter"], ["copy", "Copy playtest data", ""], ["map", "View map", "Esc"], ["title", "Title screen", ""],
     ];
     this.focus = 0;
     this.el.className = "td-sheet vd-sheet is-" + kind + (won ? " is-won" : "");
@@ -90,11 +90,11 @@ export class Sheet {
     const stars = won ? starsFor(w.lives) : 0;
     this.el.innerHTML =
       (kind === "pause"
-        ? `<h2>Tạm dừng</h2><p>Làng đứng yên chờ bạn. Chữ trên thẻ vẫn ở đó.</p>`
-        : (won ? `<h2>Giữ được làng</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh đã nhớ ra tên mình và lui về rừng.${run.retried > 0 ? " (chơi lại Ngày " + run.retried + ")" : ""}</p>`
-          : `<h2>Fort đã vỡ</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
-          `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Mạng còn", w.lives) + row("Đêm đã giữ", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Quái đã hạ", stats[STAT.kills]!) + row("Từ đã gõ", stats[STAT.callWords]!) + row("Lời gọi Hoàn hảo", stats[STAT.callsPerfect]!) + (w.mode === "learn" || w.knowledge > 0 ? row("Knowledge", w.knowledge) : "") + `</dl>` +
-          (words === "" ? "" : `<div class="td-review"><small>Từ cần ôn</small><ul>${words}</ul></div>`)) +
+        ? `<h2>Paused</h2><p>Your village waits. Card words stay in place.</p>`
+        : (won ? `<h2>Village saved</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh remembers his name and leaves.${run.retried > 0 ? " (retry Day " + run.retried + ")" : ""}</p>`
+          : `<h2>Fort fallen</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
+          `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Lives", w.lives) + row("Nights held", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Foes slain", stats[STAT.kills]!) + row("Words", stats[STAT.callWords]!) + row("Perfect calls", stats[STAT.callsPerfect]!) + (w.mode === "learn" || w.knowledge > 0 ? row("Knowledge", w.knowledge) : "") + `</dl>` +
+          (words === "" ? "" : `<div class="td-review"><small>To review</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     this.el.appendChild(this.settings.el);
     this.paint();
