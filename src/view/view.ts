@@ -23,6 +23,8 @@ export interface MapView {
   anchor?(w: World, c: number, core: boolean): { x: number; y: number };
   /** The ground point under a screen point (CSS px). */
   unproject(px: number, py: number): { x: number; z: number };
+  /** 3D only (C10): a click on an edge tray card glides the camera there; whether one was hit. */
+  tray?(px: number, py: number): boolean;
   /** The call whose bubble on the map is under the CSS point, −1 none. */
   callAt(px: number, py: number): number;
   /** Where the action is (CSS px), which the word cards keep off. */

@@ -60,7 +60,7 @@ describe("103 A8: draw includes mean cards for exactly 1000 ms", () => {
     const w = world();
     const s = callWord(w, 0);
     const c = w.words.call[s]!;
-    const node = () => ({ style: { setProperty() {} }, classList: { add() {}, toggle() {} } });
+    const node = () => ({ style: { setProperty() {} }, classList: { add() {}, toggle() {} }, dataset: {} });
     const card = (slot: number, leave: string, height: number, half: number) => ({
       el: node(), bar: node(), id: slot < 0 ? 999 : w.words.id(s), slot, call: w.calls.id(c), leave, leaveAt: 0,
       height, half, typed: w.words.typed[s], pink: false, tier: w.words.tier[s], dots: "", learn: true, late: false,
@@ -69,7 +69,7 @@ describe("103 A8: draw includes mean cards for exactly 1000 ms", () => {
     const live = card(s, "", 58, 75);
     const means = Array.from({ length: 5 }, () => card(-1, "mean", 34, 180));
     const view = Object.assign(Object.create(WordCards.prototype), {
-      cards: [live, ...means], stamps: [], byId: new Map([[live.id, live]]), offsets: new Map(), last: 0, frame: 0,
+      cards: [live, ...means], stamps: [], byId: new Map([[live.id, live]]), offsets: new Map(), wait: new Map(), last: 0, frame: 0,
       project: () => ({ x: width / 2, y: 600 }),
     }) as WordCards;
     for (const now of [0, 500, 999]) {

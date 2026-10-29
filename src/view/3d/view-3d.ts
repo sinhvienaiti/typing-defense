@@ -102,6 +102,13 @@ export class View3D implements MapView {
     return -1; // the map's call bubbles come with C10
   }
 
+  /** A click on a card in the edge tray glides the camera to its house in 0.45 s (C10); false when no tray card is there. */
+  tray(px: number, py: number): boolean {
+    const at = this.words.trayCall(this.cards.callAt(px, py));
+    if (at !== null) this.rig.glide(at.x, at.z, 450, performance.now());
+    return at !== null;
+  }
+
   keepOut(): Rect[] {
     return [];
   }

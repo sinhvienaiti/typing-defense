@@ -282,6 +282,7 @@ const hand: Parameters<typeof installPointer>[2] = {
   pointer: (p) => selection.pointer(p),
   // A call's bubble (a word card, or a dim one on the map) sends the agent there (BUILD_1A6 §8).
   click: (p, right, at) => {
+    if (!right && view.tray?.(at.x, at.y)) return;
     const call = right || selection.building ? -1 : Math.max(cards.callAt(at.x, at.y), view.callAt(at.x, at.y));
     if (call >= 0) selection.toCall(call);
     else selection.click(p, right);

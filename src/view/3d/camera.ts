@@ -89,6 +89,15 @@ export class CameraRig {
     if (snap) Object.assign(this.now, this.goal);
   }
 
+  /** The edge tray's click (C10): the look point glides to (x, z) in `ms` (0.45 s), eased in and out. */
+  glide(x: number, z: number, ms: number, nowMs: number): void {
+    const reach = this.halfM + CAMERA.panMarginM;
+    this.gliding = { x: this.now.x, z: this.now.z, at: nowMs, ms };
+    [this.goal.x, this.goal.z] = [clamp(x, -reach, reach), clamp(z, -reach, reach)];
+  }
+
+  private gliding: { x: number; z: number; at: number; ms: number } | null = null;
+
   /** A shake of `pixels` (≤ 6), fading over 120 ms from `nowMs`. */
   shake(pixels: number, nowMs: number): void {
     this.shakeSize = Math.max(this.shakeSize, clamp(pixels, 0, CAMERA.shakePx));
@@ -99,6 +108,13 @@ export class CameraRig {
   update(dt: number, nowMs: number, width: number, height: number): void {
     const k = 1 - Math.exp(-clamp(dt, 0, 0.1) * CAMERA.ease);
     for (const key of ["yaw", "pitch", "distance", "x", "z"] as const) this.now[key] += (this.goal[key] - this.now[key]) * k;
+    const glide = this.gliding;
+    if (glide !== null) {
+      const t = clamp((nowMs - glide.at) / glide.ms, 0, 1);
+      const e = t * t * (3 - 2 * t);
+      [this.now.x, this.now.z] = [glide.x + (this.goal.x - glide.x) * e, glide.z + (this.goal.z - glide.z) * e];
+      if (t >= 1) this.gliding = null;
+    }
     const { yaw, pitch, distance, x, z } = this.now;
     const flat = Math.cos(pitch * DEG) * distance;
     this.camera.position.set(x + Math.sin(yaw * DEG) * flat, Math.sin(pitch * DEG) * distance, z + Math.cos(yaw * DEG) * flat);

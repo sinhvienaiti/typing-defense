@@ -2129,6 +2129,43 @@ Giám khảo độc lập chấm C10 6,5 (phím đúng 6,5; phím sai 7,5; gõ x
 
 ### 8.12 Còn lại (cho lượt sau)
 
-- C10: khay mép ≤ 6 cho lời gọi ngoài màn (bấm thì camera lướt 0,45 s); kẹp cột thẻ tránh HUD ở mọi mức zoom.
+- C10: khay mép và kẹp cột tránh HUD đã làm ở §8.13; còn giám khảo độc lập vòng 3; icon nhà và mũi tên của khay cần ảnh thật (phiếu Codex); dải tập trung giữa màn kiểu Typing Break là mô-đun kit chung của làn khác (điều phối viên, 29/10), Wordwoven chưa làm dải nhập riêng.
 - Đường (mục 8.10): tờ chấm theo PATH_QUALITY §5 (góc mặc định và 55°, 1280 và 1920, cận cảnh khúc cua, ngã ba, đầu cầu) và số đo luma; xem lại đá bờ (`props/da-ke` ở camera chơi trông như khối viền tối); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận.
 
+### 8.13 C10 vòng 3 (29/10/2026, làn L3, Mac mini M4)
+
+Giám khảo vòng 2 chấm 7,0 (phím đúng 7,0; phím sai 7,5; gõ xong 6,5; Word Shot 7,5; Chuỗi 7,0; `tmp/lane-l2/judge-c10-r2/verdict.md`). Làn L3 sửa năm chỗ giám khảo nêu và hai việc còn lại của C10:
+- **Phím đúng (sửa 1):** vòng ấn hai tông rời khỏi thẻ, đứng ngay dưới mép dưới thẻ, dưới chữ vừa gõ (`--drop` do `cards.ts` đặt, `feel.css`). Trên thẻ chỉ còn chữ đóng dấu (T1) và màu ngọc. Khung đầu là khung sáng nhất: đĩa trắng to nhất ở khung 0 (từ khung 1 nền trong suốt; trước đây đĩa kéo dài 3 khung và to dần), thêm lóe ngọc trắng 2 khung ở chỗ chữ rời thẻ (3D). Phím cuối của từ không có vòng (thẻ tự nổ).
+- **Gõ xong (sửa 2):** thẻ nổ ngay tại chỗ ở khung của phím cuối: 1,1×, viền trắng ấm 6 px và quầng 22 px (vượt thẻ khoảng 11 %), sáng +38 %, giữ 2 khung (34 ms); rồi bóp ngang 100 ms (nhanh dần) trong khi ánh sáng tắt; trống 60 ms; chỉ khi đó từ kế tiếp của lời gọi mới hiện ở đúng chỗ (`wait` trong `cards.ts`, `SWAP_MS` 194). Chữ cuối được đóng dấu như mọi phím (hết 3 khung trống). Bản sao các chữ của từ bung ra **trước** thẻ (DOM `td-fly` trên mọi thẻ: 1,7× → 1×, ra ngoài và xuống phía nhà, tắt ở 120 ms), còn chữ 3D bay từ dưới mép thẻ vào lõi. Lóe khung của khóa hay của phím sai bị hủy khi từ xong, để không che cú nổ.
+- **Đích đáp lại (sửa 3):** chữ đầu tiên bay 50 ms; khi nó chạm lõi, nhà lóe trắng ấm 50 ms và một vòng ngọc nhỏ (T9); lóe lớn cũ giữ làm nhịp hai.
+- **Chuỗi (sửa 4):** "×N" 34 px ở 720p (44 px ở 1080p), chữ số cao 21–22 px (27–28 px); đứng ngoài dòng từ, cạnh thẻ, giữa chiều cao thẻ, lớn ra về phía xa thẻ; khi có Word Shot thì đứng phía ngược hướng bay trên màn.
+- **Word Shot (sửa 5):** lõi trắng của lóe R nhỏ lại (thân 0,5, `hot` 0,15, quầng 0,24; lóe ở lõi nạp nay màu ngọc thay cho màu HOT gần trắng; tia bắt đầu từ 20 % bán kính ra ngoài, không dồn ở tâm; vòng R bắt đầu từ 65 %, `hot` 0,2). Vòng ngọc trên đất quanh chân tháp ở khung R, nên ở 1280 vẫn thấy cú bắn dù thẻ che đỉnh tháp. Dải nghĩa và nhãn hạng của từ Bắn mạnh chờ tới khi đạn chạm (tối đa 0,9 s, `CardFeel.hold`); ×N đứng phía ngược hướng bắn.
+- **Khay mép (việc còn lại):** lời gọi ra ngoài màn đứng ở mép, theo hướng từ giữa màn tới nhà (`WordFeel.anchor`), ≤ 2 mỗi mép, ≤ 6 tất cả, quá thì ẩn; thẻ có cạnh ngọc dày phía nhà (`data-edge`); nằm ở mép mà vẫn tránh bảng HUD bên đó (xuống dưới bảng trên, lên trên bảng dưới). Bấm thẻ ở khay: camera lướt tới nhà trong 0,45 s, êm hai đầu (`CameraRig.glide`, `View3D.tray`, `main.ts`). Gõ như thường. Chưa có icon nhà và mũi tên bằng ảnh thật (cần phiếu Codex; luật 28/10 cấm hình vẽ bằng mã).
+- **Kẹp cột tránh HUD ở mọi mức zoom (việc còn lại):** cột thẻ đứng dưới thanh HUD trên và trên thanh HUD dưới mà nó gặp; `spreadLanes` tính trần đẩy 240 px từ chỗ mà giới hạn của cột đã đặt nó (trước đây cột bị bảng đẩy quá 240 px thì không tách được khỏi cột bên cạnh, rơi về nhánh "đè lên bảng").
+- **Hiệu năng:** đọc kích thước DOM một lần rồi mới ghi (không còn ép layout cho mỗi chữ); bề rộng ×N đo một lần.
+
+Đo (`td-1c-words`, Mac mini M4, High; tờ ở `tmp/lane-l3/sheets3/`, số ở `numbers-frames.json`):
+
+| Đo | Vòng 2 (L2, `7b9de55`) | Vòng 3 (L3) |
+|---|---|---|
+| Khung đầu / đỉnh của phím đúng (`firstOverPeak`, key-dark và key-light, 1280 và 1920) | 0,74–0,91 | 1,00; 0,96; 1,00; 1,00 |
+| Nhà đáp lại một từ (keydown → lóe T9, đo trong máy, `answerMs`) | +125–208 ms (giám khảo, theo screencast) | 65 ms (1280), 89 ms (1920) |
+| ×N lúc nghỉ ở 720p | khoảng 13 px | cỡ chữ 34 px, chữ số cao 21–22 px (1080p: 44 px, 27–28 px) |
+| Khoảng trống lớn nhất giữa hai khung screencast trong −40…+420 ms | 150 ms (+144–294) | ≤ 34 ms ở mọi tờ (JPEG 55 thay 78) |
+| Lõi trắng / bán kính lóe R (nửa dưới chỗ bắn, khung lóe rộng nhất) | khoảng 0,5 (giám khảo ước) | đo 0,47 (1280), 0,43 (1920), nhưng phép đo tính cả chữ DOM bay qua và tháp đá trắng; mắt ước 0,35–0,4: **vẫn có thể trên 0,30** |
+| Trắng xóa vùng sân | ≤ 2,9 % | ≤ 2,4 % |
+| Draw call hiệu ứng thêm | ≤ 2 | ≤ 2 |
+| Phím → hiệu ứng | khung vẽ đầu | khung vẽ đầu (mọi mẫu) |
+| Khay mép: camera lướt | — | 29 m trong 430 ms (1280), 25 m trong 399 ms (1920, lượt không quay khung) |
+| Thẻ đè bảng HUD ở F2, F3, zoom bánh xe | (chỉ kiểm ở zoom 1) | 0 trong 18 lần nhìn mỗi cỡ |
+| Đất dưới thẻ (§2.5) | 0,27–0,36 | 0,27–0,37 |
+| Gói "/" (gzip) | 80,90 kB (chừa 4,10) | 81,45 kB (chừa 3,55); `?title=0` 82,91 kB (chừa 2,09) |
+| Chunk 3D (gzip, cùng three.js) | 168,27 kB | 169,90 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 12.669 | 12.867 (+198) |
+| Test | 390 / 41 file | 392 / 42 file |
+
+- `td-1c-words` đạt ở 1280 × 720 và 1920 × 1080 (High): td-words, td-hud-budget, td-scale, đất dưới thẻ, ≤ 2 draw call, hiệu ứng ở khung đầu sau phím, `zoomHud`, `trayCap`, `trayGlide`, `trayClear` (mới).
+- Chưa chụp được cảnh nhiều thẻ cùng chữ đầu (cặp bậc 2): qua sáu lượt chạy ở hai cỡ, không lần nào có hai từ cùng chữ đầu sống cùng lúc. Mã đóng dấu lên mọi thẻ khớp có từ vòng 2 (`cards.ts` `read`); kịch bản tự chụp `key-multi` khi gặp cặp.
+- Test mới `tests/td-c10-r3.test.ts` (camera lướt 0,45 s; hai cột bị bảng đẩy quá 240 px vẫn tách và tránh bảng).
+- Tờ: `tmp/lane-l3/sheets3/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (14 tờ như `sheets2`: 4 khung toàn màn và 12 khung cắt từ −17 tới +800 ms), `td-1c-words-combo-rest-<cỡ>.jpg` (×2, ×3, ×5, ×7 cạnh nhau), `td-1c-words-tray[-after]-<cỡ>.jpg` (khay trước và sau khi bấm), `numbers-frames.json`. Khung thô đã xóa bằng `tools/capture-prune/prune.mjs`.
+- Tự chấm (thang của giám khảo, so Typing Break): phím đúng 8, phím sai 7,5, gõ xong 7,5, Word Shot 7,5 (R vẫn có thể trắng quá 30 % trên tháp đá trắng), Chuỗi 8; tổng khoảng 7,7. Chưa chắc đạt 8: cần giám khảo độc lập vòng 3.

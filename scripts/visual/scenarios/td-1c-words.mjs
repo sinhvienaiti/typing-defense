@@ -4,6 +4,9 @@
 // lowest card of a house's column stands within 12 px over its anchor, FX_top + 0.6 m), the draw calls the effects add
 // (≤ 2) and one frame from a key to its effect. With FRAMES=1 it records 1 s around a right key, a slip, a word typed,
 // a chain step and a Word Shot by night (CDP screencast; needs CDP_PORT) into OUT_DIR/frames/<moment>/ with meta.json.
+// C10 round 3 (lane L3): the first key on a letter two cards share (key-multi), the chain count at rest at ×2, ×3, ×5, ×7
+// (OUT_DIR/combo-rest/), the cards against the HUD at F2, F3 and a wheel zoom (zoomHud), and the edge tray: the camera
+// panned until calls stand off screen, ≤ 2 an edge and ≤ 6 in all, a click on one gliding the camera there in 0.45 s.
 //   CDP_PORT=4152 URL=http://127.0.0.1:4150/ OUT_DIR=tmp/lane-l2/words FRAMES=1 node src/kit/tools/cdp-run.mjs scripts/visual/scenarios/td-1c-words.mjs --width=1920 --height=1080
 import { execFileSync } from "node:child_process";
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
@@ -32,7 +35,7 @@ async function screencast(page) {
     if (on) frames.push({ ts: m.params.metadata.timestamp, data: m.params.data });
     ws.send(JSON.stringify({ id: ++next, method: "Page.screencastFrameAck", params: { sessionId: m.params.sessionId } }));
   });
-  await call("Page.startScreencast", { format: "jpeg", quality: 78, maxWidth: page.width, maxHeight: page.height, everyNthFrame: 1 });
+  await call("Page.startScreencast", { format: "jpeg", quality: 55, maxWidth: page.width, maxHeight: page.height, everyNthFrame: 1 });
   return {
     async record(name, act, before = 150, after = 900) {
       frames.length = 0;
@@ -141,8 +144,23 @@ export default async function (page) {
   await page.sleep(1500);
   await send(page, { t: "sandbox", op: { op: "spawn", enemy: "thuong-luong", value: 4 } });
   let power = null;
+  /** The chain count at rest (+260 ms) at ×2, ×3, ×7 (×5 from the combo screencast): a full shot, the tag's box and its digit's ink height. */
+  const rest = {};
+  const restShot = async (n) => {
+    mkdirSync(out("combo-rest"), { recursive: true });
+    await page.shot(out(`combo-rest/x${n}-${size}.png`));
+    rest["x" + n] = await page.eval(`(() => { const el = document.querySelector(".td-combo"); if (!el) return null; const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); const g = document.createElement("canvas").getContext("2d"); g.font = cs.fontWeight + " " + cs.fontSize + " " + cs.fontFamily; const m = g.measureText("${n}"); return { box: [r.left, r.top, r.width, r.height].map(Math.round), font: parseFloat(cs.fontSize), digit: Math.round(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent), text: el.textContent }; })()`);
+  };
   const ends = Date.now() + 80000;
-  while (Date.now() < ends && !(moments.shot && moments.combo) && !(cast === null && power !== null && (await page.eval(td("return t.typing().chain;"))) >= 5)) {
+  while (Date.now() < ends && !(moments.shot && moments.combo && (cast === null || rest.x7)) && !(cast === null && power !== null && (await page.eval(td("return t.typing().chain;"))) >= 5)) {
+    if (cast && !moments.keyMulti) {
+      const live = (await words()).filter((x) => x.typed === 0);
+      const pair = live.find((a) => live.some((b) => b.id !== a.id && b.text[0] === a.text[0]));
+      if (pair && ((await page.eval(td("return t.typing().lock;"))) ?? -1) < 0) {
+        moments.keyMulti = await cast.record("key-multi-" + size, async () => [await letter(page, pair.text[0]), Date.now() / 1000][1]);
+        [await key(page, "Backspace"), await page.sleep(200)];
+      }
+    }
     const next = await until(page, `const c = new Map(t.state().calls.map((x) => [x.id, x])); return t.liveWords().filter((w) => c.get(w.call)?.bright).sort((a, b) => b.age - a.age)[0] ?? null;`, 20000, 120);
     if (!next) break;
     const chain = (await page.eval(td("return t.typing().chain;"))) ?? 0;
@@ -159,7 +177,8 @@ export default async function (page) {
     await typeTo(now, now.text.length - 1);
     const last = async () => [await letter(page, next.text[next.text.length - 1]), Date.now() / 1000][1];
     if (kind === KIND.power && power === null) power = next;
-    if (cast && [4, 9, 19].includes(chain) && !moments.combo) moments.combo = await cast.record("combo-" + size, last, 150, 1000);
+    if (cast && [1, 2, 6].includes(chain) && !rest["x" + (chain + 1)]) [await last(), await page.sleep(260), await restShot(chain + 1)];
+    else if (cast && [4, 9, 19].includes(chain) && !moments.combo) moments.combo = await cast.record("combo-" + size, last, 150, 1000);
     else if (cast && kind === KIND.power && !moments.shot) {
       // A shot that flies up the screen passes under its own card: keep one going sideways or towards the camera (or any, late).
       const frames = await cast.record("shot-" + size, last, 150, 1300);
@@ -170,6 +189,62 @@ export default async function (page) {
     await sample();
   }
   await cast?.close();
+  if (moments.combo) rest.x5 = await page.eval(`(() => { const el = document.querySelector(".td-combo"); const r = el?.getBoundingClientRect(); return r ? { box: [r.left, r.top, r.width, r.height].map(Math.round), font: parseFloat(getComputedStyle(el).fontSize), fromCast: true } : null; })()`);
+
+  // The cards against the HUD at every zoom (C10 leftover): F2, F3, then a wheel zoom in from F1, six looks each.
+  const fk = async (k) => { for (const type of ["keyDown", "keyUp"]) await page.send("Input.dispatchKeyEvent", { type, key: k, code: k }); };
+  const zoomStats = cardStats();
+  for (const step of ["F2", "F3", "wheel"]) {
+    if (step === "wheel") {
+      await fk("F1");
+      await page.sleep(900);
+      for (let k = 0; k < 5; k += 1) await page.send("Input.dispatchMouseEvent", { type: "mouseWheel", x: page.width / 2, y: page.height / 2, deltaX: 0, deltaY: -120 });
+    } else await fk(step);
+    await page.sleep(1300);
+    for (let k = 0; k < 6; k += 1) [await look(page, zoomStats), await page.sleep(300)];
+  }
+  await fk("F1");
+  await page.sleep(1000);
+  // The edge tray: pan until calls stand off screen (≤ 2 an edge, ≤ 6 in all); a click on one glides the camera there in 0.45 s.
+  const trayCards = () => page.eval(`[...document.querySelectorAll(".td-card")].filter((el) => el.dataset.edge && Number(el.style.opacity) > 0.05 && !el.classList.contains("is-gone")).map((el) => { const r = el.getBoundingClientRect(); return { edge: +el.dataset.edge, text: el.textContent, x: Math.round((r.left + r.right) / 2), y: Math.round((r.top + r.bottom) / 2), left: r.left, top: r.top, right: r.right, bottom: r.bottom }; })`);
+  const tray = { cards: [], most: 0, perEdge: [0, 0, 0, 0], glide: null, overHud: [] };
+  await until(page, "return t.state().calls.some((c) => c.bright);", 20000, 200);
+  const ways = [["ArrowRight", 39], ["ArrowLeft", 37], ["ArrowUp", 38], ["ArrowDown", 40]];
+  for (let k = 0; k < 48 && tray.cards.length < 1; k += 1) {
+    const [code, vk] = ways[Math.floor(k / 12)];
+    if (k % 12 === 0) [await fk("F1"), await page.sleep(700)]; // each way from the default view
+    await page.send("Input.dispatchKeyEvent", { type: "rawKeyDown", key: code, code, windowsVirtualKeyCode: vk });
+    await page.sleep(220);
+    await page.send("Input.dispatchKeyEvent", { type: "keyUp", key: code, code, windowsVirtualKeyCode: vk });
+    await page.sleep(200);
+    tray.cards = await trayCards();
+    const panels = (await page.eval(LOOK))?.panels ?? [];
+    for (const c of tray.cards) for (const p of panels) if (Math.min(c.right, p.right) - Math.max(c.left, p.left) > 1 && Math.min(c.bottom, p.bottom) - Math.max(c.top, p.top) > 1) tray.overHud.push(p.name + ": " + c.text);
+    tray.most = Math.max(tray.most, tray.cards.length);
+    for (let e = 0; e < 4; e += 1) tray.perEdge[e] = Math.max(tray.perEdge[e], tray.cards.filter((c) => c.edge === e).length);
+  }
+  if (tray.cards.length > 0) {
+    await page.shot(out("td-1c-words-tray-" + size + ".jpg"));
+    const c = tray.cards[0];
+    const from = await view();
+    const t0 = Date.now();
+    await page.mouse(c.x, c.y, "mousePressed");
+    await page.mouse(c.x, c.y, "mouseReleased");
+    const path = [];
+    for (let k = 0; k < 16; k += 1) {
+      const v = await view();
+      path.push({ ms: Date.now() - t0, x: v.x, z: v.z });
+      await page.sleep(40);
+    }
+    const end = path.at(-1);
+    const total = Math.hypot(end.x - from.x, end.z - from.z);
+    const reach = path.find((p) => Math.hypot(end.x - p.x, end.z - p.z) <= 0.05 * total);
+    tray.glide = { metres: +total.toFixed(1), reachMs: reach?.ms ?? -1, path: path.filter((_, k) => k % 3 === 0).map((p) => [p.ms, +p.x.toFixed(1), +p.z.toFixed(1)]) };
+    await page.sleep(500);
+    await page.shot(out("td-1c-words-tray-after-" + size + ".jpg"));
+  }
+  await fk("F1");
+  await page.sleep(800);
   for (const type of ["keyDown", "keyUp"]) await page.send("Input.dispatchKeyEvent", { type, key: "F1", code: "F1" });
   await page.sleep(800);
   await page.shot(out("td-1c-words-" + size + ".jpg"));
@@ -183,7 +258,11 @@ export default async function (page) {
     fxDrawCalls: draws.peak <= 2,
     oneFrame: keyFrames.length > 0 && Math.max(...keyFrames) <= 1, // the effect is in the first frame drawn after the keydown
     wordShot: power !== null,
+    zoomHud: zoomStats.samples > 0 && zoomStats.overHud.length === 0,
+    trayCap: tray.most <= 6 && tray.perEdge.every((n) => n <= 2),
+    trayGlide: tray.glide !== null && tray.glide.metres > 3 && tray.glide.reachMs >= 300 && tray.glide.reachMs <= 650,
+    trayClear: tray.overHud.length === 0,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { grounds, cards: cardSummary(stats), anchors: anchors.filter((a) => (a.gap < -1 || a.gap > 12) && a.top > 66).concat(anchors.slice(0, 4)).slice(0, 10), anchorCount: anchors.length, draws, keyMs, keyFrames, moments, phase: final?.phase, chain: await page.eval(td("return t.typing().chain;")) });
+  return finish(page, checks, { grounds, cards: cardSummary(stats), anchors: anchors.filter((a) => (a.gap < -1 || a.gap > 12) && a.top > 66).concat(anchors.slice(0, 4)).slice(0, 10), anchorCount: anchors.length, draws, keyMs, keyFrames, moments, rest, zoom: cardSummary(zoomStats), tray, phase: final?.phase, chain: await page.eval(td("return t.typing().chain;")) });
 }
