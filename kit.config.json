@@ -1,1 +1,1 @@
-{ "modules": ["platform", "input", "vocab", "learning", "tools", "balance"] }
+{ "modules": ["platform", "input", "vocab", "learning", "tools", "balance", "audio", "ui", "feedback"] }
