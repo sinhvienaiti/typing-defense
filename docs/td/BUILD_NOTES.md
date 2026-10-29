@@ -2130,7 +2130,7 @@ Giám khảo độc lập chấm C10 6,5 (phím đúng 6,5; phím sai 7,5; gõ x
 ### 8.12 Còn lại (cho lượt sau)
 
 - C10: khay mép và kẹp cột tránh HUD đã làm ở §8.13; còn giám khảo độc lập vòng 3; icon nhà và mũi tên của khay cần ảnh thật (phiếu Codex); dải tập trung giữa màn kiểu Typing Break là mô-đun kit chung của làn khác (điều phối viên, 29/10), Wordwoven chưa làm dải nhập riêng.
-- Đường (mục 8.10): tờ chấm theo PATH_QUALITY §5 (góc mặc định và 55°, 1280 và 1920, cận cảnh khúc cua, ngã ba, đầu cầu) và số đo luma; xem lại đá bờ (`props/da-ke` ở camera chơi trông như khối viền tối); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận.
+- Đường: tờ chấm và đá bờ đã làm ở §8.14; còn giám khảo độc lập chấm M (đạt từ 8); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận (lõi đường ở camera mặc định cần đá lát thật).
 
 ### 8.13 C10 vòng 3 (29/10/2026, làn L3, Mac mini M4)
 
@@ -2169,3 +2169,26 @@ Giám khảo vòng 2 chấm 7,0 (phím đúng 7,0; phím sai 7,5; gõ xong 6,5; 
 - Test mới `tests/td-c10-r3.test.ts` (camera lướt 0,45 s; hai cột bị bảng đẩy quá 240 px vẫn tách và tránh bảng).
 - Tờ: `tmp/lane-l3/sheets3/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (14 tờ như `sheets2`: 4 khung toàn màn và 12 khung cắt từ −17 tới +800 ms), `td-1c-words-combo-rest-<cỡ>.jpg` (×2, ×3, ×5, ×7 cạnh nhau), `td-1c-words-tray[-after]-<cỡ>.jpg` (khay trước và sau khi bấm), `numbers-frames.json`. Khung thô đã xóa bằng `tools/capture-prune/prune.mjs`.
 - Tự chấm (thang của giám khảo, so Typing Break): phím đúng 8, phím sai 7,5, gõ xong 7,5, Word Shot 7,5 (R vẫn có thể trắng quá 30 % trên tháp đá trắng), Chuỗi 8; tổng khoảng 7,7. Chưa chắc đạt 8: cần giám khảo độc lập vòng 3.
+
+### 8.14 Đường map 1: đá bờ và tờ chấm PATH_QUALITY §5 (29/10/2026, làn L3)
+
+- **Đá bờ `props/da-ke` nhìn như khối viền đen:** nguyên nhân chính là GTAO (chỉ có ở High): lớp tấm vữa mỏng của model làm AO vẽ một nét đen dọc mỗi hàng đá (ở Medium nét đó xám). Đã sửa:
+  - đá bờ ra khỏi lớp độ sâu của GTAO (`userData.noAO`, `stage.ts` bọc `overrideVisibility` của `GTAOPass`);
+  - không đổ bóng (bóng của một bờ thấp làm viền tối thêm); độ sâu của mép đường do gờ lún 5 cm trong shader đất (§8.10) gánh;
+  - dài theo đường hơn, thấp hơn (1,5 × 0,9 × 1,15 lần cỡ hạt), lún 60 % chiều cao vào đất, nên chỉ đỉnh các viên đá nhô lên khỏi vai đường;
+  - đặt sát mép lõi (bề rộng nửa + 0,4–0,65 m, trước là + 0,55–0,9 m: cách một mét thì trông như khối rơi trên cỏ);
+  - không mặt nào của đá đen hẳn: màu nền tối thiểu (0,34; 0,31; 0,26) và 0,38 của nó làm ánh tự phát.
+- **Vai đường tối và ấm hơn lõi** (ảnh `trail-worn` đậm hơn, đủ phủ; mép lõi tối 0,3 thay 0,24), để ở camera mặc định đọc ra ba lớp (lõi, vai, cỏ) thay vì một dải.
+- **Số đo** (`td-1c-road` có thêm `probes`: mỗi điểm thứ 24 của làn trên màn, tâm và một mặt cắt 0,2 m một bước từ 1 m trong mép tới 2,6 m ngoài mép; `numbers-road.json`):
+
+| Đo | 1280 × 720 | 1920 × 1080 | Luật |
+|---|---|---|---|
+| Luma lõi − luma cỏ (trung vị; phần mặt cắt đạt ≥ 0,15) | 0.159 (56 %) | 0.155 (61 %) | ≥ 0,15 |
+| Chuyển lõi → vai (80 % → 20 % của chênh lõi–cỏ, trung vị) | 0.4 m | 0.2 m | 0,3–0,8 m |
+| Bề rộng nửa đường (p10–p90 quanh trung vị 2.08 m, 39 điểm) | ±22.1 % | như bên trái | ±10–20 %, rộng ra ở cua và ngã ba |
+| Draw call cả cảnh (camera mặc định) | 73 | 73 | High ≤ 150 |
+
+  - Lõi − cỏ chỉ vừa qua ngưỡng ở trung vị; vài mặt cắt âm vì điểm "cỏ" rơi vào sân Fort, sân đá ngã ba, nhà hay cầu. Bề rộng lệch ±22 % gồm cả phần rộng ra ở cua và ngã ba (luật cho phép). Đo ở 1920 dải chuyển hẹp hơn (0,2 m) vì nay vai tối hơn cỏ, nên mốc 20 % rơi ngay mép lõi; bề rộng vai theo thiết kế vẫn 0,3–0,8 m (`vergeW`).
+- **Tờ:** `tmp/lane-l3/road-sheets/td-1c-road-<cỡ>-<default|near|bend|junction|bridge>.jpg`, mỗi tờ đặt cạnh ảnh tham chiếu của chủ dự án (`art-src/_refs/owner-epic-2026-10-28.webp` ở checkout chính, chỉ đọc). Camera mặc định của game là 55° ở 58 m, nên "mặc định" và "55°" là một tờ; tờ thứ hai là F2 (40°, 30 m).
+- **Tự chấm (thang M):** 5,5. Trả lời "Đường có trông như vệt quệt không?": **ở camera mặc định thì vẫn phần nào có**: lõi là một dải be nhạt đều, chưa thấy đá lát hay vệt bánh xe; vai tối, đá bờ và gờ lún giúp nhưng ở 58 m chúng nhỏ. Ở cận cảnh (khúc cua, ngã ba, đầu cầu) thì không: có vai mòn, gờ, sân đá lát, hàng đá bờ. Mức 8 cần ảnh thật của phiếu 122 (`road-paved`, `trail-worn`) và tờ c của 123 (decal mép đường); chưa gắn, chờ điều phối viên nhận.
+- Trên cỏ có vài nét trắng mảnh lượn song song (thấy ở cận cảnh khúc cua và ngã ba); không phải đường, chưa tìm ra nguồn.

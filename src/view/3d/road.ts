@@ -123,7 +123,7 @@ export function roadField(map: MapDef, lanes: readonly Lane[], extent: number, s
       const turn = wrap(heading(lane, Math.min(n - 1, i + 8)) - heading(lane, Math.max(0, i - 8)));
       // On a bend the stones gather on its outside; on a straight they alternate.
       const side = bend[l]![i]! > 0.35 ? -Math.sign(turn) || 1 : hash(i, l) < 0.5 ? 1 : -1;
-      const off = widths[l]![i]! + 0.55 + 0.35 * hash(i, 9);
+      const off = widths[l]![i]! + 0.4 + 0.25 * hash(i, 9); // on the verge, at the core's lip (L3: a metre out they read as loose blocks)
       const [x, z] = [lane.xs[i]! - Math.sin(th) * off * side, lane.zs[i]! + Math.cos(th) * off * side];
       if (bend[l]![i]! > 0.35 || hash(i, l + 11) < 0.85) put("stones", x, z, -th + (hash(i, 3) - 0.5) * 0.5, 0.5 + 0.25 * hash(i, 4) + 0.15 * bend[l]![i]!);
       const e = widths[l]![i]! + 0.2;
@@ -144,9 +144,9 @@ export function roadField(map: MapDef, lanes: readonly Lane[], extent: number, s
   return { field, plaza, size, extent, junctions, bends, dressing, edges, widths };
 }
 
-/** The dressing's models, one instanced mesh per model mesh (the stones cast shadows); hidden under any house. */
+/** The dressing's models, one instanced mesh per model mesh (no shadows: a low curb's drew a dark rim); hidden under any house. */
 export class RoadDressing {
-  private readonly meshes: { kind: Dress["kind"]; mesh: THREE.InstancedMesh; spots: Dress[] }[] = [];
+  private readonly meshes: { kind: Dress["kind"]; mesh: THREE.InstancedMesh; spots: Dress[]; high: number }[] = [];
   private readonly matrix = new THREE.Matrix4();
   private frame = 0;
 
@@ -160,35 +160,54 @@ export class RoadDressing {
         if (!gltf) return;
         relight(gltf.scene);
         gltf.scene.updateMatrixWorld(true);
+        const high = new THREE.Box3().setFromObject(gltf.scene).getSize(new THREE.Vector3()).y;
         gltf.scene.traverse((o) => {
           const source = o as THREE.Mesh;
           if (!source.isMesh) return;
           const mesh = new THREE.InstancedMesh(source.geometry, source.material, spots.length);
-          for (const m of [source.material].flat()) if ("color" in m) (m.color as THREE.Color).multiplyScalar(1.3); // pale limestone, as the Fort's
+          for (const m of [source.material].flat()) {
+            if ("color" in m) (m.color as THREE.Color).multiplyScalar(kind === "stones" ? 1.05 : 1.3); // pale limestone, as the Fort's
+            // The curb's dark mortar box read as a black outline at the play camera (L3): its darks lifted to warm stone.
+            if (kind === "stones") {
+              const relit = m.onBeforeCompile.bind(m);
+              m.onBeforeCompile = (shader, renderer) => {
+                relit(shader, renderer);
+                // The model's dark mortar side faces away from every light and read as a black line at the play camera (L3):
+                // its albedo floored to stone and a little of it as its own light, so no face of the curb goes black.
+                shader.fragmentShader = shader.fragmentShader
+                  .replace("#include <map_fragment>", "#include <map_fragment>\n  diffuseColor.rgb = max(diffuseColor.rgb, vec3(0.34, 0.31, 0.26));")
+                  .replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\n  totalEmissiveRadiance += diffuseColor.rgb * 0.38;");
+              };
+            }
+          }
           mesh.geometry.applyMatrix4(source.matrixWorld);
-          [mesh.castShadow, mesh.receiveShadow] = [kind === "stones", true];
-          this.meshes.push({ kind, mesh, spots });
-          this.place(mesh, spots, null);
+          [mesh.castShadow, mesh.receiveShadow] = [false, true]; // a low curb's shadow drew the dark rim (L3)
+          mesh.userData["noAO"] = kind === "stones"; // nor the AO (stage.ts)
+          this.meshes.push({ kind, mesh, spots, high });
+          this.place(mesh, spots, null, high);
           this.layer.add(mesh);
         });
       }, () => undefined);
     }
   }
 
-  private place(mesh: THREE.InstancedMesh, spots: readonly Dress[], w: World | null): void {
+  private place(mesh: THREE.InstancedMesh, spots: readonly Dress[], w: World | null, high: number): void {
     const B = w?.buildings;
     spots.forEach((d, i) => {
       const under = B !== undefined && B.live().some((b) => Math.hypot(B.x[b]! - d.x, B.z[b]! - d.z) < w!.c.buildings[B.def[b]!]!.radius + 0.8);
       const s = under ? 0 : d.scale;
-      const k = d.kind === "stones" ? s * 0.7 : s; // a low curb (uniform: instanced normals take no inverse transpose)
-      mesh.setMatrixAt(i, this.matrix.compose(new THREE.Vector3(d.x, this.heightAt(d.x, d.z) - 0.05, d.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), d.yaw), new THREE.Vector3(k, k, k)));
+      // The curb: longer along the road, low, and set 60 % into the ground so only its stones' crowns show over the verge
+      // (its dark base and the ambient occlusion where its side met the grass read as a black outline, L3).
+      const size = d.kind === "stones" ? new THREE.Vector3(1.5 * s, 0.9 * s, 1.15 * s) : new THREE.Vector3(s, s, s);
+      const sink = d.kind === "stones" ? 0.6 * high * size.y : 0.05;
+      mesh.setMatrixAt(i, this.matrix.compose(new THREE.Vector3(d.x, this.heightAt(d.x, d.z) - sink, d.z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), d.yaw), size));
     });
     mesh.instanceMatrix.needsUpdate = true;
   }
 
   /** Every 20 frames: stones and terraces under a house (built since) hide. */
   update(w: World): void {
-    if ((this.frame += 1) % 20 === 0) for (const m of this.meshes) this.place(m.mesh, m.spots, w);
+    if ((this.frame += 1) % 20 === 0) for (const m of this.meshes) this.place(m.mesh, m.spots, w, m.high);
   }
 
   count(): number {

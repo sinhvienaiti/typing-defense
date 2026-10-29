@@ -154,6 +154,12 @@ export function createStage(canvas: HTMLCanvasElement, tier: Tier3D, fieldHalfM:
   if (ao !== null) {
     ao.blendIntensity = 0.85;
     ao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.4, thickness: 1.5, scale: 1.0, samples: 12 });
+    // Small thin things (the road's curb, userData.noAO) stay out of the AO's depth: there they drew a black outline (L3).
+    const hide = ao.overrideVisibility.bind(ao);
+    ao.overrideVisibility = (): void => {
+      hide();
+      scene.traverse((o) => void (o.userData["noAO"] === true && (o.visible = false)));
+    };
     composer.addPass(ao);
   }
   const bloom = T.bloomPass ? new UnrealBloomPass(new THREE.Vector2(256, 256), 0.25, 0.5, 1.6) : null;

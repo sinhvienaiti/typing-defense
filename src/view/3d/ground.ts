@@ -186,10 +186,11 @@ const SHADER_PAINT = /* glsl */ `
   vec3 road = textureGrad(tRoad, ruv, gx, gy).rgb;
   road = mix(vec3(dot(road, vec3(0.299, 0.587, 0.114))), road, 0.5) * 1.1;
   road = mix(road, texture2D(tYard, tuv * 1.1).rgb * 1.05, texture2D(tPlaza, muv).r);
-  road *= 1.0 - 0.24 * smoothstep(rw - 0.32, rw - 0.02, ad + edge); // the rim in the lip's shade
+  road *= 1.0 - 0.3 * smoothstep(rw - 0.32, rw - 0.02, ad + edge); // the rim in the lip's shade
   vec3 trail = textureGrad(tTrail, ruv + vec2(0.5, 0.31), gx, gy).rgb;
-  trail = mix(vec3(dot(trail, vec3(0.299, 0.587, 0.114))), trail, 0.6) * (0.9 + 0.12 * n2);
-  vec3 col = mix(grass, trail, verge * 0.9);
+  // The worn verge a step darker and earthier than the core (L3: at the default camera the three layers read as one band).
+  trail = mix(vec3(dot(trail, vec3(0.299, 0.587, 0.114))), trail, 0.75) * (0.76 + 0.12 * n2);
+  vec3 col = mix(grass, trail, verge);
   col = mix(col, road, core);
   // The core sits 5 cm under the verge: the lip's face (0.15 m) tilts the normal towards the road (normal_fragment_maps).
   float face = smoothstep(rw - 0.2, rw - 0.08, ad + edge) * (1.0 - smoothstep(rw + 0.02, rw + 0.14, ad + edge));

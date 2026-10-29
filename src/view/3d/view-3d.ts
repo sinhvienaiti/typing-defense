@@ -27,6 +27,8 @@ export class View3D implements MapView {
   private readonly rig: CameraRig;
   private readonly words: WordFeel;
   private readonly bridgeEnds: (readonly [number, number])[];
+  /** The ground's lanes (td-1c-road probes their cross-sections). */
+  private readonly lanes: World["lanes"];
   private readonly hit = new THREE.Vector3();
   private last = -1;
 
@@ -50,7 +52,8 @@ export class View3D implements MapView {
     const [x, z] = w.map.keep;
     this.rig = new CameraRig(stage.camera, w.map.halfM, { x, z });
     this.rig.view("home", true);
-    this.ground = createGround(stage.layers.ground, w.map, w.lanes.slice(0, -1), stage.tier, stage.renderer); // the last lane is the fly route
+    this.lanes = w.lanes.slice(0, -1); // the last lane is the fly route
+    this.ground = createGround(stage.layers.ground, w.map, this.lanes, stage.tier, stage.renderer);
     this.houses = new Houses(stage.layers.actors, w.map, stage.tier);
     this.bridgeEnds = w.map.bridges.flatMap((r) => [[r.x0 - 1.5, (r.z0 + r.z1) / 2] as const, [r.x1 + 1.5, (r.z0 + r.z1) / 2] as const]);
     this.words = new WordFeel(stage, this.houses, w.map);
@@ -138,7 +141,16 @@ export class View3D implements MapView {
     // Where the road's junctions, bends and bridge ends are on screen (scenario td-1c-road crops and zooms there).
     const at = ([x, z]: readonly [number, number]): number[] => ((p) => [Math.round(p.x), Math.round(p.y)])(this.stage.project(x, 0, z));
     const { junctions, bends } = this.ground.road;
-    const roads = { junctions: junctions.map(at), bends: bends.map(at), bridges: this.bridgeEnds.map(at), dressing: this.ground.dressing.count() };
+    // PATH_QUALITY §5 numbers: every 24th lane point on screen, its centre, its half width, and a cross-section from 1 m inside
+    // the edge to 2.6 m past it every 0.2 m (screen points), so the scenario reads core − grass luma and the transition's width.
+    const probes = this.lanes.flatMap((lane, l) => [...lane.xs].flatMap((x0, i) => {
+      if (i % 24 !== 12 || i + 1 >= lane.xs.length) return [];
+      const [z0, half] = [lane.zs[i]!, this.ground.road.widths[l]![i]!];
+      const th = Math.atan2(lane.zs[i + 1]! - z0, lane.xs[i + 1]! - x0);
+      const across = Array.from({ length: 19 }, (_, k) => at([x0 - Math.sin(th) * (half - 1 + 0.2 * k), z0 + Math.cos(th) * (half - 1 + 0.2 * k)]));
+      return [{ c: at([x0, z0]), half: +half.toFixed(2), across }];
+    }));
+    const roads = { junctions: junctions.map(at), bends: bends.map(at), bridges: this.bridgeEnds.map(at), dressing: this.ground.dressing.count(), probes };
     return { kind: this.kind, tier: this.stage.tier, ...this.stage.stats(), ...this.words.stats(), yaw, pitch, distance, x, z, houses: JSON.stringify(this.houses.report()), roads: JSON.stringify(roads) };
   }
 
