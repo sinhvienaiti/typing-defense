@@ -26,6 +26,7 @@ export class View3D implements MapView {
   private readonly houses: Houses;
   private readonly rig: CameraRig;
   private readonly words: WordFeel;
+  private readonly bridgeEnds: (readonly [number, number])[];
   private readonly hit = new THREE.Vector3();
   private last = -1;
 
@@ -51,6 +52,7 @@ export class View3D implements MapView {
     this.rig.view("home", true);
     this.ground = createGround(stage.layers.ground, w.map, w.lanes.slice(0, -1), stage.tier, stage.renderer); // the last lane is the fly route
     this.houses = new Houses(stage.layers.actors, w.map, stage.tier);
+    this.bridgeEnds = w.map.bridges.flatMap((r) => [[r.x0 - 1.5, (r.z0 + r.z1) / 2] as const, [r.x1 + 1.5, (r.z0 + r.z1) / 2] as const]);
     this.words = new WordFeel(stage, this.houses, w.map);
     stage.overlay(this.words.pool.scene);
     cards.feel = this.words;
@@ -76,7 +78,7 @@ export class View3D implements MapView {
     const dt = this.last < 0 ? 0 : (now - this.last) / 1000;
     this.place(now, dt);
     this.last = now;
-    this.ground.update(now / 1000);
+    this.ground.update(now / 1000, w);
     this.words.update(w, now, Math.min(0.1, dt));
     this.stage.render();
   }
@@ -126,7 +128,11 @@ export class View3D implements MapView {
 
   stats(): Record<string, number | string> {
     const { yaw, pitch, distance, x, z } = this.rig.pose;
-    return { kind: this.kind, tier: this.stage.tier, ...this.stage.stats(), ...this.words.stats(), yaw, pitch, distance, x, z, houses: JSON.stringify(this.houses.report()) };
+    // Where the road's junctions, bends and bridge ends are on screen (scenario td-1c-road crops and zooms there).
+    const at = ([x, z]: readonly [number, number]): number[] => ((p) => [Math.round(p.x), Math.round(p.y)])(this.stage.project(x, 0, z));
+    const { junctions, bends } = this.ground.road;
+    const roads = { junctions: junctions.map(at), bends: bends.map(at), bridges: this.bridgeEnds.map(at), dressing: this.ground.dressing.count() };
+    return { kind: this.kind, tier: this.stage.tier, ...this.stage.stats(), ...this.words.stats(), yaw, pitch, distance, x, z, houses: JSON.stringify(this.houses.report()), roads: JSON.stringify(roads) };
   }
 
   dispose(): void {

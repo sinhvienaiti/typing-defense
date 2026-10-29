@@ -2107,3 +2107,13 @@ Theo `docs/games/TYPING_BREAK_STUDY.md` §4–§5.3 (repo cha), `ART_DIRECTION_2
 - **Tờ khung:** `tmp/lane-l2/sheets/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (14 tờ: hàng đầu 4 khung toàn màn, rồi 12 khung cắt quanh thẻ và mục tiêu, −17 tới +800 ms), `compare-{key,word,shot,combo,wrong}.jpg` (tờ của ta cạnh tờ Typing Break), `clip-*-halfspeed.mp4`, số đo `numbers-frames.json`. Khung thô đã xóa.
 - **Còn lại của C10** (cho làn sau): khay mép ≤ 6 cho lời gọi ngoài màn và camera lướt 0,45 s khi bấm; kẹp cột tránh HUD khi zoom (nay chỉ tránh ở zoom 1); mặt nạ vùng yên không cần (thẻ DOM đục nằm trên canvas, hạt không đè chữ). Quái chưa có trên 3D (C7) nên đòn chữ trúng mặt đất trống; đạn bay lên màn hình đi dưới thẻ của chính tháp đó.
 
+### 8.10 Đường map 1, bản đầu (29/10/2026, làn L2; chưa có tờ chấm)
+
+Luật chủ dự án sáng 29/10 (`docs/games/PATH_QUALITY.md`): đường không được là "vệt quệt".
+- `src/view/3d/road.ts`: trường đường nướng từ lane của sim (khoảng cách ngang có dấu, khoảng cách dọc dưới dạng cos/sin chu kỳ 8 m, nửa bề rộng); đoạn hai lane chung chỉ vẽ một lần; ngã ba, khúc cua tìm từ lane. Nửa bề rộng lệch ±14 % theo nhiễu, +20 % ở khúc cua, +30 % ở ngã ba.
+- Shader đất (`ground.ts`): chất liệu chạy dọc đường (`textureGrad`, mật độ texel đều), lõi, vai mòn 0,3–0,8 m, cỏ, mép có nhiễu; mép lõi tối và pháp tuyến nghiêng ở gờ (lõi lún khoảng 5 cm); sân đá lát ở ngã ba. Mặt nạ đường cũ giữ cho test và decal.
+- Đồ bên đường có hạt cố định: đá bờ `props/da-ke` (Tripo có sẵn, đưa qua `models:blender`) cứ 2–5 m, dồn ra phía ngoài khúc cua, một cặp ở mỗi đầu cầu; thềm đá trắng `landmarks/them-da-trang` cạnh ngã ba; ẩn khi có nhà đè lên. Thêm 3 draw call (đá có bóng, thềm không).
+- Ảnh theo vai trò ở `src/view/3d/road.json` (`core`, `verge`, `plaza`, `edgeDecals`): phiếu 122 và tờ c của 123 thay vào đó khi được nhận. Chưa gắn ảnh Codex nào.
+- Test `tests/td-3d-road.test.ts`; kịch bản `td-1c-road` (góc mặc định, F2, cận cảnh khúc cua, ngã ba, đầu cầu).
+- **Còn lại:** tờ chấm theo PATH_QUALITY §5 và số đo luma; viên đá bờ nhìn như khối có viền tối ở camera chơi, cần xem lại hay thay bằng đá của phiếu 123; media mới (`props/da-ke`, `landmarks/them-da-trang`) cần `media:push`.
+

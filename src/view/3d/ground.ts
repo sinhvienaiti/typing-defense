@@ -7,11 +7,16 @@
  * the two Wooden Bridges (props/cau-go) sit on the bridge rects; Codex 097's decals lie by the decor rules (flowers and
  * clover in the grass, pebbles by the road, worn earth at the gate and the Fort; soil and leaves come with the trees, C7).
  * Missing tiles keep flat colours. Pure parts (heights, masks, decal spots) take no DOM, for the tests.
+ * C10 (PATH_QUALITY.md): the roads come from road.ts's field, not the road mask: material along the road, a core, a worn
+ * verge and grass with noisy edges, the core sunk under a lit lip, plazas on junctions; road.ts dresses their edges.
  */
 import * as THREE from "three";
 import type { MapDef } from "../../content/types";
 import { loadModel, ModelLibrary } from "../../kit/three/model-loader";
 import type { Lane } from "../../sim/lanes";
+import type { World } from "../../sim/world";
+import { RoadDressing, roadField, ROAD_TILE_M } from "./road";
+import ROAD from "./road.json";
 import { relight, type Tier3D } from "./stage";
 
 /** The border round the field, m (BUILD_1C_MAP1 §8 C3), the masks' size and a tile's size. */
@@ -131,7 +136,7 @@ export function decalSpots(map: MapDef, lanes: readonly Lane[]): [number, number
 }
 
 const SHADER_HEAD = /* glsl */ `
-uniform sampler2D tGrass, tClover, tRoad, tTrail, tBank, tYard, tMask, tDir;
+uniform sampler2D tGrass, tClover, tRoad, tTrail, tBank, tYard, tMask, tField, tPlaza;
 uniform float uExtent, uTime;
 varying vec2 vGround;
 float gnoise(vec2 p) {
@@ -149,22 +154,8 @@ vec3 jade(vec3 c, float turn, float sat) {
   i = ch * cos(h); q = ch * sin(h);
   return vec3(y + 0.956 * i + 0.621 * q, y - 0.272 * i - 0.647 * q, y - 1.106 * i + 1.703 * q);
 }
-/** The road tile with its ruts along the road: four fixed turns (45° apart, seamless), the two nearest the road's blended. */
-vec3 roadTile(vec2 p, vec2 dir) {
-  float theta = atan(dir.y, dir.x) * 0.5;
-  vec3 sum = vec3(0.0);
-  float total = 0.0;
-  for (int k = 0; k < 4; k++) {
-    float a = float(k) * 0.785398;
-    float diff = abs(mod(theta - a + 1.570796, 3.141593) - 1.570796);
-    float w = pow(max(0.0, 1.0 - diff / 0.785398), 4.0); // mostly one turn: two blended ones blur the ruts
-    vec2 t = vec2(cos(a), sin(a));
-    vec2 uv = vec2(dot(p, vec2(-t.y, t.x)), dot(p, t)) / ${TILE_M.toFixed(1)};
-    sum += texture2D(tRoad, uv).rgb * w;
-    total += w;
-  }
-  return sum / max(total, 1e-3);
-}
+/** Signed distance across the road at ground point p (the field's blue). */
+float across(vec2 p) { return texture2D(tField, (p + uExtent) / (2.0 * uExtent)).b; }
 `;
 const SHADER_PAINT = /* glsl */ `
   vec2 gp = vGround;
@@ -179,13 +170,31 @@ const SHADER_PAINT = /* glsl */ `
   grass = mix(grass, grass * vec3(1.08, 1.03, 0.82), smoothstep(0.6, 0.85, gnoise(gp * 0.03 + 11.0)) * 0.55);
   // Ragged edges: the masks' soft rims broken up by noise, so no yard or road edge is a clean circle or ribbon.
   float rag = (n3 - 0.5) * 0.5 + (n2 - 0.5) * 0.3;
-  // Roads and their worn edges: pale beige earth, not orange, at least 0.15 luma over the grass (§2.3).
-  vec3 trail = texture2D(tTrail, tuv + 0.5).rgb;
-  trail = mix(vec3(dot(trail, vec3(0.299, 0.587, 0.114))), trail, 0.6);
-  vec3 road = roadTile(gp, texture2D(tDir, muv).rg * 2.0 - 1.0);
+  // Roads (PATH_QUALITY §2, road.ts): material along the road at one texel density (u across, v along, the along
+  // distance from its cos and sin, so filtering and mip levels never see a seam); a core, a worn verge 0.3–0.8 m wide
+  // and the grass with noisy edges; the core darker at its rim, a plaza on junctions; at least 0.15 luma over the grass.
+  vec4 rf = texture2D(tField, muv);
+  float ad = abs(rf.b), rw = rf.a;
+  float edge = (n3 - 0.5) * 0.3 + (gnoise(gp * 1.7 + 9.0) - 0.5) * 0.24;
+  float vergeW = mix(0.3, 0.8, gnoise(gp * 0.19 + 4.0));
+  float core = 1.0 - smoothstep(rw - 0.08, rw + 0.08, ad + edge);
+  float verge = 1.0 - smoothstep(rw + vergeW - 0.14, rw + vergeW + 0.14, ad + edge * 1.4);
+  const float TURN = ${(ROAD_TILE_M / (2 * Math.PI)).toFixed(6)};
+  vec2 ruv = vec2(rf.b, atan(rf.g, rf.r) * TURN) / ${ROAD_TILE_M.toFixed(1)};
+  vec2 gx = vec2(dFdx(rf.b), (rf.r * dFdx(rf.g) - rf.g * dFdx(rf.r)) * TURN) / ${ROAD_TILE_M.toFixed(1)};
+  vec2 gy = vec2(dFdy(rf.b), (rf.r * dFdy(rf.g) - rf.g * dFdy(rf.r)) * TURN) / ${ROAD_TILE_M.toFixed(1)};
+  vec3 road = textureGrad(tRoad, ruv, gx, gy).rgb;
   road = mix(vec3(dot(road, vec3(0.299, 0.587, 0.114))), road, 0.5) * 1.1;
-  vec3 col = mix(grass, trail, smoothstep(0.25, 0.75, m.a + rag) * 0.85);
-  col = mix(col, road, smoothstep(0.3, 0.7, m.r + rag * 0.6));
+  road = mix(road, texture2D(tYard, tuv * 1.1).rgb * 1.05, texture2D(tPlaza, muv).r);
+  road *= 1.0 - 0.24 * smoothstep(rw - 0.32, rw - 0.02, ad + edge); // the rim in the lip's shade
+  vec3 trail = textureGrad(tTrail, ruv + vec2(0.5, 0.31), gx, gy).rgb;
+  trail = mix(vec3(dot(trail, vec3(0.299, 0.587, 0.114))), trail, 0.6) * (0.9 + 0.12 * n2);
+  vec3 col = mix(grass, trail, verge * 0.9);
+  col = mix(col, road, core);
+  // The core sits 5 cm under the verge: the lip's face (0.15 m) tilts the normal towards the road (normal_fragment_maps).
+  float face = smoothstep(rw - 0.2, rw - 0.08, ad + edge) * (1.0 - smoothstep(rw + 0.02, rw + 0.14, ad + edge));
+  vec2 lat = vec2(across(gp + vec2(0.25, 0.0)) - across(gp - vec2(0.25, 0.0)), across(gp + vec2(0.0, 0.25)) - across(gp - vec2(0.0, 0.25))) * 2.0 * sign(rf.b);
+  vec3 lipTilt = vec3(-lat.x, 0.0, -lat.y) * 0.4 * face * step(ad, 5.0);
   col = mix(col, texture2D(tBank, tuv).rgb, smoothstep(0.2, 0.6, m.g + rag * 0.5));
   col = mix(col, texture2D(tYard, tuv * 1.25).rgb, smoothstep(0.35, 0.65, m.b + rag));
   // Cloud shadows drifting over the field (§1.2, §2.7: 0.78–1 of the light), a lighting term on the ground only.
@@ -196,7 +205,8 @@ const SHADER_PAINT = /* glsl */ `
 
 /** Flat colours until (or instead of) the tiles: grass, clover, road, worn, bank, yard. */
 const FALLBACK: Record<string, string> = { grass: "#8fbf55", clover: "#86b84f", road: "#c8a06a", trail: "#b89a68", bank: "#8d8f74", yard: "#b3aea0" };
-const TILE_FILES: Record<string, string> = { grass: "grass-a", clover: "grass-b-clover", road: "dirt-road", trail: "trail-worn", bank: "stream-bank", yard: "stone-yard" };
+/** By role; the road's three come from road.json (Codex 122's road-paved and trail-worn swap in there once accepted). */
+const TILE_FILES: Record<string, string> = { grass: "grass-a", clover: "grass-b-clover", road: ROAD.core, trail: ROAD.verge, bank: "stream-bank", yard: ROAD.plaza };
 
 function flat(color: string): THREE.DataTexture {
   const c = new THREE.Color(color);
@@ -217,16 +227,19 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
   for (let i = 0; i < pos.count; i += 1) pos.setY(i, heightAt(map, pos.getX(i), pos.getZ(i)));
   geometry.computeVertexNormals();
 
-  const { mask, dir } = groundMasks(map, lanes);
+  const { mask } = groundMasks(map, lanes);
+  const road = roadField(map, lanes, extent);
   const data = (bytes: Uint8Array<ArrayBuffer>): THREE.DataTexture => Object.assign(new THREE.DataTexture(bytes, MASK_PX, MASK_PX), { magFilter: THREE.LinearFilter, minFilter: THREE.LinearFilter, needsUpdate: true });
+  const half = Uint16Array.from(road.field, (v) => THREE.DataUtils.toHalfFloat(v));
+  const fieldTexture = Object.assign(new THREE.DataTexture(half, road.size, road.size, THREE.RGBAFormat, THREE.HalfFloatType), { magFilter: THREE.LinearFilter, minFilter: THREE.LinearFilter, needsUpdate: true });
   const tiles = Object.fromEntries(Object.entries(FALLBACK).map(([key, color]) => [key, { value: flat(color) as THREE.Texture }]));
   const time = { value: 0 };
-  const uniforms = { ...Object.fromEntries(Object.entries(tiles).map(([key, u]) => ["t" + key[0]!.toUpperCase() + key.slice(1), u])), tMask: { value: data(mask) }, tDir: { value: data(dir) }, uExtent: { value: extent }, uTime: time };
+  const uniforms = { ...Object.fromEntries(Object.entries(tiles).map(([key, u]) => ["t" + key[0]!.toUpperCase() + key.slice(1), u])), tMask: { value: data(mask) }, tField: { value: fieldTexture }, tPlaza: { value: data(road.plaza as Uint8Array<ArrayBuffer>) }, uExtent: { value: extent }, uTime: time };
   const material = new THREE.MeshLambertMaterial({ color: 0xffffff });
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vGround;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvGround = (modelMatrix * vec4(transformed, 1.0)).xz;");
-    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\n" + SHADER_HEAD).replace("#include <map_fragment>", SHADER_PAINT);
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\n" + SHADER_HEAD).replace("#include <map_fragment>", SHADER_PAINT).replace("#include <normal_fragment_maps>", "#include <normal_fragment_maps>\nnormal = normalize(normal + (viewMatrix * vec4(lipTilt, 0.0)).xyz);");
   };
   const terrain = new THREE.Mesh(geometry, material);
   terrain.receiveShadow = true;
@@ -239,7 +252,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
     shader.uniforms["uTime"] = time;
     shader.vertexShader = shader.vertexShader.replace("#include <common>", "#include <common>\nvarying vec2 vWater;").replace("#include <worldpos_vertex>", "#include <worldpos_vertex>\nvWater = (modelMatrix * vec4(transformed, 1.0)).xz;");
     // Silver flecks drifting downstream: noise, not a repeating wave.
-    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\nuniform float uTime;\nvarying vec2 vWater;\n" + SHADER_HEAD.slice(SHADER_HEAD.indexOf("float gnoise"), SHADER_HEAD.indexOf("/** The road"))).replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\nfloat flow = gnoise(vec2(vWater.x * 2.3, vWater.y * 0.7 - uTime * 0.9)) * gnoise(vec2(vWater.x * 5.0 + 3.0, vWater.y * 1.9 - uTime * 1.6));\ntotalEmissiveRadiance += vec3(0.36, 0.4, 0.42) * smoothstep(0.42, 0.7, flow);");
+    shader.fragmentShader = shader.fragmentShader.replace("#include <common>", "#include <common>\nuniform float uTime;\nvarying vec2 vWater;\n" + SHADER_HEAD.slice(SHADER_HEAD.indexOf("float gnoise"), SHADER_HEAD.indexOf("/** Turns a colour"))).replace("#include <emissivemap_fragment>", "#include <emissivemap_fragment>\nfloat flow = gnoise(vec2(vWater.x * 2.3, vWater.y * 0.7 - uTime * 0.9)) * gnoise(vec2(vWater.x * 5.0 + 3.0, vWater.y * 1.9 - uTime * 1.6));\ntotalEmissiveRadiance += vec3(0.36, 0.4, 0.42) * smoothstep(0.42, 0.7, flow);");
   };
   for (const rect of map.water) {
     const z0 = rect.z0 <= -map.halfM ? -map.halfM - 4 : rect.z0;
@@ -257,8 +270,9 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
   }
 
   // Decals: one instanced quad set per sheet, each quad showing one of the sheet's 4 × 2 cells.
-  const spots = decalSpots(map, lanes);
-  const decals = [0, 1].map((sheet) => {
+  const spots = [...decalSpots(map, lanes), ...road.edges];
+  const sheets = ["ground-decals-a", "ground-decals-b", ...(ROAD.edgeDecals === null ? [] : [ROAD.edgeDecals as string])];
+  const decals = sheets.map((_, sheet) => {
     const mine = spots.filter((s) => s[2] === sheet);
     const quad = new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2);
     const cell = new Float32Array(mine.length * 2);
@@ -279,6 +293,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
 
   const bridges = new THREE.Group();
   layer.add(terrain, water, ...decals, bridges);
+  const dressing = new RoadDressing(layer, road.dressing, (x, z) => heightAt(map, x, z), tier);
 
   // Media: tiles and decals by tier (a missing file keeps the flat colour, a missing sheet no decals); the bridges.
   const loader = new THREE.TextureLoader();
@@ -291,7 +306,7 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
       return t;
     }, () => null);
   for (const [key, file] of Object.entries(TILE_FILES)) void texture(file, true).then((t) => t && (tiles[key]!.value = t));
-  ["ground-decals-a", "ground-decals-b"].forEach((file, sheet) => void texture(file, false).then((t) => {
+  sheets.forEach((file, sheet) => void texture(file, false).then((t) => {
     if (t === null) return;
     Object.assign(decals[sheet]!.material as THREE.MeshLambertMaterial, { map: t, needsUpdate: true });
     decals[sheet]!.visible = true;
@@ -310,8 +325,11 @@ export function createGround(layer: THREE.Group, map: MapDef, lanes: readonly La
 
   return {
     terrain,
-    update(seconds: number): void {
+    road,
+    dressing,
+    update(seconds: number, w?: World): void {
       time.value = seconds;
+      if (w) dressing.update(w);
     },
     dispose(): void {
       for (const mesh of [terrain, ...water.children, ...decals] as THREE.Mesh[]) {

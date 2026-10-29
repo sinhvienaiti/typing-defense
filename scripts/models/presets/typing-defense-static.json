@@ -2376,6 +2376,56 @@
           "roughnessMin": 0.5
         }
       }
+    },
+    "props/da-ke": {
+      "source": "landmarks/da-ke.glb",
+      "triangles": 2000,
+      "reviewed": false,
+      "note": "Đá bờ đường (C10, PATH_QUALITY §2.5): một dãy năm viên đá vôi xám (dãy chạy theo X của model), đặt dọc vai đường cứ 2–6 m, cụm ở khúc cua; rộng 2,6 m.",
+      "static": {
+        "yaw": 0,
+        "size": {
+          "measure": "width",
+          "metres": 2.6
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
+    },
+    "landmarks/them-da-trang": {
+      "source": "landmarks/them-da-trang.glb",
+      "triangles": 4000,
+      "reviewed": false,
+      "note": "Thềm đá trắng có vũng nước (C10, PATH_QUALITY §2.5): vật lớn ở ngã ba và đầu cầu, ngoài vai đường; rộng 3,4 m.",
+      "static": {
+        "yaw": 0,
+        "size": {
+          "measure": "width",
+          "metres": 3.4
+        },
+        "pivot": "base",
+        "colour": {
+          "match": true,
+          "strength": 0.5,
+          "minGain": 1.0,
+          "maxGain": 1.4,
+          "maxTint": 0.12
+        },
+        "material": {
+          "metallic": 0.0,
+          "roughnessMin": 0.5
+        }
+      }
     }
   }
 }

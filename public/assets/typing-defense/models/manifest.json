@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-28T16:26:27.460Z",
+  "generatedAt": "2026-10-29T01:27:39.905Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
@@ -1038,6 +1038,28 @@
         4.0076
       ]
     },
+    "landmarks/them-da-trang": {
+      "kind": "landmarks",
+      "id": "them-da-trang",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.high.glb?v=bf277ee1bc",
+          "bytes": 131720
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.medium.glb?v=8ee17ad558",
+          "bytes": 73524
+        }
+      },
+      "triangles": 4000,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        3.4001,
+        0.9049,
+        3.3822
+      ]
+    },
     "landmarks/vach-thac-bac": {
       "kind": "landmarks",
       "id": "vach-thac-bac",
@@ -1328,6 +1350,28 @@
         2.0182,
         1.5795,
         4.4423
+      ]
+    },
+    "props/da-ke": {
+      "kind": "props",
+      "id": "da-ke",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/da-ke/da-ke.high.glb?v=de4d929cee",
+          "bytes": 76708
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/da-ke/da-ke.medium.glb?v=0a23c3bbcb",
+          "bytes": 45292
+        }
+      },
+      "triangles": 2086,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.5527,
+        0.8662,
+        1.0305
       ]
     },
     "props/gold-mine-cart": {
