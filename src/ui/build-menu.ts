@@ -79,7 +79,7 @@ function callHtml(w: World, sel: Selection, c: number): string {
   const C = w.calls;
   const why = inRing(w, C.x[c]!, C.z[c]!) ? "In range: lights up when a call slot is free." : "Out of range: send someone near to light this card and type.";
   return (
-    head(callLabel(w, c).join(" "), C.words[c]! - C.done[c]! + " words · dim") +
+    head(callLabel(w, c).join(" "), C.words[c]! - C.done[c]! + (C.words[c]! - C.done[c]! === 1 ? " word" : " words") + " · dim") +
     `<p>${why}</p><div class="td-row">${button("send", "Send " + agentView(w, sel.agent).name, "Enter")}</div>`
   );
 }

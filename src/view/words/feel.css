@@ -44,10 +44,9 @@
   .td-words .td-card .k::before { animation: none; }
   .td-words .td-card .k::after { animation-duration: 100ms; }
 }
-/* The chain count over the card a word was typed on (src/view/3d/words.ts): a number, no words; gold from tier 2. */
-/* ≥ 20 px tall at rest at 720p (judge C10 r2: 13 px was missed), beside the card, never over its word line. */
-.td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; color: #e9fff9; font: 800 clamp(34px, calc(38px * var(--ui, 1)), 44px)/1 var(--vd-title); -webkit-text-stroke: 2px var(--vd-ink); text-shadow: 0 2px 0 var(--vd-ink), 0 0 12px rgba(25, 201, 168, 0.95); }
-.td-combo.is-gold { color: #ffe3a0; text-shadow: 0 2px 0 var(--vd-ink), 0 0 14px rgba(255, 199, 92, 0.95); }
+/* The chain count beside the card a word was typed on (src/view/3d/words.ts sets its tier's fill and halo): a number, no words. */
+/* Its digits ≈ 24 px tall at rest at 720p (judge C10 r3), beside the card or its meaning strip, never over its word line. */
+.td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; font: 800 clamp(38px, calc(42px * var(--ui, 1)), 50px)/1 var(--vd-title); -webkit-text-stroke: 2.5px var(--vd-ink); }
 /* The word is the biggest thing on a card (judge, 29/10): ≥ 26 px at 720p, its meaning line 0.72 of it. */
 .td-words .td-card { font-size: clamp(26px, calc(30px * var(--ui, 1)), 32px); }
 .td-words .td-card-mean { font-size: 0.72em; }

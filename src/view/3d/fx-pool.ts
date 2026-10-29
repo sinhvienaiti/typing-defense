@@ -3,7 +3,7 @@
  * §3.7): camera-facing quads in two instanced meshes, drawn after the grade (stage.ts `overlay`), so a hot core is not
  * tone mapped and the effects add 2 draw calls at most, none while nothing lives. `glow` adds light; `ink` lays dark,
  * normal-blended layers under it (smoke, ink, the card plates). Shapes are made in the shader: a soft glow with a white
- * core ≤ 30 % of its radius (`hot`), a ring, a spark streaked along its velocity, an eroded smoke blob, a letter of the
+ * core ≤ 30 % of its seen radius (`hot`), a ring, a spark streaked along its velocity, an eroded smoke blob, a letter of the
  * game's font (a glyph atlas); `flat` ones lie on the ground. A bit is full bright on its first frame (§3.1 rule 5); one
  * with `to` flies a curve into it, `trail` drops a gold mote each frame, `end` runs where it dies. For C11 to share.
  */
@@ -77,9 +77,10 @@ void main() {
   vec3 col = vColor.rgb;
   float a = 0.0;
   if (shape < 0.5) {
-    // A hot core (white inside 30 % of the radius), the coloured body, a wide halo.
+    // A hot core, the coloured body, a wide halo. The body shows to about 0.6 of the quad, so the white stays inside
+    // 0.16 of it: ≤ 30 % of what is seen (VFX_STANDARD §3.5; judge C10 r3 measured 0.46–0.6 with 0.3 here).
     a = max(exp(-r * r * 5.0), exp(-r * 2.8) * 0.42) * (1.0 - smoothstep(0.82, 1.0, r));
-    col = mix(col, vec3(1.0), (1.0 - smoothstep(0.0, 0.3, r)) * vInfo.y);
+    col = mix(col, vec3(1.0), (1.0 - smoothstep(0.0, 0.16, r)) * vInfo.y);
   } else if (shape < 1.5) {
     float w = mix(0.24, 0.05, age);
     float band = 1.0 - smoothstep(0.0, w, abs(r - 0.8));

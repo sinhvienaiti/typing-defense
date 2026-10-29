@@ -28,7 +28,7 @@ const GREEN = new THREE.Color("#38d39f");
 const RED = new THREE.Color("#ff4a4a");
 const SCRATCH = new THREE.Vector3();
 
-type House = { group: THREE.Group; def: string; level: number; ready: boolean; complete: boolean; body: THREE.Object3D | null; kits: THREE.Object3D[]; extras: THREE.Object3D[]; scaffold: THREE.Object3D | null; grownAt: number; droppedAt: number; pile: number; seen: boolean; kickAt?: number };
+type House = { group: THREE.Group; def: string; level: number; ready: boolean; complete: boolean; body: THREE.Object3D | null; kits: THREE.Object3D[]; extras: THREE.Object3D[]; scaffold: THREE.Object3D | null; grownAt: number; droppedAt: number; pile: number; seen: boolean; kickAt?: number; kickAmp?: number };
 
 const ease = (t: number): number => {
   const c = 1.70158; // easeOutBack: a little overshoot
@@ -100,9 +100,9 @@ export class Houses {
       // The grow-in and the kits' drop.
       if (house.body) {
         const g = house.grownAt < 0 ? 1 : ease((now - house.grownAt) / GROW_MS);
-        // C10: a word shot's kick (VFX_STANDARD L18): the house dips 9 % and springs back in about 120 ms.
+        // C10: a word shot's kick (VFX_STANDARD L18): the house dips 9 % and springs back in about 120 ms (a slip's recoil: less).
         const k = now - (house.kickAt ?? -1e9);
-        const kick = k < 200 ? 0.09 * Math.exp(-k / 45) * Math.cos(k / 22) : 0;
+        const kick = k < 200 ? 0.09 * (house.kickAmp ?? 1) * Math.exp(-k / 45) * Math.cos(k / 22) : 0;
         house.body.scale.set((0.8 + 0.2 * g) * (1 + kick * 0.4), g * (1 - kick), (0.8 + 0.2 * g) * (1 + kick * 0.4));
       }
       const d = house.droppedAt < 0 ? 1 : Math.min(1, (now - house.droppedAt) / DROP_MS);
@@ -247,9 +247,9 @@ export class Houses {
     return found ? out : null;
   }
 
-  kick(id: number, now: number): void {
+  kick(id: number, now: number, amp = 1): void {
     const house = this.houses.get(id);
-    if (house) house.kickAt = now;
+    if (house) [house.kickAt, house.kickAmp] = [now, amp];
   }
 
   /** Live houses and the parts each shows (scenarios, tests): def, level, ready, kits in, extras in. */

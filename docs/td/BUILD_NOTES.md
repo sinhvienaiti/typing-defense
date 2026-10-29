@@ -2129,7 +2129,7 @@ Giám khảo độc lập chấm C10 6,5 (phím đúng 6,5; phím sai 7,5; gõ x
 
 ### 8.12 Còn lại (cho lượt sau)
 
-- C10: khay mép và kẹp cột tránh HUD đã làm ở §8.13; còn giám khảo độc lập vòng 3; icon nhà và mũi tên của khay cần ảnh thật (phiếu Codex); dải tập trung giữa màn kiểu Typing Break là mô-đun kit chung của làn khác (điều phối viên, 29/10), Wordwoven chưa làm dải nhập riêng.
+- C10: khay mép và kẹp cột tránh HUD đã làm ở §8.13; năm sửa của giám khảo vòng 3 ở §8.15; còn hai giám khảo độc lập vòng 4; icon nhà và mũi tên của khay cần ảnh thật (phiếu Codex); dải tập trung giữa màn kiểu Typing Break là mô-đun kit chung của làn khác (điều phối viên, 29/10), Wordwoven chưa làm dải nhập riêng.
 - Đường: tờ chấm và đá bờ đã làm ở §8.14; còn giám khảo độc lập chấm M (đạt từ 8); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận (lõi đường ở camera mặc định cần đá lát thật).
 
 ### 8.13 C10 vòng 3 (29/10/2026, làn L3, Mac mini M4)
@@ -2192,3 +2192,50 @@ Giám khảo vòng 2 chấm 7,0 (phím đúng 7,0; phím sai 7,5; gõ xong 6,5; 
 - **Tờ:** `tmp/lane-l3/road-sheets/td-1c-road-<cỡ>-<default|near|bend|junction|bridge>.jpg`, mỗi tờ đặt cạnh ảnh tham chiếu của chủ dự án (`art-src/_refs/owner-epic-2026-10-28.webp` ở checkout chính, chỉ đọc). Camera mặc định của game là 55° ở 58 m, nên "mặc định" và "55°" là một tờ; tờ thứ hai là F2 (40°, 30 m).
 - **Tự chấm (thang M):** 5,5. Trả lời "Đường có trông như vệt quệt không?": **ở camera mặc định thì vẫn phần nào có**: lõi là một dải be nhạt đều, chưa thấy đá lát hay vệt bánh xe; vai tối, đá bờ và gờ lún giúp nhưng ở 58 m chúng nhỏ. Ở cận cảnh (khúc cua, ngã ba, đầu cầu) thì không: có vai mòn, gờ, sân đá lát, hàng đá bờ. Mức 8 cần ảnh thật của phiếu 122 (`road-paved`, `trail-worn`) và tờ c của 123 (decal mép đường); chưa gắn, chờ điều phối viên nhận.
 - Trên cỏ có vài nét trắng mảnh lượn song song (thấy ở cận cảnh khúc cua và ngã ba); không phải đường, chưa tìm ra nguồn.
+
+### 8.15 C10 vòng 4 (29/10/2026, làn L4, Mac mini M4)
+
+Giám khảo vòng 3 chấm 7,5 (phím đúng 8,0; phím sai 7,5; gõ xong 7,5; Word Shot 7,5; Chuỗi 7,5; khay mép 7,0; `tmp/lane-l3/judge-c10-r3/verdict.md`). Làn L4 sửa năm chỗ giám khảo nêu, ba việc điều phối viên giao thêm, và một lỗi tìm ra khi chụp.
+- **Word Shot, pha R (sửa 1).** Đo lại theo cách của giám khảo cho thấy chỗ trắng có ba nguồn, sửa từng nguồn:
+  - lõi trắng của quầng: shader làm trắng trong 0,3 của quad, mà thân quầng chỉ hiện tới khoảng 0,6 của quad, nên lõi là một nửa phần mắt thấy (đúng số giám khảo đo 0,46–0,6); nay 0,16 của quad (`fx-pool.ts`, cho mọi quầng);
+  - ánh sáng cộng trên tháp đá trắng: màu gì cộng lên đá trắng cũng ra trắng, và ánh hổ phách cộng ánh ngọc ra trắng kem. Thân lóe R nay được **vẽ** (trộn thường, lớp `ink`): lớp ngọc sẫm rộng gấp 2, thân ngọc đục 0,92, viền hổ phách vẽ (vòng); trên đó chỉ một lõi cộng sáng nhỏ (0,5 thân), quầng ngọc mờ (0,12) và tia ngọc (`hot` 0,1). Bỏ vòng ngọc cộng sáng của R (nó trùng bán kính viền hổ phách nên thành cung trắng); vòng lên bậc của Chuỗi nay vẽ hổ phách và ngọc; lóe kết thúc cầu nạp chỉ còn ngọc;
+  - cầu nạp ở đầu tháp (pha A): ngọc trên ngọc sẫm, `hot` 0,2, quầng hổ phách mờ khi gần đầy; chữ của từ Bắn mạnh lao vào nòng màu ngọc không trắng (`hot` 0), quầng 0,22, không kéo hạt;
+  - thẻ che lóe: khi thẻ của lời gọi che quá một phần ba quầng, tâm lóe hạ xuống trên màn (cùng độ sâu, tối đa 1,2 bán kính, vẫn trên thân tháp) tới khi khoảng 3/4 quầng nằm dưới mép dưới thẻ (`WordFeel.clear`); nòng ở trên vẫn có lớp ngọc sẫm; thẻ đang nổ và bóp, và từ kế tiếp còn ẩn, không còn tấm tối bên dưới (bóng đó che lóe).
+- **Gõ xong (sửa 2):** thẻ đục suốt lúc nổ (trước đây lấy độ mờ 0,7 của thẻ không khóa, vì từ kế tiếp của lời gọi đã khóa); 2 khung đầu: giấy sáng +36 %, viền trắng ấm 4 px quanh thẻ, quầng ấm và lớp sáng ở mép trong (T3); rồi bóp ngang thành một vạch trong 100 ms (1,1 → 0, nhanh dần, cao giữ 1,1), trống 60 ms (T7). Bản sao các chữ bay **lên và ra hai bên** từ dòng từ, không bao giờ xuống dòng nghĩa (cả ở pha R của Word Shot); khung đầu đã ra 55 % đường, mờ từ khung thứ hai. Chữ 3D lao vào nhà không còn kéo hạt vàng (hạt chồng dần làm khung 2–3 sáng hơn khung nổ); lóe T9 ở nhà 0,55; nhịp hai của nhà là thân ngọc trên ngọc sẫm, viền hổ phách vẽ.
+- **Chuỗi (sửa 3):** "×N" cỡ 38 px ở 720p (chữ số cao 23–24 px; 1080p 50 px); 2 khung đầu trắng nóng có quầng màu bậc (khung đóng dấu là khung sáng nhất), rồi theo bậc: ×2–×4 trắng ngà trên quầng tối, ×5–×9 ngọc sẫm trên quầng ngà, ×10–×19 hổ phách, ×20–×39 cam hổ phách, từ ×40 vàng (`TIER_INK`); đi theo thẻ rồi theo dải nghĩa mà thẻ biến thành (x và y). Tờ combo cắt quanh ×N và nhà vừa được giúp (`marks.combo`, `marks.house`), không còn theo lóe R của lần bắn trước.
+- **Khay mép (sửa 4):** mũi chỉ hướng là hiệu ứng trong kho hiệu ứng (không phải CSS, SVG hay emoji): hai chữ V ngọc trên nét mực chảy ra khỏi thẻ theo đúng hướng tới nhà (không chỉ theo mép), trong 44 px khay chừa giữa thẻ và mép màn (`WordFeel.pointers`, `cards.ts`); thẻ vào hay ra khỏi khay trượt 0,3 s (êm cuối) thay cho nhảy (`WordFeel.slide`). Kịch bản chụp bước lia camera mà một thẻ trượt vào khay (`tray-in`), ảnh hai thẻ cùng một mép (`tray-two`), gõ trọn một từ ở khay (`tray-type`), rồi bấm thẻ để camera lướt tới.
+- **Phím sai (sửa 5):** chữ vừa gõ sai hiện màu son trên ô chữ cần gõ, đóng dấu 1,8× → 1× trong 2 khung, rồi bị hất lên phải, xoay, tắt ở 150 ms (`WordFeel.slip`, DOM); giọt mực lớn hơn (quad 52 px CSS ở độ sâu của nhà, phần đục ≥ 50 % rộng khoảng 19 px ở 720p), vết loang 3,2 m; nhà giật nhẹ (0,5 cú nhún Word Shot) với lóe và vòng son.
+- **Số đếm số nhiều:** "Night 1 · 1 foe left" (`hud.ts`), "Best 1 star" (`title.ts`, nhãn đọc màn hình), "1 word · dim" (`build-menu.ts`); test `td-hud` kiểm "1 foe left".
+- **Nhiều thẻ cùng chữ đầu:** trong trò chơi việc này **không xảy ra**: `giveWord` (`calls.ts`) chỉ nhận từ bậc 1, nên mỗi từ đang hiện có một chữ đầu riêng (TK 6.5); cặp bậc 2 chỉ còn trong bộ định tuyến và thẻ. Ba vòng chụp không gặp là vì thế. Để kiểm T1 trên mọi thẻ khớp, `__td.twinFirst()` (`dev-tools.ts`, không đổi sim) đổi một từ chưa gõ thành bạn bậc 2 của một từ khác (cùng chữ đầu, chữ thứ hai khác), đúng trạng thái mà bộ định tuyến và thẻ xử lý; kịch bản gọi nó và chụp `key-multi` (cặp team/thanks, dark/drink, eye/easy).
+- **Lỗi tìm ra khi chụp (sửa ở `cards.ts`):** một thẻ trong pool chưa từng được đặt chỗ (từ kế tiếp của lời gọi đang chờ bóp xong, hay thẻ khay quá trần) mà từ của nó biến mất thì "gập" từ vị trí `undefined`: `place()` ném TypeError và vòng vẽ thẻ dừng. Nay thẻ chưa từng hiện được trả lại ngay. Lời gọi đóng đúng lúc thẻ còn ẩn cũng gây ra lỗi này trong trò chơi thật.
+- **Kịch bản `td-1c-words`:** ghi hộp DOM từng khung (thẻ, chữ bay, ×N, dấu hạng, chữ đóng dấu) khi quay Word Shot và combo, để phép đo lõi R bỏ đúng phần DOM; tìm khay sau khi gọi đêm sớm, thả quái và đưa Draconis về cạnh tháp (lượt chậm tới cuối ngày 2 thì không lời gọi nào sáng); thẻ dải nghĩa không còn bị coi là thẻ khay để bấm.
+
+Đo (`td-1c-words`, Mac mini M4, High; 1280 × 720 lấy từ một lượt, 1920 × 1080 từ một lượt, cùng mã cuối; tờ ở `tmp/lane-l4/sheets4/`, số ở `numbers-frames.json`):
+
+| Đo | Vòng 3 (L3) | Vòng 4 (L4) |
+|---|---|---|
+| Lõi trắng / bán kính lóe R, cách của giám khảo (khung R so khung trước phím; hiệu ứng: xám tăng ≥ 12 hay ≥ 25; lõi: điểm trung tính kênh nhỏ nhất ≥ 215, 232, 245; bỏ mọi hộp DOM), √(diện tích) | giám khảo 0,46–0,67 (1920), 0,32–0,54 (1280); làn 0,43–0,47 | Word Shot 0,18–0,31 (1280), 0,14–0,31 (1920); lượt có Chuỗi lên bậc 0,16–0,33 (1280), 0,18–0,34 (1920). Số trên 0,30 chỉ ở ngưỡng lỏng nhất (215 trên 25) |
+| Như trên, r95 lõi / r95 hiệu ứng | giám khảo 0,40–0,71 | 0,11–0,17 (1280); 0,55–0,93 (1920: 195–861 điểm trắng rải rác, chủ yếu chữ của từ rơi vào nòng, trên 8.854–11.177 điểm hiệu ứng; không thành đĩa) |
+| Khung đầu / đỉnh của riêng lóe R (bỏ hộp DOM) | — | 1,00 (cả hai cỡ, Word Shot và Chuỗi) |
+| Khung đầu / đỉnh của hộp quanh khoảnh khắc (cách của L3), 1280 / 1920 | gõ xong 0,75 / 0,59; Chuỗi 0,97 / 0,88 | phím đúng 0,99 / 0,95, nền sáng 1,0 / 1,0, hai thẻ cùng chữ đầu 1,0 / 1,0; gõ xong 0,91 / 0,91; Word Shot 1,0 / 1,0; Chuỗi 0,78 / 1,0; gõ ở khay 0,89 / 0,93 |
+| Nhà đáp lại một từ (keydown → lóe T9, `answerMs`) | 65 / 89 ms | 63 / 50 ms |
+| ×N lúc nghỉ | cỡ 34 px, chữ số 21–22 px ở 720p | cỡ 38 px, chữ số 23–24 px ở 720p (1080p: 50 px, 31–32 px) |
+| Khung trong cửa sổ −40…+420 ms | khoảng trống lớn nhất ≤ 34 ms | 27–28 khung ở mọi tờ, khoảng trống lớn nhất 17 ms (không rơi khung) |
+| Trắng xóa vùng sân | ≤ 2,4 % | ≤ 2,6 % (trần 6 %) |
+| Draw call hiệu ứng thêm | ≤ 2 | ≤ 2 |
+| Khay mép | camera lướt 29 m / 430 ms | lướt 55,9 m / 427 ms (1280), 52,6 m / 437 ms (1920); hai thẻ cùng một mép có ở cả hai cỡ; gõ "act" từ khay; ≤ 2 mỗi mép, không đè HUD |
+| Nhiều thẻ cùng chữ đầu | chưa chụp được | `key-multi` cả hai cỡ (team/thanks): chữ "t" và vòng ấn trên cả hai thẻ |
+| Gói "/" (gzip) | 81,45 kB (chừa 3,55) | 81,58 kB (chừa 3,42); `?title=0` 83,04 kB (chừa 1,96) |
+| Chunk 3D (gzip, cùng three.js) | 169,90 kB | 171,83 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 12.867 | 13.058 (+165 so với `bc05e67`) |
+| Test | 392 / 42 file | 392 / 42 file (kiểm "1 foe left" thêm vào test có sẵn) |
+
+- `td-1c-words` đạt mọi cổng ở 1280 × 720 và 1920 × 1080 (High), cả `trayGlide`; `pnpm check` xanh; ván vàng `"same":true` cả hai.
+- **Tờ:** `tmp/lane-l4/sheets4/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (key-dark, key-light, key-multi, wrong-dark, wrong-light, word-dark, shot, combo, tray-in, tray-type: 4 khung toàn màn và 12 khung cắt từ −17 tới +800 ms), `td-1c-words-combo-rest-<cỡ>.jpg` (×2, ×3, ×5, ×7, ×10), `td-1c-words-tray-<cỡ>.jpg` (thẻ trong khay, hai thẻ một mép, sau khi lướt, cắt 2× quanh mũi chỉ), `compare-shot-core-r4.jpg` (khung R và mặt nạ đo), `numbers-frames.json`. Khung thô đã xóa bằng `tools/capture-prune/prune.mjs`.
+- **Tự chấm** (thang giám khảo, so Typing Break): phím đúng 8,0; phím sai 8,0; gõ xong 8,0; Word Shot 8,0; Chuỗi 8,0; khay mép 7,5; tổng khoảng 8,0 (vẫn trong dải 7,5–8,5 cần hai giám khảo).
+- **Còn lại:**
+  - lõi R ở ngưỡng lỏng nhất còn 0,31–0,34; ở 1920 điểm trắng rải rác (chữ của từ rơi vào nòng) làm r95 cao;
+  - hộp gõ xong 0,91 (khung thứ hai sáng hơn khung nổ một chút: T9 ở nhà chạm sau 50 ms); hộp Chuỗi ở 1280 0,78 (thẻ bóp lại để lộ lóe R, chữ bung ra, sợi nối chạy vào nhà trong 0,45 s);
+  - ×N của từ Bắn mạnh đứng một mình tới khi đạn chạm, vì dải nghĩa chờ cú trúng;
+  - mũi chỉ của khay nhỏ và nhạt ở 1×, là hiệu ứng tạm cho tới khi ảnh mũi tên của khay (phiếu Codex) được nhận;
+  - emoji `CALL_ICON` và hạt ●○ bằng CSS vẫn chờ phiếu 133 và 172.

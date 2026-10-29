@@ -23,7 +23,7 @@ const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
   ["profile", "Profile", "Speed, accuracy, a typing tip"],
 ];
 /** The best stars on "Bắt đầu" (none before a win). */
-export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Best ${best} stars">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
+export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Best ${best} star${best === 1 ? "" : "s"}">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
 
 export class TitleScreen {
   readonly el: HTMLElement;

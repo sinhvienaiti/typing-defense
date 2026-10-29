@@ -91,16 +91,16 @@ const place = (el: HTMLElement, x: number, y: number, scale: string, opacity: nu
 };
 
 /**
- * A typed card `t` ms after its word (TYPING_BREAK_STUDY T3, T7; judge C10 r2): it bursts where it stands, 1.1× with a warm
- * white rim 10–12 % beyond it and +38 % light, held two frames; then it is squeezed sideways in 100 ms (faster at the end) as
- * the light dies, empty 60 ms; only then does the call's next word show in its place.
+ * A typed card `t` ms after its word (TYPING_BREAK_STUDY T3, T7; judge C10 r3): it bursts where it stands, opaque, 1.1× with a
+ * warm white rim 4 px beyond it and +36 % light, held two frames; then it is squeezed sideways to a line in 100 ms (faster at
+ * the end) as the light dies, empty 60 ms; only then does the call's next word show in its place.
  */
 const SWAP_MS = 194;
-const squeeze = (t: number): string => (t < 34 ? "1.1" : t < 134 ? Math.max(0.001, 1 - ((t - 34) / 100) ** 2).toFixed(3) + ",1" : t < SWAP_MS ? "0.001,1" : "1");
-const RIM = "0 0 0 6px #fff4d6, 0 0 22px 10px rgba(255, 214, 120, 0.95)";
+const squeeze = (t: number): string => (t < 34 ? "1.1" : t < 134 ? (1.1 * Math.max(0.001, 1 - ((t - 34) / 100) ** 2)).toFixed(3) + ",1.1" : t < SWAP_MS ? "0.001,1" : "1");
+const RIM = "inset 0 0 12px 3px #fff, 0 0 0 4px #fff4d6, 0 0 28px 12px rgba(255, 214, 120, 0.95)";
 const burst = (el: HTMLElement, t: number): void => {
   const glow = t < 34 ? 1 : t < SWAP_MS ? Math.exp(-(t - 34) / 45) : 0;
-  [el.style.boxShadow, el.style.filter] = glow > 0.05 ? [RIM, "brightness(" + (1 + 0.38 * glow).toFixed(3) + ")"] : ["", ""];
+  [el.style.boxShadow, el.style.filter] = glow > 0.05 ? [RIM, "brightness(" + (1 + 0.36 * glow).toFixed(3) + ")"] : ["", ""];
 };
 const decay = (t: number, tau: number): number => (t >= 0 && t < 6 * tau ? Math.exp(-t / tau) : 0);
 
@@ -273,11 +273,12 @@ export class WordCards {
     this.layout(w, lanes, lock, now, dt, width, height, panels, keep);
     this.feel?.frame(this.cards.filter((k) => k.id >= 0), now);
     for (const card of this.cards) {
-      // A word gone with no result read (the run was reset) folds away.
+      // A word gone with no result read (the run was reset, its call closed) folds away; one never shown (its call's next word
+      // waiting out a squeeze, a tray card over the cap) has nowhere to fold from: it is let go (C10 r4: a fresh card had no x, y).
       if (card.id >= 0 && card.leave === "" && card.seen !== this.frame) {
         this.byId.delete(card.id);
-        Object.assign(card, { leave: "fold", leaveAt: now });
-        card.el.classList.add("is-gone");
+        if (card.y === undefined || card.el.style.opacity === "0") Object.assign(card, { id: -1 }).el.style.opacity = "0";
+        else Object.assign(card, { leave: "fold", leaveAt: now }).el.classList.add("is-gone");
       }
       if (card.id >= 0 && card.leave !== "") this.leaving(card, now);
     }
@@ -304,15 +305,19 @@ export class WordCards {
         for (const card of cards) card.el.style.opacity = "0";
         continue;
       }
+      const e = roof.edge ?? -1;
       const edge = String(roof.edge ?? "");
       for (const card of cards) if (card.el.dataset.edge !== edge) card.el.dataset.edge = edge;
+      // A tray column keeps 44 px to the screen's edge for its pointer towards the caller (words.ts).
+      const x = e === 0 ? Math.max(roof.x, half + 52) : e === 1 ? Math.min(roof.x, width - half - 52) : roof.x;
       // Clear of the HUD's bars across the middle at every zoom: a column over one stands under the top bar, over the bottom one.
       let [lo, hi]: [number, number] = [SAFE.top, height - SAFE.bottom];
-      for (const p of panels) if (p.left < roof.x + half && p.right > roof.x - half && p.left < width / 2 && p.right > width / 2) [lo, hi] = p.top > height / 2 ? [lo, Math.min(hi, p.top - 4)] : [Math.max(lo, p.bottom + 4), hi];
+      for (const p of panels) if (p.left < x + half && p.right > x - half && p.left < width / 2 && p.right > width / 2) [lo, hi] = p.top > height / 2 ? [lo, Math.min(hi, p.top - 4)] : [Math.max(lo, p.bottom + 4), hi];
+      [lo, hi] = [lo + (e === 2 ? 40 : 0), hi - (e === 3 ? 40 : 0)];
       let roofY = Math.min(hi, Math.max(roof.y, lo + tallest));
       // An edge tray column stays at its edge: over a side panel there it stands under it (a top one) or over it (a bottom one).
-      if ((roof.edge ?? -1) >= 0) for (const p of panels) if (p.left < roof.x + half + 16 && p.right > roof.x - half - 16 && p.top < roofY && roofY - tallest < p.bottom) roofY = p.top > height / 2 ? p.top - 6 : p.bottom + 6 + tallest;
-      boxes.push({ x: roof.x, top: roofY - tallest, bottom: roofY, half, at: roof.x + (this.offsets.get(c) ?? 0) });
+      if (e >= 0) for (const p of panels) if (p.left < x + half + 16 && p.right > x - half - 16 && p.top < roofY && roofY - tallest < p.bottom) roofY = p.top > height / 2 ? p.top - 6 : p.bottom + 6 + tallest;
+      boxes.push({ x, top: roofY - tallest, bottom: roofY, half, at: x + (this.offsets.get(c) ?? 0) });
       columns.push({ b: c, cards, heights, roofY });
     }
     // Off the side panels and the action when the columns still part there (review R2: a fourth bubble pushed over the
@@ -349,7 +354,7 @@ export class WordCards {
         if (C.kind[column.b] === CALL_KIND.direct) card.el.style.setProperty("--t", (100 * left).toFixed(0) + "%"); // the window's clock ring
         if (card.leave === "mean") burst(card.el, now - card.leaveAt + SWAP_MS);
         const scale = card.leave === "mean" ? squeeze(now - card.leaveAt + SWAP_MS) : (card.scale + 0.06 * decay(now - (card.lockAt ?? -1e9), 35)).toFixed(3);
-        place(card.el, card.x - card.half, card.y, scale, lock >= 0 && !locked ? 0.7 : 1, slip * 3.5 * wave);
+        place(card.el, card.x - card.half, card.y, scale, lock >= 0 && !locked && card.leave === "" ? 0.7 : 1, slip * 3.5 * wave); // a typed card bursts opaque (judge C10 r3)
       });
     });
   }

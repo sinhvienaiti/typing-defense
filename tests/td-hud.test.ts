@@ -36,7 +36,10 @@ describe("the status panel", () => {
     run(w, 61);
     expect(status(w)).toContain("<b>Day 1 · 1:14</b>"); // 73.98 s left rounds up
     send(w, { t: "callNight" });
-    expect(status(w)).toMatch(/<b>Night 1 · \d+ foes left<\/b>/);
+    expect(status(w)).toMatch(/<b>Night 1 · (1 foe|\d+ foes) left<\/b>/);
+    w.spawnQueue.splice(1 - w.enemies.count); // one foe still to come (judge C10 r3: "1 foes left")
+    expect(w.enemies.count + w.spawnQueue.length).toBe(1);
+    expect(status(w)).toContain("<b>Night 1 · 1 foe left</b>");
     expect(status(w)).not.toContain("Early night");
   });
 

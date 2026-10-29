@@ -8,6 +8,7 @@ import type { Mode } from "../content/types";
 import type { CommandBody } from "../sim/commands";
 import type { RareEvent } from "../sim/events";
 import { hashHex } from "../sim/hash";
+import { dropWord } from "../sim/systems/calls";
 import { canPlace } from "../sim/placement";
 import { statsObject } from "../sim/stats";
 import { PATH_MAX } from "../sim/stores/agents";
@@ -71,6 +72,31 @@ export function installDevTools(ctx: DevContext): void {
       }));
     },
     typing: () => ({ chain: world.typing.chain, lock: world.typing.router.lock, typedTicks: world.typing.typedSum }),
+    // td-1c-words (C10 r4): Wordwoven gives every live word its own first letter (giveWord deals tier 1 only), so in play one key
+    // never matches two cards. For the T1 check this swaps an untouched word for a tier-2 partner of another (TK 6.5: the same
+    // first letter, another second letter), the pair the router and the cards still handle; [owner, partner] or null. A
+    // scenario's lever only: the run no longer matches a replay after it.
+    twinFirst: () => {
+      const [W, L] = [world.words, world.typing.letters];
+      const free = W.live().filter((s) => W.typed[s] === 0 && world.typing.router.lock !== s && W.kind[s] === KIND.call);
+      for (const a of free) {
+        const [first, second] = [deck.letters[deck.start[W.word[a]!]!]!, deck.letters[deck.start[W.word[a]!]! + 1]!];
+        if (L.owner[first] !== a || L.partner[first]! >= 0) continue;
+        for (const b of free) {
+          let word = 0;
+          while (word < deck.count && (b === a || deck.letters[deck.start[word]!] !== first || deck.letters[deck.start[word]! + 1] === second || deck.len[word]! < 3 || deck.len[word]! > 6 || deck.level[word]! > Math.max(1, world.vocab) || W.live().some((s) => W.word[s] === word))) word += 1;
+          if (word >= deck.count) continue;
+          const [c, life] = [W.call[b]!, W.life[b]!];
+          dropWord(world, b);
+          const s = W.add(word, c, KIND.call, 2, world.tick, life);
+          if (s < 0) return null;
+          L.take(s, first, 2);
+          [world.calls.word[c], world.calls.last[c]] = [s, first];
+          return [wordText(deck, W.word[a]!), wordText(deck, word)];
+        }
+      }
+      return null;
+    },
     ui: () => ({ agent: selection.agent, focus: selection.focus, call: selection.call, building: selection.building, kind: selection.kind, paused: selection.paused, tactical: selection.tactical, panel: selection.panel }),
     // Agents: hero first; mode as MODE in sim/stores/walkers.ts; goal a building id (−1 none); path: x, z, x, z… ahead. Calls: kind as CALL_KIND.
     state: () => {
