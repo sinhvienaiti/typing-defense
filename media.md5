@@ -1777,6 +1777,8 @@ f8d0fa97b401e234b926c4a71930249b  public/assets/typing-defense/models/kits/keep-
 aeb5ff7e11e51819a760bfd07eb4fad8  public/assets/typing-defense/models/kits/keep-kit-l4/keep-kit-l4.medium.glb
 da5e4b8085a657a3b13537bb555b936a  public/assets/typing-defense/models/landmarks/choi-canh-doi/choi-canh-doi.high.glb
 67aff3224c04bc13e4f0abac866cbc71  public/assets/typing-defense/models/landmarks/choi-canh-doi/choi-canh-doi.medium.glb
+c14238f22898eaa308672f72c71bd095  public/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.high.glb
+5c8ad28c38841a3aaf35603d00091604  public/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.medium.glb
 4b62964e9ed43335b600e2ca7ad29825  public/assets/typing-defense/models/landmarks/vach-thac-bac/vach-thac-bac.high.glb
 7bfaaa003ccf94ee8a7a5aa1f4198ef8  public/assets/typing-defense/models/landmarks/vach-thac-bac/vach-thac-bac.medium.glb
 93afccae738aac045722ae40be18a2e7  public/assets/typing-defense/models/loot/bag-basket/bag-basket.high.glb
@@ -1803,6 +1805,8 @@ e0db7a6416b5dfc970773b92ad6fe5c3  public/assets/typing-defense/models/props/cann
 01715dc94f721612ccf290f122d399b1  public/assets/typing-defense/models/props/cannon-barrel/cannon-barrel.medium.glb
 0e62826f1687cdecfd39e6c8f43d0233  public/assets/typing-defense/models/props/cau-go/cau-go.high.glb
 e369edc0ffedcb15feac506479b3f43a  public/assets/typing-defense/models/props/cau-go/cau-go.medium.glb
+c734557ecc5d686b9418564fbb1e4425  public/assets/typing-defense/models/props/da-ke/da-ke.high.glb
+4dbfd484377a8f49ac7468b69d301679  public/assets/typing-defense/models/props/da-ke/da-ke.medium.glb
 48357f4f7bbc48d2d98acbc6fac0c449  public/assets/typing-defense/models/props/gold-mine-cart/gold-mine-cart.high.glb
 3ba83bcea1086ec3ce2b4a70ddc4670d  public/assets/typing-defense/models/props/gold-mine-cart/gold-mine-cart.medium.glb
 da33ffc4c0c7357b3fe1a8474a86f3c0  public/assets/typing-defense/models/props/gold-pile-1/gold-pile-1.high.glb
