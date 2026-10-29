@@ -61,6 +61,8 @@ type Card = {
   leave: Leave; leaveAt: number; tx: number; ty: number; pinkUntil: number;
   /** C10 pose (ms): the last right key, the lock, the last slip; `scale` eased to its lock size. */
   keyAt?: number; lockAt?: number; slipAt?: number; scale?: number;
+  /** C10: when a typed card's meaning takes the place of its word (after the burst and the squeeze). */
+  meanAt?: number;
 };
 /** C10: a card as the 3D view's typing feel sees it (src/view/3d/words.ts). */
 export type CardView = Readonly<Pick<Card, "el" | "text" | "word" | "x" | "y" | "half" | "height" | "call" | "leave" | "slot">>;
@@ -86,8 +88,9 @@ const place = (el: HTMLElement, x: number, y: number, scale: string, opacity: nu
   el.style.opacity = opacity.toFixed(2);
 };
 
-/** The squeeze and pop of a typed card (`t` ms after its word): flat for two frames, then 1.24× easing back. */
-const pop = (t: number): string => (t < 0 || t > 200 ? "1" : t < 34 ? "1.16,0.84" : (1 + 0.24 * Math.exp(-(t - 34) / 45)).toFixed(3));
+/** A typed card `t` ms after its word (TYPING_BREAK_STUDY T3, T7): a 1.14× burst for 40 ms, squeezed sideways in 100 ms (faster at the end), empty 60 ms. */
+const SWAP_MS = 200;
+const squeeze = (t: number): string => (t < 40 ? "1.14" : t < 140 ? Math.max(0.001, 1 - ((t - 40) / 100) ** 2).toFixed(3) + ",1" : t < SWAP_MS ? "0.001,1" : "1");
 const decay = (t: number, tau: number): number => (t >= 0 && t < 6 * tau ? Math.exp(-t / tau) : 0);
 
 export class WordCards {
@@ -118,6 +121,12 @@ export class WordCards {
     const redeemed = events.filter((e) => e.t === "review" && e.redeemed).map((e) => (e.t === "review" ? e.item : -1));
     for (const event of events) {
       if (event.t === "chain") this.root.style.setProperty("--tier", String(event.tier)); // C10: the stamps grow with the chain (feel.css)
+      // C10 (TYPING_BREAK_STUDY T1): the first key stamps its letter on every card it matches, not only the one it locks.
+      if (event.t === "wordKey" && (event.result === KEY.lock || event.result === KEY.switch || event.result === KEY.group)) {
+        const locked = this.byId.get(event.word);
+        const first = locked !== undefined ? locked.word[0] : String.fromCharCode(97 + w.typing.router.group);
+        for (const other of this.cards) if (other !== locked && other.id >= 0 && other.leave === "" && other.typed <= 0 && other.word[0] === first) this.render(other, other.typed, other.pink, other.tier, other.dots, true);
+      }
       const card = "word" in event ? this.byId.get(event.word) : undefined;
       if (card === undefined) continue;
       // A wrong key shakes the card and the letter wanted stays pink until it comes (test pass 27/10: 0.15 s was missed).
@@ -134,18 +143,14 @@ export class WordCards {
         this.byId.delete(event.word);
         const c = w.calls.slotOf(event.call);
         const to = c >= 0 ? (this.anchor?.(w, c, true) ?? this.project(w.calls.x[c]!, w.calls.z[c]!)) : card;
-        Object.assign(card, { leave: card.mean === "" ? "hit" : "mean", leaveAt: now, tx: to.x, ty: to.y, slot: -1, ax: NaN, ay: NaN });
+        // The word shows whole in jade while it bursts and squeezes; its meaning takes its place after (SWAP_MS).
+        Object.assign(card, { leave: card.mean === "" ? "hit" : "mean", leaveAt: now + (card.mean === "" ? 0 : SWAP_MS), meanAt: now + SWAP_MS, tx: to.x, ty: to.y, slot: -1, ax: NaN, ay: NaN });
+        card.text.innerHTML = '<span class="t">' + card.word + "</span>";
         card.el.className = "td-card is-gone";
-        if (card.mean !== "") {
-          card.text.innerHTML = '<span class="t">' + card.word + "</span> · " + card.mean;
-          card.pips.textContent = card.sub.textContent = "";
-          card.el.className = "td-card is-mean";
-          Object.assign(card, { half: card.el.offsetWidth / 2, height: card.el.offsetHeight });
-        }
         const stamp = this.stamps.reduce((oldest, next) => (next.at < oldest.at ? next : oldest));
         stamp.el.textContent = redeemed.includes(event.item) ? "Redeemed" : GRADE_NAME[event.grade];
         stamp.el.className = "td-stamp is-" + (redeemed.includes(event.item) ? "redeem" : event.grade);
-        Object.assign(stamp, { at: now, x: card.x, y: card.y - 30, half: stamp.el.offsetWidth / 2, card: card.leave === "mean" ? card : null });
+        Object.assign(stamp, { at: now + SWAP_MS, x: card.x, y: card.y - 30, half: stamp.el.offsetWidth / 2, card: card.leave === "mean" ? card : null });
       }
     }
   }
@@ -169,13 +174,14 @@ export class WordCards {
   }
 
   /** Letters as spans: typed (t), the first one or two by tier (l), the next after a wrong key (p); a quiz hides what is not typed past its first letter. */
-  private render(card: Card, typed: number, pink: boolean, tier: number, dots: string): void {
-    const fresh = typed !== card.typed; // a new letter: only it is stamped (a slip or a dot changed re-renders too)
+  private render(card: Card, typed: number, pink: boolean, tier: number, dots: string, first = false): void {
+    const at = first ? 0 : typed !== card.typed ? typed - 1 : -1; // the letter stamped: a new one (a slip or a dot changed re-renders too), or a match's first
+    const fresh = at >= 0;
     card.tier = tier;
     const letters = [...card.word].map((ch, k) => {
-      const kind = (k < typed ? " t" : "") + (fresh && k === typed - 1 ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
+      const kind = (k < typed ? " t" : "") + (fresh && k === at ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
       const shown = card.quiz && k >= Math.max(1, typed) ? "_" : ch;
-      return kind === "" ? shown : '<span class="' + kind.trim() + '"' + (fresh && k === typed - 1 ? ' data-c="' + shown + '"' : "") + ">" + shown + "</span>"; // data-c: the stamp's copy (feel.css)
+      return kind === "" ? shown : '<span class="' + kind.trim() + '"' + (fresh && k === at ? ' data-c="' + shown + '"' : "") + ">" + shown + "</span>"; // data-c: the stamp's copy (feel.css)
     });
     card.text.innerHTML = card.quiz ? '<span class="m">' + (card.mean || "Quiz") + "</span> · " + letters.join(" ") : letters.join("");
     card.pips.textContent = dots;
@@ -222,6 +228,13 @@ export class WordCards {
     }
     // A meaning stays in its call's column, over the call's next word, newest lowest; its call ended, in a column of
     // its own (key −1 − its pool index) where it last stood, so other columns still part around it.
+    for (const card of this.cards.filter((k) => k.leave === "mean" && k.meanAt !== undefined && now >= k.meanAt)) {
+      card.meanAt = undefined;
+      card.text.innerHTML = '<span class="t">' + card.word + "</span> · " + card.mean;
+      card.pips.textContent = card.sub.textContent = "";
+      card.el.className = "td-card is-mean";
+      Object.assign(card, { half: card.el.offsetWidth / 2, height: card.el.offsetHeight });
+    }
     for (const card of this.cards.filter((k) => k.leave === "mean" && now - k.leaveAt < MS.mean).sort((a, b) => b.leaveAt - a.leaveAt)) {
       let c = w.calls.slotOf(card.call);
       if (c < 0) [c, card.ax, card.ay] = [-1 - this.cards.indexOf(card), Number.isNaN(card.ax) ? card.x : card.ax, Number.isNaN(card.ax) ? card.y + card.height : card.ay];
@@ -239,6 +252,7 @@ export class WordCards {
       if (card.id >= 0 && card.leave !== "") this.leaving(card, now);
     }
     for (const stamp of this.stamps) {
+      if (now < stamp.at && stamp.at - now <= SWAP_MS) { stamp.el.style.opacity = "0"; continue; } // its grade comes with the meaning
       const p = Math.min(1, (now - stamp.at) / MS.stamp);
       // A meaning card moves up its column over the call's next word: the stamp stays over it, never on its words (review R2).
       if (stamp.card !== null && stamp.card.leave === "mean" && stamp.card.leaveAt === stamp.at) [stamp.x, stamp.y] = [stamp.card.x, stamp.card.y - 30];
@@ -291,7 +305,7 @@ export class WordCards {
         const left = expire < 0 || s < 0 ? 0 : Math.max(0, (expire - w.tick) / Math.max(1, expire - C.born[column.b]!));
         card.bar.style.transform = "scaleX(" + left.toFixed(3) + ")";
         if (C.kind[column.b] === CALL_KIND.direct) card.el.style.setProperty("--t", (100 * left).toFixed(0) + "%"); // the window's clock ring
-        const scale = card.leave === "mean" ? pop(now - card.leaveAt) : (card.scale + 0.06 * decay(now - (card.lockAt ?? -1e9), 35)).toFixed(3);
+        const scale = card.leave === "mean" ? squeeze(now - card.leaveAt + SWAP_MS) : (card.scale + 0.06 * decay(now - (card.lockAt ?? -1e9), 35)).toFixed(3);
         place(card.el, card.x - card.half, card.y, scale, lock >= 0 && !locked ? 0.7 : 1, slip * 3.5 * wave);
       });
     });
@@ -306,7 +320,7 @@ export class WordCards {
     if (p >= 1) {
       Object.assign(card, { id: -1, leave: "" });
       card.el.style.opacity = "0";
-    } else if (card.leave === "hit") place(card.el, card.x + (card.tx - card.x) * p * p - card.half, card.y + (card.ty - card.y) * p * p, now - card.leaveAt < 120 ? pop(now - card.leaveAt) : (1 - 0.7 * p).toFixed(3), 1 - 0.4 * p);
+    } else if (card.leave === "hit") place(card.el, card.x - card.half, card.y, squeeze(now - card.leaveAt), 1); // its letters fly home on the 3D view
     else place(card.el, card.x - card.half, card.y, (1 - p * p).toFixed(3) + ",1", 1 - p * p); // squeezed sideways, faster at the end (TYPING_BREAK_STUDY T7)
   }
 }

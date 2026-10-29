@@ -45,10 +45,10 @@ const ONE_FRAME = 0.001;
 /** Flashes of a card's own frame (TYPING_BREAK_STUDY T3): the lock bursts white-jade, a slip turns it cinnabar, a typed word white-gold. */
 const LOCK: Keyframe = { boxShadow: "0 0 0 4px #fff, 0 0 28px 10px rgba(25, 201, 168, 0.9)", borderColor: "#7ff5e0" };
 const SLIP: Keyframe = { borderColor: "#c23b22", color: "#c23b22", boxShadow: "0 0 0 3px rgba(194, 59, 34, 0.9), 0 0 18px 5px rgba(194, 59, 34, 0.6)" };
-const DONE: Keyframe = { boxShadow: "0 0 0 5px #fff, 0 0 34px 14px rgba(255, 214, 120, 0.95)", filter: "brightness(1.3)" };
+const DONE: Keyframe = { boxShadow: "0 0 0 6px #fff, 0 0 40px 18px rgba(255, 214, 120, 0.95)", filter: "brightness(1.45)" };
 /** A one-shot flash back to the card's CSS look (Web Animations: it restarts every time). */
 const frameFlash = (el: HTMLElement, from: Keyframe, ms: number, hold = 0): void => void el.animate?.([from, { ...from, offset: hold }, {}], { duration: ms, easing: "cubic-bezier(0.1, 0.8, 0.2, 1)" });
-const BEADS = 12;
+const BEADS = 16;
 
 type Charge = { share: number; at: number; core: THREE.Vector3; tier: number };
 /** Where a call's letters go, kept by call id: a one-word call is gone by the time its word is read. */
@@ -190,8 +190,8 @@ export class WordFeel implements CardFeel {
   /** A hot flash: a jade (or gold) body with its white core, a wider gold halo, a dark puff under both. */
   private flash(at: THREE.Vector3, size: number, rgb: Rgb, life = 0.1): void {
     this.pool.add("ink", { x: at.x, y: at.y, z: at.z, size: size * 1.4, life: life * 2.2, rgb: INK, alpha: 0.4 });
-    this.pool.add("glow", { x: at.x, y: at.y, z: at.z, size, life, rgb, hot: 0.3 });
-    this.pool.add("glow", { x: at.x, y: at.y, z: at.z, size: size * 1.9, life: life * 1.7, rgb: GOLD, alpha: 0.4 });
+    this.pool.add("glow", { x: at.x, y: at.y, z: at.z, size, life, rgb, hot: 0.22, alpha: 0.9 });
+    this.pool.add("glow", { x: at.x, y: at.y, z: at.z, size: size * 1.9, life: life * 1.7, rgb: GOLD, alpha: 0.3 });
   }
 
   private ring(at: THREE.Vector3, radius: number, rgb: Rgb, life: number, flat: boolean): void {
@@ -239,7 +239,7 @@ export class WordFeel implements CardFeel {
   done(card: CardView, now: number): void {
     const w = this.w;
     const spot = w === null ? null : this.spot(w, card.call);
-    frameFlash(card.el, DONE, 180);
+    frameFlash(card.el, DONE, 160, 0.25);
     if (w === null || spot === null) return;
     const tier = chainTier(w.typing.chain);
     const core = spot.core.clone();
@@ -252,8 +252,8 @@ export class WordFeel implements CardFeel {
     for (let k = 0; k < len; k += 1) {
       const a = Math.PI * (1.05 + (0.9 * k) / Math.max(1, len - 1));
       const from = this.ray(cx + Math.cos(a) * (card.half + 22), cy + Math.sin(a) * (card.height / 2 + 20), core.distanceTo(this.stage.camera.position), new THREE.Vector3());
-      const arrive = k === len - 1 && !power ? () => this.answer(core, spot.radius, tier) : null;
-      this.letter(from, core, this.glyph(card.word, k), 44 * px * (1 + 0.1 * tier), power ? 0.14 : 0.18 + 0.02 * k, tier, 0, arrive);
+      const arrive = k === Math.min(len - 1, 5) && !power ? () => this.answer(core, spot.radius, tier) : null;
+      this.letter(from, core, this.glyph(card.word, k), 44 * px * (1 + 0.1 * tier), power ? 0.12 : Math.min(0.11, 0.07 + 0.008 * k), tier, 0, arrive); // the caller answers within 120 ms
     }
     if (power && spot.b >= 0) this.fired.set(spot.b, { word: card.word, tick: w.tick });
     else this.charges.delete(card.call);
@@ -279,21 +279,24 @@ export class WordFeel implements CardFeel {
       const to = this.last;
       const from = this.thread;
       if (from !== null && from.distanceToSquared(to) > 1) {
+        // A solid thread (≥ 3 px): streaks laid end to end along a raised arc, swept from the last house to this one.
+        const arc = (t: number): THREE.Vector3 => from.clone().lerp(to, t).setY(from.y + (to.y - from.y) * t + 10 * t * (1 - t));
         for (let k = 0; k < BEADS; k += 1) {
-          const t = k / (BEADS - 1);
-          const p = from.clone().lerp(to, t).setY(from.y + (to.y - from.y) * t + 10 * t * (1 - t));
-          const bead = { x: p.x, y: p.y, z: p.z, delay: 0.022 * k, life: 0.45 - 0.012 * k };
-          this.pool.add("ink", { ...bead, size: 1.5, rgb: INK, alpha: 0.35 });
-          this.pool.add("glow", { ...bead, size: 1.1, rgb: k % 2 === 0 ? GOLD : JADE, hot: 0.35 });
+          const [a, b] = [arc(k / BEADS), arc((k + 1) / BEADS)];
+          const mid = a.clone().lerp(b, 0.5);
+          const piece = { x: mid.x, y: mid.y, z: mid.z, along: b.clone().sub(a), length: a.distanceTo(b) * 1.35, delay: 0.014 * k, life: 0.45 - 0.008 * k, shape: SHAPE.spark };
+          this.pool.add("ink", { ...piece, size: 0.7, rgb: INK, alpha: 0.5 });
+          this.pool.add("glow", { ...piece, size: 0.42, rgb: event.tier >= 2 ? GOLD : JADE, hot: 0.5 });
         }
       }
       this.thread = to.clone();
       const before = chainTier(Math.max(0, event.chain - 1));
       if (event.tier > before || event.callout) {
+        // A tier: rings and sparks, no extra flash over the tower (the white core stays ≤ 30 %).
         this.ring(to, event.callout ? 8 : 4.5, GOLD, event.callout ? 0.6 : 0.4, event.callout);
-        this.ring(to, 3, HOT, 0.3, false);
-        this.flash(to, 4.5, GOLD, 0.14);
-        this.sparks(to, event.callout ? 22 : 14, [12, 22], null);
+        this.ring(to, 3, event.tier >= 2 ? GOLD : JADE, 0.3, false);
+        this.sparks(to, event.callout ? 22 : 14, [12, 22], null, { rgb: GOLD });
+        for (let k = 0; k < this.n(10); k += 1) this.pool.add("glow", { x: to.x + this.rnd(-2, 2), y: to.y, z: to.z + this.rnd(-2, 2), vy: this.rnd(3, 5), drag: 0.8, size: 0.45, life: this.rnd(0.7, 1), rgb: GOLD, hot: 0.4 });
       }
       if (this.lastCard !== null && event.chain >= 2) this.combo(this.lastCard, event.chain, event.tier, now);
     }
@@ -309,6 +312,7 @@ export class WordFeel implements CardFeel {
     this.tag ??= { el: root.appendChild(Object.assign(document.createElement("div"), { className: "td-combo" })), at: 0, x: 0, y: 0 };
     this.tag.el.textContent = "×" + chain;
     this.tag.el.classList.toggle("is-gold", tier >= 2);
+    this.tag.el.style.color = ["#e9fff9", "#9ff7e6", "#ffe3a0", "#ffc061", "#ff9f43"][Math.min(4, tier)]!;
     Object.assign(this.tag, { at: now, x: card.x + card.half + 4, y: card.y - 18 });
   }
 
@@ -322,7 +326,7 @@ export class WordFeel implements CardFeel {
     const tag = this.tag;
     if (tag === null) return;
     const t = now - tag.at;
-    const scale = t < 0 ? 1 : 1 + 0.8 * Math.exp(-t / 40);
+    const scale = t < 0 ? 1 : t < 150 ? [3, 2.25, 1.6, 1.25, 1.1, 1][Math.floor(t / 30)]! : 1; // stamped 3× → 1× by frames (T10)
     tag.el.style.transform = "translate(" + tag.x.toFixed(1) + "px," + (tag.y - Math.min(12, t / 60)).toFixed(1) + "px) scale(" + scale.toFixed(3) + ")";
     tag.el.style.opacity = (t < 700 ? 1 : Math.max(0, 1 - (t - 700) / 250)).toFixed(2);
   }
@@ -445,7 +449,7 @@ export class WordFeel implements CardFeel {
     if (shot.word.length > 0 && shot.frame % 2 === 1) {
       const g = this.glyph(shot.word, shot.k++ % shot.word.length);
       const trail = { x, y, z, vy: -0.6, drag: 2, life: 0.34, turn: this.rnd(-0.3, 0.3), spin: this.rnd(-1.5, 1.5), shape: SHAPE.letter, glyph: Math.max(0, g) };
-      this.pool.add("ink", { ...trail, size: 1.8, rgb: INK, alpha: 0.5 });
+      this.pool.add("ink", { ...trail, size: 1.9, rgb: INK, alpha: 0.9 });
       this.pool.add("glow", { ...trail, size: 1.6, rgb: JADE, hot: 0.4 });
     }
   }
@@ -466,7 +470,8 @@ export class WordFeel implements CardFeel {
     }
     this.smoke(at, 5, 4.4, 1.2, 0.5);
     for (let k = 0; k < this.n(8); k += 1) this.pool.add("glow", { x: at.x + this.rnd(-reach, reach) * 0.5, y: floor + 0.3, z: at.z + this.rnd(-reach, reach) * 0.5, vy: this.rnd(1.6, 3.2), drag: 0.7, size: 0.4, life: this.rnd(1, 1.5), delay: 0.1, rgb: k % 2 === 0 ? EMBER : GOLD, hot: 0.5 });
-    this.pool.add("ink", { x: at.x, y: floor + 0.04, z: at.z, size: 2 * reach, life: 2.6, rgb: INK, alpha: 0.45, shape: SHAPE.smoke, flat: true });
+    this.pool.add("ink", { x: at.x, y: floor + 0.04, z: at.z, size: 2.4 * reach, life: 2.8, rgb: INK, alpha: 0.75, shape: SHAPE.smoke, flat: true, hot: 3.7 }); // the scorch
+    this.pool.add("glow", { x: at.x, y: floor + 0.06, z: at.z, size: 2.2 * reach, grow: 0.25, life: 1.2, rgb: JADE, alpha: 0.5, shape: SHAPE.ring, flat: true }); // the splash's rim
   }
 
   /** __td.view(): live bits per layer, bits started last frame, the last key's keydown → effect in ms. */

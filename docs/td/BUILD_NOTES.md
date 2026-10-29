@@ -2117,3 +2117,18 @@ Luật chủ dự án sáng 29/10 (`docs/games/PATH_QUALITY.md`): đường khô
 - Test `tests/td-3d-road.test.ts`; kịch bản `td-1c-road` (góc mặc định, F2, cận cảnh khúc cua, ngã ba, đầu cầu).
 - **Còn lại:** tờ chấm theo PATH_QUALITY §5 và số đo luma; viên đá bờ nhìn như khối có viền tối ở camera chơi, cần xem lại hay thay bằng đá của phiếu 123; media mới (`props/da-ke`, `landmarks/them-da-trang`) cần `media:push`.
 
+### 8.11 Sửa C10 sau giám khảo (29/10/2026, làn L2)
+
+Giám khảo độc lập chấm C10 6,5 (phím đúng 6,5; phím sai 7,5; gõ xong 6,0; Word Shot 7,5; Chuỗi 6,5), đòi ≥ 8 và không mục nào dưới 7 (`tmp/lane-l2/judge-c10/verdict.md`). Đã sửa:
+- **Phím đúng:** vòng ấn nằm sau chữ (z-index −1 trong lớp của thẻ), không còn che từ; phím đầu đóng dấu lên mọi thẻ có chữ đầu khớp (cả khi chờ cặp bậc 2).
+- **Thứ bậc thẻ:** chữ của từ `clamp(26px, 30px × --ui, 32px)` (26 px ở 720p), dòng nghĩa 0,72 của nó.
+- **Gõ xong:** khung 0 bùng viền và sáng (T3, 1,14×), rồi bóp ngang 100 ms, trống 60 ms (T7); nghĩa và dấu hạng hiện sau 200 ms; thẻ không nghĩa bóp tại chỗ; chữ bay vào nhà trong ≤ 110 ms và nhà đáp lại ngay khi chữ chạm.
+- **Chuỗi:** "×N" đóng dấu 3× → 1× trong 150 ms theo khung, rồi đứng 26 px, màu theo bậc; lên bậc chỉ có vòng, tia và hạt (không thêm lóe trắng lên tháp); dây nối hai nhà là một nét liền (16 vệt nối đuôi, rộng khoảng 0,4 m, có lớp tối).
+- **Word Shot:** lõi trắng của lóe R giảm (0,22), quầng 0,3; chữ ở vệt đạn có viền mực đậm; chỗ trúng có vết cháy tối và vành ngọc của tia nước.
+- Tờ khung vòng 2: `tmp/lane-l2/sheets2/` (cùng dạng C10). `td-1c-words` đạt ở 1280 và 1920, mọi phím tới hiệu ứng trong khung đầu, trắng xóa ≤ 2,9 %.
+
+### 8.12 Còn lại (cho lượt sau)
+
+- C10: khay mép ≤ 6 cho lời gọi ngoài màn (bấm thì camera lướt 0,45 s); kẹp cột thẻ tránh HUD ở mọi mức zoom.
+- Đường (mục 8.10): tờ chấm theo PATH_QUALITY §5 (góc mặc định và 55°, 1280 và 1920, cận cảnh khúc cua, ngã ba, đầu cầu) và số đo luma; xem lại đá bờ (`props/da-ke` ở camera chơi trông như khối viền tối); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận.
+

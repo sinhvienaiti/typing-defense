@@ -24,11 +24,11 @@
   100% { opacity: 0; }
 }
 .td-words .td-card .k::after {
-  content: ""; left: 50%; top: 54%; width: 1.7em; height: 1.7em; margin: -0.85em 0 0 -0.85em; box-sizing: border-box; border-radius: 50%;
-  animation: td-key-press 150ms step-end;
+  content: ""; z-index: -1; left: 50%; top: 54%; width: 1.5em; height: 1.5em; margin: -0.75em 0 0 -0.75em; box-sizing: border-box; border-radius: 50%;
+  animation: td-key-press 150ms step-end; /* behind the letters (the card's own layer): it never covers the word */
 }
 @keyframes td-key-press {
-  0% { opacity: 1; background: rgba(255, 255, 255, 0.95); box-shadow: 0 0 10px 3px var(--glow, #7ff5e0); transform: scale(0.85); }
+  0% { opacity: 1; background: rgba(127, 245, 224, 0.75); box-shadow: 0 0 10px 3px var(--glow, #7ff5e0); transform: scale(0.85); }
   11% { opacity: 1; border: 0.22em solid #fff; box-shadow: 0 0 8px rgba(127, 245, 224, 0.8); transform: scale(1); }
   33% { opacity: 1; border: 0.26em solid rgba(14, 28, 26, 0.85); transform: scale(1.1); }
   55% { opacity: 1; border: 0.08em solid; border-color: #fff #fff transparent transparent; transform: scale(1.22); }
@@ -42,5 +42,8 @@
   .td-words .td-card .k::after { animation-duration: 100ms; }
 }
 /* The chain count over the card a word was typed on (src/view/3d/words.ts): a number, no words; gold from tier 2. */
-.td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; color: #e9fff9; font: 800 22px/1 var(--vd-title); -webkit-text-stroke: 1.5px var(--vd-ink); text-shadow: 0 2px 0 var(--vd-ink), 0 0 12px rgba(25, 201, 168, 0.95); }
+.td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; color: #e9fff9; font: 800 26px/1 var(--vd-title); -webkit-text-stroke: 1.5px var(--vd-ink); text-shadow: 0 2px 0 var(--vd-ink), 0 0 12px rgba(25, 201, 168, 0.95); }
 .td-combo.is-gold { color: #ffe3a0; text-shadow: 0 2px 0 var(--vd-ink), 0 0 14px rgba(255, 199, 92, 0.95); }
+/* The word is the biggest thing on a card (judge, 29/10): ≥ 26 px at 720p, its meaning line 0.72 of it. */
+.td-words .td-card { font-size: clamp(26px, calc(30px * var(--ui, 1)), 32px); }
+.td-words .td-card-mean { font-size: 0.72em; }
