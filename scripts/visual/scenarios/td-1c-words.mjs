@@ -43,13 +43,16 @@ async function screencast(page) {
     async record(name, act, before = 150, after = 900, log = false) {
       frames.length = 0;
       const edgeBefore = (await page.eval(EDGE_CARDS)) ?? [];
-      if (log) await page.eval(DOM_LOG); // every frame's DOM boxes (cards, flying letters, ×N, stamps): a flash's measure leaves them out
+      await page.eval("window.__dom = [], window.__domOn = true"); // every frame's DOM boxes (cards, flying letters, ×N, stamps): a flash's measure leaves them out
       on = true;
+      const startAt = Date.now();
       await page.sleep(before);
       const at = await act();
       await page.sleep(after);
       on = false;
-      const dom = log ? ((await page.eval("window.__domOn = false, window.__dom")) ?? []) : [];
+      const endAt = Date.now();
+      const dom = (await page.eval("window.__domOn = false, window.__dom")) ?? [];
+      const violations = (await page.eval("window.__boxViolations"))?.filter(v => v.at >= startAt && v.at <= endAt) ?? [];
       const keyAt = (await page.eval("window.__keyAt ?? 0")) / 1000 || at;
       const dir = join(out("frames"), name);
       rmSync(dir, { recursive: true, force: true });
@@ -60,7 +63,7 @@ async function screencast(page) {
         return { file, ms: Math.round((f.ts - keyAt) * 1000) };
       });
       const cards = ((await page.eval(LOOK))?.cards ?? []).map((c) => ({ text: c.text, left: Math.round(c.left), top: Math.round(c.top), right: Math.round(c.right), bottom: Math.round(c.bottom) }));
-      writeFileSync(join(dir, "meta.json"), JSON.stringify({ name, size: sizeOf(page), frames: meta, cards, edgeCards: edgeBefore.concat((await page.eval(EDGE_CARDS)) ?? []), dom: dom.map(([t, boxes]) => [Math.round(t - keyAt * 1000), boxes]), view: await page.eval(td("const v = t.view(); delete v.houses; return v;")) }, null, 1));
+      writeFileSync(join(dir, "meta.json"), JSON.stringify({ name, size: sizeOf(page), frames: meta, violations, cards, edgeCards: edgeBefore.concat((await page.eval(EDGE_CARDS)) ?? []), dom: dom.map(([t, boxes]) => [Math.round(t - keyAt * 1000), boxes]), view: await page.eval(td("const v = t.view(); delete v.houses; return v;")) }, null, 1));
       return meta.length;
     },
     close: async () => [await call("Page.stopScreencast"), ws.close()],
@@ -70,8 +73,30 @@ async function screencast(page) {
 /** The cards standing in the edge tray (data-edge 0–3), shown, with their boxes; a typed word's meaning strip is no call to click. */
 const EDGE_CARDS = `[...document.querySelectorAll(".td-card")].filter((el) => el.dataset.edge && Number(el.style.opacity) > 0.05 && !el.classList.contains("is-gone") && !el.classList.contains("is-mean")).map((el) => { const r = el.getBoundingClientRect(); return { edge: +el.dataset.edge, text: el.textContent, x: Math.round((r.left + r.right) / 2), y: Math.round((r.top + r.bottom) / 2), left: r.left, top: r.top, right: r.right, bottom: r.bottom }; })`;
 
-/** Logs each frame's shown DOM boxes over the canvas (and the stamp a typed letter drops from above it, a pseudo-element) into window.__dom ([wall ms, [[l, t, r, b]…]]) until __domOn is false. */
-const DOM_LOG = `(() => { window.__dom = []; window.__domOn = true; let els = [], n = 0; const keep = () => { if (n++ % 10 === 0) els = [...document.querySelectorAll(".td-card, .td-fly, .td-combo, .td-stamp")]; const out = []; for (const el of els) { const o = el.getAnimations().length ? parseFloat(getComputedStyle(el).opacity) : parseFloat(el.style.opacity || "1"); if (!(o > 0.02)) continue; const r = el.getBoundingClientRect(); if (r.width > 0) out.push([r.left, r.top, r.right, r.bottom].map(Math.round)); } for (const k of document.querySelectorAll(".td-card .k")) { const r = k.getBoundingClientRect(); if (r.width > 0) out.push([r.left - 2.5 * r.width, r.top - 3.4 * r.height, r.right + 2.5 * r.width, r.bottom + 0.4 * r.height].map(Math.round)); } window.__dom.push([performance.timeOrigin + performance.now(), out]); if (window.__domOn) requestAnimationFrame(keep); }; requestAnimationFrame(keep); return true; })()`;
+/** Measure real effect boxes every animation frame, including all frames between capture samples.
+ * Keep the old dom array shape for the pixel masks; named violations are separate and never rounded. */
+const DOM_LOG = `(() => {
+  window.__dom = []; window.__domOn = false; window.__boxViolations = []; window.__boxFrames = 0; window.__boxesOn = true;
+  const keep = () => {
+    const at = performance.timeOrigin + performance.now(), out = [], overHud = [], offScreen = [];
+    const panels = [...document.querySelectorAll(".td-hud .td-panel")].filter(el => getComputedStyle(el).display !== "none").map(el => ({ name: el.className, r: el.getBoundingClientRect() })).filter(p => p.r.width > 0 && p.r.height > 0);
+    for (const el of document.querySelectorAll(".td-card, .td-key-stamp, .td-fly, .td-combo, .td-stamp, .td-tray-arrow")) {
+      const cs = getComputedStyle(el);
+      if (!(parseFloat(cs.opacity) > 0.02) || cs.visibility !== "visible" || cs.display === "none") continue;
+      const r = el.getBoundingClientRect();
+      if (!(r.width > 0 && r.height > 0)) continue;
+      const name = el.className + ":" + (el.textContent || el.dataset.art || "").slice(0, 48);
+      out.push([r.left, r.top, r.right, r.bottom].map(Math.round));
+      if (r.left < 0 || r.top < 0 || r.right > innerWidth || r.bottom > innerHeight) offScreen.push(name);
+      for (const p of panels) if (Math.min(r.right, p.r.right) - Math.max(r.left, p.r.left) > 1 && Math.min(r.bottom, p.r.bottom) - Math.max(r.top, p.r.top) > 1) overHud.push(name + " / " + p.name);
+    }
+    window.__boxFrames++;
+    if (overHud.length || offScreen.length) window.__boxViolations.push({ at, frame: window.__boxFrames, overHud, offScreen });
+    if (window.__domOn) window.__dom.push([at, out]);
+    if (window.__boxesOn) requestAnimationFrame(keep);
+  };
+  requestAnimationFrame(keep); return true;
+})()`;
 
 /** Mean luma (0–1, sRGB gray) of a box of an image (ImageMagick). */
 const luma = (file, x, y, w, h) => Number(execFileSync("magick", [file, "-crop", `${Math.max(1, Math.round(w))}x${Math.max(1, Math.round(h))}+${Math.max(0, Math.round(x))}+${Math.max(0, Math.round(y))}`, "+repage", "-colorspace", "Gray", "-format", "%[fx:mean]", "info:"], { encoding: "utf8" }));
@@ -98,6 +123,7 @@ export default async function (page) {
   await gesture(page);
   await until(page, "return t.ready();", 30000);
   await page.eval("document.fonts.ready.then(() => true)");
+  await page.eval(DOM_LOG);
   await page.eval("addEventListener('keydown', (e) => (window.__keyAt = performance.timeOrigin + e.timeStamp), { capture: true }), true");
   await sandbox(page, "gold", 99999);
   await sandbox(page, "wood", 9999);
@@ -305,10 +331,17 @@ export default async function (page) {
   await page.sleep(800);
   await page.shot(out("td-1c-words-" + size + ".jpg"));
 
+  const boxAudit = await page.eval(`(() => {
+    window.__boxesOn = false;
+    const rows = window.__boxViolations || [];
+    return { frames: window.__boxFrames, overHud: { frames: rows.filter(r => r.overHud.length).length, elements: [...new Set(rows.flatMap(r => r.overHud))] }, offScreen: { frames: rows.filter(r => r.offScreen.length).length, elements: [...new Set(rows.flatMap(r => r.offScreen))] }, violations: rows };
+  })()`);
+  tray.overHud.push(...boxAudit.overHud.elements);
   const final = await state(page);
   const checks = {
     tdWords: cardsClean(stats) && stats.samples > 0,
-    tdHudBudget: stats.overHud.length === 0,
+    tdHudBudget: stats.overHud.length === 0 && boxAudit.overHud.frames === 0,
+    offScreen: boxAudit.offScreen.frames === 0,
     groundUnderCards: Object.values(grounds).flat().every((g) => g.under <= 0.6),
     tdScale: anchors.length > 0 && anchors.every((a) => (a.gap >= -1 && a.gap <= 12) || a.top <= 66), // a column kept below the top edge (lanes SAFE.top) stands lower
     fxDrawCalls: draws.peak <= 2,
@@ -320,5 +353,5 @@ export default async function (page) {
     trayClear: tray.overHud.length === 0,
     ...consoleChecks(page),
   };
-  return finish(page, checks, { grounds, cards: cardSummary(stats), anchors: anchors.filter((a) => (a.gap < -1 || a.gap > 12) && a.top > 66).concat(anchors.slice(0, 4)).slice(0, 10), anchorCount: anchors.length, draws, keyMs, keyFrames, moments, rest, zoom: cardSummary(zoomStats), tray: { ...tray, cards: tray.cards.length }, phase: final?.phase, chain: await page.eval(td("return t.typing().chain;")) });
+  return finish(page, checks, { boxAudit, grounds, cards: cardSummary(stats), anchors: anchors.filter((a) => (a.gap < -1 || a.gap > 12) && a.top > 66).concat(anchors.slice(0, 4)).slice(0, 10), anchorCount: anchors.length, draws, keyMs, keyFrames, moments, rest, zoom: cardSummary(zoomStats), tray: { ...tray, cards: tray.cards.length }, phase: final?.phase, chain: await page.eval(td("return t.typing().chain;")) });
 }

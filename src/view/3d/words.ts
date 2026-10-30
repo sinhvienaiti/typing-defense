@@ -29,6 +29,9 @@ import type { World } from "../../sim/world";
 import { wordText } from "../../typing/decks";
 import { KEY } from "../../typing/router";
 import type { CardFeel, CardView } from "../words/cards";
+import { fitElement } from "../words/dom";
+import { keepIn, type SafeFrame } from "../words/safe";
+import { comboSide, trayPointer } from "../words/tray";
 import { FxPool, SHAPE, type Bit, type Rgb } from "./fx-pool";
 import { heightAt } from "./ground";
 import type { Houses } from "./houses";
@@ -81,6 +84,7 @@ export class WordFeel implements CardFeel {
   private lastCard: CardView | null = null;
   private tag: { el: HTMLElement; at: number; x: number; y: number; half: number; h: number; w: number; side: number; card: CardView | null; call: number; seen?: number; lit: number } | null = null;
   private readonly flies: Fly[] = [];
+  private safe: SafeFrame | null = null;
   /** The last release (ms) and which way its shot runs on screen (−1 left, 1 right): the chain count stands on the other side. */
   private shotAt = -1e9;
   private shotSide = 0;
@@ -407,9 +411,15 @@ export class WordFeel implements CardFeel {
         continue;
       }
       // Already 55 % out on its first frame (off the card's own letters, so that frame is the burst's brightest), fading after it.
+      if (this.safe) {
+        const x = fly.x + fly.dx, y = fly.y + fly.dy;
+        const r = keepIn({ left: x - 32, top: y - 40, right: x + 32, bottom: y + 40 }, this.safe, this.safe.panels);
+        fly.dx += r.left - (x - 32); fly.dy += r.top - (y - 40);
+      }
       const e = 0.55 + 0.45 * (1 - (1 - Math.min(1, t / 110)) ** 2);
       fly.el.style.transform = "translate(" + (fly.x + fly.dx * e).toFixed(1) + "px," + (fly.y + fly.dy * e).toFixed(1) + "px) translate(-50%,-50%) scale(" + (2 - e).toFixed(3) + ")";
       fly.el.style.opacity = (t < 17 ? 1 : Math.max(0, 1 - (t - 17) / 95)).toFixed(2);
+      if (this.safe) fitElement(fly.el, this.safe, 3);
     }
   }
 
@@ -475,7 +485,8 @@ export class WordFeel implements CardFeel {
     this.marks.combo = [Math.round(card.x), Math.round(card.y + card.height / 2)];
   }
 
-  frame(cards: readonly CardView[], now: number): void {
+  frame(cards: readonly CardView[], now: number, safe?: SafeFrame): void {
+    this.safe = safe ?? { ...this.stage.size, panels: [] };
     // No plate under a card not shown (a call's next word waiting, one over the tray's cap) nor under a typed card bursting and
     // squeezing: that dark shadow hid a Word Shot's release under the card (judge C10 r3).
     this.plates = cards.filter((k) => k.el.style.opacity !== "0" && (k.leave === "" || (k.leave === "mean" && k.el.classList.contains("is-mean")))).map((k) => ({ x: k.x, y: k.y, w: 2 * k.half, h: k.height, mean: k.leave === "mean" }));
@@ -485,7 +496,8 @@ export class WordFeel implements CardFeel {
     for (const k of cards) if (k.leave === "" && k.slot >= 0) low.set(k.call, [Math.max(low.get(k.call)?.[0] ?? -1e9, k.y + k.height), Math.min(low.get(k.call)?.[1] ?? 1e9, k.y)]);
     this.gaps = w === null ? [] : [...low].flatMap(([call, [bottom, top]]) => (w.calls.slotOf(call) < 0 || this.tray.some((l) => l.includes(call)) || now - (this.slides.get(call)?.at ?? -1e9) < 300 ? [] : [{ call, gap: Math.round(this.anchor(w, w.calls.slotOf(call), false, true).y - bottom), top: Math.round(top) }])); // a call in the edge tray stands at the edge
     this.fliesFrame(now);
-    this.pointers(cards, now);
+    if (this.miss) fitElement(this.miss, this.safe, 3);
+    this.pointers(cards);
     this.trayLast = new Map(this.tray.flatMap((list, edge) => list.map((id) => [id, edge] as [number, number])));
     this.tray = [[], [], [], []];
     const tag = this.tag;
@@ -506,38 +518,32 @@ export class WordFeel implements CardFeel {
       tag.half += (Math.max(tag.half, card.half + 12) - tag.half) * Math.min(1, (now - (tag.seen ?? now)) / 40);
     }
     tag.seen = now;
-    const x = tag.side > 0 ? tag.x + tag.half : tag.x - tag.half - tag.w;
-    tag.el.style.transformOrigin = tag.side > 0 ? "0 50%" : "100% 50%"; // it grows away from the card
-    tag.el.style.transform = "translate(" + x.toFixed(1) + "px," + (tag.y - tag.h / 2 - Math.min(4, t / 150)).toFixed(1) + "px) scale(" + scale.toFixed(3) + ")";
+    const r = card?.el.getBoundingClientRect();
+    const bounds = r ?? { left: tag.x - tag.half, top: tag.y - tag.h / 2, right: tag.x + tag.half, bottom: tag.y + tag.h / 2 };
+    const pose = comboSide(bounds, tag.w * scale + 8, tag.h * scale + 8, tag.side, this.safe, this.safe.panels);
+    tag.side = pose.side;
+    tag.el.style.transformOrigin = "0 0";
+    tag.el.style.transform = `translate(${pose.box.left + 4}px,${pose.box.top + 4}px) scale(${scale.toFixed(3)})`;
     tag.el.style.opacity = (t < 700 ? 1 : Math.max(0, 1 - (t - 700) / 250)).toFixed(2);
   }
 
-  /**
-   * The edge tray's pointer (judge C10 r3, fix 4): two jade chevrons, each two streaks over dark ones, flowing out of a tray card
-   * towards its caller (the exact way, not the edge's), in the 34 px the tray keeps to the screen's edge (cards.ts).
-   */
-  private pointers(cards: readonly CardView[], now: number): void {
-    const depth = 40;
-    const m = this.metres(depth);
+  /** One narrow, symmetric V at every edge. The old 22 px-wide overlapping streaks merged into an open C. */
+  private pointers(cards: readonly CardView[]): void {
+    const depth = 40, m = this.metres(depth);
+    const safe = this.safe ?? { ...this.stage.size, panels: [] };
     for (const k of cards) {
-      const dir = k.leave === "" && Number(k.el.dataset.edge ?? -1) >= 0 && k.el.style.opacity !== "0" ? this.dirs.get(k.call) : undefined;
-      if (dir === undefined) continue;
-      const [ux, uy] = dir;
-      const [cx, cy] = [k.x, k.y + k.height / 2];
-      const t = Math.min(k.half / Math.max(1e-3, Math.abs(ux)), k.height / 2 / Math.max(1e-3, Math.abs(uy)));
-      for (let n = 0; n < 2; n += 1) {
-        const p = ((now / 700 + n / 2) % 1) * (this.soft ? 0 : 1);
-        const [tx, ty] = [cx + ux * (t + 16 + 14 * p), cy + uy * (t + 16 + 14 * p)];
-        const fade = this.soft ? 1 : 0.55 + 0.45 * Math.sin(Math.PI * p);
-        for (const side of [-1, 1]) {
-          const [ax, ay] = [-ux * 0.77 - side * uy * 0.64, -uy * 0.77 + side * ux * 0.64]; // an arm 40° off the way back
-          const tip = this.ray(tx, ty, depth, this.v[0]!).clone();
-          const end = this.ray(tx + ax * 18, ty + ay * 18, depth, this.v[1]!);
-          const mid = tip.clone().lerp(end, 0.5);
-          const arm = { x: mid.x, y: mid.y, z: mid.z, along: tip.clone().sub(end), length: 28 * m, life: ONE_FRAME, shape: SHAPE.spark };
-          this.pool.add("ink", { ...arm, size: 22 * m, rgb: INK, alpha: 0.85 * fade });
-          this.pool.add("glow", { ...arm, size: 14 * m, rgb: JADE, hot: 0.45, alpha: fade });
-        }
+      const edge = Number(k.el.dataset.edge ?? -1);
+      const dir = k.leave === "" && edge >= 0 && Number(k.el.style.opacity) > 0 ? this.dirs.get(k.call) : undefined;
+      if (!dir) continue;
+      const card = k.el.getBoundingClientRect();
+      const p = trayPointer(edge, dir, card, safe, safe.panels);
+      const tip = this.ray(p.points[0][0], p.points[0][1], depth, this.v[0]!).clone();
+      for (const point of p.points.slice(1)) {
+        const end = this.ray(point[0], point[1], depth, this.v[1]!);
+        const mid = tip.clone().lerp(end, 0.5);
+        const arm = { x: mid.x, y: mid.y, z: mid.z, along: tip.clone().sub(end), length: tip.distanceTo(end), life: ONE_FRAME, shape: SHAPE.spark };
+        this.pool.add("ink", { ...arm, size: 5 * m, rgb: INK, alpha: 0.9 });
+        this.pool.add("glow", { ...arm, size: 3 * m, rgb: JADE, hot: 0.45, alpha: 1 });
       }
     }
   }

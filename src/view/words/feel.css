@@ -1,29 +1,12 @@
-/*
- * C10 typing feel of the word cards (docs/td/BUILD_1C_MAP1.md §8; docs/games/TYPING_BREAK_STUDY.md T1, T2; ART_DIRECTION
- * §8.2). The letter just typed (.k, its copy in data-c) is stamped: the copy drops from above-left, tilted, 3× → 2.25× →
- * 1.6× → 1× in four frames, and the letter itself shows from the fourth; an ink press rings the spot under the card's
- * bottom edge below it (--drop, cards.ts; judge C10 r2: on the card it hid the next letters): a white disc, a thick white
- * ring, a dark ring, then a thin arc turning away, done at 150 ms (frame steps, not tweens). --tier, the chain's tier
- * (cards.ts), makes the stamp bigger and turns it gold. Reduced motion: no drop, a shorter ring.
- */
-.td-words { --tier: 0; }
-.td-words .td-card .k { position: relative; animation: td-key-hold 50ms step-end; }
-@keyframes td-key-hold { from { color: transparent; } }
-.td-words .td-card .k::before, .td-words .td-card .k::after { position: absolute; pointer-events: none; opacity: 0; }
-.td-words .td-card .k::before {
-  --s: calc(3 + 0.25 * var(--tier));
-  --glow: color-mix(in srgb, #7ff5e0, #ffc75c calc(var(--tier) * 25%));
-  content: attr(data-c); left: 0; bottom: 0; transform-origin: 40% 100%;
-  color: #fff; -webkit-text-stroke: 1.2px var(--vd-jade-ink); text-shadow: 0 1px 0 var(--vd-jade-ink), 0 0 4px var(--glow), 0 0 12px var(--glow);
-  animation: td-key-stamp 67ms step-end;
-}
-@keyframes td-key-stamp {
-  0% { opacity: 1; transform: translate(-0.3em, -0.9em) rotate(-8deg) scale(var(--s)); }
-  25% { opacity: 1; transform: translate(-0.2em, -0.55em) rotate(-6deg) scale(calc(var(--s) * 0.75)); }
-  50% { opacity: 1; transform: translate(-0.08em, -0.22em) rotate(-3deg) scale(calc(var(--s) * 0.54)); color: #c8fff4; }
-  75% { opacity: 1; transform: none; color: var(--vd-jade); -webkit-text-stroke: 0; text-shadow: 0 0 6px var(--glow); }
-  100% { opacity: 0; }
-}
+/* C10: the original letter stays jade; cards.ts writes a real stamp in the key's first draw.
+ * Only the press ring remains a CSS animation. Reduced motion has no falling stamp. */
+/* --td-letter: the size of a card word's letters (.td-words .td-card below, over td.css .td-card's 18-24 px), 26 px at 720p, 32 at 1080p. */
+.td-words { --tier: 0; --td-letter: clamp(26px, calc(30px * var(--ui, 1)), 32px); }
+.td-words .td-card .k { position: relative; animation: none; color: var(--vd-jade); }
+/* The stamp's letter is the size of the letter it covers (--td-letter; cards.ts scales it by the card's own scale: recheck 232 F3);
+ * the chain's tier (--tier, set on .td-words by cards.ts) turns its glow gold (F4). */
+.td-key-stamp { --glow: color-mix(in srgb, #7ff5e0, #ffc75c calc(var(--tier) * 25%)); position: absolute; top: 0; left: 0; pointer-events: none; z-index: 3; opacity: 0; will-change: transform, opacity; color: #fff; font: 800 var(--td-letter)/1.05 var(--vd-font); -webkit-text-stroke: 1.2px var(--vd-jade-ink); text-shadow: 0 1px 0 var(--vd-jade-ink), 0 0 4px var(--glow), 0 0 12px var(--glow); }
+.td-words .td-card .k::after { position: absolute; pointer-events: none; opacity: 0; }
 .td-words .td-card .k::after {
   content: ""; left: 50%; top: calc(var(--drop, 1.7em) + 0.6em); width: 1.15em; height: 1.15em; margin: -0.575em 0 0 -0.575em; box-sizing: border-box; border-radius: 50%;
   animation: td-key-press 150ms step-end; /* under the card: it never covers the word or its meaning */
@@ -41,14 +24,13 @@
 /* A word's last key bursts the card itself (cards.ts): no press ring under it, where a Word Shot's flash leaves the tower. */
 .td-words .td-card.is-gone .k::after { animation: none; }
 @media (prefers-reduced-motion: reduce) {
-  .td-words .td-card .k::before { animation: none; }
   .td-words .td-card .k::after { animation-duration: 100ms; }
 }
 /* The chain count beside the card a word was typed on (src/view/3d/words.ts sets its tier's fill and halo): a number, no words. */
 /* Its digits ≈ 24 px tall at rest at 720p (judge C10 r3), beside the card or its meaning strip, never over its word line. */
 .td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; font: 800 clamp(38px, calc(42px * var(--ui, 1)), 50px)/1 var(--vd-title); -webkit-text-stroke: 2.5px var(--vd-ink); }
 /* The word is the biggest thing on a card (judge, 29/10): ≥ 26 px at 720p, its meaning line 0.72 of it. */
-.td-words .td-card { font-size: clamp(26px, calc(30px * var(--ui, 1)), 32px); }
+.td-words .td-card { font-size: var(--td-letter); }
 .td-words .td-card-mean { font-size: 0.72em; }
 /* A typed card's letters bursting out in front of it (src/view/3d/words.ts), over every card. */
 .td-fly { position: absolute; top: 0; left: 0; z-index: 2; opacity: 0; pointer-events: none; will-change: transform, opacity; color: #f2fffb; font: 800 clamp(26px, calc(30px * var(--ui, 1)), 32px)/1 var(--vd-title); -webkit-text-stroke: 1.5px var(--vd-jade-ink); text-shadow: 0 2px 0 var(--vd-jade-ink), 0 0 8px #7ff5e0, 0 0 16px rgba(25, 201, 168, 0.9); }

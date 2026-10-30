@@ -20,6 +20,9 @@ import { gloss, wordText } from "../../typing/decks";
 import { KIND } from "../../typing/letters";
 import { KEY } from "../../typing/router";
 import "./feel.css";
+import { fitElement } from "./dom";
+import type { SafeFrame } from "./safe";
+import { rimAt, stampStep, typedShown } from "./steps";
 import { besidePanels, columnBox, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
 export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Flash", perfect: "Perfect", good: "Good", ok: "OK", sloppy: "Sloppy" };
@@ -63,6 +66,7 @@ type Card = {
   keyAt?: number; lockAt?: number; slipAt?: number; scale?: number;
   /** C10: when a typed card's meaning takes the place of its word (after the burst and the squeeze), and when its word was typed. */
   meanAt?: number; hitAt?: number;
+  stamp?: { el: HTMLElement; at: number; source: HTMLElement };
 };
 /** C10: a card as the 3D view's typing feel sees it (src/view/3d/words.ts). */
 export type CardView = Readonly<Pick<Card, "el" | "text" | "word" | "x" | "y" | "half" | "height" | "call" | "leave" | "slot">>;
@@ -70,7 +74,7 @@ export type CardView = Readonly<Pick<Card, "el" | "text" | "word" | "x" | "y" | 
 export interface CardFeel {
   key(card: CardView, result: number, typed: number, now: number): void;
   done(card: CardView, now: number): void;
-  frame(cards: readonly CardView[], now: number): void;
+  frame(cards: readonly CardView[], now: number, safe?: SafeFrame): void;
   /** Whether call `call`'s typed word keeps its meaning back (a Word Shot of its house still in flight: the strip waits for the impact). */
   hold?(call: number): boolean;
 }
@@ -97,10 +101,13 @@ const place = (el: HTMLElement, x: number, y: number, scale: string, opacity: nu
  */
 const SWAP_MS = 194;
 const squeeze = (t: number): string => (t < 34 ? "1.1" : t < 134 ? (1.1 * Math.max(0.001, 1 - ((t - 34) / 100) ** 2)).toFixed(3) + ",1.1" : t < SWAP_MS ? "0.001,1" : "1");
-const RIM = "inset 0 0 12px 3px #fff, 0 0 0 4px #fff4d6, 0 0 28px 12px rgba(255, 214, 120, 0.95)";
 const burst = (el: HTMLElement, t: number): void => {
-  const glow = t < 34 ? 1 : t < SWAP_MS ? Math.exp(-(t - 34) / 45) : 0;
-  [el.style.boxShadow, el.style.filter] = glow > 0.05 ? [RIM, "brightness(" + (1 + 0.36 * glow).toFixed(3) + ")"] : ["", ""];
+  const r = rimAt(t, el.offsetHeight || 58, Math.max(0.8, Math.min(1.2, (el.offsetHeight || 58) / 60)));
+  const stroke = `0 0 0 ${r.width}px ${r.color}`;
+  el.style.outline = r.light && !r.blur ? `${r.width}px solid ${r.color}` : "";
+  el.style.outlineOffset = r.out - r.width + "px";
+  el.style.boxShadow = r.light > 0.05 && r.blur ? `${stroke}, 0 0 ${r.blur}px 12px rgba(255,214,120,${r.light.toFixed(3)})` : "";
+  el.style.filter = r.light > 0.05 ? `brightness(${(1 + 0.36 * r.light).toFixed(3)})` : "";
 };
 const decay = (t: number, tau: number): number => (t >= 0 && t < 6 * tau ? Math.exp(-t / tau) : 0);
 
@@ -111,6 +118,7 @@ export class WordCards {
   private readonly offsets = new Map<number, number>();
   /** Calls (by id) whose next word waits until a typed card's burst and squeeze are over (T7). */
   private readonly wait = new Map<number, number>();
+  private chainTier = 0;
   private last = 0;
   private frame = 0;
   /** Học (R3): a child's profile, and the times a deck word was seen (app/learn.ts; null until it is in). */
@@ -133,13 +141,7 @@ export class WordCards {
     // A Từ Ôn redeemed (its review event comes just before its wordHit) is stamped "Chuộc lại" in place of its grade (R3).
     const redeemed = events.filter((e) => e.t === "review" && e.redeemed).map((e) => (e.t === "review" ? e.item : -1));
     for (const event of events) {
-      if (event.t === "chain") this.root.style.setProperty("--tier", String(event.tier)); // C10: the stamps grow with the chain (feel.css)
-      // C10 (TYPING_BREAK_STUDY T1): the first key stamps its letter on every card it matches, not only the one it locks.
-      if (event.t === "wordKey" && (event.result === KEY.lock || event.result === KEY.switch || event.result === KEY.group)) {
-        const locked = this.byId.get(event.word);
-        const first = locked !== undefined ? locked.word[0] : String.fromCharCode(97 + w.typing.router.group);
-        for (const other of this.cards) if (other !== locked && other.id >= 0 && other.leave === "" && other.typed <= 0 && other.word[0] === first) this.render(other, other.typed, other.pink, other.tier, other.dots, true);
-      }
+      if (event.t === "chain") this.root.style.setProperty("--tier", String((this.chainTier = event.tier))); // the stamps grow and turn gold (feel.css)
       const card = "word" in event ? this.byId.get(event.word) : undefined;
       if (card === undefined) continue;
       // A wrong key shakes the card and the letter wanted stays pink until it comes (test pass 27/10: 0.15 s was missed).
@@ -159,8 +161,7 @@ export class WordCards {
         // The word shows whole in jade while it bursts and squeezes; its meaning takes its place after (SWAP_MS).
         Object.assign(card, { leave: card.mean === "" ? "hit" : "mean", leaveAt: now + (card.mean === "" ? 0 : SWAP_MS), meanAt: now + SWAP_MS, hitAt: now, tx: to.x, ty: to.y, slot: -1, ax: NaN, ay: NaN });
         // The last letter is stamped like every other key (no blank frames), and the call's next word waits for the squeeze (T7).
-        const end = card.word.slice(-1);
-        card.text.innerHTML = '<span class="t">' + card.word.slice(0, -1) + '<span class="k" data-c="' + end + '">' + end + "</span></span>";
+        card.text.innerHTML = '<span class="t">' + card.word.slice(0, -1) + '<span class="k">' + card.word.slice(-1) + "</span></span>";
         this.wait.set(card.call, now + SWAP_MS);
         for (const flash of card.el.getAnimations?.() ?? []) flash.cancel(); // a lock's or a slip's frame flash would hide the burst
         burst(card.el, 0);
@@ -193,14 +194,14 @@ export class WordCards {
   }
 
   /** Letters as spans: typed (t), the first one or two by tier (l), the next after a wrong key (p); a quiz hides what is not typed past its first letter. */
-  private render(card: Card, typed: number, pink: boolean, tier: number, dots: string, first = false): void {
-    const at = first ? 0 : typed !== card.typed ? typed - 1 : -1; // the letter stamped: a new one (a slip or a dot changed re-renders too), or a match's first
+  private render(card: Card, typed: number, pink: boolean, tier: number, dots: string): void {
+    const at = typed > card.typed ? typed - 1 : -1; // Backspace never starts another stamp.
     const fresh = at >= 0;
     card.tier = tier;
     const letters = [...card.word].map((ch, k) => {
       const kind = (k < typed ? " t" : "") + (fresh && k === at ? " k" : "") + (k < card.tier ? " l" : "") + (pink && k === typed ? " p" : ""); // k: the key just typed pops
       const shown = card.quiz && k >= Math.max(1, typed) ? "_" : ch;
-      return kind === "" ? shown : '<span class="' + kind.trim() + '"' + (fresh && k === at ? ' data-c="' + shown + '"' : "") + ">" + shown + "</span>"; // data-c: the stamp's copy (feel.css)
+      return kind === "" ? shown : '<span class="' + kind + '">' + shown + "</span>";
     });
     card.text.innerHTML = card.quiz ? '<span class="m">' + (card.mean || "Quiz") + "</span> · " + letters.join(" ") : letters.join("");
     card.pips.textContent = dots;
@@ -239,7 +240,8 @@ export class WordCards {
       const dots = pips(w, c);
       const again = !card.learn && W.errors[s]! >= LEARN.meaningErrors; // 3 slips: the meaning shows again (§11.1)
       if (again) [card.learn, card.sub.textContent] = [true, card.quiz ? "" : card.mean];
-      if (again || W.typed[s] !== card.typed || pink !== card.pink || tier !== card.tier || dots !== card.dots) this.render(card, W.typed[s]!, pink, tier, dots);
+      const typed = typedShown(card.word, W.typed[s]!, w.typing.router.group);
+      if (again || typed !== card.typed || pink !== card.pink || tier !== card.tier || dots !== card.dots) this.render(card, typed, pink, tier, dots);
       card.lockedAt = lock !== s ? -1 : card.lockedAt < 0 ? w.tick : card.lockedAt;
       const late = w.calls.expire[c]! >= 0 && w.calls.expire[c]! - w.tick < 1.5 * 60;
       if (late !== card.late) card.el.classList.toggle("is-late", (card.late = late));
@@ -271,7 +273,7 @@ export class WordCards {
       (lanes.get(c) ?? lanes.set(c, []).get(c)!).push(card);
     }
     this.layout(w, lanes, lock, now, dt, width, height, panels, keep);
-    this.feel?.frame(this.cards.filter((k) => k.id >= 0), now);
+    const safe = { width, height, panels };
     for (const card of this.cards) {
       // A word gone with no result read (the run was reset, its call closed) folds away; one never shown (its call's next word
       // waiting out a squeeze, a tray card over the cap) has nowhere to fold from: it is let go (C10 r4: a fresh card had no x, y).
@@ -281,13 +283,56 @@ export class WordCards {
         else Object.assign(card, { leave: "fold", leaveAt: now }).el.classList.add("is-gone");
       }
       if (card.id >= 0 && card.leave !== "") this.leaving(card, now);
+      if (card.id >= 0) {
+        // Include the rim, review label and agent dot outside the border. Clamp after slide, scale, tilt and squeeze.
+        const [dx, dy] = fitElement(card.el, safe, card.height * 0.12 + 12);
+        card.x += dx; card.y += dy;
+      }
     }
+    this.keyStamps(now, safe);
+    this.feel?.frame(this.cards.filter((k) => k.id >= 0), now, safe);
     for (const stamp of this.stamps) {
       if (now < stamp.at && stamp.at - now <= SWAP_MS) { stamp.el.style.opacity = "0"; continue; } // its grade comes with the meaning
       const p = Math.min(1, (now - stamp.at) / MS.stamp);
       // A meaning card moves up its column over the call's next word: the stamp stays over it, never on its words (review R2).
       if (stamp.card !== null && stamp.card.leave === "mean" && stamp.card.leaveAt === stamp.at) [stamp.x, stamp.y] = [stamp.card.x, stamp.card.y - 30];
-      if (p < 1 || stamp.el.style.opacity !== "0.00") place(stamp.el, stamp.x - stamp.half, stamp.y - 28 * p, "1", 1 - p * p);
+      if (p < 1 || stamp.el.style.opacity !== "0.00") {
+        place(stamp.el, stamp.x - stamp.half, stamp.y - 28 * p, "1", 1 - p * p);
+        fitElement(stamp.el, safe, 2);
+      }
+    }
+  }
+
+  /** A real, measurable stamp; its first pose is written in this draw, never scheduled by CSS. */
+  private keyStamps(now: number, safe: SafeFrame): void {
+    for (const card of this.cards) {
+      const source = card.text?.querySelector<HTMLElement>(".k");
+      let key = card.stamp;
+      if (source && source !== key?.source) {
+        const el = key?.el ?? element(this.root, "td-key-stamp");
+        el.textContent = source.textContent;
+        card.stamp = key = { el, at: now, source };
+      }
+      if (!key) continue;
+      if (!source || Number(card.el.style.opacity) <= 0) { key.el.style.opacity = "0"; continue; }
+      const step = stampStep(now - key.at, this.chainTier);
+      key.el.style.opacity = String(step.opacity);
+      if (!step.opacity) continue;
+      const soft = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const r = key.source.getBoundingClientRect();
+      const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
+      // The stamp's font is the letter's (feel.css); the card's own scale on screen (lock, typing, burst) is the letter's rect over its
+      // layout height, so the stamp settles at exactly the letter's size (recheck 232 F3: it was 1.11-1.44x).
+      const fit = (r.bottom - r.top) / (key.source.offsetHeight || r.bottom - r.top) || 1;
+      const max = stampStep(0, this.chainTier).scale;
+      const pose = (scale: number, tilt: number): string => {
+        const drop = soft ? 0 : (scale - 1) / (max - 1);
+        return `translate(${x - 10 * drop}px,${y - 28 * drop}px) translate(-50%,-50%) rotate(${soft ? 0 : tilt}deg) scale(${+((soft ? 1 : scale) * fit).toFixed(3)})`;
+      };
+      // Measure the largest pose, with room for its complete settling path and glow, in this same draw.
+      key.el.style.transform = pose(max, -8);
+      fitElement(key.el, safe, 28);
+      key.el.style.transform = pose(step.scale, step.tilt);
     }
   }
 
