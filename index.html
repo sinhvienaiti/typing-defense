@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2f2a5a" />
     <meta name="referrer" content="strict-origin" />
-    <!-- No icon file: without this the browser asks for /favicon.ico and gets a 404. -->
-    <link rel="icon" href="data:," />
+    <!-- Temporary emblem favicon until accepted art 177. -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/typing-defense/ui/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/assets/typing-defense/ui/favicon-64.png" />
     <title>Wordwoven</title>
   </head>
   <body>
     <canvas id="tdCanvas" aria-label="Map"></canvas>
-    <div id="tdHud" class="td-hud"><div class="td-panel td-chip">Wordwoven · loading words…</div></div>
+    <div id="tdHud" class="td-hud"><div class="td-panel td-chip"><img id="tdLoadingLogo" src="/assets/typing-defense/ui/logo.180.webp" srcset="/assets/typing-defense/ui/logo.180.webp 180w, /assets/typing-defense/ui/logo.360.webp 360w, /assets/typing-defense/ui/logo.576.webp 576w, /assets/typing-defense/ui/logo.864.webp 864w, /assets/typing-defense/ui/logo.1296.webp 1296w, /assets/typing-defense/ui/logo.1728.webp 1728w" sizes="(min-height: 1080px) 180px, (max-height: 720px) 120px, 16.667vh" width="180" height="60" alt="Wordwoven" style="width:clamp(120px,16.667vh,180px);height:auto;vertical-align:middle" /><span id="tdLoadingFallback" hidden aria-hidden="true">Wordwoven</span> · loading words…</div></div>
     <div id="tdWords" class="td-words" aria-hidden="true"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>

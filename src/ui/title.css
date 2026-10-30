@@ -5,19 +5,20 @@
  */
 .tt-screen { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: var(--vd-dusk-high); color: var(--vd-ink); font: 500 15px/1.4 var(--vd-font); user-select: none; }
 .tt-screen[hidden] { display: none; }
-.tt-art { position: absolute; inset: 0; width: 100%; height: 100%; background: center 62% / cover no-repeat; opacity: 0; transition: opacity 1.4s ease; }
+.tt-art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; opacity: 0; transition: opacity 1.4s ease; }
 .tt-screen.has-art .tt-art { opacity: 1; }
 /* The backdrop failed to load (title.ts warns): one flat colour, no veil, no drawing. */
 .tt-screen.no-art { background: #1c1824; }
 .tt-screen.no-art::after { content: none; }
 .tt-screen.no-art .tt-name { color: var(--vd-paper-light); }
-/* A soft dusk veil keeps the name and the menu readable over any picture. */
-.tt-screen::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(70% 55% at 50% 30%, rgba(255, 220, 160, 0.16), transparent 70%), linear-gradient(90deg, rgba(30, 22, 40, 0.42), transparent 42%), linear-gradient(0deg, rgba(30, 22, 40, 0.35), transparent 30%); }
-
-.tt-head { position: absolute; z-index: 2; left: 50%; top: 16vh; transform: translateX(-50%); text-align: center; white-space: nowrap; }
-.tt-name { position: relative; margin: 0; padding: 0 0.12em; color: #1e1610; font: 800 clamp(64px, 14vh, 160px)/0.95 var(--vd-title); letter-spacing: 0.01em; text-shadow: 0 0 2px rgba(255, 240, 210, 0.9), 0 0 26px rgba(255, 214, 150, 0.85); transform: rotate(-2deg); }
+/* Keep the accepted painting's light; the menu already has its paper panel. */
+.tt-head { position: absolute; z-index: 2; left: 50%; top: calc(5.5vh - 3.17vw); width: 45vw; transform: translateX(-50%); text-align: center; white-space: nowrap; }
+.tt-name { position: relative; margin: 0; padding: 0; color: #1e1610; font: 800 clamp(64px, 14vh, 160px)/0.95 var(--vd-title); letter-spacing: 0.01em; text-shadow: 0 0 2px rgba(255, 240, 210, 0.9), 0 0 26px rgba(255, 214, 150, 0.85); }
+.tt-logo { display: block; width: 100%; height: auto; }
+.tt-logo[hidden], .tt-logo-fallback[hidden], .tt-art[hidden] { display: none; }
+.tt-logo-fallback { display: block; padding-top: 3.17vw; transform: rotate(-2deg); }
 .tt-head { font-size: clamp(64px, 14vh, 160px); }
-.tt-head > .tt-sub { margin: 0.55em 0 0; color: #fff3d6; font: 600 clamp(17px, 2.7vh, 28px)/1.2 var(--vd-title); text-shadow: 0 1px 3px rgba(30, 20, 30, 0.75); }
+.tt-head > .tt-sub { margin: 0.35em 0 0; color: #fff3d6; font: 600 clamp(17px, 2.7vh, 28px)/1.2 var(--vd-title); text-shadow: 0 1px 3px rgba(30, 20, 30, 0.75); }
 .tt-sub i { font-style: normal; opacity: 0.8; }
 
 .tt-menu { position: absolute; z-index: 2; left: max(24px, 6vw); bottom: max(24px, 7vh); width: min(400px, 42vw); padding: 12px; }

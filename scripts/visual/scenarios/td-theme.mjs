@@ -37,8 +37,10 @@ const TITLE = `(() => {
   const name = el.querySelector(".tt-name");
   const entries = [...el.querySelectorAll(".tt-entry")];
   return {
-    name: name?.textContent ?? "", nameFont: name ? getComputedStyle(name).fontFamily : "",
+    name: name?.querySelector(".tt-logo:not([hidden])")?.alt ?? name?.querySelector(".tt-logo-fallback:not([hidden])")?.textContent ?? "", nameFont: name ? getComputedStyle(name).fontFamily : "",
     entries: entries.map((e) => ({ id: e.dataset.entry, text: e.textContent, focus: e.classList.contains("is-focus"), off: e.classList.contains("is-off") })),
+    backdrop: (() => { const i = el.querySelector(".tt-art"); return { loaded: i?.naturalWidth > 0, src: i?.currentSrc ?? "" }; })(),
+    logo: (() => { const i = el.querySelector(".tt-logo"); return { loaded: i?.naturalWidth > 0, widthRatio: (i?.getBoundingClientRect().width ?? 0) / innerWidth, alt: i?.alt }; })(),
     painted: el.classList.contains("has-art"), drawn: el.querySelectorAll("svg, .tt-seal, .tt-fly").length,
     settings: !!el.querySelector(".td-settings:not([hidden])"),
   };
@@ -75,7 +77,12 @@ export default async function (page) {
   await shot("title");
   shown.title = title !== null && title.name === "Wordwoven" && title.entries.length === 5;
   // The painted title must be there and nothing code-drawn on it (owner, 28/10).
-  shown.painted = title?.painted === true && title.drawn === 0;
+  shown.painted = title?.painted === true && title.drawn === 0 && title.backdrop?.loaded === true && /title-backdrop\.(1280|1536)\.webp(?:$|\?)/.test(title.backdrop.src);
+  shown.logo = title?.logo?.loaded === true && title.logo.widthRatio >= 0.4 && title.logo.widthRatio <= 0.5 && title.logo.alt === "Wordwoven";
+  const favicons = await page.eval(`(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async (icon) => {
+    const response = await fetch(icon.href); return { href: icon.href, status: response.status, type: response.headers.get("content-type") };
+  })))()`);
+  shown.favicons = favicons?.length === 2 && favicons.every((f) => f.status === 200 && f.type?.split(";")[0] === "image/png" && /favicon-(32|64)\.png$/.test(f.href));
   shown.titleFace = title?.nameFont?.startsWith('"Baloo 2"') === true;
   shown.noStepBehind = tick0 === 0 || tick0 === null ? (await page.eval(td("return t.state().tick;"))) === tick0 : false;
   const face = await page.eval(FACE);
@@ -184,10 +191,22 @@ export default async function (page) {
   await send(page, { t: "sandbox", op: { op: "flood", value: 200 } });
   const lost = await until(page, `return t.state().phase === "defeat";`, 150000, 500);
   await page.sleep(800);
-  const results = await page.eval(`(() => { const s = document.querySelector(".td-sheet.is-results"); return s && !s.hidden ? s.textContent : null; })()`);
+  const results = await page.eval(`(async () => {
+    const s = document.querySelector(".td-sheet.is-results");
+    if (!s || s.hidden) return null;
+    const images = [...s.querySelectorAll("img[data-ui-art]")];
+    await Promise.allSettled(images.map((i) => i.decode()));
+    // Recheck 232 F1, F2: the heading holds its banner (no overflow, no seal bar) and stops above the next line; cream words on the banner only.
+    const h = s.querySelector(".td-result-heading"), banner = h?.querySelector(".td-result-banner"), next = h?.nextElementSibling;
+    const heading = h && { bottom: Math.max(h.getBoundingClientRect().bottom, banner?.hidden ? 0 : banner.getBoundingClientRect().bottom), overflow: h.scrollHeight - h.clientHeight, bar: getComputedStyle(h, "::after").content, nextTop: next?.getBoundingClientRect().top ?? Infinity, cream: h.classList.contains("has-banner"), color: getComputedStyle(h).color };
+    return { text: s.textContent, heading, art: images.map((i) => ({ name: i.dataset.uiArt, loaded: i.naturalWidth > 0 && !i.hidden, decorative: i.alt === "" && i.getAttribute("aria-hidden") === "true" })) };
+  })()`);
   await shot("results");
-  shown.results = lost === true && results !== null && /Fort/.test(results);
+  shown.results = lost === true && results !== null && /Fort/.test(results.text);
+  shown.resultArt = ["crest", "banner", "divider"].every((name) => results?.art.some((i) => i.name === name && i.loaded && i.decorative));
+  const heading = results?.heading;
+  shown.resultHeading = heading != null && heading.overflow <= 1 && heading.bar === "none" && heading.bottom <= heading.nextTop + 0.5 && heading.cream === results.art.some((i) => i.name === "banner" && i.loaded);
 
   const checks = { ready, ...Object.fromEntries(Object.entries(shown).map(([name, value]) => [name, value === true])), ...consoleChecks(page) };
-  return finish(page, checks, { title, face: face && { checked: face.checked, fallback: face.fallback }, musicBefore, musicAfter, stored, pauseCard, results, shots });
+  return finish(page, checks, { title, favicons, face: face && { checked: face.checked, fallback: face.fallback }, musicBefore, musicAfter, stored, pauseCard, results, shots });
 }

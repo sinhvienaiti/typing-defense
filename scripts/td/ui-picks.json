@@ -1,0 +1,223 @@
+[
+  {
+    "name": "title-backdrop",
+    "source": "title-epic/title-backdrop.v2.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10b/verdict.md",
+      "M": 8,
+      "Q": 8.5
+    },
+    "sourceSize": [
+      1536,
+      1024
+    ],
+    "alpha": false,
+    "crop": {
+      "mode": "crop",
+      "geometry": "1536x864+0+80",
+      "width": 1536,
+      "height": 864
+    },
+    "outputs": [
+      {
+        "file": "title-backdrop.1280.webp",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "file": "title-backdrop.1536.webp",
+        "width": 1536,
+        "height": 864
+      }
+    ]
+  },
+  {
+    "name": "logo",
+    "source": "title-epic/logo.alpha.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10/verdict.md",
+      "M": 8.5,
+      "Q": 9
+    },
+    "sourceSize": [
+      2172,
+      724
+    ],
+    "alpha": true,
+    "crop": {
+      "mode": "none",
+      "width": 2172,
+      "height": 724
+    },
+    "outputs": [
+      {
+        "file": "logo.180.webp",
+        "width": 180,
+        "height": 60
+      },
+      {
+        "file": "logo.360.webp",
+        "width": 360,
+        "height": 120
+      },
+      {
+        "file": "logo.576.webp",
+        "width": 576,
+        "height": 192
+      },
+      {
+        "file": "logo.864.webp",
+        "width": 864,
+        "height": 288
+      },
+      {
+        "file": "logo.1296.webp",
+        "width": 1296,
+        "height": 432
+      },
+      {
+        "file": "logo.1728.webp",
+        "width": 1728,
+        "height": 576
+      }
+    ]
+  },
+  {
+    "name": "favicon",
+    "source": "title-epic/emblem.alpha.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10/verdict.md",
+      "M": 8,
+      "Q": 9
+    },
+    "until": "177",
+    "sourceSize": [
+      1024,
+      1024
+    ],
+    "alpha": true,
+    "crop": {
+      "mode": "trim-alpha",
+      "width": 901,
+      "height": 919,
+      "x": 61,
+      "y": 41,
+      "padSquare": true
+    },
+    "outputs": [
+      {
+        "file": "favicon-32.png",
+        "width": 32,
+        "height": 32
+      },
+      {
+        "file": "favicon-64.png",
+        "width": 64,
+        "height": 64
+      }
+    ]
+  },
+  {
+    "name": "crest",
+    "source": "frames-epic/crest.alpha.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10/verdict.md",
+      "M": 8.5,
+      "Q": 9.5
+    },
+    "sourceSize": [
+      1024,
+      1024
+    ],
+    "alpha": true,
+    "crop": {
+      "mode": "none",
+      "width": 1024,
+      "height": 1024
+    },
+    "outputs": [
+      {
+        "file": "crest.128.webp",
+        "width": 128,
+        "height": 128
+      },
+      {
+        "file": "crest.256.webp",
+        "width": 256,
+        "height": 256
+      }
+    ]
+  },
+  {
+    "name": "banner",
+    "source": "frames-epic/banner.alpha.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10/verdict.md",
+      "M": 8.5,
+      "Q": 9
+    },
+    "sourceSize": [
+      1536,
+      512
+    ],
+    "alpha": true,
+    "crop": {
+      "mode": "trim-alpha",
+      "width": 1444,
+      "height": 357,
+      "x": 46,
+      "y": 77
+    },
+    "outputs": [
+      {
+        "file": "banner.400.webp",
+        "width": 400,
+        "height": 99
+      },
+      {
+        "file": "banner.800.webp",
+        "width": 800,
+        "height": 198
+      }
+    ]
+  },
+  {
+    "name": "divider",
+    "source": "frames-epic/divider.alpha.png",
+    "accepted": true,
+    "verdict": {
+      "file": "docs/codex-queue/accept-29-10/verdict.md",
+      "M": 8,
+      "Q": 9
+    },
+    "sourceSize": [
+      1536,
+      512
+    ],
+    "alpha": true,
+    "crop": {
+      "mode": "trim-alpha",
+      "width": 1444,
+      "height": 215,
+      "x": 46,
+      "y": 148
+    },
+    "outputs": [
+      {
+        "file": "divider.320.webp",
+        "width": 320,
+        "height": 48
+      },
+      {
+        "file": "divider.640.webp",
+        "width": 640,
+        "height": 95
+      }
+    ]
+  }
+]

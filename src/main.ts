@@ -20,6 +20,7 @@
  * 2D view or, when the tier asks for it, map 1's 3D view, a chunk with three.js that falls back to 2D.
  */
 import "./ui/td.css";
+import { bindArt } from "./ui/art";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
@@ -53,6 +54,8 @@ function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   if (element === null) throw new Error("typing defense: missing #" + id);
   return element as T;
 }
+
+bindArt(byId<HTMLImageElement>("tdLoadingLogo"), "logo", { fallback: byId("tdLoadingFallback") });
 
 const params = new URLSearchParams(window.location.search);
 // The story stage of map 1 (BUILD_1B §4.1); the sandbox with ?sandbox=1.
