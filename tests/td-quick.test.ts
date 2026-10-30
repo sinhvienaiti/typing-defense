@@ -73,7 +73,7 @@ type Profile = { id: string; name: string; family: string; score: number | null;
 const catalogue = JSON.parse(readFileSync(new URL("../public" + CATALOGUE, import.meta.url), "utf8")) as { profiles: Profile[] };
 type SetManifest = { schema?: string; id?: string; preview?: string; files?: { file: string; set: string; durationMs?: number }[] };
 const setManifest = (p: Profile): SetManifest => JSON.parse(readFileSync(new URL("../public" + KEYS_BASE + p.manifest, import.meta.url), "utf8")) as SetManifest;
-/** A fake sample lasts what its set's manifest says (`durationMs`, schema /2: Raindrop Tile's natural tails), else 0.2 s. */
+/** A fake sample lasts what its set's manifest says (`durationMs`, schema /2: the owner picks' natural tails), else 0.2 s. */
 const lengths = new Map<string, number>();
 for (const p of catalogue.profiles) for (const f of setManifest(p).files ?? []) if (typeof f.durationMs === "number") lengths.set(KEYS_BASE + p.manifest.slice(0, p.manifest.lastIndexOf("/") + 1) + f.file, f.durationMs / 1000);
 /** A Firefly set other than the default, from the game's own catalogue (the list may change; the default stays). */
@@ -432,22 +432,28 @@ describe("the saved keyboard set at startup", () => {
   });
 });
 
-describe("33 Firefly sets: Raindrop Tile, the owner's pick (30/10)", () => {
-  const RAIN = "raindrop-tile";
+describe("34 Firefly sets: the owner's picks Raindrop Tile and Hail Stone (30/10)", () => {
+  /** The owner's unscored picks (natural Firefly takes, kept tails), as the Audio Lab staging catalogue places them. */
+  const PICKS = [
+    { id: "hail-stone", name: "Hail Stone", family: "Solid", order: 12, after: "solid-amber", before: "crisp", keys: 25, spaces: 8, keyMs: 450, spaceMs: 535 },
+    { id: "raindrop-tile", name: "Raindrop Tile", family: "Crisp", order: 19, after: "crisp-silk", before: "clear", keys: 17, spaces: 8, keyMs: 450, spaceMs: 535 },
+  ] as const;
   const profile = (id: string): Profile => catalogue.profiles.find((p) => p.id === id)!;
   const byOrder = (): Profile[] => [...catalogue.profiles].sort((a, b) => a.order - b.order);
 
-  it("the catalogue lists 33 sets in order 0–32; Raindrop Tile closes the Crisp family after Crisp Silk, unscored as the owner's pick", () => {
+  it("the catalogue lists 34 sets in order 0–33; Hail Stone closes Solid after Solid Amber, Raindrop Tile closes Crisp after Crisp Silk, both unscored as the owner's picks", () => {
     const ids = catalogue.profiles.map((p) => p.id);
-    expect([ids.length, new Set(ids).size]).toEqual([33, 33]);
-    expect(byOrder().map((p) => p.order)).toEqual(Array.from({ length: 33 }, (_, i) => i));
-    expect(profile(RAIN)).toMatchObject({ name: "Raindrop Tile", family: "Crisp", score: null, ownerPick: true, manifest: "raindrop-tile/keys-manifest.json", preview: "raindrop-tile/preview.ogg" });
-    expect([profile("crisp-silk").order + 1, profile("clear").order - 1]).toEqual([profile(RAIN).order, profile(RAIN).order]);
-    // No invented score: only the owner's pick goes without one.
-    expect(catalogue.profiles.filter((p) => !(typeof p.score === "number" && Number.isFinite(p.score))).map((p) => p.id)).toEqual([RAIN]);
+    expect([ids.length, new Set(ids).size]).toEqual([34, 34]);
+    expect(byOrder().map((p) => p.order)).toEqual(Array.from({ length: 34 }, (_, i) => i));
+    for (const pick of PICKS) {
+      expect(profile(pick.id), pick.id).toMatchObject({ name: pick.name, family: pick.family, score: null, ownerPick: true, order: pick.order, manifest: `${pick.id}/keys-manifest.json`, preview: `${pick.id}/preview.ogg` });
+      expect([profile(pick.after).order + 1, profile(pick.before).order - 1], pick.id).toEqual([pick.order, pick.order]);
+    }
+    // No invented score: only the owner's picks go without one.
+    expect(byOrder().filter((p) => !(typeof p.score === "number" && Number.isFinite(p.score))).map((p) => p.id)).toEqual(PICKS.map((pick) => pick.id));
     const families: Record<string, number> = {};
     for (const p of catalogue.profiles) families[p.family] = (families[p.family] ?? 0) + 1;
-    expect(families).toEqual({ Deep: 3, Warm: 6, Rounded: 1, Solid: 2, Crisp: 7, Clear: 4, "Bright Clack": 10 });
+    expect(families).toEqual({ Deep: 3, Warm: 6, Rounded: 1, Solid: 3, Crisp: 7, Clear: 4, "Bright Clack": 10 });
     expect(DEFAULT_KEYBOARD_SOUND).toBe("bright-clack");
   });
 
@@ -468,55 +474,57 @@ describe("33 Firefly sets: Raindrop Tile, the owner's pick (30/10)", () => {
     expect(listed.filter((file) => !wanted.has(file))).toEqual([]);
   });
 
-  it("Raindrop Tile's manifest (schema /2): 17 keys with natural tails up to 450 ms, 8 spaces, its preview", () => {
-    const rain = setManifest(profile(RAIN));
-    expect([rain.schema, rain.id, rain.preview]).toEqual(["typing-keys-firefly/2", RAIN, "preview.ogg"]);
-    const keys = rain.files!.filter((f) => f.set === "key");
-    const spaces = rain.files!.filter((f) => f.set === "space");
-    expect([keys.length, spaces.length]).toEqual([17, 8]);
-    for (const f of keys) expect(f.durationMs, f.file).toBeGreaterThan(0);
-    expect(Math.max(...keys.map((f) => f.durationMs!))).toBe(450);
+  it.each(PICKS)("$name: its manifest (schema /2) has $keys keys with natural tails up to $keyMs ms, $spaces spaces up to $spaceMs ms, its preview", (pick) => {
+    const set = setManifest(profile(pick.id));
+    expect([set.schema, set.id, set.preview]).toEqual(["typing-keys-firefly/2", pick.id, "preview.ogg"]);
+    const keys = set.files!.filter((f) => f.set === "key");
+    const spaces = set.files!.filter((f) => f.set === "space");
+    expect([keys.length, spaces.length]).toEqual([pick.keys, pick.spaces]);
+    for (const f of [...keys, ...spaces]) expect(f.durationMs, f.file).toBeGreaterThan(0);
+    expect([Math.max(...keys.map((f) => f.durationMs!)), Math.max(...spaces.map((f) => f.durationMs!))]).toEqual([pick.keyMs, pick.spaceMs]);
   });
 
-  it("the Sound panel offers Off, Bamboo and the 33 sets in catalogue order; Raindrop Tile is in the Crisp group, read without a score", async () => {
+  it("the Sound panel offers Off, Bamboo and the 34 sets in catalogue order; Hail Stone is in the Solid group, Raindrop Tile in Crisp, read without a score", async () => {
     const read = await loadKeyboardCatalog(KEYS_BASE, { fallback: [], extra: [ORIGINAL_KEYS] });
-    const rain = read.options.find((choice) => choice.value === RAIN)!;
     expect(read.state).toBe("ready");
-    expect(rain).toEqual({ value: RAIN, label: "Raindrop Tile", family: "Crisp", manifest: KEYS_BASE + "raindrop-tile/keys-manifest.json", preview: KEYS_BASE + "raindrop-tile/preview.ogg" });
+    for (const pick of PICKS) {
+      expect(read.options.find((choice) => choice.value === pick.id)).toEqual({ value: pick.id, label: pick.name, family: pick.family, manifest: KEYS_BASE + `${pick.id}/keys-manifest.json`, preview: KEYS_BASE + `${pick.id}/preview.ogg` });
+    }
     await mount();
     press("F2", "F2");
     const values = (scope: ParentNode): string[] => [...scope.querySelectorAll<HTMLElement>('[role="option"]')].map((button) => button.dataset.value!);
     expect(values(document.querySelector(".kit-keyboards__list")!)).toEqual(["off", BUILT_IN_KEYS, ...byOrder().map((p) => p.id)]);
-    const crisp = [...document.querySelectorAll('.kit-keyboards__list [role="group"]')].find((group) => group.querySelector(".kit-keyboards__family")?.textContent === "Crisp")!;
-    expect(values(crisp)).toEqual(["crisp", "crisp-amber", "crisp-cedar", "crisp-pebble", "crisp-slate", "crisp-silk", RAIN]);
-    expect(option(RAIN)!.textContent).toBe("Raindrop Tile");
+    const group = (family: string): Element => [...document.querySelectorAll('.kit-keyboards__list [role="group"]')].find((g) => g.querySelector(".kit-keyboards__family")?.textContent === family)!;
+    expect(values(group("Solid"))).toEqual(["solid", "solid-amber", "hail-stone"]);
+    expect(values(group("Crisp"))).toEqual(["crisp", "crisp-amber", "crisp-cedar", "crisp-pebble", "crisp-slate", "crisp-silk", "raindrop-tile"]);
+    for (const pick of PICKS) expect(option(pick.id)!.textContent).toBe(pick.name);
     expect(option(DEFAULT_KEYBOARD_SOUND)!.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("picked in the panel it is saved, all 25 samples decode, and letters and the space play its own files", async () => {
+  it.each(PICKS)("$name, picked in the panel, is saved, all its samples decode, and letters and the space play its own files", async (pick) => {
     await mount();
     await settle();
     press("F2", "F2");
-    option(RAIN)!.click();
+    option(pick.id)!.click();
     await settle();
-    expect(stored()?.keyboard).toBe(RAIN);
-    expect(decodedOf(RAIN)).toHaveLength(25);
+    expect(stored()?.keyboard).toBe(pick.id);
+    expect(decodedOf(pick.id)).toHaveLength(pick.keys + pick.spaces);
     press("Escape", "Escape");
     await wait(20);
     newRun();
     frame(0);
     press("c", "KeyC");
     frame(20);
-    expect(played().at(-1)!.buffer!.url).toContain(`/${RAIN}/key-`);
+    expect(played().at(-1)!.buffer!.url).toContain(`/${pick.id}/key-`);
     press(" ", "Space");
-    expect(played().at(-1)!.buffer!.url).toContain(`/${RAIN}/space-`);
+    expect(played().at(-1)!.buffer!.url).toContain(`/${pick.id}/space-`);
     expect(notices).toEqual([]);
   });
 
-  it("its tails ring out: at 12 keys a second (about 145 WPM) no key sound is cut, nor a space at 3 a second", async () => {
-    await mount({ keyboard: RAIN });
+  it.each(PICKS)("$name: its tails ring out, at 12 keys a second (about 145 WPM) no key sound is cut, nor a space at 3 a second", async (pick) => {
+    await mount({ keyboard: pick.id });
     await settle();
-    expect(decodedOf(RAIN)).toHaveLength(25);
+    expect(decodedOf(pick.id)).toHaveLength(pick.keys + pick.spaces);
     const clock = ctx()!;
     for (let i = 0; i < 36; i += 1) {
       clock.currentTime = i / 12;
@@ -526,11 +534,12 @@ describe("33 Firefly sets: Raindrop Tile, the owner's pick (30/10)", () => {
       clock.currentTime = 4 + i / 3;
       page.quick!.typed(true);
     }
-    const keys = played().filter((source) => source.buffer!.url.includes(`/${RAIN}/key-`));
-    const spaces = played().filter((source) => source.buffer!.url.includes(`/${RAIN}/space-`));
+    const keys = played().filter((source) => source.buffer!.url.includes(`/${pick.id}/key-`));
+    const spaces = played().filter((source) => source.buffer!.url.includes(`/${pick.id}/space-`));
     expect([keys.length, spaces.length]).toEqual([36, 9]);
-    // Every variant played twice or more, so the 450 ms and 535 ms samples were among them.
-    expect([Math.max(...keys.map((s) => lengths.get(s.buffer!.url)!)), Math.max(...spaces.map((s) => lengths.get(s.buffer!.url)!))]).toEqual([0.45, 0.535]);
+    // A shuffled round plays every variant once before any twice, so the longest samples were among them.
+    expect(new Set(keys.map((s) => s.buffer!.url)).size).toBe(pick.keys);
+    expect([Math.max(...keys.map((s) => lengths.get(s.buffer!.url)!)), Math.max(...spaces.map((s) => lengths.get(s.buffer!.url)!))]).toEqual([pick.keyMs / 1000, pick.spaceMs / 1000]);
     expect([...keys, ...spaces].filter((source) => source.stopped !== null).map((source) => source.buffer!.url)).toEqual([]);
   });
 });

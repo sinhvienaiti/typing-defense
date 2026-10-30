@@ -4,6 +4,8 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 30/10/2026 | Bộ phím thứ 34 **Hail Stone** (chủ dự án chọn, họ Solid sau Solid Amber, `order` 12, không điểm): 34 OGG stereo trong `media.md5` (tổng 2.744), danh mục 34 bộ; không đổi mã; test 34 bộ | [2026-10-30-keyboard-set-hail-stone](./2026-10-30-keyboard-set-hail-stone.md) |
+| 30/10/2026 | Bộ phím thứ 33 **Raindrop Tile** (chủ dự án chọn, họ Crisp sau Crisp Silk, không điểm): 26 OGG stereo trong `media.md5` (tổng 2.710), danh mục 33 bộ; không đổi mã; test 33 bộ | [2026-10-30-keyboard-set-raindrop-tile](./2026-10-30-keyboard-set-raindrop-tile.md) |
 | 30/10/2026 | Sửa theo phản biện tiếng phím: chữ sai và chữ lạc giữ tiếng riêng trên bộ Firefly (theo kết quả bộ định tuyến), bộ đã lưu kêu từ lô giải mã đầu và được giải phóng khi đổi bộ, id lạ về Bright Clack, 17 test Settings/Sound (Happy DOM), khôi phục chú thích đầu file | [2026-10-30-keyboard-review-fixes](./2026-10-30-keyboard-review-fixes.md) |
 | 30/10/2026 | 32 bộ tiếng phím Firefly thuộc 7 họ (phiếu 218) thay bảy bộ, nhóm theo họ qua kit (phiếu 219, đồng bộ ở `4ae665b2`); mặc định vẫn Bright Clack; 2.684 OGG trong `media.md5`, 33 manifest trong Git | [2026-10-30-keyboard-sets-32](./2026-10-30-keyboard-sets-32.md) |
 | 30/10/2026 | Nút Settings và Sound trong trận (phiếu Codex 193): bảng kit quick-settings, F1/F2/Esc, đếm 3–2–1, Master/Mute, Music, Effects, Interface, tiếng phím Firefly (mặc định Bright Clack) và Bamboo (original); Claude nhận, `pnpm check` xanh, ván vàng giữ nguyên | [2026-10-30-settings-and-keyboard-sounds](./2026-10-30-settings-and-keyboard-sounds.md) |
