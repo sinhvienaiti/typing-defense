@@ -1,4 +1,6 @@
-import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig, loadEnv } from "vite";
+import { portalHome } from "./src/app/portal";
 
 const env = (name: string): string | undefined => process.env[name]?.trim() || undefined;
 
@@ -25,36 +27,62 @@ let chunkFor: ((id: string) => string | undefined) | null = null;
 // A plain `pnpm dev` on 127.0.0.1:3006 keeps Vite's own HMR socket.
 const hmrHost = env("DEV_HMR_HOST");
 
-export default defineConfig({
-  base: "/",
-  server: {
-    host: env("DEV_HOST") ?? "127.0.0.1",
-    port: 3006,
-    strictPort: true,
-    allowedHosts: (env("DEV_ALLOWED_HOSTS") ?? "td.typing-game.local")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean),
-    hmr: hmrHost
-      ? {
-          host: hmrHost,
-          protocol: (env("DEV_HMR_PROTOCOL") as "ws" | "wss" | undefined) ?? "wss",
-          clientPort: Number(env("DEV_HMR_CLIENT_PORT") ?? 443),
+/** Replace only the compiled fallback; the pinned kit stays intact. */
+export function replacePortalOrigin(code: string, origin: string): string {
+  const declaration = /^export const PARENT_ORIGIN = [^\n]+;$/gm;
+  if (code.match(declaration)?.length !== 1) throw new Error("Expected one kit PARENT_ORIGIN declaration");
+  return code.replace(declaration, () => `export const PARENT_ORIGIN = ${JSON.stringify(origin)};`);
+}
+
+export default defineConfig(({ mode }) => {
+  const root = fileURLToPath(new URL(".", import.meta.url));
+  const contract = fileURLToPath(new URL("./src/kit/learning/contract.ts", import.meta.url));
+  const home = portalHome(loadEnv(mode, root, "VITE_PORTAL_URL").VITE_PORTAL_URL);
+  const origin = home ? new URL(home).origin : "";
+  chunkFor = null;
+  return {
+    plugins: [{
+      name: "wordwoven-portal-origin",
+      enforce: "pre",
+      transform(code, id) {
+        if (id !== contract) return null;
+        try {
+          return { code: replacePortalOrigin(code, origin), map: null };
+        } catch (error) {
+          this.error(error instanceof Error ? error.message : String(error));
         }
-      : undefined,
-  },
-  build: {
-    target: "es2022",
-    // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
-    manifest: true,
-    rollupOptions: {
-      output: {
-        // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
-        // pause and results cards, the sandbox panel, __td and "Chơi lại Ngày n" (R3 step 1), Học with the portal bridge and
-        // the teaching table (R3) load apart (src/main.ts, LAZY, chunkOf).
-        // At "/" the start set is that chunk and the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
-        manualChunks: (id, { getModuleIds, getModuleInfo }) => (chunkFor ??= chunkOf([...getModuleIds()].filter((at) => getModuleInfo(at)?.isEntry), getModuleInfo))(id),
+      },
+    }],
+    base: "/",
+    server: {
+      host: env("DEV_HOST") ?? "127.0.0.1",
+      port: 3006,
+      strictPort: true,
+      allowedHosts: (env("DEV_ALLOWED_HOSTS") ?? "td.typing-game.local")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+      hmr: hmrHost
+        ? {
+            host: hmrHost,
+            protocol: (env("DEV_HMR_PROTOCOL") as "ws" | "wss" | undefined) ?? "wss",
+            clientPort: Number(env("DEV_HMR_CLIENT_PORT") ?? 443),
+          }
+        : undefined,
+    },
+    build: {
+      target: "es2022",
+      // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
+      manifest: true,
+      rollupOptions: {
+        output: {
+          // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
+          // pause and results cards, the sandbox panel, __td and "Chơi lại Ngày n" (R3 step 1), Học with the portal bridge and
+          // the teaching table (R3) load apart (src/main.ts, LAZY, chunkOf).
+          // At "/" the start set is that chunk and the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
+          manualChunks: (id, { getModuleIds, getModuleInfo }) => (chunkFor ??= chunkOf([...getModuleIds()].filter((at) => getModuleInfo(at)?.isEntry), getModuleInfo))(id),
+        },
       },
     },
-  },
+  };
 });

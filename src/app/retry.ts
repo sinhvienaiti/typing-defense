@@ -65,10 +65,10 @@ export function playtestFile(run: RunOf, profile: SkillProfile, vocabulary: stri
   return { v: 1, game: "typing-defense", numbers: balanceOf(world, profile), run: { seed: run.seed, sandbox: run.sandbox, content: world.c.hash, deck: run.deck.hash, vocabulary, expected: header.expected, pace: { k: header.k, director: header.director }, mode: run.mode, learn: run.learn, tick: world.tick, hash: hashHex(world), log: run.session.log } };
 }
 
-/** "Chép số chơi thử" (BUILD_1B §14, §22): the play-test file saved (loi-goi-choi-thu-….json) and copied to the clipboard. */
+/** Save the playtest JSON and copy the same data to the clipboard (BUILD_1B §14, §22). */
 export function copyNumbers(run: RunOf, profile: SkillProfile, vocabulary: string): void {
   const text = JSON.stringify(playtestFile(run, profile, vocabulary));
-  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: `loi-goi-choi-thu-s${run.seed}-n${run.world.day}-${run.world.tick}.json` });
+  const a = Object.assign(document.createElement("a"), { href: URL.createObjectURL(new Blob([text], { type: "application/json" })), download: `wordwoven-playtest-s${run.seed}-n${run.world.day}-${run.world.tick}.json` });
   a.click();
   URL.revokeObjectURL(a.href);
   void navigator.clipboard?.writeText(text).catch(() => undefined);
