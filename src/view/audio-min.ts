@@ -1,4 +1,20 @@
-/** Synthesized music, combat, interface and original bamboo keys on separate buses. */
+/**
+ * Lời Gọi's sound made in code (docs/td/BUILD_NOW.md §5.5, TK 24; SPLIT_PLAN §1.2), no files: bamboo, wood, bronze
+ * bells and paper (folk.ts), the list and the prompts for the real files in docs/audio/THEME_SOUND_LIST.md. Buses (TK
+ * 24.2): music (ducked under a spoken word), typing (its own light compressor), world, ui (the Interface volume, ticket
+ * 193), keys (the original Bamboo keys at Master × Keyboard volume, silent with any other keyboard sound: a Firefly set
+ * plays in app/quick.ts), a shared reverb, master and a limiter; the settings set master, music, effects and interface.
+ * A call that lights up rings its kind's alert (power a trống cơm pair, build two bamboo taps, harvest a high bell, chop
+ * a low wood knock, mine a small clink, quiz a sáo call; at most 3 a second); with Bamboo chosen, a right key is a
+ * bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB lower; a finished word a đàn tranh
+ * note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots whoosh, blasts thud, the ink folk puff
+ * like paper, a leak rings a gong; night and dawn have their own calls. The title adds far villagers calling across
+ * the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's
+ * swelling rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers;
+ * Rễ Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
+ * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
+ * drum's thump (Ngắt), a bronze stroke and knock (Neo), a stone dome cracking (Phá Khiên).
+ */
 import { TICK_HZ } from "../content/rules";
 import { FX, type RareEvent } from "../sim/events";
 import { PROJECTILE } from "../sim/stores/projectiles";
@@ -10,7 +26,7 @@ import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, tron
 import { FolkMusic } from "./music";
 
 const ALERTS_PER_S = 3;
-/** Music, effects and interface retain their squared channel curves. */
+/** Each bus's gain at volume 100 (the settings square the slider: half the slider is a quarter of the power). */
 const BASE = { music: 1, sfx: 1.4 } as const;
 type Bus = "typing" | "world" | "ui" | "keys";
 /** The title's sounds: a menu step, a choice, a closed entry, a lantern lighting. */
@@ -80,7 +96,7 @@ export class TypingAudio {
     this.apply(this.settings);
   }
 
-  /** Existing squared mix; keyboard has its own linear Master × volume bus. */
+  /** Volumes from the settings (0–100), squared; mute holds the master at 0. The Bamboo keys: linear, Master × Keyboard. */
   apply(settings: Settings): void {
     this.settings = settings;
     if (this.ctx === null) return;
@@ -109,7 +125,11 @@ export class TypingAudio {
     else go(this.out.world, this.ctx!.currentTime, 620, 0.09, 0.05);
   }
 
-  /** Each frame: the music's layer (calm on the title and by day, tension at night), the music ducked under a word being spoken (TK 24.2 PRONUNCIATION_DUCK: −9 dB in 0.12 s, back in 0.5 s), on the title a villager calling every 3–7 s from left or right; a wood-block knock each of the day's last 10 s, higher for the last 3 (the early call). */
+  /**
+   * Each frame: the music's layer (calm on the title and by day, tension at night), the music ducked under a
+   * word being spoken (TK 24.2 PRONUNCIATION_DUCK: −9 dB in 0.12 s, back in 0.5 s), on the title a villager
+   * calling every 3–7 s from left or right; a wood-block knock each of the day's last 10 s, higher for the last 3 (the early call).
+   */
   frame(w: World | null, now: number): void {
     if (this.ctx === null || this.music === null) return;
     const left = w !== null && w.phase === "day" ? Math.ceil((w.phaseEnd - w.tick) / TICK_HZ) : -1;

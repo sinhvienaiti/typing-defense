@@ -1,4 +1,11 @@
-/** Settings in td.settings; story stars in td.campaign. */
+/**
+ * The settings kept under td.settings (SPLIT_PLAN D7): master, music and effects volumes 0–100, "Nhịp tự điều
+ * theo cách bạn gõ" (BALANCE.md §4.2, on by default; a run keeps the value it started with) and the story's mode (BUILD_1B
+ * §14, R3; null: by the profile). Read at boot; the card that changes them (ui/settings.ts) loads with the title or the
+ * pause card (BUILD_1B §20: not in the start chunk). The stars of each stage won are kept under td.campaign (§4.3, R3).
+ * Tickets 192/193 add mute, the interface volume, the keyboard sound (a Firefly set's id, "bamboo" or "off") and its
+ * volume, changed in the Settings and Sound panels (app/quick.ts).
+ */
 import { safeLocalStorage } from "../kit/platform/safe-storage";
 import { STARS } from "../content/rules";
 import type { Mode } from "../content/types";

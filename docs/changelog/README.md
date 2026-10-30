@@ -4,6 +4,7 @@ Mỗi lần cập nhật một file tiếng Việt trong thư mục này (`AGENT
 
 | Ngày | Việc | File |
 |---|---|---|
+| 30/10/2026 | Sửa theo phản biện tiếng phím: chữ sai và chữ lạc giữ tiếng riêng trên bộ Firefly (theo kết quả bộ định tuyến), bộ đã lưu kêu từ lô giải mã đầu và được giải phóng khi đổi bộ, id lạ về Bright Clack, 17 test Settings/Sound (Happy DOM), khôi phục chú thích đầu file | [2026-10-30-keyboard-review-fixes](./2026-10-30-keyboard-review-fixes.md) |
 | 30/10/2026 | 32 bộ tiếng phím Firefly thuộc 7 họ (phiếu 218) thay bảy bộ, nhóm theo họ qua kit (phiếu 219, đồng bộ ở `4ae665b2`); mặc định vẫn Bright Clack; 2.684 OGG trong `media.md5`, 33 manifest trong Git | [2026-10-30-keyboard-sets-32](./2026-10-30-keyboard-sets-32.md) |
 | 30/10/2026 | Nút Settings và Sound trong trận (phiếu Codex 193): bảng kit quick-settings, F1/F2/Esc, đếm 3–2–1, Master/Mute, Music, Effects, Interface, tiếng phím Firefly (mặc định Bright Clack) và Bamboo (original); Claude nhận, `pnpm check` xanh, ván vàng giữ nguyên | [2026-10-30-settings-and-keyboard-sounds](./2026-10-30-settings-and-keyboard-sounds.md) |
 | 28/10/2026 | 1B.V4 bước 1 (VFX 2D, phiếu Codex 036): ống `FX.fire`/`FX.hit` cho view 2D (`FxPipe`, `FxDraw`), `FxView` vào chunk lười `fx`; gói "/" 83,85 kB gzip, 10.555 dòng; gộp vào `a2-days` (83,78 kB) và dừng làn V4a: 2D chỉ còn bậc Low và đường lùi, năm pha của V4a sang C11 | [2026-10-28-td-fx-pipe](./2026-10-28-td-fx-pipe.md) |
