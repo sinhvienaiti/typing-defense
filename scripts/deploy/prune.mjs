@@ -1,12 +1,16 @@
-import { existsSync, lstatSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { lstatSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
 
 const prefix = "/assets/typing-defense/models/";
 
+function entry(path) {
+  return lstatSync(path, { throwIfNoEntry: false });
+}
+
 // Never follow links while planning or deleting a package's files.
 function filesUnder(path) {
-  if (!existsSync(path)) return [];
-  const stat = lstatSync(path);
+  const stat = entry(path);
+  if (!stat) return [];
   if (stat.isSymbolicLink()) throw new Error(`Refusing symlink: ${path}`);
   if (stat.isFile()) return [{ path, bytes: stat.size }];
   if (!stat.isDirectory()) throw new Error(`Not a regular package path: ${path}`);
@@ -38,7 +42,7 @@ function prune(target) {
     if (dirname(at) === at) break;
   }
   const index = join(dist, "index.html");
-  if (!existsSync(index) || !lstatSync(index).isFile()) throw new Error(`Not a package directory (missing index.html): ${dist}`);
+  if (!entry(index)?.isFile()) throw new Error(`Not a package directory (missing index.html): ${dist}`);
   const list = JSON.parse(readFileSync(new URL("../../deploy-models.json", import.meta.url), "utf8"));
   if (!Array.isArray(list.models) || list.models.some((key) => typeof key !== "string")) throw new Error("deploy-models.json must contain a models array of keys");
   const keys = [...new Set(list.models)];
@@ -46,14 +50,14 @@ function prune(target) {
   const vite = join(dist, ".vite");
   // Check every parent before reading a manifest through it.
   for (const path of [join(dist, "assets"), join(dist, "assets/typing-defense")]) {
-    if (existsSync(path) && lstatSync(path).isSymbolicLink()) throw new Error(`Refusing symlink: ${path}`);
+    if (entry(path)?.isSymbolicLink()) throw new Error(`Refusing symlink: ${path}`);
   }
   const modelFiles = filesUnder(models);
   const viteFiles = filesUnder(vite);
   let manifest;
   const keep = new Set();
   const manifestPath = join(models, "manifest.json");
-  if (existsSync(models) && keys.length) {
+  if (entry(models) && keys.length) {
     manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const selected = {};
     for (const key of keys) {
@@ -67,7 +71,7 @@ function prune(target) {
   }
   // All validation completes before the first write or deletion.
   const removed = [...modelFiles.filter((file) => !keep.has(file.path)), ...viteFiles];
-  if (existsSync(models)) {
+  if (entry(models)) {
     if (!keys.length) rmSync(models, { recursive: true });
     else {
       for (const file of modelFiles) if (!keep.has(file.path)) rmSync(file.path);

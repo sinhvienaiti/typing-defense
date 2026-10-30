@@ -79,4 +79,35 @@ describe("portal destination", () => {
     expect(learningBridge().parentOrigin).toBe("");
     expect(learningBridge()).toBe(learningBridge());
   });
+  it("creates one real bridge only on the first call, never during import", async () => {
+    vi.resetModules();
+    vi.stubEnv("VITE_PORTAL_URL", "https://portal.example/learn/");
+    const f = fixture();
+    const addEventListener = vi.fn(f.host.addEventListener);
+    const removeEventListener = vi.fn(f.host.removeEventListener);
+    vi.stubGlobal("window", { ...f.host, addEventListener, removeEventListener });
+    const { createLearningBridge } = await import("../src/kit/learning");
+    const create = vi.fn(createLearningBridge);
+    vi.doMock("../src/kit/learning", async (original) => ({
+      ...await original<typeof import("../src/kit/learning")>(), createLearningBridge: create,
+    }));
+    try {
+      const module = await import("../src/app/learning");
+      expect(create).not.toHaveBeenCalled();
+      expect(addEventListener).not.toHaveBeenCalled();
+      const first = module.learningBridge();
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(addEventListener).toHaveBeenCalledTimes(1);
+      expect(first.parentOrigin).toBe("https://portal.example");
+      expect(module.learningBridge()).toBe(first);
+      expect(create).toHaveBeenCalledTimes(1);
+      expect(addEventListener).toHaveBeenCalledTimes(1);
+    } finally {
+      for (const result of create.mock.results) if (result.type === "return") result.value.dispose();
+      expect(removeEventListener.mock.calls).toEqual(addEventListener.mock.calls);
+      vi.doUnmock("../src/kit/learning");
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    }
+  });
 });

@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -8,10 +8,11 @@ const prefix = "/assets/typing-defense/models/";
 function snapshot(dir: string): Record<string, string> {
   return Object.fromEntries(readdirSync(dir, { withFileTypes: true }).flatMap((item): [string, string][] => {
     const path = join(dir, item.name);
+    if (item.isSymbolicLink()) return [[item.name, "symlink:" + readlinkSync(path)]];
     return item.isDirectory() ? Object.entries(snapshot(path)).map(([name, data]) => [item.name + "/" + name, data]) : [[item.name, readFileSync(path).toString("base64")]];
   }));
 }
-function fixture(run: (f: { dir: string; dist: string; models: string; manifest: Record<string, unknown>; prune: (keys: string[]) => ReturnType<typeof spawnSync> }) => void, url = prefix + "buildings/keep/high.glb?v=hash") {
+function fixture(run: (f: { dir: string; dist: string; models: string; manifest: Record<string, unknown>; prune: (keys: string[], target?: string) => ReturnType<typeof spawnSync> }) => void, url = prefix + "buildings/keep/high.glb?v=hash") {
   mkdirSync("tmp", { recursive: true });
   const dir = mkdtempSync("tmp/deploy-prune-");
   const dist = join(dir, "dist");
@@ -34,11 +35,11 @@ function fixture(run: (f: { dir: string; dist: string; models: string; manifest:
     writeFileSync(join(models, "buildings/keep/medium.glb"), "medium");
     writeFileSync(join(models, "units/other/high.glb"), "other");
     const publicBefore = snapshot(join(dir, "public"));
-    run({ dir, dist, models, manifest, prune: (keys) => {
+    run({ dir, dist, models, manifest, prune: (keys, target = dist) => {
       mkdirSync(join(dir, "scripts/deploy"), { recursive: true });
       copyFileSync(script, join(dir, "scripts/deploy/prune.mjs"));
       writeFileSync(join(dir, "deploy-models.json"), JSON.stringify({ models: keys }));
-      return spawnSync(process.execPath, [join(dir, "scripts/deploy/prune.mjs"), dist], { encoding: "utf8" });
+      return spawnSync(process.execPath, [join(dir, "scripts/deploy/prune.mjs"), target], { encoding: "utf8" });
     } });
     expect(snapshot(join(dir, "public"))).toEqual(publicBefore);
   } finally { rmSync(dir, { recursive: true, force: true }); }
@@ -98,5 +99,32 @@ describe("deployment model pruning", () => {
     expect(result.stderr).toMatch(/symlink/i);
     expect(existsSync(join(f.dist, ".vite"))).toBe(true);
     expect(existsSync(join(f.models, "manifest.json"))).toBe(true);
+  }));
+  describe.each([[], ["buildings/keep"]])("dangling links with selected keys %j", (...keys) => {
+    it.each(["assets", "assets/typing-defense", "assets/typing-defense/models", "assets/typing-defense/models/keep/link", ".vite", ".vite/link"])("rejects dangling %s before any change", (path) => fixture((f) => {
+      const link = join(f.dist, path);
+      rmSync(link, { recursive: true, force: true });
+      mkdirSync(join(link, ".."), { recursive: true });
+      symlinkSync(resolve(f.dir, "public/missing"), link);
+      const before = snapshot(f.dist);
+      const sentinel = snapshot(join(f.dir, "public"));
+      const result = f.prune(keys);
+      expect(result.status).toBe(1);
+      expect(result.stderr).toMatch(/symlink/i);
+      expect(snapshot(f.dist)).toEqual(before);
+      expect(snapshot(join(f.dir, "public"))).toEqual(sentinel);
+    }));
+  });
+  it.each(["dist", "ancestor"])("rejects a linked %s before changing the real package", (kind) => fixture((f) => {
+    const alias = join(f.dir, "alias");
+    symlinkSync(resolve(kind === "dist" ? f.dist : f.dir), alias, "dir");
+    const before = snapshot(f.dist);
+    const sentinel = snapshot(join(f.dir, "public"));
+    const result = f.prune([], kind === "dist" ? alias : join(alias, "dist"));
+    expect(result.status).toBe(1);
+    expect(result.stderr).toMatch(/symlink/i);
+    expect(snapshot(f.dist)).toEqual(before);
+    expect(snapshot(join(f.dir, "public"))).toEqual(sentinel);
+    expect(readlinkSync(alias)).toBe(resolve(kind === "dist" ? f.dist : f.dir));
   }));
 });

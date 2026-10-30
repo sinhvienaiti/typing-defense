@@ -1,3 +1,5 @@
+import { realpathSync } from "node:fs";
+import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv } from "vite";
 import { portalHome } from "./src/app/portal";
@@ -34,23 +36,42 @@ export function replacePortalOrigin(code: string, origin: string): string {
   return code.replace(declaration, () => `export const PARENT_ORIGIN = ${JSON.stringify(origin)};`);
 }
 
+// Vite ids can carry queries or reach the same file through a symlink.
+function canonicalId(id: string): string | null {
+  const path = id.split("?")[0]!.replace(/\\/g, "/");
+  if (!isAbsolute(path)) return null;
+  try {
+    return realpathSync(path);
+  } catch (error) {
+    if (["ENOENT", "ENOTDIR"].includes((error as NodeJS.ErrnoException).code ?? "")) return null;
+    throw error;
+  }
+}
+
 export default defineConfig(({ mode }) => {
-  const root = fileURLToPath(new URL(".", import.meta.url));
-  const contract = fileURLToPath(new URL("./src/kit/learning/contract.ts", import.meta.url));
+  const root = realpathSync(fileURLToPath(new URL(".", import.meta.url)));
+  const contract = realpathSync(fileURLToPath(new URL("./src/kit/learning/contract.ts", import.meta.url)));
   const home = portalHome(loadEnv(mode, root, "VITE_PORTAL_URL").VITE_PORTAL_URL);
   const origin = home ? new URL(home).origin : "";
+  let transformed = false;
   chunkFor = null;
   return {
     plugins: [{
       name: "wordwoven-portal-origin",
       enforce: "pre",
+      buildStart() { transformed = false; },
       transform(code, id) {
-        if (id !== contract) return null;
+        if (canonicalId(id) !== contract) return null;
         try {
-          return { code: replacePortalOrigin(code, origin), map: null };
+          const replaced = replacePortalOrigin(code, origin);
+          transformed = true;
+          return { code: replaced, map: null };
         } catch (error) {
           this.error(error instanceof Error ? error.message : String(error));
         }
+      },
+      buildEnd(error) {
+        if (!error && !transformed) this.error("Kit PARENT_ORIGIN was not transformed");
       },
     }],
     base: "/",
