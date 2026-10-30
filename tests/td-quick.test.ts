@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
 import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { installKeys } from "../src/app/input";
 import { BUILT_IN_KEYS, DEFAULT_KEYBOARD_SOUND, loadSettings, type Settings } from "../src/app/prefs";
-import { applyQuick, KEYS_BASE, mountQuick, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
+import { applyQuick, KEYS_BASE, mountQuick, ORIGINAL_KEYS, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
 import { Session } from "../src/app/session";
-import { KEYBOARD_DECODE_BATCH_SIZE, TYPING_SOUND_MAP } from "../src/kit/feedback/typing-fx/audio";
+import { KEYBOARD_DECODE_BATCH_SIZE, keyboardFiles, loadKeyboardCatalog, TYPING_SOUND_MAP, TYPING_SOUND_SET } from "../src/kit/feedback/typing-fx/audio";
 import { hashHex } from "../src/sim/hash";
 import type { TypingAudio } from "../src/view/audio-min";
 import { callWord, smallDeck, wordOf } from "./td/typing";
@@ -44,8 +45,10 @@ class TestSource {
   }
   connect(target: unknown): void { this.target = target; }
   disconnect(): void {}
+  /** When the kit cut it (a stolen voice), else null: a sample that rang to its end. */
+  stopped: number | null = null;
   start(): void { this.level = (this.target as TestGain | null)?.gain.value ?? -1; }
-  stop(): void {}
+  stop(when = 0): void { this.stopped = when; }
 }
 class TestContext {
   currentTime = 0;
@@ -57,7 +60,7 @@ class TestContext {
   async decodeAudioData(bytes: ArrayBuffer): Promise<{ duration: number; url: string }> {
     const url = new TextDecoder().decode(bytes);
     this.decoded.push(url);
-    return { duration: 0.2, url };
+    return { duration: lengths.get(url) ?? 0.2, url };
   }
   async resume(): Promise<void> { this.state = "running"; }
   createGain(): TestGain { return new TestGain(); }
@@ -66,7 +69,13 @@ class TestContext {
 const contexts: TestContext[] = [];
 
 const CATALOGUE = KEYS_BASE + "keys-manifest.json";
-const catalogue = JSON.parse(readFileSync(new URL("../public" + CATALOGUE, import.meta.url), "utf8")) as { profiles: { id: string; order: number }[] };
+type Profile = { id: string; name: string; family: string; score: number | null; ownerPick?: boolean; manifest: string; preview: string; order: number };
+const catalogue = JSON.parse(readFileSync(new URL("../public" + CATALOGUE, import.meta.url), "utf8")) as { profiles: Profile[] };
+type SetManifest = { schema?: string; id?: string; preview?: string; files?: { file: string; set: string; durationMs?: number }[] };
+const setManifest = (p: Profile): SetManifest => JSON.parse(readFileSync(new URL("../public" + KEYS_BASE + p.manifest, import.meta.url), "utf8")) as SetManifest;
+/** A fake sample lasts what its set's manifest says (`durationMs`, schema /2: Raindrop Tile's natural tails), else 0.2 s. */
+const lengths = new Map<string, number>();
+for (const p of catalogue.profiles) for (const f of setManifest(p).files ?? []) if (typeof f.durationMs === "number") lengths.set(KEYS_BASE + p.manifest.slice(0, p.manifest.lastIndexOf("/") + 1) + f.file, f.durationMs / 1000);
 /** A Firefly set other than the default, from the game's own catalogue (the list may change; the default stays). */
 const OTHER = catalogue.profiles.map((p) => p.id).find((id) => id !== DEFAULT_KEYBOARD_SOUND)!;
 const net = { catalogueDown: false, holdAfter: Infinity, holdSet: DEFAULT_KEYBOARD_SOUND, served: new Map<string, number>(), held: [] as (() => void)[] };
@@ -420,5 +429,108 @@ describe("the saved keyboard set at startup", () => {
       expect([settings.keyboard, stored()?.keyboard]).toEqual([keyboard, keyboard]);
       page.quick!.destroy();
     }
+  });
+});
+
+describe("33 Firefly sets: Raindrop Tile, the owner's pick (30/10)", () => {
+  const RAIN = "raindrop-tile";
+  const profile = (id: string): Profile => catalogue.profiles.find((p) => p.id === id)!;
+  const byOrder = (): Profile[] => [...catalogue.profiles].sort((a, b) => a.order - b.order);
+
+  it("the catalogue lists 33 sets in order 0–32; Raindrop Tile closes the Crisp family after Crisp Silk, unscored as the owner's pick", () => {
+    const ids = catalogue.profiles.map((p) => p.id);
+    expect([ids.length, new Set(ids).size]).toEqual([33, 33]);
+    expect(byOrder().map((p) => p.order)).toEqual(Array.from({ length: 33 }, (_, i) => i));
+    expect(profile(RAIN)).toMatchObject({ name: "Raindrop Tile", family: "Crisp", score: null, ownerPick: true, manifest: "raindrop-tile/keys-manifest.json", preview: "raindrop-tile/preview.ogg" });
+    expect([profile("crisp-silk").order + 1, profile("clear").order - 1]).toEqual([profile(RAIN).order, profile(RAIN).order]);
+    // No invented score: only the owner's pick goes without one.
+    expect(catalogue.profiles.filter((p) => !(typeof p.score === "number" && Number.isFinite(p.score))).map((p) => p.id)).toEqual([RAIN]);
+    const families: Record<string, number> = {};
+    for (const p of catalogue.profiles) families[p.family] = (families[p.family] ?? 0) + 1;
+    expect(families).toEqual({ Deep: 3, Warm: 6, Rounded: 1, Solid: 2, Crisp: 7, Clear: 4, "Bright Clack": 10 });
+    expect(DEFAULT_KEYBOARD_SOUND).toBe("bright-clack");
+  });
+
+  it("every set names key and space files the kit reads; each sample and preview has one media.md5 line and no line is stale", () => {
+    const root = "public" + KEYS_BASE;
+    const lines = readFileSync(join(__dirname, "..", "media.md5"), "utf8").split("\n").filter((line) => line.includes("  " + root));
+    for (const line of lines) expect(line).toMatch(/^[0-9a-f]{32} {2}\S+\.ogg$/);
+    const listed = lines.map((line) => line.slice(34));
+    const wanted = new Set<string>();
+    for (const p of catalogue.profiles) {
+      const files = keyboardFiles(setManifest(p), root + p.manifest.slice(0, p.manifest.lastIndexOf("/") + 1));
+      expect(files.key.length, p.id).toBeGreaterThanOrEqual(TYPING_SOUND_SET.key.want);
+      expect(files.space.length, p.id).toBeGreaterThanOrEqual(TYPING_SOUND_SET.space.want);
+      for (const file of [...files.key, ...files.space, root + p.preview]) wanted.add(file);
+    }
+    expect(listed.length).toBe(new Set(listed).size);
+    expect([...wanted].filter((file) => !listed.includes(file))).toEqual([]);
+    expect(listed.filter((file) => !wanted.has(file))).toEqual([]);
+  });
+
+  it("Raindrop Tile's manifest (schema /2): 17 keys with natural tails up to 450 ms, 8 spaces, its preview", () => {
+    const rain = setManifest(profile(RAIN));
+    expect([rain.schema, rain.id, rain.preview]).toEqual(["typing-keys-firefly/2", RAIN, "preview.ogg"]);
+    const keys = rain.files!.filter((f) => f.set === "key");
+    const spaces = rain.files!.filter((f) => f.set === "space");
+    expect([keys.length, spaces.length]).toEqual([17, 8]);
+    for (const f of keys) expect(f.durationMs, f.file).toBeGreaterThan(0);
+    expect(Math.max(...keys.map((f) => f.durationMs!))).toBe(450);
+  });
+
+  it("the Sound panel offers Off, Bamboo and the 33 sets in catalogue order; Raindrop Tile is in the Crisp group, read without a score", async () => {
+    const read = await loadKeyboardCatalog(KEYS_BASE, { fallback: [], extra: [ORIGINAL_KEYS] });
+    const rain = read.options.find((choice) => choice.value === RAIN)!;
+    expect(read.state).toBe("ready");
+    expect(rain).toEqual({ value: RAIN, label: "Raindrop Tile", family: "Crisp", manifest: KEYS_BASE + "raindrop-tile/keys-manifest.json", preview: KEYS_BASE + "raindrop-tile/preview.ogg" });
+    await mount();
+    press("F2", "F2");
+    const values = (scope: ParentNode): string[] => [...scope.querySelectorAll<HTMLElement>('[role="option"]')].map((button) => button.dataset.value!);
+    expect(values(document.querySelector(".kit-keyboards__list")!)).toEqual(["off", BUILT_IN_KEYS, ...byOrder().map((p) => p.id)]);
+    const crisp = [...document.querySelectorAll('.kit-keyboards__list [role="group"]')].find((group) => group.querySelector(".kit-keyboards__family")?.textContent === "Crisp")!;
+    expect(values(crisp)).toEqual(["crisp", "crisp-amber", "crisp-cedar", "crisp-pebble", "crisp-slate", "crisp-silk", RAIN]);
+    expect(option(RAIN)!.textContent).toBe("Raindrop Tile");
+    expect(option(DEFAULT_KEYBOARD_SOUND)!.getAttribute("aria-selected")).toBe("true");
+  });
+
+  it("picked in the panel it is saved, all 25 samples decode, and letters and the space play its own files", async () => {
+    await mount();
+    await settle();
+    press("F2", "F2");
+    option(RAIN)!.click();
+    await settle();
+    expect(stored()?.keyboard).toBe(RAIN);
+    expect(decodedOf(RAIN)).toHaveLength(25);
+    press("Escape", "Escape");
+    await wait(20);
+    newRun();
+    frame(0);
+    press("c", "KeyC");
+    frame(20);
+    expect(played().at(-1)!.buffer!.url).toContain(`/${RAIN}/key-`);
+    press(" ", "Space");
+    expect(played().at(-1)!.buffer!.url).toContain(`/${RAIN}/space-`);
+    expect(notices).toEqual([]);
+  });
+
+  it("its tails ring out: at 12 keys a second (about 145 WPM) no key sound is cut, nor a space at 3 a second", async () => {
+    await mount({ keyboard: RAIN });
+    await settle();
+    expect(decodedOf(RAIN)).toHaveLength(25);
+    const clock = ctx()!;
+    for (let i = 0; i < 36; i += 1) {
+      clock.currentTime = i / 12;
+      page.quick!.typed(false);
+    }
+    for (let i = 0; i < 9; i += 1) {
+      clock.currentTime = 4 + i / 3;
+      page.quick!.typed(true);
+    }
+    const keys = played().filter((source) => source.buffer!.url.includes(`/${RAIN}/key-`));
+    const spaces = played().filter((source) => source.buffer!.url.includes(`/${RAIN}/space-`));
+    expect([keys.length, spaces.length]).toEqual([36, 9]);
+    // Every variant played twice or more, so the 450 ms and 535 ms samples were among them.
+    expect([Math.max(...keys.map((s) => lengths.get(s.buffer!.url)!)), Math.max(...spaces.map((s) => lengths.get(s.buffer!.url)!))]).toEqual([0.45, 0.535]);
+    expect([...keys, ...spaces].filter((source) => source.stopped !== null).map((source) => source.buffer!.url)).toEqual([]);
   });
 });
