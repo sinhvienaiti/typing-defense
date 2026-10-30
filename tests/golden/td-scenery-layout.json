@@ -1,0 +1,17 @@
+{
+  "1": {
+    "low": "7ef26fa5",
+    "medium": "a95c4fdb",
+    "high": "c80acc03"
+  },
+  "20261030": {
+    "low": "da7c5c45",
+    "medium": "69a044aa",
+    "high": "4deef4f9"
+  },
+  "default": {
+    "low": "3af7e8a6",
+    "medium": "cb54ec7a",
+    "high": "16c5a3d3"
+  }
+}
