@@ -1,9 +1,4 @@
-/**
- * The keyboard and the mouse (docs/td/BUILD_NOW.md §5.4, BUILD_1A6 §8, TK 6.15, 8.3, 23.6). A letter is a `key`
- * command, Backspace a `backspace`; any other key is read by event.code into the action its button carries, so a letter
- * is never a command. Composing, held (arrows aside), Ctrl, Alt, Meta and synthetic presses (unless the dev flag allows
- * them) do nothing. A Space right after a letter the game took is the space typed between words, not the pause.
- */
+/** Physical typing and command keys; overlays and input methods keep their own keys. */
 import { isComposingKey, typedLetter, vietnameseInputSign } from "../kit/input";
 import type { CommandBody } from "../sim/commands";
 
@@ -28,22 +23,24 @@ export function keyAction(event: KeyboardEvent, allowUntrusted = false): number 
 /** A Space within this many ms of a letter the game took is a typist's space between words: swallowed (review R2). */
 export const WORD_SPACE_MS = 800;
 
-/**
- * `send` says whether the game took the key (not while paused); `onVietnamese`: an input method seems on, so the page
- * asks the player to switch it off. Space, the tactical pause of relax and learn, stays still for a moment after a
- * letter: a habit of typing tests would otherwise pause the game after a word and drop the next word's letters.
- */
-export function installKeys(target: Window, keys: { send(command: CommandBody): boolean; act(action: string): void; onVietnamese(): void; allowUntrusted: boolean }): void {
+/** `send` says whether the game took the key (not while paused); `onVietnamese`: an input method seems on, so the page asks the player to switch it off. Space, the tactical pause of relax and learn, stays still for a moment after a letter: a habit of typing tests would otherwise pause the game after a word and drop the next word's letters. */
+export function installKeys(target: Window, keys: { send(command: CommandBody): boolean; act(action: string): void; onVietnamese(): void; allowUntrusted: boolean; typed?(space: boolean, native?: boolean): void; blocked?(): boolean }): void {
   let letterAt = -Infinity;
   target.addEventListener("keydown", (event) => {
+    if (keys.blocked?.()) return;
+    if ((event.target as HTMLElement | null)?.closest?.('textarea, input:not([type]), input[type="text"], input[type="search"], input[type="email"], input[type="url"], input[type="tel"], input[type="password"], [contenteditable]:not([contenteditable="false"])')) {
+      if ((event.isTrusted || keys.allowUntrusted) && !event.repeat && !event.ctrlKey && !event.metaKey && !event.altKey && !isComposingKey(event) && (event.key.length === 1 || event.code === "Backspace")) keys.typed?.(event.code === "Space", true);
+      return;
+    }
     if ((event.isTrusted || keys.allowUntrusted) && vietnameseInputSign(event)) keys.onVietnamese();
     const action = keyAction(event, keys.allowUntrusted);
     if (action === null) return;
     event.preventDefault();
     if (typeof action === "number") {
-      if (keys.send({ t: "key", letter: action, atMs: event.timeStamp })) letterAt = event.timeStamp;
-    } else if (action === "backspace") keys.send({ t: "backspace", atMs: event.timeStamp });
-    else if (action !== "space" || event.timeStamp - letterAt >= WORD_SPACE_MS) keys.act(action);
+      if (keys.send({ t: "key", letter: action, atMs: event.timeStamp })) { letterAt = event.timeStamp; keys.typed?.(false); }
+    } else if (action === "backspace") { if (keys.send({ t: "backspace", atMs: event.timeStamp })) keys.typed?.(false); }
+    else if (action === "space" && event.timeStamp - letterAt < WORD_SPACE_MS) keys.typed?.(true);
+    else keys.act(action);
   });
 }
 

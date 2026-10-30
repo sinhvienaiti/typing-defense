@@ -1,29 +1,11 @@
-/**
- * Lời Gọi (index.html), step 1A "Cổng vui" (docs/td/BUILD_NOW.md) with 1A.6 "Lời Gọi" (docs/td/BUILD_1A6.md) and 1B's
- * map 1 with Mộc Tinh (docs/td/BUILD_1B.md) in the Văn Điền theme (SPLIT_PLAN D7): the title screen first (a link with
- * ?sandbox= skips it, ?title=1 / 0 forces it), while the vocabulary loads; the story stage, or the sandbox with
- * ?sandbox=1. A lost run may be played again from the day of the night it was lost ("Chơi lại Ngày n": the page
- * reloads, replays the log to that day's start and checks its hash). Then the world steps at 60 Hz in a session, the 2D
- * view draws it, the calls' word cards float over it, the keys, the mouse and the HUD act through the selection, sound
- * and music follow its events, Esc's pause card and the results card sit over it, and window.__td lets the browser
- * scenarios drive it through commands. The typing profile (app/skill.ts, BALANCE.md §2) gives the run its header (E,
- * pace k, the pace director by the settings) and takes each day and night's typing after it. The title, its settings
- * and Hồ sơ gõ cards, the pause and results cards, sound and the sandbox panel are chunks of their own (BUILD_1B §20):
- * at "/" the page starts with this entry and the title only (scripts/bundle-budget.mjs counts that start set), the rest
- * comes once the page is usable or when picked; each is retried, then the page falls back (src/app/chunks.ts, R2 review
- * fix 2) and asks again when it is wanted (R2 review fix 3). R3 step 1 (docs/td/R3_PLAN.md §3.1) took window.__td
- * (app/dev-tools.ts) and "Chơi lại Ngày n" with "Chép số chơi thử" (app/retry.ts) out of this entry too. Học (R3,
- * BUILD_1B §11; app/learn.ts, a chunk asked for at once, with the portal bridge) plans the run's study lists before its
- * first step, counts the words seen, sends the learning events and keeps the review book across runs; one that cannot
- * load plays with no lists. The teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top,
- * what a building does on its card.
- */
+/** Boots the story or sandbox, lazy UI, input, audio and fixed-step session. */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
 import { installKeys, installPointer } from "./app/input";
-import { bestStars, keepStars, loadSettings, storyMode } from "./app/prefs";
+import { bestStars, keepStars, loadSettings, saveSettings, storyMode } from "./app/prefs";
+import type { GameQuick } from "./app/quick";
 import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
 import { updateSkill } from "./kit/balance";
 import { Selection } from "./app/selection";
@@ -63,10 +45,12 @@ const settings = loadSettings();
 /** Sound and music, a chunk fetched once the page is usable (prefetch): nothing sounds before a key or a click anyway (TypingAudio.resume). */
 const sound = new Chunk("sound", async () => new (await import("./view/audio-min")).TypingAudio(settings));
 let audio: TypingAudio | null = null;
+let quick: GameQuick | null = null;
 /** Asks for sound while it is not in: once the page is usable, then on each key or click until it loads (the chunk keeps its 15 s cool-down after a failure; R2 review fix 3). */
 const wantSound = (wake: boolean): void => void sound.get().then((m) => ((audio = m), wake && m?.resume()));
 /** A key or a click (the title's too): sound starts, or is asked for again while it is not in. */
-const wakeSound = (): void => (audio === null ? wantSound(true) : audio.resume());
+const wakeSound = (): void => { audio === null ? wantSound(true) : audio.resume(); quick?.wake(); };
+const settingsChanged = (): void => { audio?.apply(settings); quick?.sync(); };
 let profile = loadSkill(params.get("learn") === "1" ? "learn" : sandbox ? "balanced" : (settings.mode ?? "balanced"));
 /** A fresh run's mode: Học with ?learn=1, the sandbox Cân bằng (its panel switches), the story the settings' (R3, BUILD_1B §14). */
 const freshMode = (): Mode => (params.get("learn") === "1" ? "learn" : sandbox ? "balanced" : storyMode(settings, profile.audience === "child"));
@@ -91,7 +75,7 @@ const cardChunks = { settings: new Chunk("settings", () => import("./ui/settings
 const titleCards = {
   settings: async () => {
     const s = await cardChunks.settings.get();
-    return s && new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => title?.settingsDone());
+    return s && new s.SettingsCard(settings, settingsChanged, () => title?.settingsDone());
   },
   profile: async () => {
     const p = await cardChunks.profile.get();
@@ -110,11 +94,7 @@ function showTitle(canContinue: boolean): void {
     if (titleUp) shown.show(canContinue, bestStars()[SLICE_1A.id] ?? 0);
   });
 }
-/**
- * "Chơi lại Ngày n" (BUILD_1B §4.3) kept by the last page under td.retry (app/retry.ts RETRY_KEY), read once. Its chunk
- * (app/retry.ts, with "Chép số chơi thử") loads at once when there is one, else once the page is usable for the results
- * card's buttons; one that cannot load starts the run over, told in the HUD.
- */
+/** "Chơi lại Ngày n" (BUILD_1B §4.3) kept by the last page under td.retry (app/retry.ts RETRY_KEY), read once. Its chunk (app/retry.ts, with "Chép số chơi thử") loads at once when there is one, else once the page is usable for the results card's buttons; one that cannot load starts the run over, told in the HUD. */
 const kept = (() => {
   try {
     const raw = sessionStorage.getItem("td.retry");
@@ -161,6 +141,7 @@ window.addEventListener("pagehide", () => {
   learner?.flush(performance.now());
 });
 const selection = new Selection(world, (command) => session.send(command));
+const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).mountQuick(settings, { audio: () => audio, quit: () => showTitle(world.phase !== "defeat"), countdown: () => titleUp || selection.halted ? 0 : 500, notice: tellLost }));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
 cards.child = profile.audience === "child";
 /** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
@@ -193,9 +174,10 @@ const panel = new Chunk("sandbox", async () => (await import("./app/sandbox")).s
 
 /** Buttons and keys: the camera's and the sound's own, the rest the selection's. */
 function act(action: string): void {
+  if (quick?.blocking) return;
   const [name, dx, dy] = action.split(":");
   if (name === "pan") view.panBy(Number(dx) * 60, Number(dy) * 60);
-  else if (name === "mute" && audio !== null) audio.muted = !audio.muted;
+  else if (name === "mute") { settings.muted = !settings.muted; settingsChanged(); saveSettings(settings); }
   else if (name === "pause" && mapOnly) mapOnly = false; // the HUD's Ⅱ brings the results back too
   else selection.act(action);
 }
@@ -206,16 +188,13 @@ const banner = new BossBanner();
 const tips = new Chunk("tips", () => import("./ui/tips"));
 const wantTips = (): void => void tips.get().then((m) => m !== null && (banner.tips = m.TIPS));
 for (const type of ["pointerdown", "keydown"]) window.addEventListener(type, wakeSound);
-/**
- * Esc's pause card and the results card, with their settings card: a chunk fetched once the page is usable, asked again
- * when a card is wanted; without it the HUD says the pause or the end (R2 review fix 2). "Xem bản đồ" puts the results away.
- */
+/** Esc's pause card and the results card, with their settings card: a chunk fetched once the page is usable, asked again when a card is wanted; without it the HUD says the pause or the end (R2 review fix 2). "Xem bản đồ" puts the results away. */
 let mapOnly = false;
 let sheet: Sheet | null = null;
 const sheets = new Chunk("sheets", async () => {
   const [m, s] = await Promise.all([import("./ui/sheets"), cardChunks.settings.get()]);
   if (s === null) throw new Error("no settings card");
-  return new m.Sheet(document.body, new s.SettingsCard(settings, (changed) => audio?.apply(changed), () => sheet?.settingsDone()), (action: SheetAction) => {
+  return new m.Sheet(document.body, new s.SettingsCard(settings, settingsChanged, () => sheet?.settingsDone()), (action: SheetAction) => {
     if (action === "resume") selection.act("pause");
     else if (action === "map") mapOnly = true;
     else if (action === "again") window.location.search = freshRun(false);
@@ -233,6 +212,7 @@ const wantSheet = (): void => void sheets.get().then((m) => (sheet = m));
 const dev = new Chunk("dev", () => import("./app/dev-tools"));
 /** Once the page is usable: sound, the cards' chunk, the results card's buttons, the sandbox panel and __td, so none of them holds up the start. */
 function prefetch(): void {
+  void quickChunk.get().then((m) => (quick = m));
   wantSound(false);
   void fxChunk.get().then((m) => m && ((view.fx = new m.FxView(view.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
   wantSheet();
@@ -242,7 +222,7 @@ function prefetch(): void {
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    ready: () => painted && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
     chunks: () => ({ sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
@@ -250,6 +230,8 @@ function prefetch(): void {
 }
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
 window.addEventListener("keydown", (event) => {
+  if (quick?.blocking) return;
+  if (event.code === "F1" || event.code === "F2") { if (quick === null) { event.preventDefault(); event.stopImmediatePropagation(); void quickChunk.get().then((m) => { quick = m; m?.open(event.code === "F1" ? "settings" : "sound"); }); } return; }
   if (titleUp && title === null) return void (event.preventDefault(), event.stopImmediatePropagation());
   // "Xem bản đồ" put the results away: Esc or Enter brings them back (test pass 27/10: it was one way, F5 only).
   if (mapOnly && !titleUp && (event.code === "Escape" || event.code === "Enter")) return void ((mapOnly = false), event.preventDefault(), event.stopImmediatePropagation());
@@ -261,7 +243,9 @@ window.addEventListener("keydown", (event) => {
 }, true);
 installKeys(window, {
   // Paused (Esc, or Space's tactical pause), nothing is typed: words wait.
-  send: (command) => !selection.halted && (session.send(command), true),
+  send: (command) => !titleUp && !quick?.blocking && !selection.halted && (session.send(command), true),
+  blocked: () => titleUp || quick?.blocking === true,
+  typed: (space, native) => { if (!selection.halted || native) quick?.typed(space, native); },
   act,
   onVietnamese: () => (imeUntil = performance.now() + 8000),
   allowUntrusted: params.get("untrusted") === "1",
@@ -270,6 +254,7 @@ installPointer(canvas, view, {
   pointer: (p) => selection.pointer(p),
   // A call's bubble (a word card, or a dim one on the map) sends the agent there (BUILD_1A6 §8).
   click: (p, right, at) => {
+    if (titleUp || quick?.blocking) return;
     const call = right || selection.building ? -1 : Math.max(cards.callAt(at.x, at.y), view.callAt(at.x, at.y));
     if (call >= 0) selection.toCall(call);
     else selection.click(p, right);
@@ -284,7 +269,7 @@ function showHud(): void {
   const refused = [...recent].reverse().find((event) => event.t === "rejected" && world.tick - event.tick < 150);
   const now = performance.now();
   const over = world.phase === "defeat" || world.phase === "victory";
-  const card = titleUp ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "";
+  const card = titleUp || quick?.blocking ? "" : over ? (mapOnly ? "" : "results") : selection.paused ? "pause" : "";
   // A card or the sandbox panel wanted before its chunk is in: asked again (at most once a second); a chunk given up is
   // told here instead (R2 review fix 3: the panel too, not only the cards).
   if (card !== "" && (sheet === null || retryChunk.value === null) && now - sheetAsked > 1000) {
@@ -315,7 +300,7 @@ function showHud(): void {
     banner.html(world, now),
     banner.teachHtml(world),
   ]);
-  document.body.classList.toggle("is-paused", selection.paused);
+  document.body.classList.toggle("is-paused", selection.paused || quick?.blocking === true);
   sheet?.show(card, world, { story: !sandbox, retried: retry?.day ?? 0, canRetry: retryChunk.value !== null, best: won?.best ?? 0, record: won?.record === true, blows: banner.blows });
 }
 
@@ -349,8 +334,8 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted || titleUp || (world.tick === 0 && !learnChunk.settled);
-      session.orders = selection.tactical; // the hand's orders act at once, typing waits
+      session.paused = selection.halted || titleUp || quick?.blocking === true || (world.tick === 0 && !learnChunk.settled);
+      session.orders = selection.tactical && !titleUp && !quick?.blocking; // orders wait behind an overlay too
       session.frame(now);
       if (!sandbox && won === null && world.phase === "victory") won = keepStars(world.c.content.id, world.lives);
       const fresh = world.events.rare.splice(0);
@@ -374,7 +359,7 @@ runFrameLoop({
   draw(now) {
     timed(costs.draw, () => {
       view.draw(world, selection);
-      cards.draw(world, now, window.innerWidth, window.innerHeight, hud.boxes(window.innerWidth, window.innerHeight), view.keepOut(world));
+      cards.draw(world, now, window.innerWidth, window.innerHeight, [...hud.boxes(window.innerWidth, window.innerHeight), { left: window.innerWidth - 160, top: 0, right: window.innerWidth, bottom: 80 }], view.keepOut(world));
     });
     painted = true;
   },
