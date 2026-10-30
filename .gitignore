@@ -15,7 +15,6 @@ public/assets/**
 !public/assets/typing-defense/**/
 !public/assets/typing-defense/README.md
 !public/assets/typing-defense/**/manifest.json
-!public/assets/typing-defense/audio/keys/**/keys-manifest.json
 # art-src stays on Drive; only the 3D source index is tracked (media:check needs it)
 art-src/*
 !art-src/3d/

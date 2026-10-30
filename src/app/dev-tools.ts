@@ -34,6 +34,8 @@ export type DevContext = {
   learning(): unknown;
   /** BALANCE.md §7 B9's numbers, through app/retry.ts (its chunk; null when it is missing). */
   balance(): Promise<unknown>;
+  /** Typing Feel's keyboard sounds: the run's keyboard gate, its first step, Bamboo's stand-in and the Sound panel's view (app/quick.ts). */
+  keyboard(): unknown;
 };
 
 export function installDevTools(ctx: DevContext): void {
@@ -52,6 +54,8 @@ export function installDevTools(ctx: DevContext): void {
     // A play-test's numbers for BALANCE.md §7 B9: the run's flow (night meter) and the profile the game keeps.
     balance: () => ctx.balance(),
     learning: () => ctx.learning(),
+    // Typing Feel (parent docs/games/TYPING_FEEL_SERVICE.md §5.1): the keyboard gate's times and why it opened (batch, ended, time), the catalogue, the chosen and saved set, Bamboo's stand-in.
+    keyboard: () => ctx.keyboard(),
     dayHashes: () => session.dayHashes.slice(),
     retry: () => ctx.replayed(),
     hash: () => hashHex(world),

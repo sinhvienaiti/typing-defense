@@ -3,21 +3,27 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { installKeys } from "../src/app/input";
-import { BUILT_IN_KEYS, DEFAULT_KEYBOARD_SOUND, loadSettings, type Settings } from "../src/app/prefs";
-import { applyQuick, KEYS_BASE, mountQuick, ORIGINAL_KEYS, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
+import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, requestKeyboardCatalogue } from "../src/app/keyboard";
+import { bambooKeys, BUILT_IN_KEYS, DEFAULT_KEYBOARD_SOUND, loadSettings, savedKeyboard, type Settings } from "../src/app/prefs";
+import { applyQuick, mountQuick, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
 import { Session } from "../src/app/session";
-import { KEYBOARD_DECODE_BATCH_SIZE, keyboardFiles, loadKeyboardCatalog, TYPING_SOUND_MAP, TYPING_SOUND_SET } from "../src/kit/feedback/typing-fx/audio";
+import { KEYBOARD_DECODE_BATCH_SIZE, KEYBOARD_FIRST_BATCH_SPACES, TYPING_SOUND_MAP } from "../src/kit/feedback/typing-fx/audio";
+import { safeLocalStorage } from "../src/kit/platform/safe-storage";
 import { hashHex } from "../src/sim/hash";
 import type { TypingAudio } from "../src/view/audio-min";
+import { catalogue, FEEL_BASE, SAMPLE_FAMILIES, SAMPLE_IDS, SAMPLE_SETS, sampleFiles, serve, setDir, type Reply } from "./feel-fixture";
 import { callWord, smallDeck, wordOf } from "./td/typing";
 
 /**
  * The Settings gear and Sound speaker in Wordwoven (parent docs/games/IN_GAME_SETTINGS.md, tickets 192/193) through
  * the kit's real panels: applyQuick and the saved values, F1/F2/Esc and the corner buttons, letters held back and the
- * session frozen (hash, tick, log) while a panel or its 3-2-1 is up, the keys routed as src/main.ts routes them, the
- * saved Firefly set active from its first decoded batch (and released when the player picks another first), an
- * unknown saved set repaired to the owner's default, and wrong or stray letters keeping the kit's damped cue.
- * Happy DOM and a fake WebAudio; the catalogue JSON is the game's own, the samples are fake bytes naming their URL.
+ * session frozen (hash, tick, log) while a panel or its 3-2-1 is up, the keys routed as src/main.ts routes them, and the
+ * keyboard sets read from Typing Feel (parent docs/games/TYPING_FEEL_SERVICE.md §5.1–5.3, §8.1): the panel built at once
+ * with the pending list, the saved set active from its first decoded batch, a catalogue without the saved id, one that
+ * fails (404, HTML with status 200, not JSON, CORS) or comes late while the panel is open, no origin at all, a set that
+ * cannot sound (Bamboo stands in, unsaved), and wrong or stray letters keeping the kit's damped cue. Happy DOM and a fake
+ * WebAudio; the host is the sample one of tests/feel-fixture.ts behind a stubbed fetch (no network, no parent repo); the
+ * samples are fake bytes naming their URL.
  */
 class Param {
   value = 1;
@@ -68,25 +74,57 @@ class TestContext {
 }
 const contexts: TestContext[] = [];
 
-const CATALOGUE = KEYS_BASE + "keys-manifest.json";
-type Profile = { id: string; name: string; family: string; score: number | null; ownerPick?: boolean; manifest: string; preview: string; order: number };
-const catalogue = JSON.parse(readFileSync(new URL("../public" + CATALOGUE, import.meta.url), "utf8")) as { profiles: Profile[] };
-type SetManifest = { schema?: string; id?: string; preview?: string; files?: { file: string; set: string; durationMs?: number }[] };
-const setManifest = (p: Profile): SetManifest => JSON.parse(readFileSync(new URL("../public" + KEYS_BASE + p.manifest, import.meta.url), "utf8")) as SetManifest;
-/** A fake sample lasts what its set's manifest says (`durationMs`, schema /2: the owner picks' natural tails), else 0.2 s. */
+const CATALOGUE = FEEL_BASE + "keys-manifest.json";
+/** A fake sample lasts what the test says (the owner picks' natural tails below), else 0.2 s. */
 const lengths = new Map<string, number>();
-for (const p of catalogue.profiles) for (const f of setManifest(p).files ?? []) if (typeof f.durationMs === "number") lengths.set(KEYS_BASE + p.manifest.slice(0, p.manifest.lastIndexOf("/") + 1) + f.file, f.durationMs / 1000);
-/** A Firefly set other than the default, from the game's own catalogue (the list may change; the default stays). */
-const OTHER = catalogue.profiles.map((p) => p.id).find((id) => id !== DEFAULT_KEYBOARD_SOUND)!;
-const net = { catalogueDown: false, holdAfter: Infinity, holdSet: DEFAULT_KEYBOARD_SOUND, served: new Map<string, number>(), held: [] as (() => void)[] };
-const fetchStub = vi.fn(async (url: string) => {
-  if (url === CATALOGUE && net.catalogueDown) return { ok: false, status: 503, json: async () => ({}), arrayBuffer: async () => new ArrayBuffer(0) };
-  if (url.endsWith(".json")) return { ok: true, status: 200, json: async () => JSON.parse(readFileSync(new URL("../public" + url, import.meta.url), "utf8")) };
-  const set = url.slice(KEYS_BASE.length).split("/")[0]!;
-  const n = (net.served.get(set) ?? 0) + 1;
-  net.served.set(set, n);
-  if (set === net.holdSet && n > net.holdAfter && !url.endsWith("/preview.ogg")) await new Promise<void>((go) => net.held.push(go));
-  return { ok: true, status: 200, arrayBuffer: async () => new TextEncoder().encode(url).buffer };
+/** A sample set other than the catalogue's default (Bright Clack). */
+const OTHER = "deep";
+/** How the sample host answers the catalogue: as it should, or broken as §8.1 lists it. */
+type CatalogueReply = "ok" | "404" | "html" | "json" | "cors";
+const net = {
+  catalogue: "ok" as CatalogueReply,
+  root: catalogue(),
+  /** The catalogue's answer waits until the test lets it go (a late catalogue). */
+  holdCatalogue: false,
+  heldCatalogue: [] as (() => void)[],
+  /** Samples of `holdSet` past the first `holdAfter` wait until the test lets them go. */
+  holdAfter: Infinity,
+  holdSet: DEFAULT_KEYBOARD_SOUND,
+  served: new Map<string, number>(),
+  held: [] as (() => void)[],
+  /** Sets whose manifest, or whose every sample, answers 404. */
+  broken: new Map<string, "manifest" | "samples">(),
+  /** Every request: its URL and the cache mode it asked for. */
+  calls: [] as { url: string; cache: RequestCache | undefined }[],
+};
+/** A fetch answer as the kit's timedJson and timedBytes read it; a sample's bytes name its URL. */
+function respond(url: string, reply: Reply): Response {
+  return {
+    ok: reply.status >= 200 && reply.status < 300, status: reply.status, headers: new Headers(reply.type ? { "content-type": reply.type } : {}),
+    text: async () => reply.text ?? "", json: async () => JSON.parse(reply.text ?? ""), arrayBuffer: async () => new TextEncoder().encode(url).buffer as ArrayBuffer,
+  } as unknown as Response;
+}
+const setOf = (url: string): string => (url.startsWith(FEEL_BASE + "sets/") ? url.slice((FEEL_BASE + "sets/").length).split("/")[0]! : "");
+const fetchStub = vi.fn(async (url: string, init?: RequestInit) => {
+  net.calls.push({ url, cache: init?.cache });
+  if (url === CATALOGUE) {
+    if (net.holdCatalogue) await new Promise<void>((go) => net.heldCatalogue.push(go));
+    if (net.catalogue === "cors") throw new TypeError("Failed to fetch");
+    if (net.catalogue === "404") return respond(url, { status: 404 });
+    if (net.catalogue === "html") return respond(url, { status: 200, type: "text/html", text: "<!doctype html><html><body>app</body></html>" });
+    if (net.catalogue === "json") return respond(url, { status: 200, type: "application/json", text: "{ not json" });
+  }
+  const set = setOf(url);
+  const broken = net.broken.get(set);
+  if (broken === "manifest" && url.endsWith("/keys-manifest.json")) return respond(url, { status: 404 });
+  const sample = /\/(key|space)-\d+\.ogg$/.test(url);
+  if (broken === "samples" && sample) return respond(url, { status: 404 });
+  if (sample) {
+    const n = (net.served.get(set) ?? 0) + 1;
+    net.served.set(set, n);
+    if (set === net.holdSet && n > net.holdAfter) await new Promise<void>((go) => net.held.push(go));
+  }
+  return respond(url, serve(url, net.root));
 });
 
 const wait = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
@@ -94,13 +132,15 @@ const wait = (ms: number) => new Promise<void>((done) => setTimeout(done, ms));
 const settle = async (): Promise<void> => { for (let k = 0; k < 12; k += 1) await wait(1); };
 const ctx = (): TestContext | undefined => contexts.at(-1);
 const played = (): TestSource[] => (ctx()?.sources ?? []).filter((source) => source.buffer?.url.includes("/key-") || source.buffer?.url.includes("/space-"));
-const decodedOf = (set: string): string[] => (ctx()?.decoded ?? []).filter((url) => url.startsWith(KEYS_BASE + set + "/") && !url.endsWith("/preview.ogg"));
+const decodedOf = (set: string): string[] => (ctx()?.decoded ?? []).filter((url) => url.startsWith(setDir(set)) && !url.endsWith("/preview.ogg"));
+const urls = (): string[] => net.calls.map((call) => call.url);
 const press = (key: string, code: string, target: EventTarget = document.body): KeyboardEvent => {
   const event = new KeyboardEvent("keydown", { key, code, bubbles: true, cancelable: true });
   target.dispatchEvent(event);
   return event;
 };
 const option = (value: string) => document.querySelector<HTMLButtonElement>(`[role="option"][data-value="${value}"]`);
+const values = (scope: ParentNode = document.querySelector(".kit-keyboards__list")!): string[] => [...scope.querySelectorAll<HTMLElement>('[role="option"]')].map((button) => button.dataset.value!);
 const stored = (): Partial<Settings> | null => JSON.parse(localStorage.getItem("td.settings") ?? "null") as Partial<Settings> | null;
 
 /** The page as src/main.ts wires it: the title, the selection's halt, the session, installKeys and the frame. */
@@ -123,12 +163,24 @@ function frame(now: number): void {
 }
 let settings: Settings;
 const notices: string[] = [];
+/** What main.ts's hooks were told: Bamboo's stand-in (main hands it to the sound chunk) and the keyboard gate. */
+const told = { standIn: [] as (string | null)[], playable: [] as string[] };
 let quits = 0;
-async function mount(saved: Partial<Settings> = {}, countdown = 2): Promise<GameQuick> {
+/**
+ * A page with `saved` as the stored td.settings (null: none): the settings, the raw keyboard field and the catalogue
+ * asked for with the page from `base` (null: no origin), then the panels; by default the catalogue and the saved set's
+ * load run out first (`wait: false`: not).
+ */
+async function mount(saved: Partial<Settings> | null = null, options: { countdown?: number; base?: string | null; wait?: boolean } = {}): Promise<GameQuick> {
   localStorage.clear();
-  if (Object.keys(saved).length > 0) localStorage.setItem("td.settings", JSON.stringify(saved));
+  if (saved !== null) localStorage.setItem("td.settings", JSON.stringify(saved));
   settings = loadSettings();
-  page.quick = await mountQuick(settings, { audio: () => fakeAudio, quit: () => void (quits += 1), countdown: () => countdown, notice: (text) => void notices.push(text) });
+  page.quick = mountQuick(settings, {
+    audio: () => fakeAudio, quit: () => void (quits += 1), countdown: () => options.countdown ?? 2, notice: (text) => void notices.push(text),
+    saved: savedKeyboard(), feed: requestKeyboardCatalogue(options.base === undefined ? FEEL_BASE : options.base),
+    standIn: (id) => void told.standIn.push(id), playable: (by) => void told.playable.push(by),
+  });
+  if (options.wait !== false) await settle();
   return page.quick;
 }
 
@@ -147,8 +199,11 @@ beforeEach(() => {
   contexts.length = 0;
   notices.length = 0;
   quits = 0;
+  lengths.clear();
+  Object.assign(told, { standIn: [], playable: [] });
   Object.assign(page, { titleUp: false, halted: false, quick: null, session: null, acts: [], bamboo: [] });
-  Object.assign(net, { catalogueDown: false, holdAfter: Infinity, holdSet: DEFAULT_KEYBOARD_SOUND, served: new Map(), held: [] });
+  Object.assign(net, { catalogue: "ok", root: catalogue(), holdCatalogue: false, heldCatalogue: [], holdAfter: Infinity, holdSet: DEFAULT_KEYBOARD_SOUND, served: new Map(), held: [], broken: new Map(), calls: [] });
+  fetchStub.mockClear();
   vi.stubGlobal("AudioContext", TestContext);
   vi.stubGlobal("GainNode", TestGain);
   vi.stubGlobal("AudioBufferSourceNode", TestSource);
@@ -157,7 +212,7 @@ beforeEach(() => {
   vi.spyOn(Math, "random").mockReturnValue(0.5);
 });
 afterEach(async () => {
-  for (const go of net.held.splice(0)) go();
+  for (const go of [...net.held.splice(0), ...net.heldCatalogue.splice(0)]) go();
   page.quick?.destroy();
   await settle();
   document.body.replaceChildren();
@@ -225,7 +280,7 @@ describe("F1, F2, Esc and the corner buttons", () => {
   });
 
   it("Quit to title closes at once, with no countdown", async () => {
-    const quick = await mount({}, 50);
+    const quick = await mount(null, { countdown: 50 });
     press("F1", "F1");
     document.querySelector<HTMLButtonElement>('[data-action="quit"]')!.click();
     expect([quits, quick.panel, quick.blocking]).toEqual([1, null, false]);
@@ -234,7 +289,7 @@ describe("F1, F2, Esc and the corner buttons", () => {
 
 describe("play held behind a panel", () => {
   it("letters, Backspace and Space are held back; the session's hash, tick and log stay as they were through the 3-2-1", async () => {
-    const quick = await mount({}, 10);
+    const quick = await mount(null, { countdown: 10 });
     const session = newRun();
     frame(0);
     frame(40);
@@ -286,9 +341,9 @@ describe("keys routed as the page routes them", () => {
     expect(played()).toHaveLength(before); // nothing at keydown: the sim has not judged it yet
     frame(20);
     expect(played()).toHaveLength(before + 1);
-    expect(played().at(-1)!.buffer!.url).toContain(`/${DEFAULT_KEYBOARD_SOUND}/key-`);
+    expect(played().at(-1)!.buffer!.url).toContain(setDir(DEFAULT_KEYBOARD_SOUND) + "key-");
     press(" ", "Space");
-    expect(played().at(-1)!.buffer!.url).toContain(`/${DEFAULT_KEYBOARD_SOUND}/space-`);
+    expect(played().at(-1)!.buffer!.url).toContain(setDir(DEFAULT_KEYBOARD_SOUND) + "space-");
     press("Backspace", "Backspace");
     expect(played().at(-1)!.buffer!.url).toContain("/key-");
     expect(played()).toHaveLength(before + 3);
@@ -357,35 +412,34 @@ describe("wrong and stray letters on a Firefly set (review 30/10, medium)", () =
       levels.push(...played().slice(before).map((source) => source.level));
     }
     expect(levels).toEqual([TYPING_SOUND_MAP.key.gain, TYPING_SOUND_MAP.wrong.gain, TYPING_SOUND_MAP.key.gain, TYPING_SOUND_MAP.stray.gain]);
-    expect(played().every((source) => source.buffer!.url.startsWith(KEYS_BASE + DEFAULT_KEYBOARD_SOUND + "/key-"))).toBe(true);
+    expect(played().every((source) => source.buffer!.url.startsWith(setDir(DEFAULT_KEYBOARD_SOUND) + "key-"))).toBe(true);
   });
 });
 
 describe("the saved keyboard set at startup", () => {
-  it("the game's catalogue holds the owner's default", () => {
-    expect(catalogue.profiles.map((p) => p.id)).toContain(DEFAULT_KEYBOARD_SOUND);
-  });
-
-  it("is active from its first decoded batch: a letter sounds while the rest of the set still loads", async () => {
+  it("is active from its first decoded batch (12 keys and 4 spaces): a letter and the first space sound while the rest still loads; the run's gate is told once", async () => {
     net.holdAfter = KEYBOARD_DECODE_BATCH_SIZE;
     await mount();
-    await settle();
-    expect(decodedOf(DEFAULT_KEYBOARD_SOUND)).toHaveLength(KEYBOARD_DECODE_BATCH_SIZE);
+    const first = decodedOf(DEFAULT_KEYBOARD_SOUND);
+    expect(first).toHaveLength(KEYBOARD_DECODE_BATCH_SIZE);
+    expect(first.filter((url) => url.includes("/space-"))).toHaveLength(KEYBOARD_FIRST_BATCH_SPACES);
+    expect(told.playable).toEqual(["batch"]);
     newRun();
     frame(0);
     press("c", "KeyC");
     frame(20);
-    expect(played().at(-1)?.buffer?.url).toContain(`/${DEFAULT_KEYBOARD_SOUND}/key-`);
+    expect(played().at(-1)?.buffer?.url).toContain(setDir(DEFAULT_KEYBOARD_SOUND) + "key-");
+    press(" ", "Space");
+    expect(played().at(-1)?.buffer?.url).toContain(setDir(DEFAULT_KEYBOARD_SOUND) + "space-");
     for (const go of net.held.splice(0)) go();
     await settle();
     expect(decodedOf(DEFAULT_KEYBOARD_SOUND).length).toBeGreaterThan(KEYBOARD_DECODE_BATCH_SIZE);
-    expect(notices).toEqual([]);
+    expect([notices, told.playable, told.standIn]).toEqual([[], ["batch"], []]);
   });
 
   it("picked away from before it finished, it is released: none of its other files decode, and the new set plays", async () => {
     net.holdAfter = KEYBOARD_DECODE_BATCH_SIZE;
     await mount();
-    await settle();
     press("F2", "F2");
     option(OTHER)!.click();
     for (const go of net.held.splice(0)) go();
@@ -397,134 +451,222 @@ describe("the saved keyboard set at startup", () => {
     frame(0);
     press("c", "KeyC");
     frame(20);
-    expect(played().at(-1)?.buffer?.url).toContain(`/${OTHER}/key-`);
+    expect(played().at(-1)?.buffer?.url).toContain(setDir(OTHER) + "key-");
     expect(notices).toEqual([]);
   });
 
-  it("an unknown saved set falls back to the owner's default, saved, not to Bamboo (review 30/10, low)", async () => {
+  it("a catalogue without the saved set moves it to the catalogue's default, saved once; the panel repairs nothing more (review 30/10, low)", async () => {
+    net.root = catalogue({ default: "deep-amber" });
+    const writes = vi.spyOn(safeLocalStorage, "writeJson");
     await mount({ keyboard: "removed-pack" });
-    expect(settings.keyboard).toBe(DEFAULT_KEYBOARD_SOUND);
-    expect(stored()?.keyboard).toBe(DEFAULT_KEYBOARD_SOUND);
+    expect(settings.keyboard).toBe("deep-amber");
+    expect(writes.mock.calls.filter(([key]) => key === "td.settings").map(([, value]) => (value as Settings).keyboard)).toEqual(["deep-amber"]);
     press("F2", "F2");
-    expect(option(DEFAULT_KEYBOARD_SOUND)!.getAttribute("aria-selected")).toBe("true");
-    await settle();
-    expect(decodedOf(DEFAULT_KEYBOARD_SOUND).length).toBeGreaterThan(0);
+    expect(option("deep-amber")!.getAttribute("aria-selected")).toBe("true");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, ...SAMPLE_IDS]);
+    expect(decodedOf("deep-amber").length).toBeGreaterThan(0);
+    expect(writes.mock.calls.filter(([key]) => key === "td.settings")).toHaveLength(1);
+    expect(notices).toEqual([]);
   });
 
-  it("a catalogue that fails to load keeps the saved set (shown unavailable) and never saves Bamboo over it", async () => {
-    net.catalogueDown = true;
-    await mount({ keyboard: OTHER, master: 70 });
-    expect(notices).toEqual(["Keyboard catalogue unavailable · Bamboo and Off remain available"]);
-    expect(settings.keyboard).toBe(OTHER);
-    press("F2", "F2");
-    expect(stored()?.keyboard).toBe(OTHER);
-    const saved = option(OTHER)!;
-    expect([saved.disabled, saved.getAttribute("aria-selected"), saved.textContent]).toEqual([true, "true", "Saved sound unavailable"]);
-    expect(option(BUILT_IN_KEYS)!.getAttribute("aria-selected")).toBe("false");
-  });
-
-  it("Off and Bamboo survive a restart as saved", async () => {
+  it("Off and Bamboo survive a restart as saved, and load no set", async () => {
     for (const keyboard of ["off", BUILT_IN_KEYS]) {
       await mount({ keyboard });
-      expect([settings.keyboard, stored()?.keyboard]).toEqual([keyboard, keyboard]);
+      expect([settings.keyboard, stored()?.keyboard, page.quick!.standIn(), told.playable]).toEqual([keyboard, keyboard, null, ["ended"]]);
+      expect(urls()).toEqual([CATALOGUE]);
       page.quick!.destroy();
+      Object.assign(told, { playable: [] });
+      net.calls.length = 0;
     }
+  });
+
+  it("a save without a keyboard sound follows the catalogue's default and never writes it on an unrelated change; the player's pick is written", async () => {
+    net.root = catalogue({ default: "deep-amber" });
+    await mount({ master: 70 });
+    expect(settings.keyboard).toBe("deep-amber");
+    document.querySelector<HTMLButtonElement>('.kit-qs__corner[data-panel="sound"]')!.click();
+    document.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!.click();
+    expect(stored()).toMatchObject({ master: 70, muted: true });
+    expect(stored()).not.toHaveProperty("keyboard");
+    option("solid")!.click();
+    expect(stored()?.keyboard).toBe("solid");
+    document.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!.click();
+    expect(stored()).toMatchObject({ muted: false, keyboard: "solid" });
   });
 });
 
-describe("34 Firefly sets: the owner's picks Raindrop Tile and Hail Stone (30/10)", () => {
-  /** The owner's unscored picks (natural Firefly takes, kept tails), as the Audio Lab staging catalogue places them. */
-  const PICKS = [
-    { id: "hail-stone", name: "Hail Stone", family: "Solid", order: 12, after: "solid-amber", before: "crisp", keys: 25, spaces: 8, keyMs: 450, spaceMs: 535 },
-    { id: "raindrop-tile", name: "Raindrop Tile", family: "Crisp", order: 19, after: "crisp-silk", before: "clear", keys: 17, spaces: 8, keyMs: 450, spaceMs: 535 },
-  ] as const;
-  const profile = (id: string): Profile => catalogue.profiles.find((p) => p.id === id)!;
-  const byOrder = (): Profile[] => [...catalogue.profiles].sort((a, b) => a.order - b.order);
-
-  it("the catalogue lists 34 sets in order 0–33; Hail Stone closes Solid after Solid Amber, Raindrop Tile closes Crisp after Crisp Silk, both unscored as the owner's picks", () => {
-    const ids = catalogue.profiles.map((p) => p.id);
-    expect([ids.length, new Set(ids).size]).toEqual([34, 34]);
-    expect(byOrder().map((p) => p.order)).toEqual(Array.from({ length: 34 }, (_, i) => i));
-    for (const pick of PICKS) {
-      expect(profile(pick.id), pick.id).toMatchObject({ name: pick.name, family: pick.family, score: null, ownerPick: true, order: pick.order, manifest: `${pick.id}/keys-manifest.json`, preview: `${pick.id}/preview.ogg` });
-      expect([profile(pick.after).order + 1, profile(pick.before).order - 1], pick.id).toEqual([pick.order, pick.order]);
-    }
-    // No invented score: only the owner's picks go without one.
-    expect(byOrder().filter((p) => !(typeof p.score === "number" && Number.isFinite(p.score))).map((p) => p.id)).toEqual(PICKS.map((pick) => pick.id));
-    const families: Record<string, number> = {};
-    for (const p of catalogue.profiles) families[p.family] = (families[p.family] ?? 0) + 1;
-    expect(families).toEqual({ Deep: 3, Warm: 6, Rounded: 1, Solid: 3, Crisp: 7, Clear: 4, "Bright Clack": 10 });
-    expect(DEFAULT_KEYBOARD_SOUND).toBe("bright-clack");
+describe("Typing Feel down or missing (§5.3, §8.1): the saved set stays, Bamboo stands in, the run is not held", () => {
+  it("no origin: nothing is fetched, no notice; Off, Bamboo and the saved set shown unavailable; the save keeps it; Bamboo stands in until a pick", async () => {
+    await mount({ keyboard: "hail-stone" }, { base: null });
+    expect([fetchStub.mock.calls.length, notices, told.playable, told.standIn]).toEqual([0, [], ["ended"], ["hail-stone"]]);
+    press("F2", "F2");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, "hail-stone"]);
+    const saved = option("hail-stone")!;
+    expect([saved.disabled, saved.getAttribute("aria-selected"), saved.textContent]).toEqual([true, "true", "Saved sound unavailable"]);
+    expect([settings.keyboard, stored()?.keyboard, page.quick!.standIn(), bambooKeys(settings, page.quick!.standIn())]).toEqual(["hail-stone", "hail-stone", "hail-stone", true]);
+    press("Escape", "Escape");
+    await wait(20);
+    // Bamboo's space at the key (its letters come from audio-min's own read of the verdicts); no sample.
+    newRun();
+    frame(0);
+    press("c", "KeyC");
+    frame(20);
+    press(" ", "Space");
+    expect([played(), page.bamboo]).toEqual([[], [true]]);
+    press("F2", "F2");
+    option("off")!.click();
+    expect([page.quick!.standIn(), told.standIn.at(-1), stored()?.keyboard]).toEqual([null, null, "off"]);
   });
 
-  it("every set names key and space files the kit reads; each sample and preview has one media.md5 line and no line is stale", () => {
-    const root = "public" + KEYS_BASE;
-    const lines = readFileSync(join(__dirname, "..", "media.md5"), "utf8").split("\n").filter((line) => line.includes("  " + root));
-    for (const line of lines) expect(line).toMatch(/^[0-9a-f]{32} {2}\S+\.ogg$/);
-    const listed = lines.map((line) => line.slice(34));
-    const wanted = new Set<string>();
-    for (const p of catalogue.profiles) {
-      const files = keyboardFiles(setManifest(p), root + p.manifest.slice(0, p.manifest.lastIndexOf("/") + 1));
-      expect(files.key.length, p.id).toBeGreaterThanOrEqual(TYPING_SOUND_SET.key.want);
-      expect(files.space.length, p.id).toBeGreaterThanOrEqual(TYPING_SOUND_SET.space.want);
-      for (const file of [...files.key, ...files.space, root + p.preview]) wanted.add(file);
-    }
-    expect(listed.length).toBe(new Set(listed).size);
-    expect([...wanted].filter((file) => !listed.includes(file))).toEqual([]);
-    expect(listed.filter((file) => !wanted.has(file))).toEqual([]);
+  it("no origin and no saved sound: Bamboo plays, and the save stays without a keyboard sound", async () => {
+    await mount({ master: 70 }, { base: null });
+    expect([settings.keyboard, page.quick!.standIn(), fetchStub.mock.calls.length]).toEqual([BUILT_IN_KEYS, null, 0]);
+    press("F2", "F2");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS]);
+    document.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!.click();
+    expect(stored()).not.toHaveProperty("keyboard");
   });
 
-  it.each(PICKS)("$name: its manifest (schema /2) has $keys keys with natural tails up to $keyMs ms, $spaces spaces up to $spaceMs ms, its preview", (pick) => {
-    const set = setManifest(profile(pick.id));
-    expect([set.schema, set.id, set.preview]).toEqual(["typing-keys-firefly/2", pick.id, "preview.ogg"]);
-    const keys = set.files!.filter((f) => f.set === "key");
-    const spaces = set.files!.filter((f) => f.set === "space");
-    expect([keys.length, spaces.length]).toEqual([pick.keys, pick.spaces]);
-    for (const f of [...keys, ...spaces]) expect(f.durationMs, f.file).toBeGreaterThan(0);
-    expect([Math.max(...keys.map((f) => f.durationMs!)), Math.max(...spaces.map((f) => f.durationMs!))]).toEqual([pick.keyMs, pick.spaceMs]);
+  it.each([
+    ["404", "a 404"],
+    ["html", "HTML with status 200 (an SPA fallback)"],
+    ["json", "a body that is not JSON"],
+    ["cors", "a CORS failure"],
+  ] as const)("%s: %s keeps the saved set (shown unavailable), says \"Keyboard sounds unavailable\" once, asks for no set, and Bamboo stands in", async (reply, _what) => {
+    net.catalogue = reply;
+    await mount({ keyboard: OTHER, master: 70 });
+    expect(notices).toEqual([KEYBOARD_UNAVAILABLE]);
+    expect([settings.keyboard, stored()?.keyboard, page.quick!.standIn(), told.playable]).toEqual([OTHER, OTHER, OTHER, ["ended"]]);
+    expect(urls()).toEqual([CATALOGUE]);
+    page.quick!.typed(true);
+    expect([page.bamboo, played()]).toEqual([[true], []]);
+    press("F2", "F2");
+    const saved = option(OTHER)!;
+    expect([saved.disabled, saved.getAttribute("aria-selected"), saved.textContent]).toEqual([true, "true", "Saved sound unavailable"]);
+    expect(option(BUILT_IN_KEYS)!.getAttribute("aria-selected")).toBe("false");
+    // An unrelated change keeps the saved set in the save.
+    document.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!.click();
+    expect(stored()).toMatchObject({ muted: true, keyboard: OTHER });
   });
 
-  it("the Sound panel offers Off, Bamboo and the 34 sets in catalogue order; Hail Stone is in the Solid group, Raindrop Tile in Crisp, read without a score", async () => {
-    const read = await loadKeyboardCatalog(KEYS_BASE, { fallback: [], extra: [ORIGINAL_KEYS] });
-    expect(read.state).toBe("ready");
-    for (const pick of PICKS) {
-      expect(read.options.find((choice) => choice.value === pick.id)).toEqual({ value: pick.id, label: pick.name, family: pick.family, manifest: KEYS_BASE + `${pick.id}/keys-manifest.json`, preview: KEYS_BASE + `${pick.id}/preview.ogg` });
-    }
+  it.each(["manifest", "samples"] as const)("the saved set's %s fails: Bamboo stands in, one notice, the save keeps the set; a sample failure stops after the first batch", async (broken) => {
+    net.broken.set("hail-stone", broken);
+    await mount({ keyboard: "hail-stone" });
+    expect([notices, page.quick!.standIn(), settings.keyboard, stored()?.keyboard, told.playable]).toEqual([[KEYBOARD_SET_UNAVAILABLE], "hail-stone", "hail-stone", "hail-stone", ["ended"]]);
+    const samples = urls().filter((url) => /\/(key|space)-\d+\.ogg$/.test(url));
+    expect(samples).toHaveLength(broken === "manifest" ? 0 : KEYBOARD_DECODE_BATCH_SIZE);
+    page.quick!.typed(true);
+    expect([page.bamboo, played()]).toEqual([[true], []]);
+    press("F2", "F2");
+    option(BUILT_IN_KEYS)!.click();
+    expect([page.quick!.standIn(), stored()?.keyboard]).toEqual([null, BUILT_IN_KEYS]);
+  });
+
+  it("a set picked in the panel that cannot sound: Bamboo stands in, unsaved, until the next pick", async () => {
+    net.broken.set("solid", "samples");
     await mount();
     press("F2", "F2");
-    const values = (scope: ParentNode): string[] => [...scope.querySelectorAll<HTMLElement>('[role="option"]')].map((button) => button.dataset.value!);
-    expect(values(document.querySelector(".kit-keyboards__list")!)).toEqual(["off", BUILT_IN_KEYS, ...byOrder().map((p) => p.id)]);
+    option("solid")!.click();
+    await settle();
+    expect([page.quick!.standIn(), stored()?.keyboard, notices]).toEqual(["solid", "solid", [KEYBOARD_SET_UNAVAILABLE]]);
+    option(OTHER)!.click();
+    await settle();
+    expect([page.quick!.standIn(), stored()?.keyboard, decodedOf(OTHER).length]).toEqual([null, OTHER, sampleFiles(OTHER).key.length + sampleFiles(OTHER).space.length]);
+  });
+});
+
+describe("a late catalogue (§5.1 steps 4–5): the panel is built at once and takes the list when it comes", () => {
+  it("open before the catalogue: Off, Bamboo and the saved set \"Loading…\"; the list is replaced in place, the saved set selected and loaded, no preview played", async () => {
+    net.holdCatalogue = true;
+    await mount({ keyboard: "hail-stone" });
+    press("F2", "F2");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, "hail-stone"]);
+    expect([option("hail-stone")!.disabled, option("hail-stone")!.getAttribute("aria-selected"), option("hail-stone")!.textContent]).toEqual([true, "true", "Loading…"]);
+    expect(told.playable).toEqual([]);
+    for (const go of net.heldCatalogue.splice(0)) go();
+    await settle();
+    expect(page.quick!.panel).toBe("sound");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, ...SAMPLE_IDS]);
+    expect([option("hail-stone")!.disabled, option("hail-stone")!.getAttribute("aria-selected")]).toEqual([false, "true"]);
+    expect(decodedOf("hail-stone").length).toBeGreaterThan(0);
+    expect(urls().filter((url) => url.endsWith("/preview.ogg"))).toEqual([]);
+    expect([stored()?.keyboard, notices, told.playable]).toEqual(["hail-stone", [], ["batch"]]);
+  });
+
+  it("Bamboo picked while the catalogue loads stands: the late list keeps it selected, nothing else is saved and no set loads", async () => {
+    net.holdCatalogue = true;
+    await mount({ keyboard: "hail-stone" });
+    press("F2", "F2");
+    option(BUILT_IN_KEYS)!.click();
+    expect(stored()?.keyboard).toBe(BUILT_IN_KEYS);
+    for (const go of net.heldCatalogue.splice(0)) go();
+    await settle();
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, ...SAMPLE_IDS]);
+    expect(option(BUILT_IN_KEYS)!.getAttribute("aria-selected")).toBe("true");
+    expect([settings.keyboard, stored()?.keyboard, urls(), page.quick!.standIn()]).toEqual([BUILT_IN_KEYS, BUILT_IN_KEYS, [CATALOGUE], null]);
+  });
+});
+
+describe("fetches (§5.1, §8.1)", () => {
+  it("the catalogue revalidates (no-cache); set manifests may come from the HTTP cache, at startup and from the panel; samples and previews come from the feel host only", async () => {
+    await mount();
+    press("F2", "F2");
+    option("hail-stone")!.click();
+    await settle();
+    const caches = (pattern: RegExp) => net.calls.filter((call) => pattern.test(call.url)).map((call) => call.cache);
+    expect(caches(/\/v1\/keys\/keys-manifest\.json$/)).toEqual(["no-cache"]);
+    expect(caches(/\/sets\/.+\/keys-manifest\.json$/)).toEqual(["default", "default"]);
+    expect(urls().every((url) => url.startsWith(FEEL_BASE))).toBe(true);
+    expect(urls().filter((url) => url.endsWith("/preview.ogg"))).toEqual([setDir("hail-stone") + "preview.ogg"]);
+  });
+});
+
+describe("Typing Feel sets on the sample host: the owner's picks Raindrop Tile and Hail Stone", () => {
+  /** The owner's unscored picks (natural Firefly takes with kept tails); the fake lengths stand for their longest samples. */
+  const PICKS = [
+    { id: "hail-stone", name: "Hail Stone", family: "Solid", keyMs: 450, spaceMs: 535 },
+    { id: "raindrop-tile", name: "Raindrop Tile", family: "Crisp", keyMs: 450, spaceMs: 535 },
+  ] as const;
+  const counts = (id: string) => SAMPLE_SETS.find((set) => set.id === id)!;
+
+  it("the Sound panel offers Off, Bamboo and the sets in catalogue order under one heading per family; the picks read without a score", async () => {
+    await mount();
+    press("F2", "F2");
+    expect(values()).toEqual(["off", BUILT_IN_KEYS, ...SAMPLE_IDS]);
+    const headings = [...document.querySelectorAll(".kit-keyboards__list .kit-keyboards__family")].map((heading) => heading.textContent).filter(Boolean);
+    expect(headings).toEqual(SAMPLE_FAMILIES);
     const group = (family: string): Element => [...document.querySelectorAll('.kit-keyboards__list [role="group"]')].find((g) => g.querySelector(".kit-keyboards__family")?.textContent === family)!;
-    expect(values(group("Solid"))).toEqual(["solid", "solid-amber", "hail-stone"]);
-    expect(values(group("Crisp"))).toEqual(["crisp", "crisp-amber", "crisp-cedar", "crisp-pebble", "crisp-slate", "crisp-silk", "raindrop-tile"]);
+    expect(values(group("Solid"))).toEqual(["solid", "hail-stone"]);
+    expect(values(group("Crisp"))).toEqual(["raindrop-tile"]);
     for (const pick of PICKS) expect(option(pick.id)!.textContent).toBe(pick.name);
     expect(option(DEFAULT_KEYBOARD_SOUND)!.getAttribute("aria-selected")).toBe("true");
   });
 
   it.each(PICKS)("$name, picked in the panel, is saved, all its samples decode, and letters and the space play its own files", async (pick) => {
     await mount();
-    await settle();
     press("F2", "F2");
     option(pick.id)!.click();
     await settle();
     expect(stored()?.keyboard).toBe(pick.id);
-    expect(decodedOf(pick.id)).toHaveLength(pick.keys + pick.spaces);
+    expect(decodedOf(pick.id)).toHaveLength(counts(pick.id).keys + counts(pick.id).spaces);
     press("Escape", "Escape");
     await wait(20);
     newRun();
     frame(0);
     press("c", "KeyC");
     frame(20);
-    expect(played().at(-1)!.buffer!.url).toContain(`/${pick.id}/key-`);
+    expect(played().at(-1)!.buffer!.url).toContain(setDir(pick.id) + "key-");
     press(" ", "Space");
-    expect(played().at(-1)!.buffer!.url).toContain(`/${pick.id}/space-`);
+    expect(played().at(-1)!.buffer!.url).toContain(setDir(pick.id) + "space-");
     expect(notices).toEqual([]);
   });
 
   it.each(PICKS)("$name: its tails ring out, at 12 keys a second (about 145 WPM) no key sound is cut, nor a space at 3 a second", async (pick) => {
+    const files = sampleFiles(pick.id);
+    for (const url of files.key) lengths.set(url, pick.keyMs / 1000);
+    for (const url of files.space) lengths.set(url, pick.spaceMs / 1000);
     await mount({ keyboard: pick.id });
-    await settle();
-    expect(decodedOf(pick.id)).toHaveLength(pick.keys + pick.spaces);
+    expect(decodedOf(pick.id)).toHaveLength(files.key.length + files.space.length);
     const clock = ctx()!;
     for (let i = 0; i < 36; i += 1) {
       clock.currentTime = i / 12;
@@ -534,12 +676,19 @@ describe("34 Firefly sets: the owner's picks Raindrop Tile and Hail Stone (30/10
       clock.currentTime = 4 + i / 3;
       page.quick!.typed(true);
     }
-    const keys = played().filter((source) => source.buffer!.url.includes(`/${pick.id}/key-`));
-    const spaces = played().filter((source) => source.buffer!.url.includes(`/${pick.id}/space-`));
+    const keys = played().filter((source) => source.buffer!.url.startsWith(setDir(pick.id) + "key-"));
+    const spaces = played().filter((source) => source.buffer!.url.startsWith(setDir(pick.id) + "space-"));
     expect([keys.length, spaces.length]).toEqual([36, 9]);
-    // A shuffled round plays every variant once before any twice, so the longest samples were among them.
-    expect(new Set(keys.map((s) => s.buffer!.url)).size).toBe(pick.keys);
-    expect([Math.max(...keys.map((s) => lengths.get(s.buffer!.url)!)), Math.max(...spaces.map((s) => lengths.get(s.buffer!.url)!))]).toEqual([pick.keyMs / 1000, pick.spaceMs / 1000]);
+    // A shuffled round plays every variant once before any twice.
+    expect(new Set(keys.map((s) => s.buffer!.url)).size).toBe(files.key.length);
     expect([...keys, ...spaces].filter((source) => source.stopped !== null).map((source) => source.buffer!.url)).toEqual([]);
+  });
+});
+
+describe("no keyboard set is copied into the game (B5)", () => {
+  it("media.md5 holds no audio/keys line, and the game's own code names no keys folder of its own", () => {
+    const root = join(__dirname, "..");
+    expect(readFileSync(join(root, "media.md5"), "utf8").split("\n").filter((line) => line.includes("/audio/keys/"))).toEqual([]);
+    for (const file of ["src/app/keyboard.ts", "src/app/quick.ts", "src/main.ts"]) expect(readFileSync(join(root, file), "utf8"), file).not.toMatch(/assets\/typing-defense\/audio\/keys/);
   });
 });

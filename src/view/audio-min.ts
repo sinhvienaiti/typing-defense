@@ -2,8 +2,9 @@
  * Lời Gọi's sound made in code (docs/td/BUILD_NOW.md §5.5, TK 24; SPLIT_PLAN §1.2), no files: bamboo, wood, bronze
  * bells and paper (folk.ts), the list and the prompts for the real files in docs/audio/THEME_SOUND_LIST.md. Buses (TK
  * 24.2): music (ducked under a spoken word), typing (its own light compressor), world, ui (the Interface volume, ticket
- * 193), keys (the original Bamboo keys at Master × Keyboard volume, silent with any other keyboard sound: a Firefly set
- * plays in app/quick.ts), a shared reverb, master and a limiter; the settings set master, music, effects and interface.
+ * 193), keys (the original Bamboo keys at Master × Keyboard volume, silent with any other keyboard sound: a Typing Feel
+ * set plays in app/quick.ts, unless Bamboo stands in for one that cannot sound), a shared reverb, master and a limiter;
+ * the settings set master, music, effects and interface.
  * A call that lights up rings its kind's alert (power a trống cơm pair, build two bamboo taps, harvest a high bell, chop
  * a low wood knock, mine a small clink, quiz a sáo call; at most 3 a second); with Bamboo chosen, a right key is a
  * bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB lower; a finished word a đàn tranh
@@ -21,7 +22,7 @@ import { PROJECTILE } from "../sim/stores/projectiles";
 import { chainTier } from "../sim/systems/chain";
 import type { World } from "../sim/world";
 import { KEY } from "../typing/router";
-import { BUILT_IN_KEYS, type Settings } from "../app/prefs";
+import { bambooKeys, type Settings } from "../app/prefs";
 import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, trong, type Out } from "./folk";
 import { FolkMusic } from "./music";
 
@@ -49,7 +50,8 @@ export class TypingAudio {
   /** Real-time stamps (ms) of the last sounds a cap counts. */
   private readonly last = { arrow: [] as number[], puff: [] as number[], coin: [] as number[], leak: -1e9, caller: 0, left: -1 };
 
-  constructor(private settings: Settings) {}
+  /** `standIn`: the chosen keyboard set the Bamboo keys stand in for this session (app/quick.ts), or null. */
+  constructor(private settings: Settings, private readonly standIn: () => string | null = () => null) {}
 
   get muted(): boolean {
     return this.settings.muted;
@@ -106,12 +108,12 @@ export class TypingAudio {
     this.musicBus.gain.setTargetAtTime(v(settings.music, BASE.music), t, 0.03);
     this.sfx.gain.setTargetAtTime(v(settings.sfx, BASE.sfx), t, 0.03);
     this.uiBus.gain.setTargetAtTime(v(settings.ui, BASE.sfx), t, 0.03);
-    this.keyBus.gain.setTargetAtTime(settings.muted || settings.keyboard !== BUILT_IN_KEYS ? 0 : settings.master * settings.keyboardVolume / 10000, t, 0.03);
+    this.keyBus.gain.setTargetAtTime(settings.muted || !bambooKeys(settings, this.standIn()) ? 0 : settings.master * settings.keyboardVolume / 10000, t, 0.03);
   }
 
-  /** The original bamboo keys, independently of the combat and completion sounds. */
+  /** The original bamboo keys, independently of the combat and completion sounds; also while they stand in for a set that cannot sound. */
   key(space = false, wrong = false, step = 0): void {
-    if (this.ctx === null || this.settings.keyboard !== BUILT_IN_KEYS || this.settings.muted || this.settings.master === 0 || this.settings.keyboardVolume === 0) return;
+    if (this.ctx === null || !bambooKeys(this.settings, this.standIn()) || this.settings.muted || this.settings.master === 0 || this.settings.keyboardVolume === 0) return;
     go(this.out.keys, this.ctx.currentTime, wrong ? 150 : space ? 620 : 880 * 2 ** (Math.min(12, step) / 12), wrong ? 0.04 : 0.08, wrong ? 0.045 : space ? 0.05 : 0.028);
   }
 

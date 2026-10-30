@@ -18,14 +18,18 @@
  * load plays with no lists. The teaching table (ui/tips.ts) is a chunk too: Bà Cú Mực's rows in the frame at the top,
  * what a building does on its card. The Settings gear and the Sound speaker (app/quick.ts; parent
  * docs/games/IN_GAME_SETTINGS.md) are one more chunk, which F1 / F2 also ask for: while a panel or its 3-2-1 is up the
- * run holds as behind the pause card, and each letter's verdict plays the chosen keyboard set.
+ * run holds as behind the pause card, and each letter's verdict plays the chosen keyboard set. That set comes from Typing
+ * Feel (parent docs/games/TYPING_FEEL_SERVICE.md §5.1): its catalogue (app/keyboard.ts, a chunk) is asked for with the
+ * page and nothing waits on it; the run's first step waits for the saved set's first sounds 1.5 s at most
+ * (app/keyboard-gate.ts).
  */
 import "./ui/td.css";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
 import { installKeys, installPointer } from "./app/input";
-import { bestStars, keepStars, loadSettings, saveSettings, storyMode } from "./app/prefs";
+import { KeyboardGate } from "./app/keyboard-gate";
+import { bestStars, keepStars, loadSettings, savedKeyboard, saveSettings, storyMode } from "./app/prefs";
 import type { GameQuick } from "./app/quick";
 import { loadSkill, paceHeader, saveSkill, SkillTally } from "./app/skill";
 import { updateSkill } from "./kit/balance";
@@ -63,8 +67,15 @@ const canvas = byId<HTMLCanvasElement>("tdCanvas");
 const view = new DebugView(canvas);
 let painted = false;
 const settings = loadSettings();
+/** Typing Feel: the save's own keyboard sound (before the default fills it in) and the catalogue, asked for with the page (app/keyboard.ts). */
+const keyboardSaved = savedKeyboard();
+const keyboardFeed = new Chunk("keyboard", () => import("./app/keyboard")).get().then((m) => m?.requestKeyboardCatalogue() ?? null);
+/** The first step waits for the saved set's first batch, 1.5 s at most from here; the set Bamboo stands in for (never saved); the first step's time. */
+const keyboardGate = new KeyboardGate();
+let keyboardStandIn: string | null = null;
+let firstStepAt = -1;
 /** Sound and music, a chunk fetched once the page is usable (prefetch): nothing sounds before a key or a click anyway (TypingAudio.resume). */
-const sound = new Chunk("sound", async () => new (await import("./view/audio-min")).TypingAudio(settings));
+const sound = new Chunk("sound", async () => new (await import("./view/audio-min")).TypingAudio(settings, () => keyboardStandIn));
 let audio: TypingAudio | null = null;
 let quick: GameQuick | null = null;
 /** Asks for sound while it is not in: once the page is usable, then on each key or click until it loads (the chunk keeps its 15 s cool-down after a failure; R2 review fix 3). */
@@ -166,7 +177,10 @@ window.addEventListener("pagehide", () => {
   learner?.flush(performance.now());
 });
 const selection = new Selection(world, (command) => session.send(command));
-const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).mountQuick(settings, { audio: () => audio, quit: () => showTitle(world.phase !== "defeat"), countdown: () => titleUp || selection.halted ? 0 : 500, notice: tellLost }));
+const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).mountQuick(settings, {
+  audio: () => audio, quit: () => showTitle(world.phase !== "defeat"), countdown: () => titleUp || selection.halted ? 0 : 500, notice: tellLost,
+  saved: keyboardSaved, feed: keyboardFeed, standIn: (id) => void (keyboardStandIn = id), playable: (by) => keyboardGate.open(by),
+}));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
 cards.child = profile.audience === "child";
 /** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
@@ -249,11 +263,12 @@ function prefetch(): void {
   if (sandbox) void panel.get();
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
-    // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel).
-    ready: () => painted && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel), and the keyboard gate open.
+    ready: () => painted && keyboardGate.isOpen && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
     chunks: () => ({ sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
+    keyboard: () => ({ gate: { startedAt: keyboardGate.startedAt, openedAt: keyboardGate.openedAt, by: keyboardGate.by }, firstStepAt, standIn: keyboardStandIn, panel: quick?.keyboard() ?? null }),
   }));
 }
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
@@ -362,9 +377,11 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      session.paused = selection.halted || titleUp || quick?.blocking === true || (world.tick === 0 && !learnChunk.settled);
+      // The first step waits for Học's study lists and the keyboard gate (the saved set's first sounds, 1.5 s at most).
+      session.paused = selection.halted || titleUp || quick?.blocking === true || (world.tick === 0 && (!learnChunk.settled || !keyboardGate.isOpen));
       session.orders = selection.tactical && !titleUp && !quick?.blocking; // orders wait behind an overlay too
       session.frame(now);
+      if (firstStepAt < 0 && world.tick > 0) firstStepAt = performance.now();
       if (!sandbox && won === null && world.phase === "victory") won = keepStars(world.c.content.id, world.lives);
       const fresh = world.events.rare.splice(0);
       if (banner.tips === null && fresh.some((event) => event.t === "phase")) wantTips();

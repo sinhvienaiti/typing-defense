@@ -1,12 +1,14 @@
-import { defineConfig } from "vite";
+import { fileURLToPath } from "node:url";
+import { defineConfig, loadEnv, type Plugin } from "vite";
 
 const env = (name: string): string | undefined => process.env[name]?.trim() || undefined;
 
 /**
  * BUILD_1B §20: the modules src/main.ts loads with import(), each its own chunk (R3 step 1, docs/td/R3_PLAN.md §3.1:
- * tests/td-chunks.test.ts checks every import() of main.ts against it).
+ * tests/td-chunks.test.ts checks every import() of main.ts against it). app/keyboard.ts (the Typing Feel catalogue, asked
+ * for with the page) brings the kit's keyboard audio with it, out of the start set.
  */
-export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets|tips)|app[\\/](sandbox|dev-tools|retry|learn|quick)|view[\\/](audio-min|folk|music|fx-pipe))\.ts$/;
+export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets|tips)|app[\\/](sandbox|dev-tools|retry|learn|quick|keyboard)|view[\\/](audio-min|folk|music|fx-pipe))\.ts$/;
 
 type ModuleInfo = { importedIds: readonly string[] } | null;
 /**
@@ -24,9 +26,37 @@ let chunkFor: ((id: string) => string | undefined) | null = null;
 // The parent repo's dev script sets these for the nginx host (td.typing-game.local).
 // A plain `pnpm dev` on 127.0.0.1:3006 keeps Vite's own HMR socket.
 const hmrHost = env("DEV_HMR_HOST");
+const root = fileURLToPath(new URL(".", import.meta.url));
 
-export default defineConfig({
+/**
+ * The Typing Feel origin of VITE_TYPING_FEEL_ORIGIN (parent docs/games/TYPING_FEEL_SERVICE.md §5.1), as the preconnect's
+ * href: an http(s) URL without credentials, reduced to its origin. Anything else is no origin, as for the game itself
+ * (typingFeelKeysBase).
+ */
+export function feelOrigin(value: string | undefined): string | null {
+  const text = value?.trim() ?? "";
+  if (!text || /[\s?#]/.test(text)) return null;
+  try {
+    const url = new URL(text);
+    return (url.protocol === "http:" || url.protocol === "https:") && url.host !== "" && !url.username && !url.password ? url.origin : null;
+  } catch {
+    return null;
+  }
+}
+
+/** `<link rel="preconnect" … crossorigin>` to the Typing Feel host, only when this build has one: no tag at all otherwise. */
+export function feelPreconnect(origin: string | null): Plugin {
+  return {
+    name: "typing-feel-preconnect",
+    transformIndexHtml: () => (origin === null ? [] : [{ tag: "link", attrs: { rel: "preconnect", href: origin, crossorigin: true }, injectTo: "head" }]),
+  };
+}
+
+export default defineConfig(({ mode }) => ({
   base: "/",
+  // The parent's build:td and dev:td:app set the origin; a plain `pnpm dev`, `pnpm build` or `pnpm check` here does not
+  // (Typing Feel off: Off and Bamboo only). .env files count too.
+  plugins: [feelPreconnect(feelOrigin(loadEnv(mode, root, "VITE_TYPING_FEEL_").VITE_TYPING_FEEL_ORIGIN))],
   server: {
     host: env("DEV_HOST") ?? "127.0.0.1",
     port: 3006,
@@ -57,4 +87,4 @@ export default defineConfig({
       },
     },
   },
-});
+}));
