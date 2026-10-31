@@ -1,0 +1,579 @@
+{
+  "version": 1,
+  "region": "meadow",
+  "format": "webp",
+  "uvOrigin": "top-left",
+  "alphaCutoff": 0.5,
+  "marginPx": 8,
+  "bleedPx": 8,
+  "tiers": {
+    "high": {
+      "size": 4096,
+      "color": "meadow/color.high.webp",
+      "normal": "meadow/normal.high.webp"
+    },
+    "medium": {
+      "size": 2048,
+      "color": "meadow/color.medium.webp",
+      "normal": "meadow/normal.medium.webp"
+    }
+  },
+  "shadow": {
+    "size": 1024,
+    "file": "meadow/shadow.high.webp",
+    "tiers": [
+      "high"
+    ]
+  },
+  "normal": {
+    "space": "tangent",
+    "x": "right",
+    "y": "up",
+    "encode": "n*0.5+0.5",
+    "colorSpace": "linear",
+    "z": "camera"
+  },
+  "densityPxPerM": 72,
+  "pending": false,
+  "sprites": [
+    {
+      "id": "almond-tree-v3",
+      "type": "almond-tree",
+      "variant": "v3",
+      "kind": "tree",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0,
+        0,
+        0.328125,
+        0.320313
+      ],
+      "rect": [
+        0,
+        0,
+        1344,
+        1312
+      ],
+      "px": [
+        1344,
+        1312
+      ],
+      "foot": [
+        0.460588,
+        0.006098
+      ],
+      "heightM": 18,
+      "sizeM": [
+        18.666667,
+        18.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/almond-tree-v3.png",
+      "sha256": "c35213f18388574846c78f5278f551f3861808cd82b50579d66c317098df5b79"
+    },
+    {
+      "id": "almond-tree-v4",
+      "type": "almond-tree",
+      "variant": "v4",
+      "kind": "tree",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0.192383,
+        0.605469,
+        0.493164,
+        0.855469
+      ],
+      "rect": [
+        788,
+        2480,
+        2020,
+        3504
+      ],
+      "px": [
+        1232,
+        1024
+      ],
+      "foot": [
+        0.499044,
+        0.007813
+      ],
+      "heightM": 14,
+      "sizeM": [
+        17.111111,
+        14.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/almond-tree-v4.png",
+      "sha256": "991e85b9b048648ad1e4d45de8ca76003a1d41dcd83dbd9f80522f5db9658099"
+    },
+    {
+      "id": "bamboo-clump-v3",
+      "type": "bamboo-clump",
+      "variant": "v3",
+      "kind": "bamboo",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0,
+        0.605469,
+        0.192383,
+        0.890625
+      ],
+      "rect": [
+        0,
+        2480,
+        788,
+        3648
+      ],
+      "px": [
+        788,
+        1168
+      ],
+      "foot": [
+        0.690305,
+        0.006849
+      ],
+      "heightM": 16,
+      "sizeM": [
+        10.944444,
+        16.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/bamboo-clump-v3.png",
+      "sha256": "e77ae820fd462155644eade67e6cf253f4503e9b382b0f511a22493c1b71d863"
+    },
+    {
+      "id": "bamboo-clump-v4",
+      "type": "bamboo-clump",
+      "variant": "v4",
+      "kind": "bamboo",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0,
+        0.320313,
+        0.205078,
+        0.605469
+      ],
+      "rect": [
+        0,
+        1312,
+        840,
+        2480
+      ],
+      "px": [
+        840,
+        1168
+      ],
+      "foot": [
+        0.560269,
+        0.006849
+      ],
+      "heightM": 16,
+      "sizeM": [
+        11.666667,
+        16.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/bamboo-clump-v4.png",
+      "sha256": "ab274fd5a84c110aa5a39108d4096dbf70e0da3d9cb52d013da3184ffd39e1df"
+    },
+    {
+      "id": "canopy-block-v3",
+      "type": "canopy-block",
+      "variant": "v3",
+      "kind": "canopy",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0.669922,
+        0,
+        0.983398,
+        0.179688
+      ],
+      "rect": [
+        2744,
+        0,
+        4028,
+        736
+      ],
+      "px": [
+        1284,
+        736
+      ],
+      "foot": [
+        0.484983,
+        0.01087
+      ],
+      "heightM": 10,
+      "sizeM": [
+        17.833333,
+        10.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/canopy-block-v3.png",
+      "sha256": "9536c854d08eddaa3ac07903395520effff41e290bd61af6471968980c2da965"
+    },
+    {
+      "id": "canopy-block-v4",
+      "type": "canopy-block",
+      "variant": "v4",
+      "kind": "canopy",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0.328125,
+        0,
+        0.669922,
+        0.220703
+      ],
+      "rect": [
+        1344,
+        0,
+        2744,
+        904
+      ],
+      "px": [
+        1400,
+        904
+      ],
+      "foot": [
+        0.506697,
+        0.009956
+      ],
+      "heightM": 14,
+      "sizeM": [
+        22.096956,
+        14.26832
+      ],
+      "pxPerM": 63.357143,
+      "source": "scenery/meadow/canopy-block-v4.png",
+      "sha256": "6694ab74bc5af0e21db1680a93350f2a9c404290ba4a1616fa11a8fb5456af1c"
+    },
+    {
+      "id": "mountain-pine-v3",
+      "type": "mountain-pine",
+      "variant": "v3",
+      "kind": "tree",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0.205078,
+        0.320313,
+        0.371094,
+        0.570313
+      ],
+      "rect": [
+        840,
+        1312,
+        1520,
+        2336
+      ],
+      "px": [
+        680,
+        1024
+      ],
+      "foot": [
+        0.606788,
+        0.007813
+      ],
+      "heightM": 14,
+      "sizeM": [
+        9.444444,
+        14.222222
+      ],
+      "pxPerM": 72,
+      "source": "scenery/meadow/mountain-pine-v3.png",
+      "sha256": "32403b41c8702e73f60495d4a7849c4ad0a25ea7192e9e5f84cf50b5d1ddbc3a"
+    },
+    {
+      "id": "mountain-pine-v4",
+      "type": "mountain-pine",
+      "variant": "v4",
+      "kind": "tree",
+      "ink": false,
+      "key": "#FF00FF",
+      "uv": [
+        0.669922,
+        0.179688,
+        0.899414,
+        0.352539
+      ],
+      "rect": [
+        2744,
+        736,
+        3684,
+        1444
+      ],
+      "px": [
+        940,
+        708
+      ],
+      "foot": [
+        0.536152,
+        0.011299
+      ],
+      "heightM": 10,
+      "sizeM": [
+        13.583815,
+        10.231214
+      ],
+      "pxPerM": 69.2,
+      "source": "scenery/meadow/mountain-pine-v4.png",
+      "sha256": "c6105b331ebfbba96b60655046118985463f6fd671260cb23b95deadc0c4719f"
+    }
+  ],
+  "build": {
+    "recipe": "77760d71c697e92a3d984481f270c2275fa0d6bc3f59b4c502103c24bd34c06d",
+    "outputs": {
+      "meadow/color.high.webp": "ec3544dd788e3cdd7f0ec379735db38791cafa507a54dddb84a91c2ca5dd30ce",
+      "meadow/normal.high.webp": "56e57edc3ae62736056af6593726b2992c4e3814c000d3e41244e49d28d43f55",
+      "meadow/color.medium.webp": "eefbc37a57ea8e9212f8c33030605d3cf263e0e376b3059e0c4bde304364aff9",
+      "meadow/normal.medium.webp": "8b91b4ec899c15613cc3d70ff73534632b39b6c82d862253baee48192c564135",
+      "meadow/shadow.high.webp": "808af3898fab825fda39c2693664b15eceabf7bae544b3ca2f2d497dd4c0a482"
+    },
+    "colorQuality": 95,
+    "edgeKeyPixels": 14,
+    "edgeReview": {
+      "decision": "2026-10-30 13:28",
+      "quality": 95,
+      "failures": [
+        {
+          "tier": "high",
+          "id": "bamboo-clump-v3",
+          "keyPixels": 4,
+          "maxRGBA": [
+            84,
+            38,
+            91,
+            104
+          ],
+          "pixels": [
+            {
+              "xy": [
+                573,
+                317
+              ],
+              "rgba": [
+                83,
+                32,
+                67,
+                104
+              ]
+            },
+            {
+              "xy": [
+                636,
+                578
+              ],
+              "rgba": [
+                81,
+                38,
+                91,
+                0
+              ]
+            },
+            {
+              "xy": [
+                636,
+                579
+              ],
+              "rgba": [
+                84,
+                31,
+                88,
+                0
+              ]
+            },
+            {
+              "xy": [
+                637,
+                581
+              ],
+              "rgba": [
+                65,
+                18,
+                56,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "tier": "high",
+          "id": "bamboo-clump-v4",
+          "keyPixels": 3,
+          "maxRGBA": [
+            87,
+            49,
+            103,
+            168
+          ],
+          "pixels": [
+            {
+              "xy": [
+                659,
+                874
+              ],
+              "rgba": [
+                67,
+                31,
+                56,
+                0
+              ]
+            },
+            {
+              "xy": [
+                667,
+                980
+              ],
+              "rgba": [
+                86,
+                46,
+                96,
+                168
+              ]
+            },
+            {
+              "xy": [
+                667,
+                981
+              ],
+              "rgba": [
+                87,
+                49,
+                103,
+                36
+              ]
+            }
+          ]
+        },
+        {
+          "tier": "high",
+          "id": "canopy-block-v3",
+          "keyPixels": 3,
+          "maxRGBA": [
+            73,
+            35,
+            75,
+            101
+          ],
+          "pixels": [
+            {
+              "xy": [
+                66,
+                81
+              ],
+              "rgba": [
+                66,
+                35,
+                75,
+                0
+              ]
+            },
+            {
+              "xy": [
+                384,
+                621
+              ],
+              "rgba": [
+                60,
+                13,
+                65,
+                87
+              ]
+            },
+            {
+              "xy": [
+                385,
+                621
+              ],
+              "rgba": [
+                73,
+                12,
+                62,
+                101
+              ]
+            }
+          ]
+        },
+        {
+          "tier": "high",
+          "id": "mountain-pine-v4",
+          "keyPixels": 2,
+          "maxRGBA": [
+            72,
+            18,
+            72,
+            0
+          ],
+          "pixels": [
+            {
+              "xy": [
+                638,
+                208
+              ],
+              "rgba": [
+                72,
+                17,
+                72,
+                0
+              ]
+            },
+            {
+              "xy": [
+                639,
+                209
+              ],
+              "rgba": [
+                66,
+                18,
+                59,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "tier": "medium",
+          "id": "mountain-pine-v3",
+          "keyPixels": 2,
+          "maxRGBA": [
+            107,
+            56,
+            114,
+            103
+          ],
+          "pixels": [
+            {
+              "xy": [
+                67,
+                22
+              ],
+              "rgba": [
+                107,
+                56,
+                114,
+                8
+              ]
+            },
+            {
+              "xy": [
+                247,
+                276
+              ],
+              "rgba": [
+                89,
+                40,
+                74,
+                103
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
