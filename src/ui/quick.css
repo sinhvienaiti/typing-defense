@@ -6,18 +6,110 @@
   --kit-qs-focus: var(--vd-lantern); --kit-qs-line: var(--vd-bamboo); --kit-qs-backdrop: var(--vd-quick-backdrop);
   font-family: var(--vd-font);
 }
+/* Frame (160 panel-large.v2, 1183 x 1152): a 9-slice of its slice data (210 px corners and edges, edges "round"), 38 px
+   wide at 720p and 57 at 1080p (its display data: 56). The centre is no longer the frame's own `fill`: with "round" the
+   middle slice was tiled at the frame's scale (138 px tiles), a grid of seams behind the rows. The border box now stops
+   at the inner gold edge (100 px of the art, 18 px drawn), the frame image covers the band beyond it, and the centre is
+   one stretched copy of the art's middle (763 x 732 px: the art drawn 1183/763 and 1152/732 times the area inside the
+   frame), clipped inside the gold edge. Paddings keep the content where it was (42/46/50 px at 720p). */
 .td-quick.kit-qs .kit-qs__panel {
-  border: 38px solid transparent; border-image: var(--kit-qs-skin-panel) 210 fill / 38px / 0 round;
-  border-radius: 0; background-image: none; padding: 4px 8px 12px;
+  border: calc(18px * var(--kit-qs-s)) solid transparent; border-radius: 0;
+  border-image: var(--kit-qs-skin-panel) 210 / calc(38px * var(--kit-qs-s)) / 0 round;
+  background: var(--kit-qs-skin-panel) center / calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5505)
+    calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5738) no-repeat padding-box transparent;
+  padding: calc(24px * var(--kit-qs-s)) calc(28px * var(--kit-qs-s)) calc(32px * var(--kit-qs-s));
 }
 .td-quick.kit-qs .kit-qs__btn, .td-quick.kit-qs .kit-qs__chip {
   border: 12px solid transparent; border-image: var(--kit-qs-skin-button) 170 260 fill / 12px / 0 round;
   background-image: none; padding: 0 7px; min-height: 38px;
 }
-.td-quick .kit-qs__btn:hover, .td-quick .kit-qs__opt input:checked + .kit-qs__chip,
-.td-quick .kit-qs__btn[aria-pressed="true"], .td-quick .kit-qs__btn[aria-checked="true"] { outline: 2px solid var(--vd-lantern); color: var(--vd-quick-text); }
+/* Chosen, pressed or switched on: the 160 button-active plate (same cut as the button, an amber glow round it;
+   --td-qs-button-active from app/quick.ts) with gold lettering, in place of an orange CSS outline whose rounded corners
+   did not match the art. Hover brightens the art. */
+.td-quick.kit-qs .kit-qs__opt input:checked + .kit-qs__chip,
+.td-quick.kit-qs .kit-qs__btn[aria-pressed="true"], .td-quick.kit-qs .kit-qs__btn[aria-checked="true"] {
+  border-image-source: var(--td-qs-button-active, var(--kit-qs-skin-button)); background: none; color: var(--vd-quick-accent);
+}
+.td-quick.kit-qs .kit-qs__btn:hover, .td-quick.kit-qs .kit-qs__opt:hover input:not(:disabled) + .kit-qs__chip { filter: brightness(1.18); }
+/* "Unmute" is longer than "Mute": the toggle keeps Unmute's width for both labels, so the Master row does not shift when
+   muted. The button's 12 px art border and 7 px padding do not scale (38 px); the label does (58 px at scale 1, measured). */
+.td-quick.kit-qs .kit-qs__btn[data-toggle] { min-width: calc(38px + 60px * var(--kit-qs-s)); }
 .td-quick .kit-qs__row { grid-template-columns: 24px minmax(90px, auto) minmax(0, 1fr); }
 /* Resume is the kit's primary button: the kit gives it --kit-qs-accent-text (ink), dark on the dark button art.
    Gold lettering on the same art keeps it readable and marks it as the main action; hover turns it cream. */
 .td-quick .kit-qs__btn--primary { color: var(--vd-quick-accent); }
+/* Sound rows share one label column wide enough for "Keyboard volume", so every groove and the keyboard list start at
+   the same x (each row is its own grid; `auto` let a long label push its groove right). The icon column scales with
+   the panel like the icons. Settings rows keep their own columns so "Pace adapts to your typing" stays on one line. */
+.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:not(.kit-qs__row--slot) {
+  grid-template-columns: calc(24px * var(--kit-qs-s)) 9em minmax(0, 1fr);
+}
+/* Slider art (225). The groove is drawn in three slices: its 64 px cloud-scroll caps keep their own proportion
+   (10 x 10 px at scale 1, as tall as the groove) and only the plain jade middle stretches; the kit stretched the whole
+   1024 x 64 image, so the caps came out about twice too wide on grooves up to 36:1. The kit's flat --kit-qs-line
+   (bamboo) under the groove and --kit-qs-text under the knob's square are cleared, so only the art shows. The knob box
+   grows from 22 to 32 px (the art fills 70 % of it: about 22 px visible at 720p, 34 px at 1080p) and the range box with
+   it, so the knob's glow stays inside. WebKit and Gecko pseudo-elements stay in separate rules (one unknown selector
+   drops the whole rule).
+   States, on the knob as games draw them: the range shows a hand; hover brightens the knob with a lantern glow; a press
+   (drag) lifts it 8 % with a stronger glow and a grabbing hand; keyboard focus rings it in lantern light (two tight
+   drop-shadows and a soft halo) and warms the groove, in place of the kit's flat 2 px box around the whole range. */
+.td-quick.kit-qs--skin-slider .kit-qs__range { height: calc(32px * var(--kit-qs-s)); cursor: pointer; }
+.td-quick.kit-qs--skin-slider .kit-qs__range:active { cursor: grabbing; }
+.td-quick.kit-qs--skin-slider .kit-qs__range:focus-visible { outline: none; }
+.td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-runnable-track {
+  background: none; border: 0 solid transparent;
+  border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-moz-range-track {
+  background: none; border: 0 solid transparent;
+  border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb {
+  width: calc(32px * var(--kit-qs-s)); height: calc(32px * var(--kit-qs-s)); margin-top: calc(-11px * var(--kit-qs-s));
+  background-color: transparent; transition: filter 120ms ease-out, transform 120ms ease-out;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-moz-range-thumb {
+  width: calc(32px * var(--kit-qs-s)); height: calc(32px * var(--kit-qs-s)); background-color: transparent;
+  transition: filter 120ms ease-out, transform 120ms ease-out;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:hover::-webkit-slider-thumb {
+  filter: brightness(1.15) drop-shadow(0 0 calc(4px * var(--kit-qs-s)) rgba(255, 184, 77, 0.85));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:hover::-moz-range-thumb {
+  filter: brightness(1.15) drop-shadow(0 0 calc(4px * var(--kit-qs-s)) rgba(255, 184, 77, 0.85));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:focus-visible::-webkit-slider-runnable-track {
+  filter: drop-shadow(0 0 calc(3px * var(--kit-qs-s)) rgba(255, 184, 77, 0.55));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:focus-visible::-moz-range-track {
+  filter: drop-shadow(0 0 calc(3px * var(--kit-qs-s)) rgba(255, 184, 77, 0.55));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:focus-visible::-webkit-slider-thumb {
+  filter: brightness(1.12) drop-shadow(0 0 1px #ffb84d) drop-shadow(0 0 1px #ffb84d)
+    drop-shadow(0 0 calc(5px * var(--kit-qs-s)) rgba(255, 184, 77, 0.95));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:focus-visible::-moz-range-thumb {
+  filter: brightness(1.12) drop-shadow(0 0 1px #ffb84d) drop-shadow(0 0 1px #ffb84d)
+    drop-shadow(0 0 calc(5px * var(--kit-qs-s)) rgba(255, 184, 77, 0.95));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:active::-webkit-slider-thumb {
+  transform: scale(1.08); filter: brightness(1.25) drop-shadow(0 0 calc(6px * var(--kit-qs-s)) rgba(255, 170, 60, 0.95));
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range:active::-moz-range-thumb {
+  transform: scale(1.08); filter: brightness(1.25) drop-shadow(0 0 calc(6px * var(--kit-qs-s)) rgba(255, 170, 60, 0.95));
+}
+@media (prefers-reduced-motion: reduce) {
+  .td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb { transition: none; }
+  .td-quick.kit-qs--skin-slider .kit-qs__range::-moz-range-thumb { transition: none; }
+}
+.td-quick.kit-qs--still.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb { transition: none; }
+.td-quick.kit-qs--still.kit-qs--skin-slider .kit-qs__range::-moz-range-thumb { transition: none; }
+/* Muted (app/quick.ts watchMute): while Mute is pressed the Master groove and knob dim and lose colour and the number
+   is struck through; the button reads "Unmute" on the button-active plate. The row's speaker shows the 180 muted-speaker
+   art (--td-qs-icon-muted) while muted or at 0, as the corner button does; the kit's image only hides. */
+.td-quick .td-quick__row--muted .kit-qs__range { filter: grayscale(0.7) brightness(0.6); }
+.td-quick .td-quick__row--muted .kit-qs__num { opacity: 0.55; text-decoration: line-through; text-decoration-thickness: calc(2px * var(--kit-qs-s)); }
+.td-quick .td-quick__row--silent .kit-qs__icon-cell { background: var(--td-qs-icon-muted) center / contain no-repeat; }
+.td-quick .td-quick__row--silent .kit-qs__icon { opacity: 0; }
 .td-quick .kit-qs__row--slot { grid-template-columns: 1fr; }

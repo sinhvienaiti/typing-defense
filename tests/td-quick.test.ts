@@ -685,6 +685,145 @@ describe("Typing Feel sets on the sample host: the owner's picks Raindrop Tile a
   });
 });
 
+describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
+  /** Rule bodies of src/ui/quick.css by selector (comments dropped, whitespace folded) and every rule head. */
+  const sheet = (): { rules: Map<string, string>; heads: string[] } => {
+    const rules = new Map<string, string>();
+    const heads: string[] = [];
+    const css = readFileSync(join(__dirname, "..", "src/ui/quick.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+    for (const [, head, body] of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      heads.push(head!.trim());
+      for (const selector of head!.split(",").map((part) => part.trim()).filter(Boolean)) {
+        rules.set(selector, (rules.get(selector) ?? "") + body!.replace(/\s+/g, " ").trim() + " ");
+      }
+    }
+    return { rules, heads };
+  };
+
+  it("sliders wear the 225 jade groove in three slices and the limestone knob, with no kit colour under either", async () => {
+    await mount();
+    const root = document.querySelector<HTMLElement>(".td-quick")!;
+    expect(root.classList.contains("kit-qs--skin-slider")).toBe(true);
+    expect(root.style.getPropertyValue("--kit-qs-skin-track")).toContain("/assets/typing-defense/ui/quick-settings/slider-track.png");
+    expect(root.style.getPropertyValue("--kit-qs-skin-thumb")).toContain("/assets/typing-defense/ui/quick-settings/slider-thumb.128.png");
+    expect(root.style.getPropertyValue("--kit-qs-skin-panel")).toContain("panel-large.v2.alpha.png");
+    press("F2", "F2");
+    expect(document.querySelector('[data-row="master"] input[type="range"]')!.classList.contains("kit-qs__range")).toBe(true);
+    // A DOM stub has no cascade: read the sheet. The 64 px cloud-scroll caps keep their proportion (10 x 10 at scale 1)
+    // and only the jade middle stretches; the round knob and the capped groove would show the kit's flat colours.
+    const { rules, heads } = sheet();
+    const at = (pseudo: string) => rules.get(`.td-quick.kit-qs--skin-slider .kit-qs__range${pseudo}`) ?? "";
+    for (const track of ["::-webkit-slider-runnable-track", "::-moz-range-track"]) {
+      expect(at(track), track).toContain("background: none;");
+      expect(at(track), track).toContain("border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;");
+    }
+    // The knob box is 32 px (about 22 px of knob at 720p), centred on the 10 px groove; the range box holds it.
+    for (const thumb of ["::-webkit-slider-thumb", "::-moz-range-thumb"]) {
+      expect(at(thumb), thumb).toContain("background-color: transparent;");
+      expect(at(thumb), thumb).toContain("width: calc(32px * var(--kit-qs-s));");
+      expect(at(thumb), thumb).toContain("height: calc(32px * var(--kit-qs-s));");
+    }
+    expect(at("::-webkit-slider-thumb")).toContain("margin-top: calc(-11px * var(--kit-qs-s));");
+    expect(at("")).toContain("height: calc(32px * var(--kit-qs-s));");
+    // One unknown pseudo-element drops a whole rule: WebKit and Gecko never share one.
+    expect(heads.filter((head) => head.includes("::-webkit-") && head.includes("::-moz-"))).toEqual([]);
+  });
+
+  it("the knob answers hover, press and keyboard focus with its own light, and the range shows a hand", () => {
+    const { rules } = sheet();
+    const at = (state: string) => rules.get(`.td-quick.kit-qs--skin-slider .kit-qs__range${state}`) ?? "";
+    expect(at("")).toContain("cursor: pointer;");
+    expect(at(":active")).toContain("cursor: grabbing;");
+    // The kit's flat 2 px box around the whole range gives way to a lantern ring of light on the knob and a warm groove.
+    expect(at(":focus-visible")).toContain("outline: none;");
+    for (const [thumb, track] of [["::-webkit-slider-thumb", "::-webkit-slider-runnable-track"], ["::-moz-range-thumb", "::-moz-range-track"]] as const) {
+      expect(at(`:hover${thumb}`), thumb).toMatch(/filter: brightness\(1\.15\) drop-shadow\(/);
+      expect(at(`:active${thumb}`), thumb).toContain("transform: scale(1.08);");
+      expect(at(`:focus-visible${thumb}`), thumb).toContain("drop-shadow(0 0 1px #ffb84d) drop-shadow(0 0 1px #ffb84d)");
+      expect(at(`:focus-visible${track}`), track).toContain("filter: drop-shadow(");
+    }
+  });
+
+  it("the frame is a 9-slice whose centre is one stretched copy of the art's middle, never tiles", () => {
+    const panel = sheet().rules.get(".td-quick.kit-qs .kit-qs__panel") ?? "";
+    // No `fill`: with "round" the frame's own middle was tiled at its 38 px scale (138 px tiles, seams behind the rows).
+    expect(panel).toContain("border-image: var(--kit-qs-skin-panel) 210 / calc(38px * var(--kit-qs-s)) / 0 round;");
+    expect(panel).not.toContain("fill");
+    expect(panel).toContain("border: calc(18px * var(--kit-qs-s)) solid transparent;");
+    expect(panel).toContain("background: var(--kit-qs-skin-panel) center / calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5505) calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5738) no-repeat padding-box transparent;");
+  });
+
+  it("a chosen chip, a pressed Mute and a switched-on switch wear the 160 button-active plate, not an orange outline", async () => {
+    await mount();
+    const root = document.querySelector<HTMLElement>(".td-quick")!;
+    expect(root.style.getPropertyValue("--td-qs-button-active")).toContain("/assets/typing-defense/ui/quick-settings/button-active.v2.alpha.png");
+    const { rules } = sheet();
+    for (const state of [".kit-qs__opt input:checked + .kit-qs__chip", '.kit-qs__btn[aria-pressed="true"]', '.kit-qs__btn[aria-checked="true"]']) {
+      const body = rules.get(`.td-quick.kit-qs ${state}`) ?? "";
+      expect(body, state).toContain("border-image-source: var(--td-qs-button-active, var(--kit-qs-skin-button));");
+      expect(body, state).toContain("color: var(--vd-quick-accent);");
+    }
+    expect([...rules.values()].some((body) => body.includes("outline: 2px solid var(--vd-lantern)"))).toBe(false);
+    expect(rules.get(".td-quick.kit-qs .kit-qs__btn:hover")).toContain("filter: brightness(1.18);");
+  });
+
+  it("muted, the Master row dims and strikes its number, shows the muted speaker and the button reads Unmute", async () => {
+    await mount();
+    const root = document.querySelector<HTMLElement>(".td-quick")!;
+    expect(root.style.getPropertyValue("--td-qs-icon-muted")).toContain("/assets/typing-defense/ui/quick-settings/hud-sound-muted.128.png");
+    press("F2", "F2");
+    const master = document.querySelector<HTMLElement>('.kit-qs__dialog[data-panel="sound"] [data-row="master"]')!;
+    const mute = master.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!;
+    expect(mute.textContent).toBe("Mute");
+    mute.click();
+    await settle();
+    expect(mute.getAttribute("aria-pressed")).toBe("true");
+    expect(mute.textContent).toBe("Unmute");
+    expect(master.classList.contains("td-quick__row--muted")).toBe(true);
+    expect(master.classList.contains("td-quick__row--silent")).toBe(true);
+    expect(stored()?.muted).toBe(true);
+    mute.click();
+    await settle();
+    expect(mute.textContent).toBe("Mute");
+    expect(master.classList.contains("td-quick__row--muted")).toBe(false);
+    expect(master.classList.contains("td-quick__row--silent")).toBe(false);
+    const range = master.querySelector<HTMLInputElement>('input[type="range"]')!;
+    range.value = "0";
+    range.dispatchEvent(new Event("input", { bubbles: true }));
+    await settle();
+    expect(master.classList.contains("td-quick__row--silent")).toBe(true);
+    expect(master.classList.contains("td-quick__row--muted")).toBe(false);
+    const { rules } = sheet();
+    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__range")).toContain("filter: grayscale(0.7) brightness(0.6);");
+    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__num")).toContain("text-decoration: line-through;");
+    expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon-cell")).toContain("background: var(--td-qs-icon-muted) center / contain no-repeat;");
+    expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon")).toContain("opacity: 0;");
+    expect(rules.get(".td-quick.kit-qs .kit-qs__btn[data-toggle]")).toContain("min-width: calc(38px + 60px * var(--kit-qs-s));");
+  });
+
+  it("every Sound row with a groove or the keyboard list takes the one label column, so the grooves start at one x", async () => {
+    await mount();
+    press("F2", "F2");
+    const aligned = ".td-quick .kit-qs__dialog[data-panel=\"sound\"] .kit-qs__row:not(.kit-qs__row--slot)";
+    expect(sheet().rules.get(aligned)).toContain("grid-template-columns: calc(24px * var(--kit-qs-s)) 9em minmax(0, 1fr);");
+    const matched = new Set(document.querySelectorAll(aligned));
+    const sound = document.querySelector('.kit-qs__dialog[data-panel="sound"]')!;
+    const ranges = [...sound.querySelectorAll('input[type="range"]')].map((input) => input.closest(".kit-qs__row")!);
+    expect(ranges.length).toBeGreaterThanOrEqual(5);
+    for (const line of [...ranges, sound.querySelector('[data-row="keyboard"]')!]) expect(matched.has(line), (line as HTMLElement).dataset.row).toBe(true);
+    // The Settings rows keep their own columns ("Pace adapts to your typing" on one line).
+    expect([...document.querySelectorAll('.kit-qs__dialog[data-panel="settings"] .kit-qs__row')].some((line) => matched.has(line))).toBe(false);
+  });
+
+  it("Resume, the primary button, reads in gold lettering on the dark button art, not the kit's ink", async () => {
+    await mount();
+    press("F1", "F1");
+    const resume = document.querySelector<HTMLButtonElement>('.kit-qs__dialog[data-panel="settings"] [data-action="resume"]')!;
+    expect(resume.classList.contains("kit-qs__btn--primary")).toBe(true);
+    expect(sheet().rules.get(".td-quick .kit-qs__btn--primary")).toContain("color: var(--vd-quick-accent);");
+  });
+});
+
 describe("no keyboard set is copied into the game (B5)", () => {
   it("media.md5 holds no audio/keys line, and the game's own code names no keys folder of its own", () => {
     const root = join(__dirname, "..");

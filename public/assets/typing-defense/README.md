@@ -12,6 +12,8 @@ Từ 31/10/2026 (bước B5 của `docs/games/TYPING_FEEL_SERVICE.md` ở repo c
 
 Tám icon của phiếu 180 và hai ảnh khung/nút `frames-epic` đã có. Mỗi PNG có prompt chính xác cạnh ảnh; JSON khung giữ thông số cắt và tương phản của nguồn. Phiếu 193 không sinh hoặc sửa ảnh.
 
+Thanh trượt (phiếu 225, gắn 31/10): `slider-track.png` (1024 × 64), `slider-track.512.png`, `slider-thumb.png` (1024²), `slider-thumb.256.png`, `.128.png`, `.64.png`, chép nguyên byte từ `art-src/ui/quick-settings/sliders/`; prompt nằm cạnh bản nguồn ở đó. Game dùng `slider-track.png` và `slider-thumb.128.png` (`src/app/quick.ts`). Sáu file này chưa có dòng trong `media.md5` (lúc gắn đang chạy `media:push`); cần thêm rồi `media:push`.
+
 ## Git và Drive
 
 PNG và prompt nằm ngoài Git; chỉ README này và các `manifest.json` được cho qua `.gitignore`. Mỗi PNG có một dòng trong `media.md5` của game (cách phiếu 191 làm cho Last Line). `pnpm media:push` ở repo cha kiểm từng dòng trên Drive và đẩy lại file Drive còn thiếu khi máy này có đúng byte, nên máy đang giữ các file này cần chạy `media:push` một lần. Prompt `.prompt.txt` và JSON khung `*.v2.json` cạnh ảnh không phải đuôi media, nên chỉ nằm trên máy và ở nguồn phiếu 180.
