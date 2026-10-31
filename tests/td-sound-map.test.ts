@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
+import { letterSound } from "../src/app/quick";
+import type { Settings } from "../src/app/prefs";
 import { FX, type RareEvent } from "../src/sim/events";
+import type { World } from "../src/sim/world";
 import { PROJECTILE } from "../src/sim/stores/projectiles";
 import { KEY } from "../src/typing/router";
+import { TypingAudio } from "../src/view/audio-min";
 import { SOUND_IDS, busOf, eventSounds, ringSound } from "../src/view/sound-map";
 
 /** 1C step C10: every event the game sounds goes through one id (src/view/sound-map.ts); new ids have no code-made sound. */
@@ -22,6 +26,16 @@ describe("C10: the event → sound-id map", () => {
     expect(eventSounds(ev({ t: "bossStrike", move: "keep", hit: true }))).toEqual(["boss-slam"]);
     const types = ["built", "finished", "sold", "phase", "bossWarn", "bossLull", "bossEmerge", "bossPhase", "bossRetreat", "victory", "defeat", "stun", "ult", "direct", "panic", "waveStart", "nightCalled", "harvested", "felled"];
     for (const t of types) for (const id of eventSounds(ev({ t, phase: "night", ok: true, verb: 1 }))) expect(all, t + " → " + id).toContain(id);
+  });
+
+  it("sounds a tier-2 pair's first letter (KEY.group) once: Bamboo here in audio-min, a Typing Feel set in quick.ts (judge C10 r5)", () => {
+    const audio = new TypingAudio({ muted: false } as Settings);
+    const keys: boolean[] = [];
+    Object.assign(audio, { ctx: { currentTime: 0 }, key: (_space: boolean, wrong: boolean) => void keys.push(wrong) });
+    const w = { events: { ring: { written: 0, size: 64 } }, words: { slotOf: () => 0, typed: [1] } } as unknown as World;
+    for (const result of [KEY.group, KEY.lock, KEY.advance, KEY.wrong, KEY.stray]) audio.read([ev({ t: "wordKey", word: 1, result })], w, 0);
+    expect(keys).toEqual([false, false, false, true, true]);
+    expect(letterSound(KEY.group)).toBe("key");
   });
 
   it("names the combat ring's shots by projectile and its hits, deaths, coins, leaks; buses by id", () => {

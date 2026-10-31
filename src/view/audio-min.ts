@@ -200,9 +200,10 @@ export class TypingAudio {
     const t = this.ctx.currentTime;
     for (const event of events) {
       if (event.t === "wordKey") {
-        // Keys sound once: a Typing Feel set plays in app/quick.ts; the Bamboo keys here, only when chosen or standing in.
+        // Keys sound once: a Typing Feel set plays in app/quick.ts; the Bamboo keys here, only when chosen or standing in. A
+        // tier-2 pair's first letter (KEY.group) is a right key too, as in quick.ts (judge C10 r5: it was silent with Bamboo).
         const s = w.words.slotOf(event.word);
-        if (event.result !== KEY.group) this.key(false, event.result === KEY.wrong || event.result === KEY.stray, s >= 0 ? w.words.typed[s]! : 8);
+        this.key(false, event.result === KEY.wrong || event.result === KEY.stray, s >= 0 ? w.words.typed[s]! : 8);
         continue;
       }
       if (event.t === "phase") {

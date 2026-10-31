@@ -15,9 +15,9 @@ export const KEY_ACTIONS: Readonly<Record<string, string>> = {
   Insert: "build", Backslash: "build", ShiftInsert: "hire", ShiftBackslash: "hire", Delete: "undo", ShiftDelete: "sell", Escape: "escape", Pause: "pause", F9: "sandbox", Space: "space",
   Equal: "ult", // BUILD_1B §8.2: Tối Thượng (no IME uses it)
   ArrowLeft: "pan:1:0", ArrowRight: "pan:-1:0", ArrowUp: "pan:0:1", ArrowDown: "pan:0:-1",
-  // 1C (TK 23.6): Shift + arrows turn and tilt the 3D camera; Home, PageDown, PageUp its views (fn + arrows on a Mac laptop;
-  // F1 / F2 are the Settings and Sound panels): the 2D view has neither.
-  ShiftArrowLeft: "turn:-1:0", ShiftArrowRight: "turn:1:0", ShiftArrowUp: "turn:0:-1", ShiftArrowDown: "turn:0:1", Home: "cam:home", PageDown: "cam:near", PageUp: "cam:overview",
+  // 1C (TK 23.6): Shift + arrows turn and tilt the 3D camera; Home, PageDown, End its views (fn + arrows on a Mac laptop;
+  // F1 / F2 are the Settings and Sound panels, PageUp twice upgrades in TK 8.3): the 2D view has neither.
+  ShiftArrowLeft: "turn:-1:0", ShiftArrowRight: "turn:1:0", ShiftArrowUp: "turn:0:-1", ShiftArrowDown: "turn:0:1", Home: "cam:home", PageDown: "cam:near", End: "cam:overview",
 };
 
 /** A letter 0–25, "backspace", an action, or null: the page leaves the key alone. */

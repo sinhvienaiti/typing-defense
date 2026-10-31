@@ -6,10 +6,13 @@
 import { fitElement } from "./dom";
 import type { SafeFrame } from "./safe";
 
-/** Synchronous frame steps; the tier adds the same 0.25 as the original stamp. */
-export function stampStep(t: number, tier: number) {
+/**
+ * Synchronous frame steps; the tier adds the same 0.25 as the original stamp. `done`: the word's last key, whose card bursts
+ * at once: from 1.8×, so the word stays readable as it completes (judge C10 r5: 2.4× and the flying letters hid it 2 frames).
+ */
+export function stampStep(t: number, tier: number, done = false) {
   const k = t < 17 ? 0 : t < 33 ? 1 : t < 50 ? 2 : 3;
-  return { scale: [2.4, 1.8, 1.3, 1][k]! + (k < 3 ? 0.25 * tier : 0), tilt: [-8, -6, -3, 0][k]!, opacity: t >= 0 && t < 66 ? 1 : 0 };
+  return { scale: (done ? [1.8, 1.45, 1.15, 1] : [2.4, 1.8, 1.3, 1])[k]! + (k < 3 ? (done ? 0.1 : 0.25) * tier : 0), tilt: [-8, -6, -3, 0][k]!, opacity: t >= 0 && t < 66 ? 1 : 0 };
 }
 
 /** What a word card (cards.ts) shares with its key stamp. */
@@ -27,7 +30,8 @@ export function keyStamps(cards: readonly StampCard[], root: HTMLElement, tier: 
     }
     if (!key) continue;
     if (!source || Number(card.el.style.opacity) <= 0) { key.el.style.opacity = "0"; continue; }
-    const step = stampStep(now - key.at, tier);
+    const done = card.el.classList?.contains("is-gone") === true;
+    const step = stampStep(now - key.at, tier, done);
     key.el.style.opacity = String(step.opacity);
     if (!step.opacity) continue;
     const soft = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -36,7 +40,7 @@ export function keyStamps(cards: readonly StampCard[], root: HTMLElement, tier: 
     // The stamp's font is the letter's (feel.css); the card's own scale on screen (lock, typing, burst) is the letter's rect over its
     // layout height, so the stamp settles at exactly the letter's size (recheck 232 F3: it was 1.11-1.44x).
     const fit = (r.bottom - r.top) / (key.source.offsetHeight || r.bottom - r.top) || 1;
-    const max = stampStep(0, tier).scale;
+    const max = stampStep(0, tier, done).scale;
     const pose = (scale: number, tilt: number): string => {
       const drop = soft ? 0 : (scale - 1) / (max - 1);
       return `translate(${x - 10 * drop}px,${y - 28 * drop}px) translate(-50%,-50%) rotate(${soft ? 0 : tilt}deg) scale(${+((soft ? 1 : scale) * fit).toFixed(3)})`;

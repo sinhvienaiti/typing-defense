@@ -46,8 +46,8 @@ describe("keys by event.code (BUILD_NOW §5.4)", () => {
     // §8: the tempo keys are gone; the page leaves them alone ("-" stays free for 1C, BUILD_1B §14).
     for (const event of [{ key: "-", code: "Minus" }, { key: "_", code: "Minus", shiftKey: true }, { key: "+", code: "Equal", shiftKey: true }]) expect(press(event)).toBeNull();
     // 1C: the 3D camera's views on keys that never type and the browser keeps no use for; F1 / F2 stay the Settings and Sound panels'.
-    expect([press({ key: "Home", code: "Home" }), press({ key: "PageDown", code: "PageDown" }), press({ key: "PageUp", code: "PageUp" })]).toEqual(["cam:home", "cam:near", "cam:overview"]);
-    for (const code of ["F1", "F2", "F3", "F5", "Tab"]) expect(String(press({ key: code, code })).startsWith("cam:"), code).toBe(false);
+    expect([press({ key: "Home", code: "Home" }), press({ key: "PageDown", code: "PageDown" }), press({ key: "End", code: "End" })]).toEqual(["cam:home", "cam:near", "cam:overview"]);
+    for (const code of ["F1", "F2", "F3", "F5", "Tab", "PageUp"]) expect(String(press({ key: code, code })).startsWith("cam:"), code).toBe(false); // PageUp: TK 8.3's upgrade
   });
 
   it("never turns a letter into a command: a letter key types, whatever its code; a letter code that prints no letter does nothing", () => {

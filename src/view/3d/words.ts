@@ -56,6 +56,8 @@ const SLIP: Keyframe = { borderColor: "#c23b22", color: "#c23b22", boxShadow: "0
 /** A one-shot flash back to the card's CSS look (Web Animations: it restarts every time). */
 const frameFlash = (el: HTMLElement, from: Keyframe, ms: number, hold = 0): void => void el.animate?.([from, { ...from, offset: hold }, {}], { duration: ms, easing: "cubic-bezier(0.1, 0.8, 0.2, 1)" });
 const BEADS = 16;
+/** A card's edge-tray side (0 left, 1 right, 2 top, 3 bottom), −1 on the field (cards.ts writes "" there, which Number reads as 0). */
+const edgeOf = (el: HTMLElement): number => (el.dataset.edge ? Number(el.dataset.edge) : -1);
 const DARK_HALO = "rgba(10, 14, 12, 0.85)";
 /** The chain count's fill and halo by tier. */
 const TIER_INK: readonly (readonly [string, string])[] = [["#fff6e0", DARK_HALO], ["#0e9c84", "rgba(255, 246, 224, 0.95)"], ["#ffb31f", DARK_HALO], ["#ff8a1c", DARK_HALO], ["#ffd84a", "rgba(110, 36, 0, 0.9)"]];
@@ -63,7 +65,7 @@ const TIER_INK: readonly (readonly [string, string])[] = [["#fff6e0", DARK_HALO]
 type Charge = { share: number; at: number; core: THREE.Vector3; tier: number };
 /** Where a call's letters go, kept by call id: a one-word call is gone by the time its word is read. */
 type Spot = { core: THREE.Vector3; kind: number; b: number; radius: number };
-type Shot = { born: number; x0: number; z0: number; y0: number; total: number; word: string; k: number; x: number; y: number; z: number; splash: number; bolt: boolean; frame: number; call: number };
+type Shot = { born: number; x0: number; z0: number; y0: number; total: number; word: string; side: number; trail: boolean; x: number; y: number; z: number; splash: number; bolt: boolean; frame: number; call: number };
 /** A typed card's letter flying out in front of it (DOM, over the card), `t` ms after `at`. */
 type Fly = { el: HTMLElement; at: number; x: number; y: number; dx: number; dy: number };
 /** The edge tray (TYPING_DEFENSE_DESIGN, "Khay mép"): a call off screen stands at the edge towards it, ≤ 2 an edge, ≤ 6 in all. */
@@ -79,10 +81,17 @@ export class WordFeel implements CardFeel {
   private readonly shots = new Map<number, Shot>();
   /** Buildings (by id) whose power word was typed this tick: their volley carries the word (the Fort's bolts). */
   private readonly fired = new Map<number, { word: string; tick: number; call: number }>();
-  private plates: { x: number; y: number; w: number; h: number; mean: boolean }[] = [];
+  private plates: { x: number; y: number; w: number; h: number; mean: boolean; a?: number }[] = [];
   private last: THREE.Vector3 | null = null;
   private lastCard: CardView | null = null;
   private tag: { el: HTMLElement; at: number; x: number; y: number; half: number; h: number; w: number; side: number; card: CardView | null; call: number; seen?: number; lit: number } | null = null;
+  /** Each call's last drawn column (CSS px: x, bottom, height, half width): two tray columns on one edge keep apart, the pointer's room. */
+  private drawn = new Map<number, [number, number, number, number]>();
+  /** This frame's tray anchors by call, and the pointers' boxes drawn (td-1c-words samples their pixels). */
+  private trayAt = new Map<number, { x: number; y: number }>();
+  private pointerBoxes: number[][] = [];
+  /** The tray cards' live boxes as drawn last frame, by call: a click hits the card where it is, sliding or not. */
+  private trayBoxes: [number, DOMRect][] = [];
   private readonly flies: Fly[] = [];
   private safe: SafeFrame | null = null;
   /** The last release (ms) and which way its shot runs on screen (−1 left, 1 right): the chain count stands on the other side. */
@@ -155,7 +164,9 @@ export class WordFeel implements CardFeel {
     const { width, height } = this.stage.size;
     const behind = this.v[1]!.copy(p).applyMatrix4(this.stage.camera.matrixWorldInverse).z > 0;
     if (core || raw) return { x: s.x, y: s.y };
-    if (!behind && s.x >= 0 && s.x <= width && s.y >= 0 && s.y <= height) return this.slide(w.calls.id(c), { x: s.x, y: s.y });
+    // A call in the tray comes back only once its anchor is 24 px inside the screen: at the border it flapped in and out (judge C10 r5 runs).
+    const m = this.trayLast.has(w.calls.id(c)) ? 24 : 0;
+    if (!behind && s.x >= m && s.x <= width - m && s.y >= m && s.y <= height - m) return this.slide(w.calls.id(c), { x: s.x, y: s.y });
     const [mx, my] = [width / 2, height / 2];
     let [dx, dy] = [behind ? mx - s.x : s.x - mx, behind ? my - s.y : s.y - my];
     if (Math.abs(dx) + Math.abs(dy) < 1) dy = 1;
@@ -170,10 +181,40 @@ export class WordFeel implements CardFeel {
     }
     const d = Math.hypot(dx, dy);
     this.dirs.set(id, [dx / d, dy / d]);
-    return this.slide(id, { x: mx + dx * k, y: my + dy * k, edge });
+    const at = { x: mx + dx * k, y: my + dy * k };
+    // Two columns on one edge keep 18 px apart along it, the field's rule (judge C10 r5: they overlapped by 12 px).
+    const other = list.find((o) => o !== id);
+    const o = other === undefined ? undefined : this.trayAt.get(other);
+    if (o !== undefined) {
+      const [mine, theirs] = [this.drawn.get(id), this.drawn.get(other!)];
+      const side = edge <= 1;
+      const need = side ? Math.max(mine?.[2] ?? 60, theirs?.[2] ?? 60) + 18 : (mine?.[3] ?? 100) + (theirs?.[3] ?? 100) + 18;
+      const [p, q, lo, hi] = side ? [at.y, o.y, TRAY.top + need, height - TRAY.margin] : [at.x, o.x, TRAY.margin + need / 2, width - TRAY.margin - need / 2];
+      if (Math.abs(p - q) < need) {
+        const moved = q + (p >= q ? need : -need);
+        const to = moved < lo || moved > hi ? q - (p >= q ? need : -need) : moved;
+        if (side) at.y = to;
+        else at.x = to;
+      }
+    }
+    // A side column keeps 52 px a 720p step from the screen's edge: room for its V turned up to 60° (1080p). Its half as columnBox's.
+    const room = (this.drawn.get(id)?.[3] ?? 100) + 9 + 52 * Math.max(1, height / 720);
+    if (edge === 0) at.x = Math.max(at.x, room);
+    if (edge === 1) at.x = Math.min(at.x, width - room);
+    // A side column clears every HUD side panel it passes on its way from where it was drawn (as cards.ts would at its end),
+    // so it slides down (or up) clear of them first and is never snapped under one mid-slide.
+    const [x0, half, tall] = [this.drawn.get(id)?.[0] ?? at.x, (this.drawn.get(id)?.[3] ?? 100) + 9, this.drawn.get(id)?.[2] ?? 60];
+    const [left, right] = [Math.min(x0, at.x) - half, Math.max(x0, at.x) + half];
+    for (let pass = 0; edge <= 1 && pass < 2; pass += 1) for (const p of this.safe?.panels ?? []) if (p.left < right && p.right > left && p.top < at.y && at.y - tall < p.bottom) at.y = p.top > height / 2 ? p.top - 6 : p.bottom + 6 + tall;
+    this.trayAt.set(id, at);
+    return this.slide(id, { ...at, edge });
   }
 
-  /** A card going into the edge tray or out of it slides there from where it stood in 0.3 s (eased out), not in one jump. */
+  /**
+   * A card going into the edge tray or out of it slides there in 0.3 s from its last anchor; cards.ts keeps the column's
+   * parting offset, which springs back as the slide goes (judge C10 r5: the tray's own clamps on that anchor, the pointer's
+   * room and the side panels, made it jump for a frame: the room is the target's now, the panels are tested where it was drawn).
+   */
   private slide(id: number, p: { x: number; y: number; edge?: number }): { x: number; y: number; edge?: number } {
     const [now, e] = [performance.now(), p.edge ?? -1];
     let was = this.slides.get(id);
@@ -183,9 +224,19 @@ export class WordFeel implements CardFeel {
     }
     if (was.e !== e && was.e !== -2 && e !== -2) [was.fx, was.fy, was.at] = [was.x, was.y, now];
     const u = Math.min(1, (now - was.at) / 300);
-    const k = 1 - (1 - u) ** 3;
-    [was.x, was.y, was.e] = [was.fx + (p.x - was.fx) * k, was.fy + (p.y - was.fy) * k, e];
+    // Into a side tray: down (or up) in the first 105 ms, across after 90 ms, so a card beside a HUD panel is clear of it first;
+    // both legs ease in and out (an ease-out leg moved 40 px in its first frame).
+    const ease = (t: number): number => 1 - (1 - Math.max(0, Math.min(1, t))) ** 3;
+    const both = (t: number): number => (t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t));
+    const [kx, ky] = e === 0 || e === 1 ? [both((u - 0.3) / 0.7), both(u / 0.35)] : [ease(u), ease(u)];
+    [was.x, was.y, was.e] = [was.fx + (p.x - was.fx) * kx, was.fy + (p.y - was.fy) * ky, e];
     return u >= 1 ? p : { ...p, x: was.x, y: was.y };
+  }
+
+  /** The call (id) whose tray card's live box holds CSS point (px, py), 6 px of slack round it; −1 none (judge C10 r5). */
+  trayHit(px: number, py: number): number {
+    const hit = this.trayBoxes.find(([, r]) => px >= r.left - 6 && px <= r.right + 6 && py >= r.top - 6 && py <= r.bottom + 6);
+    return hit === undefined ? -1 : hit[0];
   }
 
   /** The ground point of call `id` when it stands in the edge tray (a click there glides the camera to it), else null. */
@@ -238,14 +289,27 @@ export class WordFeel implements CardFeel {
     return this.ray(x, card.y + card.height + 4 + below / this.metres(depth), depth, out);
   }
 
+  /**
+   * A tray card's letter `k` leaves past the card's outer edge towards the caller, clear of its word (judge C10 r5: one rising
+   * through the word read as an extra capital, "A away"); null for a card on the field.
+   */
+  private exit(card: CardView, core: THREE.Vector3, out: THREE.Vector3, k = 0): THREE.Vector3 | null {
+    const edge = edgeOf(card.el);
+    if (edge < 0) return null;
+    const r = card.el.getBoundingClientRect();
+    const [gap, mx, my] = [26 + 12 * k, (r.left + r.right) / 2, (r.top + r.bottom) / 2];
+    const [x, y] = [[r.left - gap, my], [r.right + gap, my], [mx, r.top - gap], [mx, r.bottom + gap]][edge]!;
+    return this.ray(x!, y!, core.distanceTo(this.stage.camera.position), out);
+  }
+
   private glyph(word: string, k: number): number {
     const g = word.toLowerCase().charCodeAt(k) - 97;
     return g >= 0 && g < 26 ? g : -1;
   }
 
   /** A letter flying from `from` into `to` over `life` s: jade over a dark copy, gold motes behind. */
-  private letter(from: THREE.Vector3, to: THREE.Vector3, g: number, size: number, life: number, tier: number, delay = 0, end: ((bit: Bit) => void) | null = null, hot = 0.45 + 0.1 * tier, trail = 0.3, halo = 0.45): void {
-    const fly = { x: from.x, y: from.y, z: from.z, to: to.clone(), arc: 1.4, life, delay, turn: -0.14, spin: this.rnd(-2, 2) };
+  private letter(from: THREE.Vector3, to: THREE.Vector3, g: number, size: number, life: number, tier: number, delay = 0, end: ((bit: Bit) => void) | null = null, hot = 0.45 + 0.1 * tier, trail = 0.3, halo = 0.45, arc = 1.4): void {
+    const fly = { x: from.x, y: from.y, z: from.z, to: to.clone(), arc, life, delay, turn: -0.14, spin: this.rnd(-2, 2) };
     if (g < 0) return void this.pool.add("glow", { ...fly, size: size * 0.6, rgb: JADE, hot: 0.4, trail: size * 0.25, end });
     this.pool.add("ink", { ...fly, size: size * 1.15, rgb: INK, alpha: 0.65, shape: SHAPE.letter, glyph: g });
     this.pool.add("glow", { ...fly, size: size * 1.7, rgb: JADE, alpha: halo });
@@ -296,7 +360,8 @@ export class WordFeel implements CardFeel {
     const tier = chainTier(w.typing.chain);
     const core = spot.core.clone();
     const px = this.metres(core.distanceTo(this.stage.camera.position));
-    const from = this.under(card, typed - 1, core, this.v[1]!, 14 * px); // where the press ring stands, under the card (feel.css)
+    const tray = edgeOf(card.el) >= 0;
+    const from = this.exit(card, core, this.v[1]!) ?? this.under(card, typed - 1, core, this.v[1]!, 14 * px); // where the press ring stands, under the card (feel.css)
     [this.keyMs, this.keyFrames] = [this.downAt >= 0 ? performance.now() - this.downAt : -1, this.frames - this.downFrame + 1];
     if (result === KEY.wrong) {
       // A slip: the letter typed stamped in cinnabar over the one wanted and flicked off; a cinnabar glint at the card, an ink
@@ -326,7 +391,7 @@ export class WordFeel implements CardFeel {
       this.pool.add("glow", { x: core.x, y: core.y, z: core.z, size: 1.6 + 0.25 * tier, life: 0.12, rgb: JADE, hot: 0.25 });
       this.ring(core, 1.2 + 0.2 * tier, JADE, 0.18, false, 0.45, 0.3);
       this.sparks(core, 3 + tier, [6, 10], null, { life: 0.18, hot: 0.3 }, 0, [AMBER, JADE]);
-    });
+    }, undefined, undefined, undefined, tray ? 0.5 : 1.4); // from a tray card, a flat path out past its edge
     this.sparks(from, 2 + tier, [6, 10], null, { size: 0.2, length: 1.1, life: 0.16 });
     if (result === KEY.lock || result === KEY.switch) this.ring(core, Math.max(2.5, spot.radius * 1.3), JADE, 0.35, true);
     this.charges.set(card.call, { share: typed / Math.max(1, card.word.length), at: now, core, tier });
@@ -344,7 +409,8 @@ export class WordFeel implements CardFeel {
     // The card bursts and squeezes where it stands (cards.ts); copies of its letters burst out in front of it (DOM, over the
     // card), and its letters dive from under it into the caller. The first to land flashes the caller warm white for 40 ms
     // with a small jade ring (T9, within 120 ms); the big answer follows. A power word's shot leaves at once and carries them.
-    const starts = Array.from({ length: len }, (_, k) => this.under(card, k, core, new THREE.Vector3(), 14 * px));
+    const starts = Array.from({ length: len }, (_, k) => this.exit(card, core, new THREE.Vector3(), k) ?? this.under(card, k, core, new THREE.Vector3(), 14 * px));
+    const arc = edgeOf(card.el) >= 0 ? 0.5 : 1.4;
     this.burst(card, now);
     for (let k = 0; k < len; k += 1) {
       const from = starts[k]!;
@@ -352,7 +418,7 @@ export class WordFeel implements CardFeel {
       const arrive = power ? null : k === 0 ? () => [this.struck(core, spot.radius), len === 1 && answer()] : k === Math.min(len - 1, 5) ? answer : null;
       // A power word's letters land in the muzzle as the shot leaves: jade, not white, inside its flash (§3.5). No gold trail on a
       // typed word's dive: its motes piled up over the first frames, so the burst was not the brightest (judge C10 r3, §5.6).
-      this.letter(from, core, this.glyph(card.word, k), 44 * px * (power ? 0.85 : 1 + 0.1 * tier), power ? 0.08 : 0.05 + 0.01 * k, tier, 0, arrive, power ? 0 : 0.45 + 0.1 * tier, 0, power ? 0.22 : 0.45);
+      this.letter(from, core, this.glyph(card.word, k), 44 * px * (power ? 0.85 : 1 + 0.1 * tier), power ? 0.08 : 0.05 + 0.01 * k, tier, 0, arrive, power ? 0 : 0.45 + 0.1 * tier, 0, power ? 0.22 : 0.45, arc);
     }
     if (power && spot.b >= 0) this.fired.set(spot.b, { word: card.word, tick: w.tick, call: card.call });
     else this.charges.delete(card.call);
@@ -370,7 +436,7 @@ export class WordFeel implements CardFeel {
     this.ring(core, 1.7, JADE, 0.2, false, 0.6, 0.3);
   }
 
-  /** The letter a slip typed, in cinnabar over the letter wanted (`typed` letters before it): stamped 1.8× → 1× in 2 frames, flicked off by 150 ms. */
+  /** The letter a slip typed, in cinnabar beside the letter wanted (`typed` letters before it): stamped 1.8× → 1× in 2 frames, flicked off by 150 ms. */
   private slip(card: CardView, typed: number): void {
     const [root, ch] = [card.el.parentElement, this.downKey];
     if (root === null || ch.length !== 1 || this.soft) return;
@@ -379,8 +445,10 @@ export class WordFeel implements CardFeel {
     el.textContent = ch;
     const text = card.text;
     const scale = typed >= 2 ? 1.2 : 1.1; // a locked card's size (cards.ts), grown from its bottom
-    const x = card.x + (text.offsetLeft + text.offsetWidth * ((typed + 0.5) / Math.max(1, card.word.length)) - card.half) * scale;
-    const y = card.y + card.height - (card.height - text.offsetTop - text.offsetHeight / 2) * scale;
+    // Half a cell up and right of the letter wanted, which stays readable under it (judge C10 r5: it was hidden 80–100 ms).
+    const cell = (text.offsetWidth / Math.max(1, card.word.length)) * scale;
+    const x = card.x + (text.offsetLeft + text.offsetWidth * ((typed + 0.5) / Math.max(1, card.word.length)) - card.half) * scale + cell * 0.5;
+    const y = card.y + card.height - (card.height - text.offsetTop - text.offsetHeight / 2) * scale - text.offsetHeight * scale * 0.5;
     const at = (dx: number, dy: number, s: number, turn: number): string => "translate(" + (x + dx).toFixed(1) + "px," + (y + dy).toFixed(1) + "px) translate(-50%,-50%) scale(" + s + ") rotate(" + turn + "deg)";
     for (const old of el.getAnimations?.() ?? []) old.cancel();
     el.animate?.([{ transform: at(-4, -10, 1.8, -8), opacity: 1 }, { transform: at(0, 0, 1, 0), opacity: 1, offset: 0.24 }, { transform: at(0, 0, 1, 0), opacity: 1, offset: 0.4 }, { transform: at(22, -34, 0.85, 34), opacity: 0 }], { duration: 150, fill: "forwards" });
@@ -392,8 +460,8 @@ export class WordFeel implements CardFeel {
     if (root === null || this.soft) return;
     const text = card.text;
     const len = Math.min(12, card.word.length);
-    const [left, width, top, high] = [text.offsetLeft, text.offsetWidth, text.offsetTop, text.offsetHeight]; // read once, then write (no layout per letter)
-    const lift = (card.height - top - high / 2) * 1.2; // the card stands 1.2× from its bottom
+    const [left, width, high] = [text.offsetLeft, text.offsetWidth, text.offsetHeight]; // read once, then write (no layout per letter)
+    const lift = card.height * 1.2 + high * 0.55; // above the card's top edge (it stands 1.2× from its bottom): never over its word (judge C10 r5)
     for (let k = 0; k < len; k += 1) {
       const fly = (this.flies[k] ??= { el: root.appendChild(Object.assign(document.createElement("div"), { className: "td-fly" })), at: 0, x: 0, y: 0, dx: 0, dy: 0 });
       const share = (k + 0.5) / len;
@@ -481,29 +549,35 @@ export class WordFeel implements CardFeel {
     this.tag.el.textContent = "×" + chain;
     // Tiers that read on grass (judge C10 r3: pale mint did not): ivory, deep jade on an ivory halo, then amber to gold on a dark one.
     Object.assign(this.tag.el.style, { color: "#fffbea", textShadow: "0 3px 0 #1d1710, 0 0 8px " + TIER_INK[Math.min(4, tier)]![0] + ", 0 0 18px " + TIER_INK[Math.min(4, tier)]![0] });
-    Object.assign(this.tag, { lit: tier, at: now, x: card.x, y: card.y + card.height / 2, half: card.half * 1.2 + 12, h: this.tag.el.offsetHeight, w: this.tag.el.offsetWidth, side: 0, card, call: card.call });
+    Object.assign(this.tag, { lit: tier, at: now, x: card.x, y: card.y + card.height / 2, half: card.half * 1.2 + 12, h: this.tag.el.offsetHeight, w: this.tag.el.offsetWidth, side: NaN, card, call: card.call });
     this.marks.combo = [Math.round(card.x), Math.round(card.y + card.height / 2)];
   }
 
   frame(cards: readonly CardView[], now: number, safe?: SafeFrame): void {
     this.safe = safe ?? { ...this.stage.size, panels: [] };
     // No plate under a card not shown (a call's next word waiting, one over the tray's cap) nor under a typed card bursting and
-    // squeezing: that dark shadow hid a Word Shot's release under the card (judge C10 r3).
-    this.plates = cards.filter((k) => k.el.style.opacity !== "0" && (k.leave === "" || (k.leave === "mean" && k.el.classList.contains("is-mean")))).map((k) => ({ x: k.x, y: k.y, w: 2 * k.half, h: k.height, mean: k.leave === "mean" }));
+    // squeezing: that dark shadow hid a Word Shot's release under the card (judge C10 r3). None while a card slides into the tray
+    // or out of it either: plates are drawn a frame late, so one trailed the fast card as a dark box (judge C10 r5).
+    const sliding = (k: CardView): boolean => now - (this.slides.get(k.call)?.at ?? -1e9) < 340;
+    this.plates = cards.filter((k) => k.el.style.opacity !== "0" && !sliding(k) && (k.leave === "" || (k.leave === "mean" && k.el.classList.contains("is-mean")))).map((k) => ({ x: k.x, y: k.y, w: 2 * k.half, h: k.height, mean: k.leave === "mean" }));
     // td-scale: how far each column's lowest card stands over its anchor (px; the lanes push a column down off the top edge).
     const w = this.w;
     const low = new Map<number, [number, number]>();
     for (const k of cards) if (k.leave === "" && k.slot >= 0) low.set(k.call, [Math.max(low.get(k.call)?.[0] ?? -1e9, k.y + k.height), Math.min(low.get(k.call)?.[1] ?? 1e9, k.y)]);
+    this.drawn = new Map([...low].map(([call, [bottom, top]]) => {
+      const k = cards.find((c) => c.call === call && c.leave === "")!;
+      return [call, [k.x, bottom, bottom - top, Math.max(...cards.filter((c) => c.call === call).map((c) => c.half))]];
+    }));
     this.gaps = w === null ? [] : [...low].flatMap(([call, [bottom, top]]) => (w.calls.slotOf(call) < 0 || this.tray.some((l) => l.includes(call)) || now - (this.slides.get(call)?.at ?? -1e9) < 300 ? [] : [{ call, gap: Math.round(this.anchor(w, w.calls.slotOf(call), false, true).y - bottom), top: Math.round(top) }])); // a call in the edge tray stands at the edge
     this.fliesFrame(now);
     if (this.miss) fitElement(this.miss, this.safe, 3);
     this.pointers(cards);
     this.trayLast = new Map(this.tray.flatMap((list, edge) => list.map((id) => [id, edge] as [number, number])));
     this.tray = [[], [], [], []];
+    this.trayAt.clear();
     const tag = this.tag;
     if (tag === null) return;
     const t = now - tag.at;
-    if (tag.side === 0) tag.side = this.shotAt >= tag.at && this.shotSide !== 0 ? -this.shotSide : 1;
     const scale = t < 0 ? 1 : t < 150 ? [3, 2.25, 1.6, 1.25, 1.1, 1][Math.floor(t / 30)]! : 1; // stamped 3× → 1× by frames (T10)
     if (t >= 34 && tag.lit >= 0) {
       // White-hot for its first two frames (the stamp is its brightest frame), then its tier's fill and halo.
@@ -520,30 +594,48 @@ export class WordFeel implements CardFeel {
     tag.seen = now;
     const r = card?.el.getBoundingClientRect();
     const bounds = r ?? { left: tag.x - tag.half, top: tag.y - tag.h / 2, right: tag.x + tag.half, bottom: tag.y + tag.h / 2 };
-    const pose = comboSide(bounds, tag.w * scale + 8, tag.h * scale + 8, tag.side, this.safe, this.safe.panels);
+    tag.el.dataset.own = r && card!.call === tag.call ? [r.left, r.top, r.right, r.bottom].map(Math.round).join() : ""; // td-1c-words: never over its own card
+    // Its side is chosen once for the stamp's largest box (×3) and kept through the stamp (judge C10 r5: at 1920 the ×2.25 frame
+    // fell back onto its own tray card, then flipped); at rest it may change sides as the card turns into its meaning strip.
+    if (Number.isNaN(tag.side)) tag.side = comboSide(bounds, tag.w * 3 + 8, tag.h * 3 + 8, this.shotAt >= tag.at && this.shotSide !== 0 ? -this.shotSide : 1, this.safe, this.safe.panels).side;
+    const pose = comboSide(bounds, tag.w * scale + 8, tag.h * scale + 8, tag.side, this.safe, this.safe.panels, t < 150);
     tag.side = pose.side;
     tag.el.style.transformOrigin = "0 0";
     tag.el.style.transform = `translate(${pose.box.left + 4}px,${pose.box.top + 4}px) scale(${scale.toFixed(3)})`;
-    tag.el.style.opacity = (t < 700 ? 1 : Math.max(0, 1 - (t - 700) / 250)).toFixed(2);
+    const fade = t < 700 ? 1 : Math.max(0, 1 - (t - 700) / 250);
+    tag.el.style.opacity = fade.toFixed(2);
+    // At rest a soft ink plate under the count, like the cards' (judge C10 r5: jade on grass, amber on sand read only by their outline).
+    if (t >= 150 && fade > 0) this.plates.push({ x: pose.box.left + 4 + tag.w / 2, y: pose.box.top + 4, w: tag.w, h: tag.h, mean: false, a: fade });
   }
 
-  /** One narrow, symmetric V at every edge. The old 22 px-wide overlapping streaks merged into an open C. */
+  /**
+   * One symmetric V at every edge, pointing at the caller: two solid jade bars (4 px at 720p) in a full ink outline (8 px),
+   * just outside the card's edge (judge C10 r5: thin streaks fading at both ends read as a 1 px hairline). A code-drawn mark
+   * until Codex 165's tray-arrow art is accepted.
+   */
   private pointers(cards: readonly CardView[]): void {
     const depth = 40, m = this.metres(depth);
     const safe = this.safe ?? { ...this.stage.size, panels: [] };
+    const k720 = Math.max(1, this.stage.size.height / 720);
+    this.pointerBoxes = [];
+    this.trayBoxes = [];
     for (const k of cards) {
-      const edge = Number(k.el.dataset.edge ?? -1);
-      const dir = k.leave === "" && edge >= 0 && Number(k.el.style.opacity) > 0 ? this.dirs.get(k.call) : undefined;
+      const edge = edgeOf(k.el);
+      const dir = k.leave === "" && edge >= 0 && this.tray[edge]?.includes(k.call) && Number(k.el.style.opacity) > 0 ? this.dirs.get(k.call) : undefined;
       if (!dir) continue;
       const card = k.el.getBoundingClientRect();
+      this.trayBoxes.push([k.call, card]);
       const p = trayPointer(edge, dir, card, safe, safe.panels);
+      this.pointerBoxes.push([p.box.left, p.box.top, p.box.right - p.box.left, p.box.bottom - p.box.top, edge].map(Math.round));
       const tip = this.ray(p.points[0][0], p.points[0][1], depth, this.v[0]!).clone();
       for (const point of p.points.slice(1)) {
         const end = this.ray(point[0], point[1], depth, this.v[1]!);
         const mid = tip.clone().lerp(end, 0.5);
-        const arm = { x: mid.x, y: mid.y, z: mid.z, along: tip.clone().sub(end), length: tip.distanceTo(end), life: ONE_FRAME, shape: SHAPE.spark };
-        this.pool.add("ink", { ...arm, size: 5 * m, rgb: INK, alpha: 0.9 });
-        this.pool.add("glow", { ...arm, size: 3 * m, rgb: JADE, hot: 0.45, alpha: 1 });
+        const long = tip.distanceTo(end);
+        // fx-pool's plate shows about 0.79 of its length and 0.62 of its width solid: sized so the bars meet at the tip.
+        const arm = { x: mid.x, y: mid.y, z: mid.z, along: tip.clone().sub(end), life: ONE_FRAME, shape: SHAPE.plate };
+        this.pool.add("ink", { ...arm, length: (long + 8 * k720 * m) / 0.79, size: (8 * k720 * m) / 0.62, rgb: INK, alpha: 1 });
+        this.pool.add("glow", { ...arm, length: (long + 2 * k720 * m) / 0.79, size: (4 * k720 * m) / 0.62, rgb: JADE, alpha: 1 });
       }
     }
   }
@@ -558,7 +650,7 @@ export class WordFeel implements CardFeel {
     for (const p of this.plates) {
       const at = this.ray(p.x, p.y + p.h / 2, depth, this.v[0]!);
       const [fh, fw] = p.mean ? [0.62, 0.78] : [0.45, 0.62]; // a meaning strip's plate hugs it and is lighter (judge r2: a smudge on the grass)
-      this.pool.add("ink", { x: at.x, y: at.y, z: at.z, size: (p.h / fh) * px, length: (p.w / fw) * px, along: right.clone(), life: ONE_FRAME, rgb: INK, alpha: p.mean ? 0.38 : 0.55, shape: SHAPE.plate });
+      this.pool.add("ink", { x: at.x, y: at.y, z: at.z, size: (p.h / fh) * px, length: (p.w / fw) * px, along: right.clone(), life: ONE_FRAME, rgb: INK, alpha: (p.a ?? 1) * (p.mean ? 0.38 : 0.55), shape: SHAPE.plate });
     }
     this.charge(w, now);
     this.flights(w, now);
@@ -608,7 +700,9 @@ export class WordFeel implements CardFeel {
         const word = P.word[p]! >= 0 ? wordText(w.typing.deck, P.word[p]!) : (fired?.word ?? "");
         const muzzle = this.muzzle(w, b, P.ox[p]!, P.oz[p]!, this.v[0]!);
         const twin = [...this.shots.values()].some((s) => s.born === w.tick && Math.abs(s.x0 - muzzle.x) < 0.1 && Math.abs(s.z0 - muzzle.z) < 0.1);
-        shot = { born: w.tick, x0: muzzle.x, z0: muzzle.z, y0: muzzle.y, total: Math.max(1, Math.hypot(P.tx[p]! - P.ox[p]!, P.tz[p]! - P.oz[p]!)), word, k: 0, x: muzzle.x, y: muzzle.y, z: muzzle.z, splash: P.splash[p]!, bolt, frame: 0, call: fired?.call ?? -1 };
+        // Which way it runs on screen: its word trails behind its head in reading order (judge C10 r5: cycled letters read "EYEEYE").
+        const [sa, sb] = [this.stage.project(muzzle.x, muzzle.y, muzzle.z), this.stage.project(muzzle.x + P.tx[p]! - P.ox[p]!, muzzle.y, muzzle.z + P.tz[p]! - P.oz[p]!)];
+        shot = { born: w.tick, x0: muzzle.x, z0: muzzle.z, y0: muzzle.y, total: Math.max(1, Math.hypot(P.tx[p]! - P.ox[p]!, P.tz[p]! - P.oz[p]!)), word, side: sb.x < sa.x - 4 ? -1 : 1, trail: ![...this.shots.values()].some((s) => s.trail && Math.abs(s.x0 - muzzle.x) < 0.1 && Math.abs(s.z0 - muzzle.z) < 0.1), x: muzzle.x, y: muzzle.y, z: muzzle.z, splash: P.splash[p]!, bolt, frame: 0, call: fired?.call ?? -1 };
         this.shots.set(id, shot);
         if (!twin) this.release(w, b, muzzle, new THREE.Vector3(P.tx[p]! - P.ox[p]!, 0, P.tz[p]! - P.oz[p]!).normalize(), now, bolt, shot.call);
       }
@@ -639,7 +733,7 @@ export class WordFeel implements CardFeel {
 
   /**
    * Where a flash of `size` m at `at` shows: when the card of call `call` hides more than a third of it, lowered on screen (at its
-   * depth, ≤ 1.2 of its radius: still on the tower) until about 3/4 of it is under the card's bottom (judge C10 r3: half was hidden).
+   * depth, ≤ 1.6 of its radius: still on the tower) until its body is under the card's bottom (judge C10 r3, r5).
    */
   private clear(at: THREE.Vector3, size: number, call: number): THREE.Vector3 {
     const card = this.lastCard;
@@ -650,7 +744,7 @@ export class WordFeel implements CardFeel {
     const r = (0.42 * size) / this.metres(depth); // the amber halo's seen radius, px
     const bottom = card.y + card.height;
     this.marks.card = [card.x - card.half * 1.1, card.y - card.height * 0.1, card.x + card.half * 1.1, bottom].map(Math.round);
-    const dy = Math.min(1.2 * r, bottom + 0.4 * r - s.y); // 0.4 r: about three quarters of it under the card
+    const dy = Math.min(1.6 * r, bottom + 0.8 * r - s.y); // 0.8 r: its body (0.7 r) wholly under the card (judge C10 r5: 0.4 r hid its top third)
     return Math.abs(s.x - card.x) > card.half * 1.1 + r || dy <= 0 ? out : this.ray(s.x, s.y + dy, depth, out);
   }
 
@@ -698,11 +792,20 @@ export class WordFeel implements CardFeel {
     const back = v.clone().normalize().multiplyScalar(-3.2 * big);
     if (v.lengthSq() > 1e-6) this.pool.add("glow", { ...head, x: x + back.x, y: y + back.y, z: z + back.z, along: v.clone(), length: 7 * big, size: 1.1 * big, rgb: JADE, alpha: 0.55, shape: SHAPE.spark, hot: 0.4 }); // the streak behind it
     this.pool.add("glow", { x, y, z, vx: -v.x * 20, vy: -v.y * 20, vz: -v.z * 20, size: 0.4, length: 3, life: 0.12, rgb: GOLD, hot: 0.5, shape: SHAPE.spark });
-    if (shot.word.length > 0 && shot.frame % 2 === 1) {
-      const g = this.glyph(shot.word, shot.k++ % shot.word.length);
-      const trail = { x, y, z, vy: -0.6, drag: 2, life: 0.34, turn: this.rnd(-0.3, 0.3), spin: this.rnd(-1.5, 1.5), shape: SHAPE.letter, glyph: Math.max(0, g) };
-      this.pool.add("ink", { ...trail, size: 1.9, rgb: INK, alpha: 0.9 });
-      this.pool.add("glow", { ...trail, size: 1.6, rgb: JADE, hot: 0.4 });
+    // The word itself rides behind the head, a letter a cell apart along the path, in reading order on screen (the last letter
+    // next to the head when it runs right, the first when it runs left); each shows once the head has gone that far.
+    const word = shot.trail ? shot.word.slice(0, 8) : ""; // one word a volley: its shots' words piled up into "EAMMM" by the tower
+    const cell = 1.55 * big;
+    const gone = Math.hypot(x - shot.x0, z - shot.z0);
+    for (let j = 0; j < word.length; j += 1) {
+      const behind = cell * (shot.side < 0 ? j + 1 : word.length - j);
+      if (behind >= gone) continue;
+      const g = 1 - behind / gone;
+      const [lx, lz] = [shot.x0 + (x - shot.x0) * g, shot.z0 + (z - shot.z0) * g];
+      const fj = f * g;
+      const at = { x: lx, y: shot.y0 + (1.2 - shot.y0) * fj + 0.08 * shot.total * Math.sin(Math.PI * fj) + heightAt(this.map, lx, lz) * fj, z: lz, life: ONE_FRAME, shape: SHAPE.letter, glyph: Math.max(0, this.glyph(word, j)) };
+      this.pool.add("ink", { ...at, size: 1.9 * big, rgb: INK, alpha: 0.9 });
+      this.pool.add("glow", { ...at, size: 1.6 * big, rgb: JADE, hot: 0.4 });
     }
   }
 
@@ -730,7 +833,7 @@ export class WordFeel implements CardFeel {
   stats(): Record<string, number | string> {
     const live = this.pool.count();
     const tag = this.tag?.el.getBoundingClientRect();
-    return { fxGlow: live.glow, fxInk: live.ink, fxShots: this.shots.size, keyMs: Math.round(this.keyMs * 10) / 10, keyFrames: this.keyFrames, answerMs: Math.round(this.answerMs), anchors: JSON.stringify(this.gaps), shotDx: this.heading[0]!, shotDz: this.heading[1]!, marks: JSON.stringify(this.marks), tag: tag ? JSON.stringify([tag.left, tag.top, tag.width, tag.height].map(Math.round)) : "", tray: JSON.stringify([...this.trayLast]) };
+    return { fxGlow: live.glow, fxInk: live.ink, fxShots: this.shots.size, keyMs: Math.round(this.keyMs * 10) / 10, keyFrames: this.keyFrames, answerMs: Math.round(this.answerMs), anchors: JSON.stringify(this.gaps), shotDx: this.heading[0]!, shotDz: this.heading[1]!, marks: JSON.stringify(this.marks), tag: tag ? JSON.stringify([tag.left, tag.top, tag.width, tag.height].map(Math.round)) : "", tray: JSON.stringify([...this.trayLast]), pointers: JSON.stringify(this.pointerBoxes) };
   }
 
   dispose(): void {

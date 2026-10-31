@@ -17,4 +17,7 @@
 .td-quick .kit-qs__btn:hover, .td-quick .kit-qs__opt input:checked + .kit-qs__chip,
 .td-quick .kit-qs__btn[aria-pressed="true"], .td-quick .kit-qs__btn[aria-checked="true"] { outline: 2px solid var(--vd-lantern); color: var(--vd-quick-text); }
 .td-quick .kit-qs__row { grid-template-columns: 24px minmax(90px, auto) minmax(0, 1fr); }
+/* Resume is the kit's primary button: the kit gives it --kit-qs-accent-text (ink), dark on the dark button art.
+   Gold lettering on the same art keeps it readable and marks it as the main action; hover turns it cream. */
+.td-quick .kit-qs__btn--primary { color: var(--vd-quick-accent); }
 .td-quick .kit-qs__row--slot { grid-template-columns: 1fr; }

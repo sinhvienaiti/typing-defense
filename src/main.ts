@@ -293,7 +293,7 @@ function prefetch(): void {
 // The title takes every key while it is up (and while its chunk loads); a card takes its own (arrows, Enter, Esc) and lets the rest through.
 window.addEventListener("keydown", (event) => {
   if (quick?.blocking) return;
-  if (event.code === "F1" || event.code === "F2") { if (quick === null) { event.preventDefault(); event.stopImmediatePropagation(); void quickChunk.get().then((m) => { quick = m; m?.open(event.code === "F1" ? "settings" : "sound"); }); } return; }
+  if (event.code === "F1" || event.code === "F2") { if (quick === null) { event.preventDefault(); event.stopImmediatePropagation(); void quickChunk.get().then((m) => m ? ((quick = m), m.open(event.code === "F1" ? "settings" : "sound")) : tellLost("Settings and Sound failed to load · F5 to retry")); } return; }
   if (titleUp && title === null) return void (event.preventDefault(), event.stopImmediatePropagation());
   // "Xem bản đồ" put the results away: Esc or Enter brings them back (test pass 27/10: it was one way, F5 only).
   if (mapOnly && !titleUp && (event.code === "Escape" || event.code === "Enter")) return void ((mapOnly = false), event.preventDefault(), event.stopImmediatePropagation());

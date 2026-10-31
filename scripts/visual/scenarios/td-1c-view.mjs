@@ -66,7 +66,10 @@ export default async function (page) {
   // 2. ?view=3d (Medium) and ?q=high: the 3D view on its own canvas.
   const before3d = errors().length;
   runs.deep = await open("?title=0&view=3d");
-  runs.deep.ground = await pixel(page, cx, cy);
+  // The ground drawn: a 3 × 3 grid over the field, a third of it grass (since C3 and C10's roads the middle is road sand: judge C10 r5).
+  runs.deep.grounds = [];
+  for (const fx of [0.3, 0.5, 0.7]) for (const fy of [0.3, 0.5, 0.7]) runs.deep.grounds.push(await pixel(page, Math.round(page.width * fx), Math.round(page.height * fy)));
+  runs.deep.ground = runs.deep.grounds[4];
   runs.deep.loaded = await page.eval(`performance.getEntriesByType("resource").some((e) => /view-3d/.test(e.name))`);
   await pointer();
   runs.deep.afterPointer = await page.eval(LOOK);
@@ -97,7 +100,7 @@ export default async function (page) {
   const checks = {
     flatPlays: runs.flat.view3d === false && runs.flat.deep === null && runs.flat.flat === "visible" && runs.flat.steps > 30 && green(runs.flat.ground),
     lowIs2d: runs.low.view3d === false && runs.low.deep === null && runs.low.steps > 30,
-    deepOpens: runs.deep.view3d === true && runs.deep.loaded === true && runs.deep.flat === "hidden" && runs.deep.deep?.css?.[0] === page.width && runs.deep.deep?.css?.[1] === page.height && runs.deep.steps > 30 && green(runs.deep.ground),
+    deepOpens: runs.deep.view3d === true && runs.deep.loaded === true && runs.deep.flat === "hidden" && runs.deep.deep?.css?.[0] === page.width && runs.deep.deep?.css?.[1] === page.height && runs.deep.steps > 30 && runs.deep.grounds.filter(green).length >= 3,
     deepPointer: runs.deep.afterPointer?.view3d === true,
     highOpens: runs.high.view3d === true && runs.high.steps > 30 && runs.high.deep?.width >= page.width,
     lostFallsBack: runs.lost.view3d === false && runs.lost.deep === null && runs.lost.flat === "visible" && runs.lost.steps > 30 && /3D view stopped/.test(runs.lost.notices) && green(runs.lost.ground),

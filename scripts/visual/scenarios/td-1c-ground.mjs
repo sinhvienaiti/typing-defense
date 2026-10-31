@@ -1,5 +1,5 @@
 // 1C steps C2–C3 (docs/td/BUILD_1C_MAP1.md §8): pictures of map 1's 3D stage and ground for an independent judge, and
-// the stage's numbers. At ?q=high: the default camera (Home) with the HUD, PageDown, PageUp, then 3 tilts (30°, 55°, 85°) × 4
+// the stage's numbers. At ?q=high: the default camera (Home) with the HUD, PageDown, End, then 3 tilts (30°, 55°, 85°) × 4
 // headings (0°, 90°, 180°, 270°) with the HUD hidden, the keys a player would press (Shift + arrows turn 15° and tilt
 // 5°). At ?q=medium: the default camera again. For each: __td.view() (draw calls, triangles, the camera) and the mean
 // and p95 of the last frames' draw cost. Day 1, no buildings yet (C6). Exits 1 on a console error or exception.
@@ -46,7 +46,7 @@ export default async function (page) {
   await read("high-default");
   await press("PageDown");
   await read("high-near");
-  await press("PageUp");
+  await press("End");
   await read("high-overview");
   await press("Home");
   await hud(false);

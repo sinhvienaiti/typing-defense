@@ -943,7 +943,7 @@ Chỉ cho huy chương và Xu nhỏ, không thêm sức mạnh. Ví dụ: "Khôn
 | `Backspace` | Xóa một chữ của từ đang khóa. Không bao giờ bán nhà. |
 | `Esc` | Nhả khóa → đóng menu → bỏ chọn (về Tướng) → menu dừng |
 | `Space` | Nuốt |
-| Mũi tên, Shift + mũi tên, F1–F3 | Camera |
+| Mũi tên, Shift + mũi tên, Home, PageDown, End | Camera (1C, 31/10: F1, F2 là bảng Settings, Sound; chờ chủ dự án duyệt) |
 | F4 | Bám theo người đang chọn |
 | `Pause` | Tạm dừng |
 
@@ -2592,7 +2592,7 @@ Cột tối đa 240 px.
 
 ### 23.6 Camera
 
-- Chuột: kéo trái hoặc giữa để kéo bản đồ; kéo phải để xoay, nâng góc; lăn để zoom vào điểm dưới con trỏ; ngưỡng bấm và kéo 6 px. Bàn phím: mũi tên, Shift + mũi tên, F1–F3; F4 bám người đang chọn.
+- Chuột: kéo trái hoặc giữa để kéo bản đồ; kéo phải để xoay, nâng góc; lăn để zoom vào điểm dưới con trỏ; ngưỡng bấm và kéo 6 px. Bàn phím: mũi tên, Shift + mũi tên; Home góc mặc định, PageDown góc gần, End toàn cảnh (1C, 31/10: F1, F2 là bảng Settings, Sound, PageUp giữ cho nâng cấp; chờ chủ dự án duyệt); F4 bám người đang chọn.
 - Mặc định **55° ở 58 m**. Zoom 22–120 m. F3 "Toàn cảnh" 85° ở 100 m.
 - **Camera không bao giờ tự chạy giữa đợt**, kể cả khi boss ra, khi tung Tối Thượng. Boss ra mắt: khung cận cảnh nhỏ 320 × 180 góc trên phải 2,5 s.
 - Rung camera tối đa 6 px trong 120 ms, chỉ trên canvas.

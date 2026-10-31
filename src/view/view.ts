@@ -33,13 +33,13 @@ export interface MapView {
   zoomAt(px: number, py: number, factor: number): void;
   /** 3D only: a right drag or Shift + arrows turn the heading and tilt (CSS px). */
   turn?(dx: number, dy: number): void;
-  /** 3D only: Home, PageDown, PageUp (TK 23.6). */
+  /** 3D only: Home, PageDown, End (TK 23.6). */
   look?(name: CameraView): void;
   /** What the view drew last frame and where its camera is (__td.view()). */
   stats?(): Record<string, number | string>;
 }
 
-/** Home the default view, PageDown a close low one, PageUp "Toàn cảnh" (TK 23.6; F1 / F2 open Settings and Sound). */
+/** Home the default view, PageDown a close low one, End "Toàn cảnh" (TK 23.6; F1 / F2 open Settings and Sound). */
 export type CameraView = "home" | "near" | "overview";
 
 export type Tier = "low" | "medium" | "high";

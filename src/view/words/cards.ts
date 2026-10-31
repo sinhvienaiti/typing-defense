@@ -323,16 +323,18 @@ export class WordCards {
       const e = roof.edge ?? -1;
       const edge = String(roof.edge ?? "");
       for (const card of cards) if (card.el.dataset.edge !== edge) card.el.dataset.edge = edge;
-      // A tray column keeps 44 px to the screen's edge for its pointer towards the caller (words.ts).
-      const x = e === 0 ? Math.max(roof.x, half + 52) : e === 1 ? Math.min(roof.x, width - half - 52) : roof.x;
+      // A tray column's room for its pointer towards the caller comes with its anchor (3d/words.ts), so its slide eases into it.
+      const x = roof.x;
       // Clear of the HUD's bars across the middle at every zoom: a column over one stands under the top bar, over the bottom one.
       let [lo, hi]: [number, number] = [SAFE.top, height - SAFE.bottom];
       for (const p of panels) if (p.left < x + half && p.right > x - half && p.left < width / 2 && p.right > width / 2) [lo, hi] = p.top > height / 2 ? [lo, Math.min(hi, p.top - 4)] : [Math.max(lo, p.bottom + 4), hi];
       [lo, hi] = [lo + (e === 2 ? 40 : 0), hi - (e === 3 ? 40 : 0)];
       let roofY = Math.min(hi, Math.max(roof.y, lo + tallest));
-      // An edge tray column stays at its edge: over a side panel there it stands under it (a top one) or over it (a bottom one).
-      if (e >= 0) for (const p of panels) if (p.left < x + half + 16 && p.right > x - half - 16 && p.top < roofY && roofY - tallest < p.bottom) roofY = p.top > height / 2 ? p.top - 6 : p.bottom + 6 + tallest;
-      boxes.push({ x, top: roofY - tallest, bottom: roofY, half, at: x + (this.offsets.get(c) ?? 0) });
+      // An edge tray column stays at its edge: over a side panel there it stands under it (a top one) or over it (a bottom one),
+      // tested where it was drawn (its parting offset in): a card sliding in beside the panel is not snapped under it (judge C10 r5).
+      const at = x + (this.offsets.get(c) ?? 0);
+      if (e >= 0) for (const p of panels) if (p.left < at + half && p.right > at - half && p.top < roofY && roofY - tallest < p.bottom) roofY = p.top > height / 2 ? p.top - 6 : p.bottom + 6 + tallest;
+      boxes.push({ x, top: roofY - tallest, bottom: roofY, half, at });
       columns.push({ b: c, cards, heights, roofY });
     }
     // Off the side panels and the action when the columns still part there (review R2: a fourth bubble pushed over the

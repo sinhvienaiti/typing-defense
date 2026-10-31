@@ -106,6 +106,8 @@ export default defineConfig(({ mode }) => {
       host: env("DEV_HOST") ?? "127.0.0.1",
       port: 3006,
       strictPort: true,
+      // Captures and other lanes' test output under tmp/ never reload a page under test (judge C10 r5).
+      watch: { ignored: ["**/tmp/**"] },
       allowedHosts: (env("DEV_ALLOWED_HOSTS") ?? "td.typing-game.local")
         .split(",")
         .map((value) => value.trim())

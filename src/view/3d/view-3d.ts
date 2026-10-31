@@ -3,7 +3,7 @@
  * under src/view/3d (C2: the stage and the RTS camera; C3: the ground, the stream and the bridges; C6: the houses and the
  * landmarks; C10: the word cards' anchors and their typing feel, words.ts) on a canvas
  * of its own over the 2D one, and answers the page as a MapView: project and unproject through the camera, the pointer's
- * pan, turn and zoom, the views (Home, PageDown, PageUp). It reads the world and never changes it. `open` gives null without WebGL (the page keeps
+ * pan, turn and zoom, the views (Home, PageDown, End). It reads the world and never changes it. `open` gives null without WebGL (the page keeps
  * 2D); a lost context calls `lost`.
  */
 import * as THREE from "three";
@@ -107,7 +107,8 @@ export class View3D implements MapView {
 
   /** A click on a card in the edge tray glides the camera to its house in 0.45 s (C10); false when no tray card is there. */
   tray(px: number, py: number): boolean {
-    const at = this.words.trayCall(this.cards.callAt(px, py));
+    const hit = this.words.trayHit(px, py);
+    const at = this.words.trayCall(hit >= 0 ? hit : this.cards.callAt(px, py));
     if (at !== null) this.rig.glide(at.x, at.z, 450, performance.now());
     return at !== null;
   }

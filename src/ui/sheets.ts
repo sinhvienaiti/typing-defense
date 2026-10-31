@@ -3,8 +3,9 @@
  * not part around them). Pause (Esc, the HUD's Ⅱ): Chơi tiếp, Cài đặt, Về màn đầu. Results (BUILD_1B §4.3, §13.1): "Giữ
  * được làng" with its stars stamped one by one, or "Lũy đã vỡ" with a hint read off the run, and on a story won the
  * best stars kept (R3: "Kỷ lục ★★", new or not); the numbers, "Từ cần ôn" (the review book's newest five with their
- * meaning); Chơi lại Ngày n (after a night past the first was lost), Chơi lại (từ đầu), Chép số chơi thử, Xem bản đồ,
- * Về màn đầu. Keyboard first: ↑ ↓ pick, Enter chooses, Esc goes back to the game (or closes the settings).
+ * meaning); Chơi lại Ngày n (after a night past the first was lost), Chơi lại (từ đầu), Xem bản đồ, Về màn đầu on the
+ * 160 button plates, then Chép số chơi thử as a small link. A scrim dims the game under either card. Keyboard first: ↑ ↓
+ * pick, Enter chooses, Esc goes back to the game (or closes the settings).
  */
 import { starsFor } from "../app/prefs";
 import { STAT } from "../sim/stats";
@@ -73,14 +74,18 @@ export class Sheet {
     if (kind === this.kind) return;
     this.kind = kind;
     this.el.hidden = kind === "";
+    // A scrim under the card (td.css); the results also put the field's word cards away (judge C10 r5).
+    this.el.ownerDocument?.body.classList.toggle("has-sheet", kind !== "");
+    this.el.ownerDocument?.body.classList.toggle("has-results", kind === "results");
     this.settings.close();
     if (kind === "") return;
     const won = w.phase === "victory";
     // The sandbox too: its skipTo runs replay alike (BUILD_1B §19 td-1b-night5); not while app/retry.ts is missing (R3 step 1).
     const retry = !won && w.day >= 2 && run.canRetry !== false;
+    // "Copy playtest data" (the owner's play-test pack) is the last, a small link under the plates, not a player's choice.
     this.buttons = kind === "pause" ? PAUSE : [
       ...(retry ? [["retry", "Retry Day " + w.day, "Enter"] as const] : []),
-      ["again", retry ? "Restart" : "Retry", retry ? "" : "Enter"], ["copy", "Copy playtest data", ""], ["map", "View map", "Esc"], ["title", "Title screen", ""],
+      ["again", retry ? "Restart" : "Retry", retry ? "" : "Enter"], ["map", "View map", "Esc"], ["title", "Title screen", ""], ["copy", "Copy playtest data", ""],
     ];
     this.focus = 0;
     this.el.className = "td-sheet vd-sheet is-" + kind + (won ? " is-won" : kind === "results" ? " is-lost" : "");
@@ -96,7 +101,7 @@ export class Sheet {
           : `<h2 class="td-result-heading">${artHtml("banner", "td-result-banner")}<span>Fort fallen</span></h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
           `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Lives", w.lives) + row("Nights held", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Foes slain", stats[STAT.kills]!) + row("Words", stats[STAT.callWords]!) + row("Perfect calls", stats[STAT.callsPerfect]!) + (w.mode === "learn" || w.knowledge > 0 ? row("Knowledge", w.knowledge) : "") + `</dl>` +
           artHtml("divider", "td-result-divider") + (words === "" ? "" : `<div class="td-review"><small>To review</small><ul>${words}</ul></div>`)) +
-      this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
+      this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}"${action === "copy" ? ' class="td-sheet-link"' : ""}>${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
     // The heading's words turn cream on a loaded banner only; on paper (loading, failed) they stay ink (recheck 232 F2).
     this.el.querySelectorAll<HTMLImageElement>("img[data-ui-art]").forEach((img) => {
       const on = (yes: boolean) => () => img.parentElement?.classList.toggle("has-banner", yes);

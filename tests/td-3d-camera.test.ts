@@ -6,7 +6,7 @@ import { projectToScreen } from "../src/view/3d/stage";
 /**
  * 1C step C2 (docs/td/BUILD_1C_MAP1.md §8; TK 23.2, 23.6): map 1's RTS camera. A screen point taken down to the ground
  * and projected back lands within 0.5 px at 3 tilts × 4 headings; the default view gives TK 23.2's sizes; zoom keeps the
- * ground point under the pointer; pan stays on the field; Home and PageUp are TK 23.6's views. Node only: no WebGL.
+ * ground point under the pointer; pan stays on the field; Home and End are TK 23.6's views. Node only: no WebGL.
  */
 const [W, H] = [1920, 1080];
 const FORT = { x: 0, z: 40 };
@@ -89,7 +89,7 @@ describe("map 1's 3D camera (src/view/3d/camera.ts)", () => {
     expect(Math.max(Math.abs(r.pose.x), Math.abs(r.pose.z))).toBeLessThanOrEqual(48 + CAMERA.panMarginM + 1e-9);
   });
 
-  it("PageUp is 85° at 100 m, Home the default view and heading again; tilt stays within 30–85°", () => {
+  it("End is 85° at 100 m, Home the default view and heading again; tilt stays within 30–85°", () => {
     const { rig: r, settle } = rig();
     r.turn(200, 60);
     settle();

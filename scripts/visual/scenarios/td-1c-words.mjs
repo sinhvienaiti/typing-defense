@@ -5,7 +5,7 @@
 // (≤ 2) and one frame from a key to its effect. With FRAMES=1 it records 1 s around a right key, a slip, a word typed,
 // a chain step and a Word Shot by night (CDP screencast; needs CDP_PORT) into OUT_DIR/frames/<moment>/ with meta.json.
 // C10 round 3 (lane L3): the first key on a letter two cards share (key-multi), the chain count at rest at ×2, ×3, ×5, ×7
-// (OUT_DIR/combo-rest/), the cards against the HUD at PageDown, PageUp and a wheel zoom (zoomHud), and the edge tray: the camera
+// (OUT_DIR/combo-rest/), the cards against the HUD at PageDown, End and a wheel zoom (zoomHud), and the edge tray: the camera
 // panned until calls stand off screen, ≤ 2 an edge and ≤ 6 in all, a click on one gliding the camera there in 0.45 s.
 // C10 round 4 (lane L4): in play every live word has its own first letter (calls.ts deals tier 1 only), so key-multi is
 // forced by __td.twinFirst (one untouched word swapped for a tier-2 partner of another, TK 6.5) and recorded every run; the chain count at rest at ×10 too (amber); with FRAMES=1 the pan step a card slides into the tray in
@@ -90,8 +90,15 @@ const DOM_LOG = `(() => {
       if (r.left < 0 || r.top < 0 || r.right > innerWidth || r.bottom > innerHeight) offScreen.push(name);
       for (const p of panels) if (Math.min(r.right, p.r.right) - Math.max(r.left, p.r.left) > 1 && Math.min(r.bottom, p.r.bottom) - Math.max(r.top, p.r.top) > 1) overHud.push(name + " / " + p.name);
     }
+    // The chain count never over its own card (judge C10 r5: at 1920 its ×2.25 frame covered its tray card): words.ts writes the card's box.
+    const onCard = [];
+    for (const el of document.querySelectorAll(".td-combo")) {
+      if (!(parseFloat(getComputedStyle(el).opacity) > 0.02) || !el.dataset.own) continue;
+      const r = el.getBoundingClientRect(), [l, t, rr, b] = el.dataset.own.split(",").map(Number);
+      if (Math.min(r.right, rr) - Math.max(r.left, l) > 2 && Math.min(r.bottom, b) - Math.max(r.top, t) > 2) onCard.push(el.textContent);
+    }
     window.__boxFrames++;
-    if (overHud.length || offScreen.length) window.__boxViolations.push({ at, frame: window.__boxFrames, overHud, offScreen });
+    if (overHud.length || offScreen.length || onCard.length) window.__boxViolations.push({ at, frame: window.__boxFrames, overHud, offScreen, onCard });
     if (window.__domOn) window.__dom.push([at, out]);
     if (window.__boxesOn) requestAnimationFrame(keep);
   };
@@ -245,7 +252,7 @@ export default async function (page) {
   // card slides into the tray (tray-in); a still when two share an edge (tray-two); a word typed from the tray (tray-type); a
   // click on a tray card glides the camera there in 0.45 s.
   const trayCards = () => page.eval(EDGE_CARDS);
-  const tray = { cards: [], most: 0, perEdge: [0, 0, 0, 0], glide: null, overHud: [], first: -1, two: false, typed: null };
+  const tray = { cards: [], most: 0, perEdge: [0, 0, 0, 0], glide: null, overHud: [], first: -1, two: false, typed: null, pointer: [] };
   // Night with foes coming and the hero back by the towers (lit calls are in a help ring), two words live, else nothing goes
   // to the tray (a slow run reaches here by day 2's end, no call lit).
   if ((await state(page))?.phase !== "night") [await key(page, "Enter", { shift: true }), await page.sleep(1500)];
@@ -271,6 +278,25 @@ export default async function (page) {
     tray.most = Math.max(tray.most, tray.cards.length);
     for (let e = 0; e < 4; e += 1) tray.perEdge[e] = Math.max(tray.perEdge[e], tray.cards.filter((c) => c.edge === e).length);
   };
+  /**
+   * The tray still, and each tray pointer's pixels in it (judge C10 r5: the V was a 1 px hairline whose box passed the geometry
+   * checks): an ink outline (luma < 0.12) and a jade core (g > 0.55, r < 0.45, b > 0.4) must each fill ≥ 6 % of its box.
+   */
+  const pointerShot = async () => {
+    // The pointers read before and after the still must agree (a card still sliding moves its pointer between the two).
+    const file = out("td-1c-words-tray-" + size + ".jpg");
+    let boxes = [];
+    for (let k = 0; k < 8; k += 1) {
+      const before = (await view())?.pointers || "[]";
+      await page.shot(file);
+      const after = (await view())?.pointers || "[]";
+      boxes = JSON.parse(after);
+      if (before === after && boxes.length > 0) break;
+      await page.sleep(120);
+    }
+    const share = (b, fx) => Number(execFileSync("magick", [file, "-crop", `${b[2]}x${b[3]}+${b[0]}+${b[1]}`, "+repage", "-fx", fx, "-colorspace", "Gray", "-format", "%[fx:mean]", "info:"], { encoding: "utf8" }));
+    tray.pointer = boxes.map((b) => ({ box: b, ink: +share(b, "0.299*r+0.587*g+0.114*b < 0.12 ? 1 : 0").toFixed(3), jade: +share(b, "g > 0.55 && r < 0.45 && b > 0.4 ? 1 : 0").toFixed(3) }));
+  };
   /** A word typed from the tray: its stamps, its burst, its letters leaving the edge towards the caller. */
   const typeFromTray = async () => {
     const ids = new Set(JSON.parse((await view())?.tray || "[]").map(([id]) => id));
@@ -285,36 +311,52 @@ export default async function (page) {
   };
   for (let k = 0; k < 64 && !(tray.first >= 0 && (tray.two || cast === null)); k += 1) {
     await pan(k);
-    if (tray.cards.length > 0 && tray.first < 0) [tray.first = k, await page.shot(out("td-1c-words-tray-" + size + ".jpg")), await typeFromTray()];
+    if (tray.cards.length > 0 && tray.first < 0) [tray.first = k, await pointerShot(), await typeFromTray()];
     if (!tray.two && [0, 1, 2, 3].some((e) => tray.cards.filter((c) => c.edge === e).length >= 2)) [tray.two = true, await page.shot(out("td-1c-words-tray-two-" + size + ".jpg"))];
   }
   // Back to a pan with a card in the tray (the last steps may have lost it), every way if need be.
   for (let k = 0; k < 64 && tray.cards.length === 0 && tray.first >= 0; k += 1) await pan((Math.floor(tray.first / 16) * 16 + k) % 64);
   if (tray.typed === null && tray.cards.length > 0) await typeFromTray();
   if (tray.cards.length > 0) {
-    if (tray.first < 0 || !existsSync(out("td-1c-words-tray-" + size + ".jpg"))) await page.shot(out("td-1c-words-tray-" + size + ".jpg"));
-    const c = tray.cards[0];
-    const from = await view();
-    const t0 = Date.now();
-    await page.mouse(c.x, c.y, "mousePressed");
-    await page.mouse(c.x, c.y, "mouseReleased");
-    const path = [];
-    for (let k = 0; k < 16; k += 1) {
-      const v = await view();
-      path.push({ ms: Date.now() - t0, x: v.x, z: v.z });
-      await page.sleep(40);
-    }
-    const end = path.at(-1);
-    const total = Math.hypot(end.x - from.x, end.z - from.z);
-    const reach = path.find((p) => Math.hypot(end.x - p.x, end.z - p.z) <= 0.05 * total);
-    tray.glide = { metres: +total.toFixed(1), reachMs: reach?.ms ?? -1, path: path.filter((_, k) => k % 3 === 0).map((p) => [p.ms, +p.x.toFixed(1), +p.z.toFixed(1)]) };
+    if (tray.first < 0 || !existsSync(out("td-1c-words-tray-" + size + ".jpg")) || tray.pointer.length === 0) await pointerShot();
+    // The card's box read again just before the click, once it holds still (judge C10 r5: one 1920 run clicked a stale box and
+    // the camera never moved); the card's box and the element under the point are kept with the result.
+    const settled = async () => {
+      let [a, b] = [await trayCards(), null];
+      for (let k = 0; k < 10; k += 1) {
+        await page.sleep(80);
+        b = await trayCards();
+        if (b.length > 0 && a.length > 0 && Math.hypot(b[0].x - a[0].x, b[0].y - a[0].y) < 1) break;
+        a = b;
+      }
+      return b?.[0] ?? tray.cards[0];
+    };
+    const glide = async () => {
+      const c = await settled();
+      const under = await page.eval(`(() => { const el = document.elementFromPoint(${c.x}, ${c.y}); return el ? el.tagName + "#" + el.id + "." + el.className : null; })()`);
+      const from = await view();
+      const t0 = Date.now();
+      await page.mouse(c.x, c.y, "mousePressed");
+      await page.mouse(c.x, c.y, "mouseReleased");
+      const path = [];
+      for (let k = 0; k < 16; k += 1) {
+        const v = await view();
+        path.push({ ms: Date.now() - t0, x: v.x, z: v.z });
+        await page.sleep(40);
+      }
+      const end = path.at(-1);
+      const total = Math.hypot(end.x - from.x, end.z - from.z);
+      const reach = path.find((p) => Math.hypot(end.x - p.x, end.z - p.z) <= 0.05 * total);
+      return { metres: +total.toFixed(1), reachMs: reach?.ms ?? -1, card: { text: c.text, box: [c.left, c.top, c.right, c.bottom].map(Math.round), edge: c.edge }, under, path: path.filter((_, k) => k % 3 === 0).map((p) => [p.ms, +p.x.toFixed(1), +p.z.toFixed(1)]) };
+    };
+    tray.glide = await glide();
     await page.sleep(500);
     await page.shot(out("td-1c-words-tray-after-" + size + ".jpg"));
   }
   await cast?.close();
-  // The cards against the HUD at every zoom (C10 leftover): PageDown, PageUp, then a wheel zoom in from Home, six looks each.
+  // The cards against the HUD at every zoom (C10 leftover): PageDown, End, then a wheel zoom in from Home, six looks each.
   const zoomStats = cardStats();
-  for (const step of ["PageDown", "PageUp", "wheel"]) {
+  for (const step of ["PageDown", "End", "wheel"]) {
     if (step === "wheel") {
       await fk("Home");
       await page.sleep(900);
@@ -334,7 +376,7 @@ export default async function (page) {
   const boxAudit = await page.eval(`(() => {
     window.__boxesOn = false;
     const rows = window.__boxViolations || [];
-    return { frames: window.__boxFrames, overHud: { frames: rows.filter(r => r.overHud.length).length, elements: [...new Set(rows.flatMap(r => r.overHud))] }, offScreen: { frames: rows.filter(r => r.offScreen.length).length, elements: [...new Set(rows.flatMap(r => r.offScreen))] }, violations: rows };
+    return { frames: window.__boxFrames, overHud: { frames: rows.filter(r => r.overHud.length).length, elements: [...new Set(rows.flatMap(r => r.overHud))] }, offScreen: { frames: rows.filter(r => r.offScreen.length).length, elements: [...new Set(rows.flatMap(r => r.offScreen))] }, comboOnCard: { frames: rows.filter(r => r.onCard?.length).length, elements: [...new Set(rows.flatMap(r => r.onCard ?? []))] }, violations: rows };
   })()`);
   tray.overHud.push(...boxAudit.overHud.elements);
   const final = await state(page);
@@ -342,6 +384,7 @@ export default async function (page) {
     tdWords: cardsClean(stats) && stats.samples > 0,
     tdHudBudget: stats.overHud.length === 0 && boxAudit.overHud.frames === 0,
     offScreen: boxAudit.offScreen.frames === 0,
+    comboClearOfCard: boxAudit.comboOnCard.frames === 0,
     groundUnderCards: Object.values(grounds).flat().every((g) => g.under <= 0.6),
     tdScale: anchors.length > 0 && anchors.every((a) => (a.gap >= -1 && a.gap <= 12) || a.top <= 66), // a column kept below the top edge (lanes SAFE.top) stands lower
     fxDrawCalls: draws.peak <= 2,
@@ -351,6 +394,7 @@ export default async function (page) {
     trayCap: tray.most <= 6 && tray.perEdge.every((n) => n <= 2),
     trayGlide: tray.glide !== null && tray.glide.metres > 3 && tray.glide.reachMs >= 300 && tray.glide.reachMs <= 650,
     trayClear: tray.overHud.length === 0,
+    trayPointerReads: tray.pointer.length > 0 && tray.pointer.every((p) => p.ink >= 0.06 && p.jade >= 0.06),
     ...consoleChecks(page),
   };
   return finish(page, checks, { boxAudit, grounds, cards: cardSummary(stats), anchors: anchors.filter((a) => (a.gap < -1 || a.gap > 12) && a.top > 66).concat(anchors.slice(0, 4)).slice(0, 10), anchorCount: anchors.length, draws, keyMs, keyFrames, moments, rest, zoom: cardSummary(zoomStats), tray: { ...tray, cards: tray.cards.length }, phase: final?.phase, chain: await page.eval(td("return t.typing().chain;")) });

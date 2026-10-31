@@ -181,7 +181,7 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-card.is-direct { border-radius: 3px; border-left: 7px double var(--vd-ink); border-right: 7px double var(--vd-ink); background: linear-gradient(180deg, #fbf0d0, #f0d9a2); }
 .td-card.is-direct .td-card-dot { top: -9px; right: -11px; width: 18px; height: 18px; background: conic-gradient(var(--vd-seal) var(--t, 100%), var(--vd-paper-light) 0); }
 /* A grade is a round seal pressed over the card: jade for typing at its best, vermilion for good, amber for sloppy. */
-.td-stamp { padding: 1px 9px; border: 2px solid currentColor; border-radius: 999px; background: rgba(255, 244, 214, 0.94); box-shadow: inset 0 0 0 1.5px rgba(255, 244, 214, 0.94), inset 0 0 0 3px currentColor; color: var(--vd-seal); font: 800 14px/1.35 var(--vd-title); letter-spacing: 0.02em; }
+.td-stamp { padding: 1px 9px; border: 2px solid currentColor; border-radius: 999px; background: rgba(255, 244, 214, 0.94); box-shadow: inset 0 0 0 1.5px rgba(255, 244, 214, 0.94), inset 0 0 0 3px currentColor; color: var(--vd-seal); font: 800 clamp(19px, calc(22px * var(--ui, 1)), 24px)/1.3 var(--vd-title); letter-spacing: 0.02em; } /* caps ≥ 13 px at 720p (judge C10 r5: 9–10 px); badge art waits for Codex 172 */
 .td-stamp.is-flash, .td-stamp.is-perfect { color: var(--vd-jade); }
 .td-stamp.is-ok { color: var(--vd-ink); }
 .td-stamp.is-sloppy { color: var(--vd-amber); }
@@ -200,6 +200,18 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-sheet button kbd { margin-left: auto; padding: 0 5px; border: 1px solid currentColor; border-radius: 4px; font: 700 12px/1.5 var(--vd-font); opacity: 0.7; }
 .td-sheet button.is-focus { border: 0; background: radial-gradient(circle at 30% 25%, #d24a2e, var(--vd-seal) 55%, var(--vd-seal-dark)); color: var(--vd-paper-light); box-shadow: inset 0 0 0 2px var(--vd-seal-dark), inset 0 0 0 3.5px rgba(255, 236, 200, 0.7), 1px 2px 0 rgba(43, 33, 24, 0.7); }
 .td-sheet .td-settings { margin-top: 4px; }
+/* The cards' own buttons on the 160 plates (the Settings panel's button art, gold-framed when picked) in cream (judge C10 r5:
+ * flat CSS boxes); the border keeps the art's 170 : 260 slice ratio. "Copy playtest data" is a small link under them. */
+.td-sheet button[data-sheet] { min-height: 40px; margin-top: 6px; padding: 0 6px; border: solid transparent; border-width: 11px 17px; border-radius: 0; border-image: url("/assets/typing-defense/ui/quick-settings/button.v2.alpha.png") 170 260 fill / 11px 17px / 0 round; background: none; box-shadow: none; color: var(--vd-quick-text); text-shadow: 0 1px 2px #06120e; }
+.td-sheet button[data-sheet].is-focus { border-image-source: url("/assets/typing-defense/ui/quick-settings/button-active.v2.alpha.png"); color: var(--vd-quick-accent); }
+.td-sheet button[data-sheet]:hover { filter: brightness(1.15); }
+.td-sheet button.td-sheet-link { justify-content: center; width: fit-content; min-height: 0; margin: 8px auto 0; padding: 2px 6px; border: 0; border-image: none; color: #5c4a33; font: 700 13px/1.3 var(--vd-font); text-decoration: underline 1px; text-underline-offset: 3px; text-shadow: none; }
+.td-sheet button.td-sheet-link.is-focus { border-image: none; outline: 2px solid var(--vd-lantern); color: var(--vd-seal-dark); }
+/* A card dims the game under it (judge C10 r5: the defeat read as a pop-up over a live map); the results put the field's word
+ * cards away. The Settings gear and the Sound speaker stay bright over the scrim. */
+body.has-sheet::after { content: ""; position: fixed; inset: 0; z-index: 3; pointer-events: none; background: radial-gradient(ellipse at 50% 45%, rgba(6, 12, 10, 0.55), rgba(6, 12, 10, 0.68)); }
+body.has-results .td-words { visibility: hidden; }
+body.has-sheet .td-quick { z-index: 4; }
 /* Results (BUILD_1B §4.3): the stars stamp in one by one; the hint of a loss; the words to review. */
 .td-stars { display: flex; gap: 10px; justify-content: center; margin: 4px 0; }
 .td-stars i { color: #cbbd9b; font: 900 34px/1 var(--vd-title); font-style: normal; }
@@ -214,7 +226,7 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-review b { color: var(--vd-jade-ink); }
 /* Accepted art stays inside the scrolling card; the pause card does not instantiate these images. */
 .td-result-crest { display: block; width: 96px; height: 96px; margin: 0 auto 2px; object-fit: contain; }
-.is-lost .td-result-crest { filter: grayscale(0.5) brightness(0.75); }
+.is-lost .td-result-crest { filter: grayscale(0.35); } /* no darkening: it read muddy on the paper (judge C10 r5); a defeat crest is art still to make */
 /* The box grows with its banner (no fixed height, no seal bar under it: recheck 232 F1). The words turn cream only over a
  * loaded banner (sheets.ts has-banner); over paper, while it loads or after it fails, they stay ink (F2). */
 .td-sheet .td-result-heading { display: grid; place-items: center; position: relative; margin: 0; text-align: center; font-size: 30px; }
@@ -239,4 +251,6 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
   .is-results .td-review { font-size: 13px; line-height: 1.2; }
   .is-results .td-review ul { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; margin: 2px 0; }
   .is-results button { margin-top: 4px; padding: 5px 12px; font-size: 15px; }
+  .is-results button[data-sheet] { min-height: 36px; margin-top: 3px; padding: 0 6px; border-width: 10px 15px; border-image-width: 10px 15px; }
+  .is-results button.td-sheet-link { min-height: 0; margin-top: 5px; padding: 1px 6px; border: 0; font-size: 13px; }
 }

@@ -50,13 +50,20 @@ describe("203 A1: nearest safe boxes, including every moving frame", () => {
     expect(comboSide(card, 80, 40, 1, v, []).side).toBe(1);
     expect(comboSide(box(8, 300, 180, 60), 80, 40, -1, v, []).side).toBe(1);
     expect(comboSide(card, 80, 40, 1, v, [box(680, 280, 100, 110), box(400, 280, 100, 110)]).side).toBe(0);
+    // Judge C10 r5: a fallback box never lands on its own card; `only` keeps the side chosen at the stamp's largest box.
+    const edgeCard = box(52, 300, 190, 72);
+    const fallback = comboSide(edgeCard, 260, 150, 1, v, [box(250, 200, 300, 400)]);
+    expect(touch(fallback.box, edgeCard)).toBe(false);
+    expect(comboSide(card, 80, 40, -1, v, [box(380, 250, 100, 160)], true).side).toBe(-1);
   });
 });
 
 describe("203 A2: one symmetric 90 degree V at all four edges", () => {
   it.each(layouts)("4 edges x 3 headings at $height", v => {
     const ps = panels(v);
-    const cards = [box(52, 300, 190, 72), box(v.width - 242, 300, 190, 72), box(v.width / 2 - 95, 90, 190, 72), box(v.width / 2 - 95, v.height - 170, 190, 72)];
+    // A side tray column keeps 52 px a 720p step from the screen's edge (3d/words.ts anchor): room for the V turned 60°.
+    const room = 52 * Math.max(1, v.height / 720);
+    const cards = [box(room, 300, 190, 72), box(v.width - 190 - room, 300, 190, 72), box(v.width / 2 - 95, 90, 190, 72), box(v.width / 2 - 95, v.height - 170, 190, 72)];
     for (let edge = 0; edge < 4; edge++) for (const d of [-40, 0, 40]) {
       const a = [Math.PI, 0, -Math.PI / 2, Math.PI / 2][edge]! + d * Math.PI / 180;
       const p = trayPointer(edge, [Math.cos(a), Math.sin(a)], cards[edge]!, v, ps);
@@ -70,7 +77,10 @@ describe("203 A2: one symmetric 90 degree V at all four edges", () => {
       expect(dot).toBeCloseTo(0, 5);
       expect(Math.hypot(...wings[0]!)).toBeCloseTo(Math.hypot(...wings[1]!), 5);
       expect(Math.abs(Math.atan2(Math.sin(p.angle - a), Math.cos(p.angle - a)))).toBeLessThan(1e-6);
-      if (edge === 0) expect(tip[1]).toBeGreaterThan(cards[edge]!.bottom + 4);
+      // Just outside the card's edge towards the caller, at its middle (judge C10 r5), never on the card.
+      const c = cards[edge]!;
+      if (edge === 0) expect(Math.abs((p.box.top + p.box.bottom) / 2 - (c.top + c.bottom) / 2)).toBeLessThan(1);
+      if (edge === 0) expect(Math.max(...p.points.map((q) => q[0]))).toBeLessThanOrEqual(c.left - 8);
       for (const bar of ps) expect(touch(p.box, box(bar.left - 8, bar.top - 8, bar.right - bar.left + 16, bar.bottom - bar.top + 16))).toBe(false);
       // Undo rotation: the left V and bottom V have exactly the same local geometry (subpixel bound 0.5).
       for (const [i, point] of p.points.entries()) {

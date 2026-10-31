@@ -2,7 +2,7 @@
  * The RTS camera of map 1 (1C step C2, TK 23.6): it looks at a point of the field from a heading, a tilt and a distance,
  * all eased. Default 55° at 58 m on the Fort's side of the field; zoom 22–120 m about the pointer; a left or middle
  * drag pans (app/input.ts), a right drag turns and tilts 30–85°; arrows pan, Shift + arrows turn and tilt; Home the
- * default view, PageDown a close low view, PageUp "Toàn cảnh" 85° at 100 m. It never moves by itself. The shake (≤ 6 px, 120 ms)
+ * default view, PageDown a close low view, End "Toàn cảnh" 85° at 100 m. It never moves by itself. The shake (≤ 6 px, 120 ms)
  * shifts the projection only, so the word cards projected through the stage stay still. No DOM: the page feeds it.
  * Adapted from games/dragon-hold@02fe9c7 src/view/camera.ts (eased goal and now, the yaw kept unwrapped, pan along the
  * heading, the projection shift), with TK 23.6's limits in metres and a plain shake (this game's kit has no feedback).
@@ -21,7 +21,7 @@ export function groundAt(camera: PerspectiveCamera, width: number, height: numbe
 
 export const CAMERA = {
   pitchMinDeg: 30, pitchMaxDeg: 85, nearM: 22, farM: 120,
-  /** Home (TK 23.6), PageDown (đề xuất C2: close and low, to read a house), PageUp "Toàn cảnh". */
+  /** Home (TK 23.6), PageDown (đề xuất C2: close and low, to read a house), End "Toàn cảnh". */
   views: { home: { pitchDeg: 55, distanceM: 58 }, near: { pitchDeg: 40, distanceM: 30 }, overview: { pitchDeg: 85, distanceM: 100 } },
   /** The default look point lies this far towards the field's middle from the Fort, so the Fort sits in the view's lower third. */
   homeLeadM: 12,
@@ -81,7 +81,7 @@ export class CameraRig {
     this.pan(0, 0);
   }
 
-  /** Home, PageDown, PageUp: a named tilt and distance over the default look point (home also the default heading); `snap` skips the easing. */
+  /** Home, PageDown, End: a named tilt and distance over the default look point (home also the default heading); `snap` skips the easing. */
   view(name: ViewName, snap = false): void {
     const { pitchDeg, distanceM } = CAMERA.views[name];
     Object.assign(this.goal, { pitch: pitchDeg, distance: distanceM });
