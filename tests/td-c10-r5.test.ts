@@ -2,9 +2,10 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import { keepIn, type View } from "../src/view/words/safe";
 import { comboSide, trayPointer } from "../src/view/words/tray";
-import { rimAt, stampStep, typedShown } from "../src/view/words/steps";
+import { rimAt, typedShown } from "../src/view/words/steps";
 import type { Rect } from "../src/view/words/lanes";
 import { WordCards } from "../src/view/words/cards";
+import { keyStamps, stampStep } from "../src/view/words/stamps";
 import { Hud, PANELS } from "../src/ui/hud";
 import { send, world } from "./td/fixtures";
 import { callWord, live, smallDeck, type, wordOf } from "./td/typing";
@@ -121,8 +122,10 @@ describe("203 A5: synchronous stamp without a hole in the original word", () => 
     const css = readFileSync("src/view/words/feel.css", "utf8") + readFileSync("src/ui/td.css", "utf8");
     expect(css).not.toContain("td-key-hold"); expect(css).not.toContain("td-key-stamp 67ms");
     expect(css).not.toMatch(/\.k[^{}]*\{[^}]*color:\s*transparent/);
-    const cards = readFileSync("src/view/words/cards.ts", "utf8");
-    expect(cards).toContain("stampStep("); expect(cards).toContain('"td-key-stamp"');
+    // The key stamps moved to their own chunk at the 1C merge (start set budget): cards.ts draws them through `stamper`.
+    const stamps = readFileSync("src/view/words/stamps.ts", "utf8");
+    expect(stamps).toContain("stampStep("); expect(stamps).toContain('"td-key-stamp"');
+    expect(readFileSync("src/view/words/cards.ts", "utf8")).toContain("this.stamper?.(this.cards, this.root, this.chainTier, now, safe)");
   });
 });
 
@@ -155,7 +158,7 @@ describe("203 runtime wiring without a DOM library", () => {
       const card = { id: 1, slot: -1, word: "team", leave: "hit", el: { style, dataset: {}, getBoundingClientRect: () => ({ ...box(24, 195, 160, 70), width: 160 }) }, text: { innerHTML: '<span class="t">tea<span class="k">m</span></span>', querySelector: () => source }, x: 104, y: 195, half: 80, height: 70 };
       Object.assign(card, { stamp: { el: stamp, source: {}, at: -1000 } });
       const frame = vi.fn();
-      const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: 0, last: 0, frame: 0, layout() {}, leaving() {}, feel: { frame } }) as WordCards;
+      const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: 0, last: 0, frame: 0, layout() {}, leaving() {}, feel: { frame }, stamper: keyStamps }) as WordCards;
       const w = world();
       for (const t of [0, 17, 33, 50, 66]) {
         view.draw(w, t, 1280, 720, panels(layouts[0]!));
@@ -181,7 +184,7 @@ describe("232 F3-F5: stamp size and tier, the card clamp and the hard rim in the
     const stamp = { style: { ...style }, dataset: {}, textContent: "", getBoundingClientRect: () => ({ ...box(600, 300, 20, 20), width: 20 }) };
     const source = { textContent: "m", offsetHeight: layoutHeight, getBoundingClientRect: () => sourceRect };
     const card = { id: 1, slot: -1, word: "team", leave: "hit", el: { style, dataset: {}, getBoundingClientRect: () => ({ ...box(560, 300, 160, 70), width: 160 }) }, text: { querySelector: () => source }, x: 640, y: 300, half: 80, height: 70, stamp: { el: stamp, source: {}, at: -1000 } };
-    const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: tier, last: 0, frame: 0, layout() {}, leaving() {} }) as WordCards;
+    const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: tier, last: 0, frame: 0, layout() {}, leaving() {}, stamper: keyStamps }) as WordCards;
     return { view, stamp };
   };
   const scaleOf = (transform: string) => Number(/scale\(([\d.]+)\)/.exec(transform)![1]);
@@ -243,7 +246,7 @@ describe("232 F3-F5: stamp size and tier, the card clamp and the hard rim in the
       const ps = panels(layouts[0]!);
       const style = { opacity: "1", transform: "", translate: "" };
       const card = { id: 1, slot: -1, word: "team", leave: "hit", el: { style, dataset: {}, getBoundingClientRect: () => { const [dx, dy] = (style.translate || "0px 0px").split(" ").map(parseFloat); return { ...box(100 + dx!, 150 + dy!, 160, 40), width: 160 }; } }, text: { querySelector: () => null }, x: 180, y: 150, half: 80, height: 40 };
-      const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: 0, last: 0, frame: 0, layout() {}, leaving() {} }) as WordCards;
+      const view = Object.assign(Object.create(WordCards.prototype), { cards: [card], stamps: [], chainTier: 0, last: 0, frame: 0, layout() {}, leaving() {}, stamper: keyStamps }) as WordCards;
       expect(touch(box(100, 150, 160, 40), ps[0]!)).toBe(true);
       view.draw(world(), 0, 1280, 720, ps);
       expect(style.translate).not.toBe("");

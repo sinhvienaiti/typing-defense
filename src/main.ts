@@ -25,7 +25,6 @@
  * view or, when the tier asks for it, map 1's 3D view, a chunk with three.js that falls back to 2D.
  */
 import "./ui/td.css";
-import { bindArt } from "./ui/art";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
@@ -62,7 +61,9 @@ function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   return element as T;
 }
 
-bindArt(byId<HTMLImageElement>("tdLoadingLogo"), "logo", { fallback: byId("tdLoadingFallback") });
+// The loading logo's art check (ui/art.ts, a chunk shared with the title and the cards: out of the start set; bindArt also
+// reads a load or a failure that came first).
+void new Chunk("art", () => import("./ui/art")).get().then((m) => m?.bindArt(byId<HTMLImageElement>("tdLoadingLogo"), "logo", { fallback: byId("tdLoadingFallback") }));
 
 const params = new URLSearchParams(window.location.search);
 // The story stage of map 1 (BUILD_1B §4.1); the sandbox with ?sandbox=1.
@@ -194,6 +195,10 @@ const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).
 }));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z), (w, c, core) => view.anchor?.(w, c, core) ?? null);
 cards.child = profile.audience === "child";
+/** C10's key stamps (view/words/stamps.ts), asked for with the page; nothing waits on them but __td.ready(). A failed one is asked again on a key. */
+const stamps = new Chunk("stamps", () => import("./view/words/stamps"));
+const wantStamps = (): void => void stamps.get().then((m) => (cards.stamper = m?.keyStamps ?? null));
+wantStamps();
 /** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
 let runLearn = retry?.learn ?? NO_LEARN;
 void learnChunk.get().then((m) => {
@@ -278,7 +283,7 @@ function prefetch(): void {
     world, session, deck, source, sandbox, selection, recent, costs,
     // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel,
     // the 3D view when the tier asks for it), and the keyboard gate open.
-    ready: () => painted && keyboardGate.isOpen && (look.kind === "2d" || view3d.settled) && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    ready: () => painted && keyboardGate.isOpen && (look.kind === "2d" || view3d.settled) && stamps.settled && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
     chunks: () => ({ view3d: view.kind === "3d", sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
     view: () => view.stats?.() ?? { kind: view.kind }, header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
@@ -412,6 +417,7 @@ runFrameLoop({
       if (!sandbox && won === null && world.phase === "victory") won = keepStars(world.c.content.id, world.lives);
       const fresh = world.events.rare.splice(0);
       if (banner.tips === null && fresh.some((event) => event.t === "phase")) wantTips();
+      if (cards.stamper === null && stamps.failed && fresh.some((event) => event.t === "wordKey")) wantStamps();
       learner?.read(fresh, world, now);
       const sample = tally.read(fresh, world);
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));

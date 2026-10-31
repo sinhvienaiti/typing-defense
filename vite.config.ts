@@ -11,7 +11,7 @@ const env = (name: string): string | undefined => process.env[name]?.trim() || u
  * tests/td-chunks.test.ts checks every import() of main.ts against it). app/keyboard.ts (the Typing Feel catalogue, asked
  * for with the page) brings the kit's keyboard audio with it, out of the start set.
  */
-export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets|tips)|app[\\/](sandbox|dev-tools|retry|learn|quick|keyboard)|view[\\/](audio-min|folk|music|fx-pipe))\.ts$/;
+export const LAZY = /[\\/]src[\\/](ui[\\/](title|settings|profile|sheets|tips|art)|app[\\/](sandbox|dev-tools|retry|learn|quick|keyboard)|view[\\/](audio-min|folk|music|fx-pipe|words[\\/]stamps))\.ts$/;
 
 type ModuleInfo = { importedIds: readonly string[] } | null;
 /**
@@ -122,6 +122,9 @@ export default defineConfig(({ mode }) => {
       target: "es2022",
       // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
       manifest: true,
+      // No modulepreload polyfill in the entry (0.23 kB gzip, 1C merge): every browser the game runs on preloads modules itself
+      // (Chrome 66, Firefox 115, Safari 17); an older one still loads each chunk, only without the early fetch.
+      modulePreload: { polyfill: false },
       rollupOptions: {
         output: {
           // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the

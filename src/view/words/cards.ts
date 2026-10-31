@@ -22,7 +22,8 @@ import { KEY } from "../../typing/router";
 import "./feel.css";
 import { fitElement } from "./dom";
 import type { SafeFrame } from "./safe";
-import { rimAt, stampStep, typedShown } from "./steps";
+import type { keyStamps } from "./stamps";
+import { rimAt, typedShown } from "./steps";
 import { besidePanels, columnBox, lanesTouch, spreadLanes, type LaneBox, type Rect } from "./lanes";
 
 export const GRADE_NAME: Readonly<Record<Grade, string>> = { flash: "Flash", perfect: "Perfect", good: "Good", ok: "OK", sloppy: "Sloppy" };
@@ -126,6 +127,8 @@ export class WordCards {
   seen: ((item: number) => number) | null = null;
   /** C10: the 3D view's typing feel while it draws. */
   feel: CardFeel | null = null;
+  /** C10's key stamps (stamps.ts), a chunk main.ts asks for with the page: none are drawn until it is in. */
+  stamper: typeof keyStamps | null = null;
 
   constructor(private readonly root: HTMLElement, private readonly project: (x: number, z: number) => { x: number; y: number }, private readonly anchor?: Anchor) {
     this.cards = Array.from({ length: POOL }, () => {
@@ -289,7 +292,7 @@ export class WordCards {
         card.x += dx; card.y += dy;
       }
     }
-    this.keyStamps(now, safe);
+    this.stamper?.(this.cards, this.root, this.chainTier, now, safe);
     this.feel?.frame(this.cards.filter((k) => k.id >= 0), now, safe);
     for (const stamp of this.stamps) {
       if (now < stamp.at && stamp.at - now <= SWAP_MS) { stamp.el.style.opacity = "0"; continue; } // its grade comes with the meaning
@@ -300,39 +303,6 @@ export class WordCards {
         place(stamp.el, stamp.x - stamp.half, stamp.y - 28 * p, "1", 1 - p * p);
         fitElement(stamp.el, safe, 2);
       }
-    }
-  }
-
-  /** A real, measurable stamp; its first pose is written in this draw, never scheduled by CSS. */
-  private keyStamps(now: number, safe: SafeFrame): void {
-    for (const card of this.cards) {
-      const source = card.text?.querySelector<HTMLElement>(".k");
-      let key = card.stamp;
-      if (source && source !== key?.source) {
-        const el = key?.el ?? element(this.root, "td-key-stamp");
-        el.textContent = source.textContent;
-        card.stamp = key = { el, at: now, source };
-      }
-      if (!key) continue;
-      if (!source || Number(card.el.style.opacity) <= 0) { key.el.style.opacity = "0"; continue; }
-      const step = stampStep(now - key.at, this.chainTier);
-      key.el.style.opacity = String(step.opacity);
-      if (!step.opacity) continue;
-      const soft = matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const r = key.source.getBoundingClientRect();
-      const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
-      // The stamp's font is the letter's (feel.css); the card's own scale on screen (lock, typing, burst) is the letter's rect over its
-      // layout height, so the stamp settles at exactly the letter's size (recheck 232 F3: it was 1.11-1.44x).
-      const fit = (r.bottom - r.top) / (key.source.offsetHeight || r.bottom - r.top) || 1;
-      const max = stampStep(0, this.chainTier).scale;
-      const pose = (scale: number, tilt: number): string => {
-        const drop = soft ? 0 : (scale - 1) / (max - 1);
-        return `translate(${x - 10 * drop}px,${y - 28 * drop}px) translate(-50%,-50%) rotate(${soft ? 0 : tilt}deg) scale(${+((soft ? 1 : scale) * fit).toFixed(3)})`;
-      };
-      // Measure the largest pose, with room for its complete settling path and glow, in this same draw.
-      key.el.style.transform = pose(max, -8);
-      fitElement(key.el, safe, 28);
-      key.el.style.transform = pose(step.scale, step.tilt);
     }
   }
 

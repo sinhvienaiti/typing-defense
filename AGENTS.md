@@ -200,7 +200,11 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   `pnpm build`) reads Vite's manifest and fails the build when a start page's set (`/`:
   the entry chunk and the title; `?title=0`: the entry and Học) passes 85 kB gzip; it prints the headroom.
   `vite.config.ts` `chunkOf` keeps in the entry chunk only what main.ts imports statically without passing a lazy module.
-  `td-1b-chunks` blocks a chunk in the browser and checks the fallbacks.
+  `td-1b-chunks` blocks a chunk in the browser and checks the fallbacks. Since the 1C merge (31/10) the UI art table
+  (`ui/art.ts`, the loading logo's check; the title and the cards import it too) and C10's key stamps
+  (`view/words/stamps.ts`, drawn by `WordCards.stamper` once in; a failed one is asked again on a key) are chunks asked
+  for with the page, and the build has no modulepreload polyfill: "/" 83.96 kB, "/?title=0" 84.78 kB gzip with the play
+  host's `VITE_TYPING_FEEL_ORIGIN` and `VITE_PORTAL_URL` (84.63 kB without: the portal origin adds 0.15 kB to Học's chunk).
 - Balance (parent `docs/games/BALANCE.md` §9.2; `docs/td/BUILD_NOTES.md` §6): the typing profile
   `src/app/skill.ts` (kit key `typing-defense.skill`, folded after each day and night) gives the run header
   (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
@@ -217,7 +221,9 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   `?view=2d|3d` and `?q=low|medium|high`, Low and 2D by default until C13; `load3d`). `DebugView` is the Low tier and the
   fallback; map 1's 3D view is `src/view/3d/` (C1: `view-3d.ts`, still empty), a chunk of its own with three.js that
   only `load3d` reaches (`tests/td-view.test.ts`; `scripts/bundle-budget.mjs` checks its 260 kB budget). Scenario
-  `scripts/visual/scenarios/td-1c-view.mjs`: 2D plays, 3D opens, a blocked chunk and a lost context fall back.
+  `scripts/visual/scenarios/td-1c-view.mjs`: 2D plays, 3D opens, a blocked chunk and a lost context fall back. 3D camera:
+  arrows pan, Shift + arrows turn and tilt, Home the default view, PageDown the close one, PageUp the overview (F1 / F2
+  stay the Settings and Sound panels'). Keys sound once: no sound-map id for a key (Typing Feel or Bamboo only).
 - `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` and, from 1C, `three` included).
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`
   (the sandbox bot, 3 nights) and `tests/golden/td-1b-boss.json` (the sandbox
