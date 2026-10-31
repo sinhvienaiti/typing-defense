@@ -17,4 +17,36 @@
 .td-quick .kit-qs__btn:hover, .td-quick .kit-qs__opt input:checked + .kit-qs__chip,
 .td-quick .kit-qs__btn[aria-pressed="true"], .td-quick .kit-qs__btn[aria-checked="true"] { outline: 2px solid var(--vd-lantern); color: var(--vd-quick-text); }
 .td-quick .kit-qs__row { grid-template-columns: 24px minmax(90px, auto) minmax(0, 1fr); }
+/* Resume is the kit's primary button: the kit gives it --kit-qs-accent-text (ink), dark on the dark button art.
+   Gold lettering on the same art keeps it readable and marks it as the main action; hover turns it cream. */
+.td-quick .kit-qs__btn--primary { color: var(--vd-quick-accent); }
+/* Sound rows share one label column wide enough for "Keyboard volume", so every groove and the keyboard list start at
+   the same x (each row is its own grid; `auto` let a long label push its groove right). The icon column scales with
+   the panel like the icons. Settings rows keep their own columns so "Pace adapts to your typing" stays on one line. */
+.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:not(.kit-qs__row--slot) {
+  grid-template-columns: calc(24px * var(--kit-qs-s)) 9em minmax(0, 1fr);
+}
+/* Slider art (225). The groove is drawn in three slices: its 64 px cloud-scroll caps keep their own proportion
+   (10 x 10 px at scale 1, as tall as the groove) and only the plain jade middle stretches; the kit stretched the whole
+   1024 x 64 image, so the caps came out about twice too wide on grooves up to 36:1. The kit's flat --kit-qs-line
+   (bamboo) under the groove and --kit-qs-text under the knob's square are cleared, so only the art shows. The knob box
+   grows from 22 to 28 px (the art fills 70 % of it: about 20 px visible, twice the groove) and the range box with it,
+   so the focus ring still holds the knob. WebKit and Gecko pseudo-elements stay in separate rules (one unknown
+   selector drops the whole rule). */
+.td-quick.kit-qs--skin-slider .kit-qs__range { height: calc(28px * var(--kit-qs-s)); }
+.td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-runnable-track {
+  background: none; border: 0 solid transparent;
+  border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-moz-range-track {
+  background: none; border: 0 solid transparent;
+  border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb {
+  width: calc(28px * var(--kit-qs-s)); height: calc(28px * var(--kit-qs-s)); margin-top: calc(-9px * var(--kit-qs-s));
+  background-color: transparent;
+}
+.td-quick.kit-qs--skin-slider .kit-qs__range::-moz-range-thumb {
+  width: calc(28px * var(--kit-qs-s)); height: calc(28px * var(--kit-qs-s)); background-color: transparent;
+}
 .td-quick .kit-qs__row--slot { grid-template-columns: 1fr; }

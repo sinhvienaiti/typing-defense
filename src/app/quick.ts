@@ -8,7 +8,7 @@
  * chosen set's own files.
  */
 import { pendingKeyboardChoices, TypingSounds, type KeyboardSoundChoice, type TypingSoundEvent } from "../kit/feedback/typing-fx/audio";
-import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickRow, type QuickValue } from "../kit/ui/quick-settings";
+import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
 import { bambooKeys, MODE_CHOICES, ownKeyboard, ownsKeyboard, saveSettings, type Settings } from "./prefs";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, manifestJson, ORIGINAL_KEYS, sampleBytes, startKeyboard, type KeyboardFeed } from "./keyboard";
 import { modeName } from "../ui/settings";
@@ -16,6 +16,18 @@ import type { RareEvent } from "../sim/events";
 import { KEY } from "../typing/router";
 import type { TypingAudio } from "../view/audio-min";
 export const QUICK_ART = "/assets/typing-defense/ui/quick-settings/";
+/**
+ * Frame, button (115/160) and slider art (225). At 1080p the groove is drawn up to about 414 × 15 CSS px and the knob
+ * box 42 px: the 1024 × 64 groove and the 128 px knob. quick.css draws the groove in three slices (the cloud-scroll caps
+ * keep their proportion, the plain middle stretches), sizes the knob and clears the kit's flat colours under both
+ * (`.td-quick.kit-qs--skin-slider`), so only the art shows.
+ */
+export const QUICK_SKIN: QuickSkin = {
+  panel: QUICK_ART + "panel-large.v2.alpha.png",
+  button: QUICK_ART + "button.v2.alpha.png",
+  sliderTrack: QUICK_ART + "slider-track.png",
+  sliderThumb: QUICK_ART + "slider-thumb.128.png",
+};
 export const settingsRows = (): QuickRow[] => [
   { kind: "heading", id: "gameHeading", label: "Game · new runs" },
   { kind: "toggle", id: "pace", label: "Pace adapts to your typing", default: true },
@@ -82,7 +94,7 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
     keyboardFetch: { fetchJson: manifestJson, fetchBytes: sampleBytes },
     onKeyboardFail: (choice) => { if (choice.value === s.keyboard) setStandIn(choice.value, true); },
     icons: Object.fromEntries(QUICK_ICON_NAMES.filter((name) => name !== "vol-voice").map((name) => [name, QUICK_ART + name + ".128.png"])),
-    skin: { panel: QUICK_ART + "panel-large.v2.alpha.png", button: QUICK_ART + "button.v2.alpha.png" },
+    skin: QUICK_SKIN,
     onChange: (id, value) => {
       if (!applyQuick(s, id, value)) return;
       if (id === "keyboard") {
