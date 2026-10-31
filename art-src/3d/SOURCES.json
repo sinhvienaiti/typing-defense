@@ -476,6 +476,12 @@
    "image": "art-src/heroes/tre.png",
    "usedBy": []
   },
+  "kits/archer-kit-l2.fix1.glb": {
+   "md5": "1cdc61ec40b89d2624e296b69f5332dd",
+   "bytes": 2650160,
+   "image": "art-src/kits/archer-kit-l2.png",
+   "usedBy": []
+  },
   "kits/archer-kit-l2.glb": {
    "md5": "6cc3271005aae485e85c3d13f2784c6b",
    "bytes": 2652564,
@@ -552,6 +558,12 @@
    "md5": "63ddc9df037a7673d30c88ca263a5a03",
    "bytes": 2689832,
    "image": "art-src/kits/infirmary-kit-l3.png",
+   "usedBy": []
+  },
+  "kits/keep-kit-l2.fix1.glb": {
+   "md5": "7ce3dd8c6268a2e3b788a91ea65dead0",
+   "bytes": 3304080,
+   "image": "art-src/kits/keep-kit-l2.png",
    "usedBy": []
   },
   "kits/keep-kit-l2.glb": {
