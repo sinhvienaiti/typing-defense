@@ -1,11 +1,11 @@
 // @vitest-environment happy-dom
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { installKeys } from "../src/app/input";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, requestKeyboardCatalogue } from "../src/app/keyboard";
 import { bambooKeys, BUILT_IN_KEYS, DEFAULT_KEYBOARD_SOUND, loadSettings, savedKeyboard, type Settings } from "../src/app/prefs";
-import { applyQuick, LIST_ROW_VARS, mountQuick, PLATE_SLICE, QUICK_ICONS, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
+import { applyQuick, LIST_ROW_VARS, mountQuick, PLATE_SLICE, QUICK_ICON_FILES, QUICK_ICONS, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
 import { QUICK_ICON_NAMES } from "../src/kit/ui/quick-settings";
 import { Session } from "../src/app/session";
 import { KEYBOARD_DECODE_BATCH_SIZE, KEYBOARD_FIRST_BATCH_SPACES, TYPING_SOUND_MAP } from "../src/kit/feedback/typing-fx/audio";
@@ -755,13 +755,16 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
       expect(music.style.getPropertyValue("--kit-qs-v"), String(value)).toBe(v);
     }
     // A DOM stub has no cascade: read the sheet. Knob 32 px; the 244 pair sits 8 px in from the 1024 px canvas's ends,
-    // so it is cut 0 72 with 11.25 px caps (72 x 10 / 64); Mute's column as wide as "Unmute"; both parts as painted.
+    // so both parts are cut 0 72 with 11.25 px caps (72 x 10 / 64), the fill's own variables set too; Mute's column as
+    // wide as "Unmute"; both parts as painted.
     const { rules, heads } = sheet();
     const layer = rules.get(".td-quick.kit-qs") ?? "";
     for (const line of [
       "--kit-qs-knob: calc(32px * var(--kit-qs-s));",
       "--kit-qs-groove-slice: 0 72;",
       "--kit-qs-groove-cap: calc(11.25px * var(--kit-qs-s));",
+      "--kit-qs-fill-slice: 0 72;",
+      "--kit-qs-fill-cap: calc(11.25px * var(--kit-qs-s));",
       "--kit-qs-aside-w: calc(38px + 60px * var(--kit-qs-s));",
     ]) expect(layer, line).toContain(line);
     expect(layer).not.toContain("--kit-qs-empty-filter");
@@ -946,16 +949,34 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
     expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__listen img")).toContain("width: calc(24px * var(--kit-qs-s));");
   });
 
-  it("every Sound row has its 180 icon (Keyboard volume the keyboard's), only files the game has, and the title is in Baloo 2", async () => {
+  it("every Sound row has its own icon (the 244 r2 keyboard and interface, Keyboard volume's new one), the corner gear is the 244 r2, and the title is in Baloo 2", async () => {
     await mount();
     press("F2", "F2");
     const sound = document.querySelector('.kit-qs__dialog[data-panel="sound"]')!;
     const icon = (id: string) => sound.querySelector(`[data-row="${id}"] .kit-qs__icon`)?.getAttribute("src") ?? null;
-    const expected: Record<string, string> = { master: "vol-master", music: "vol-music", effects: "vol-effects", keyboard: "vol-keyboard", keyboardVolume: "vol-keyboard", ui: "vol-interface" };
-    for (const [id, name] of Object.entries(expected)) expect(icon(id), id).toContain(`/assets/typing-defense/ui/quick-settings/${name}.128.png`);
-    // No Voice row, so no vol-voice file; every URL is one of the 180 icons the game has.
+    const expected: Record<string, string> = {
+      master: "vol-master.128.png", music: "vol-music.128.png", effects: "vol-effects.128.png", keyboard: "vol-keyboard.r2.128.png",
+      keyboardVolume: "vol-keyboard-volume.128.png", ui: "vol-interface.r2.128.png",
+    };
+    for (const [id, file] of Object.entries(expected)) expect(icon(id), id).toBe(`/assets/typing-defense/ui/quick-settings/${file}`);
+    // Six rows, six different pictures (Keyboard volume no longer borrows the keyboard's).
+    expect(new Set(Object.keys(expected).map(icon)).size).toBe(6);
+    // The corner Settings gear is the 244 r2 gear; the speaker keeps its 180 art.
+    const corner = (panel: string) => document.querySelector(`.kit-qs__corner[data-panel="${panel}"] img`)?.getAttribute("src") ?? null;
+    expect(corner("settings")).toBe("/assets/typing-defense/ui/quick-settings/hud-settings.r2.128.png");
+    expect(corner("sound")).toBe("/assets/typing-defense/ui/quick-settings/hud-sound.128.png");
+    // Every name the kit draws on the corners or the default Sound rows has a file, except Voice (no Voice row).
     expect(QUICK_ICONS["vol-voice"]).toBeUndefined();
-    for (const url of Object.values(QUICK_ICONS)) expect(QUICK_ICON_NAMES.some((name) => name !== "vol-voice" && url!.endsWith(`/${name}.128.png`)), url).toBe(true);
+    for (const name of QUICK_ICON_NAMES.filter((n) => n !== "vol-voice")) expect(QUICK_ICONS[name], name).toBe(`/assets/typing-defense/ui/quick-settings/${(QUICK_ICON_FILES as Record<string, string>)[name]}`);
+    expect(QUICK_ICONS["vol-keyboard-volume"]).toBe("/assets/typing-defense/ui/quick-settings/vol-keyboard-volume.128.png");
+    // Media stays out of Git: where this machine has the art, each public file is the accepted source byte for byte.
+    const root = join(__dirname, "..");
+    const pub = join(root, "public/assets/typing-defense/ui/quick-settings");
+    const src = join(root, "art-src/ui/quick-settings/selected");
+    for (const file of Object.values(QUICK_ICON_FILES)) {
+      if (!existsSync(join(pub, file)) || !existsSync(join(src, file))) continue;
+      expect(readFileSync(join(pub, file)).equals(readFileSync(join(src, file))), file).toBe(true);
+    }
     const { rules } = sheet();
     expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-title-font: var(--vd-title);");
     expect(rules.get(".td-quick .kit-qs__title")).toContain("color: var(--vd-quick-accent);");

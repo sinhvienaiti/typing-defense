@@ -8,7 +8,7 @@
  * chosen set's own files.
  */
 import { pendingKeyboardChoices, TypingSounds, type KeyboardSoundChoice, type TypingSoundEvent } from "../kit/feedback/typing-fx/audio";
-import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickContext, type QuickIcons, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
+import { QuickSettings, defaultSoundRows, type QuickContext, type QuickIcons, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
 import { bambooKeys, MODE_CHOICES, ownKeyboard, ownsKeyboard, saveSettings, type Settings } from "./prefs";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, manifestJson, ORIGINAL_KEYS, sampleBytes, startKeyboard, type KeyboardFeed } from "./keyboard";
 import { modeName } from "../ui/settings";
@@ -26,9 +26,10 @@ const ROW_EDGE = [12, 18] as const;
 /**
  * Frame, button (115/160) and slider art (225 knob, 244 groove pair). At 1080p the groove is drawn about 15 CSS px tall
  * and the knob box 42 px: the 1024 x 64 groove and the 128 px knob.
- * - The fill layer: the 244 pair (accepted 31/10), a dark empty groove right of the knob and the lit jade fill left of
- *   it, drawn as painted. The two match each other (IoU 0.9996); both sit 8 px in from the old 225 groove's ends, so
- *   quick.css cuts them 0 72. The 225 track stays as `sliderTrack` (the kit's fallback only).
+ * - The fill layer: the 244 pair (accepted 31/10), the dark unpolished stone groove right of the knob and the bright
+ *   polished jade fill left of it, drawn as painted (no filter). The two match each other (IoU 0.9996); both sit 8 px in
+ *   from the old 225 groove's ends, so quick.css cuts both 0 72 (groove and fill variables). The 225 track stays as
+ *   `sliderTrack` (the kit's fallback only).
  * - Keyboard sound rows are 160 button plates, the chosen row the 160 button-active plate (`buttonActive`, also the
  *   pressed and chosen buttons). The 245 list-row art drops in here.
  */
@@ -42,11 +43,23 @@ export const QUICK_SKIN: QuickSkin = {
   sliderFill: QUICK_ART + "slider-fill.png",
   listRow: { slice: PLATE_SLICE, edge: ROW_EDGE },
 };
-/** The 180 icons the game has (no Voice row); Keyboard volume reuses the keyboard icon until its own (ticket 244) is accepted. */
-export const QUICK_ICONS: QuickIcons = {
-  ...Object.fromEntries(QUICK_ICON_NAMES.filter((name) => name !== "vol-voice").map((name) => [name, QUICK_ART + name + ".128.png"])),
-  "vol-keyboard-volume": QUICK_ART + "vol-keyboard.128.png",
-};
+/**
+ * Icon files by kit name, all 128 px (no Voice row, so no vol-voice). Ticket 180 drew the set; ticket 244 (accepted
+ * 31/10) redrew three as r2 (the jade key with sound waves, the cursor on a jade seal, a solid gold gear on a jade
+ * plate for the corner Settings button) and added Keyboard volume's own icon (a key and level bars).
+ */
+export const QUICK_ICON_FILES = {
+  "hud-settings": "hud-settings.r2.128.png",
+  "hud-sound": "hud-sound.128.png",
+  "hud-sound-muted": "hud-sound-muted.128.png",
+  "vol-master": "vol-master.128.png",
+  "vol-music": "vol-music.128.png",
+  "vol-effects": "vol-effects.128.png",
+  "vol-keyboard": "vol-keyboard.r2.128.png",
+  "vol-keyboard-volume": "vol-keyboard-volume.128.png",
+  "vol-interface": "vol-interface.r2.128.png",
+} as const satisfies QuickIcons;
+export const QUICK_ICONS: QuickIcons = Object.fromEntries(Object.entries(QUICK_ICON_FILES).map(([name, file]) => [name, QUICK_ART + file]));
 /**
  * The keyboard rows' plate at the panel's scale (quick.css scales the 34 px rows by --kit-qs-s; the kit's own values
  * are these at scale 1): the edges and the label clear of the corners.

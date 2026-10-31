@@ -12,6 +12,8 @@ Từ 31/10/2026 (bước B5 của `docs/games/TYPING_FEEL_SERVICE.md` ở repo c
 
 Tám icon của phiếu 180 và hai ảnh khung/nút `frames-epic` đã có. Mỗi PNG có prompt chính xác cạnh ảnh; JSON khung giữ thông số cắt và tương phản của nguồn. Phiếu 193 không sinh hoặc sửa ảnh.
 
+Phiếu 244 (nhận 31/10, gắn ở `47a1698` và lượt `2026-10-31-panels-art`): cặp rãnh `slider-empty.png` và `slider-fill.png` (1024 × 64) chép từ `art-src/ui/quick-settings/sliders/`; bốn icon `hud-settings.r2.128.png`, `vol-keyboard.r2.128.png`, `vol-interface.r2.128.png`, `vol-keyboard-volume.128.png` chép từ `art-src/ui/quick-settings/selected/`, nguyên byte (md5 khớp nguồn). Game dùng các bản này thay `hud-settings.128.png`, `vol-keyboard.128.png`, `vol-interface.128.png` (ba file cũ vẫn ở đây và trong `media.md5`, không còn được tải). Sáu file 244 chưa có dòng trong `media.md5`; điều phối thêm khi `media:push`.
+
 Thanh trượt (phiếu 225, gắn 31/10): `slider-track.png` (1024 × 64), `slider-track.512.png`, `slider-thumb.png` (1024²), `slider-thumb.256.png`, `.128.png`, `.64.png`, chép nguyên byte từ `art-src/ui/quick-settings/sliders/`; prompt nằm cạnh bản nguồn ở đó. Game dùng `slider-track.png` và `slider-thumb.128.png` (`src/app/quick.ts`). Sáu file này chưa có dòng trong `media.md5` (lúc gắn đang chạy `media:push`); cần thêm rồi `media:push`.
 
 ## Git và Drive

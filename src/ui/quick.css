@@ -9,13 +9,15 @@
 /* Layer settings for the kit (QUICK_SETTINGS_VARS). Focus is a lantern-amber glow hugging the art; active plates
    letter in gold; the panel title, buttons, chips, keyboard rows, labels and headings are in the title face (Baloo 2
    600, the one weight the game loads); numbers and small notes keep Be Vietnam Pro. The knob box is 32 px (the art
-   fills 70 %: about 22 px visible at 720p), so the fill stops at its centre. The 244 groove pair sits 8 px in from the
-   1024 px canvas's ends, so it is cut 0 72 (8 + 64) with 11.25 px caps (72 x 10 / 64) and drawn as painted. Mute sits
-   in a column as wide as "Unmute" after the number on every slider row, so all grooves are one length. */
+   fills 70 %: about 22 px visible at 720p), so the fill stops at its centre. The 244 pair (stone empty, jade fill)
+   sits 8 px in from the 1024 px canvas's ends, so both are cut 0 72 (8 + 64) with 11.25 px caps (72 x 10 / 64) and
+   drawn as painted; the fill's own variables are set too, not left to fall back on the groove's. Mute sits in a
+   column as wide as "Unmute" after the number on every slider row, so all grooves are one length. */
 .td-quick.kit-qs {
   --kit-qs-glow: var(--vd-lantern); --kit-qs-active-text: var(--vd-quick-accent); --kit-qs-title-font: var(--vd-title);
   --kit-qs-button-font: var(--vd-title); --kit-qs-label-font: var(--vd-title); --kit-qs-note-font: var(--vd-font);
   --kit-qs-knob: calc(32px * var(--kit-qs-s)); --kit-qs-groove-slice: 0 72; --kit-qs-groove-cap: calc(11.25px * var(--kit-qs-s));
+  --kit-qs-fill-slice: 0 72; --kit-qs-fill-cap: calc(11.25px * var(--kit-qs-s));
   --kit-qs-aside-w: calc(38px + 60px * var(--kit-qs-s));
   --kit-qs-list-pad: calc(8px * var(--kit-qs-s));
 }
