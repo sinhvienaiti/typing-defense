@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { playtestFile, type RunOf } from "../src/app/retry";
+import { spawnSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it, vi } from "vitest";
+import { copyNumbers, playtestFile, type RunOf } from "../src/app/retry";
 import { paceHeader } from "../src/app/skill";
 import type { Session } from "../src/app/session";
 import { b9Report, b9Row, ownerBot, readPlaytest, replayPlaytest } from "./td/b9";
@@ -19,6 +22,58 @@ describe("the play-test file and B9 (BUILD_1B §22, BALANCE.md §7 B9)", () => {
   const header = paceHeader(profile, true);
   const run: RunOf = { world: played.world, session: { log: played.log } as unknown as Session, seed: 3, sandbox: false, deck, mode: "balanced", header, learn: played.learn, fresh: () => "" };
   const file = readPlaytest(JSON.stringify(playtestFile(run, profile, "shared")));
+
+  it("downloads the English filename and copies the same playtest JSON", async () => {
+    let saved: Blob | undefined;
+    const a = { href: "", download: "", click: vi.fn() };
+    const create = vi.spyOn(URL, "createObjectURL").mockImplementation((blob) => {
+      saved = blob as Blob;
+      return "blob:playtest";
+    });
+    const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    const clipboard = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal("document", { createElement: vi.fn(() => a) });
+    vi.stubGlobal("navigator", { clipboard: { writeText: clipboard } });
+    try {
+      copyNumbers(run, profile, "shared");
+      expect(a.download).toBe(`wordwoven-playtest-s3-n${run.world.day}-${run.world.tick}.json`);
+      expect(a.click).toHaveBeenCalledOnce();
+      expect(create).toHaveBeenCalledOnce();
+      expect(revoke).toHaveBeenCalledWith("blob:playtest");
+      expect(saved?.type).toBe("application/json");
+      const text = await saved!.text();
+      expect(JSON.parse(text)).toEqual(file);
+      expect(clipboard).toHaveBeenCalledWith(text);
+    } finally {
+      vi.restoreAllMocks();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("the B9 CLI reads both legacy and English filenames and replays both to the same hash", { timeout: 20_000 }, () => {
+    mkdirSync("tmp", { recursive: true });
+    const dir = mkdtempSync("tmp/b9-filenames-test-");
+    const names = ["loi-goi-choi-thu-s3-n1.json", "wordwoven-playtest-s3-n1.json"];
+    try {
+      const paths = names.map((name) => {
+        const path = join(dir, name);
+        writeFileSync(path, JSON.stringify(file));
+        return path;
+      });
+      const result = spawnSync(process.execPath, ["--import", "tsx", "scripts/td/b9.ts", ...paths, "--seeds=1"], { encoding: "utf8", timeout: 15_000 });
+      if (result.error) throw result.error;
+      const expected: string[] = [];
+      const rows = names.map((name) => b9Row(name, file, 1));
+      const gate = b9Report(rows, (text) => expected.push(text));
+      expect(rows.every((row) => row.replay?.match)).toBe(true);
+      expect(result.status, result.stderr).toBe(gate.status === "pass" ? 0 : 1);
+      expect(result.stderr).toBe("");
+      expect(result.stdout).toContain(expected.join("\n") + "\n");
+      for (const name of names) expect(result.stdout).toContain(`| ${name} | khớp ${file.run!.hash} |`);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
 
   it("holds the numbers B9 reads and the run in the replay's shape; replayed on Node it reaches the page's hash", () => {
     expect(file.numbers.flow).toEqual(played.world.pace.meter.summary("quit"));

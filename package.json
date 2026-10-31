@@ -10,6 +10,8 @@
     "preview": "vite preview --host 127.0.0.1 --port 3006 --strictPort",
     "test": "vitest run",
     "check": "node src/kit/verify-kit.mjs && pnpm test && pnpm build",
+    "deploy:pack": "pnpm build && node scripts/deploy/prune.mjs dist && node src/kit/tools/deploy/check-pack.mjs dist --game typing-defense",
+    "deploy:pack:local": "pnpm build && node scripts/deploy/prune.mjs dist && node src/kit/tools/deploy/check-pack.mjs dist --game typing-defense --allow-local-host",
     "td:balance": "node --import tsx scripts/td/balance.ts",
     "td:golden:update": "node --import tsx scripts/td/golden.ts && node --import tsx scripts/td/golden.ts --boss",
     "td:golden:check": "node --import tsx scripts/td/golden.ts --check && node --import tsx scripts/td/golden.ts --boss --check",

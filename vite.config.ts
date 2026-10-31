@@ -1,5 +1,8 @@
+import { realpathSync } from "node:fs";
+import { isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig, loadEnv, type Plugin } from "vite";
+import { portalHome } from "./src/app/portal";
 
 const env = (name: string): string | undefined => process.env[name]?.trim() || undefined;
 
@@ -26,7 +29,6 @@ let chunkFor: ((id: string) => string | undefined) | null = null;
 // The parent repo's dev script sets these for the nginx host (td.typing-game.local).
 // A plain `pnpm dev` on 127.0.0.1:3006 keeps Vite's own HMR socket.
 const hmrHost = env("DEV_HMR_HOST");
-const root = fileURLToPath(new URL(".", import.meta.url));
 
 /**
  * The Typing Feel origin of VITE_TYPING_FEEL_ORIGIN (parent docs/games/TYPING_FEEL_SERVICE.md §5.1), as the preconnect's
@@ -52,39 +54,83 @@ export function feelPreconnect(origin: string | null): Plugin {
   };
 }
 
-export default defineConfig(({ mode }) => ({
-  base: "/",
-  // The parent's build:td and dev:td:app set the origin; a plain `pnpm dev`, `pnpm build` or `pnpm check` here does not
-  // (Typing Feel off: Off and Bamboo only). .env files count too.
-  plugins: [feelPreconnect(feelOrigin(loadEnv(mode, root, "VITE_TYPING_FEEL_").VITE_TYPING_FEEL_ORIGIN))],
-  server: {
-    host: env("DEV_HOST") ?? "127.0.0.1",
-    port: 3006,
-    strictPort: true,
-    allowedHosts: (env("DEV_ALLOWED_HOSTS") ?? "td.typing-game.local")
-      .split(",")
-      .map((value) => value.trim())
-      .filter(Boolean),
-    hmr: hmrHost
-      ? {
-          host: hmrHost,
-          protocol: (env("DEV_HMR_PROTOCOL") as "ws" | "wss" | undefined) ?? "wss",
-          clientPort: Number(env("DEV_HMR_CLIENT_PORT") ?? 443),
+/** Replace only the compiled fallback; the pinned kit stays intact. */
+export function replacePortalOrigin(code: string, origin: string): string {
+  const declaration = /^export const PARENT_ORIGIN = [^\n]+;$/gm;
+  if (code.match(declaration)?.length !== 1) throw new Error("Expected one kit PARENT_ORIGIN declaration");
+  return code.replace(declaration, () => `export const PARENT_ORIGIN = ${JSON.stringify(origin)};`);
+}
+
+// Vite ids can carry queries or reach the same file through a symlink.
+function canonicalId(id: string): string | null {
+  const path = id.split("?")[0]!.replace(/\\/g, "/");
+  if (!isAbsolute(path)) return null;
+  try {
+    return realpathSync(path);
+  } catch (error) {
+    if (["ENOENT", "ENOTDIR"].includes((error as NodeJS.ErrnoException).code ?? "")) return null;
+    throw error;
+  }
+}
+
+export default defineConfig(({ mode }) => {
+  const root = realpathSync(fileURLToPath(new URL(".", import.meta.url)));
+  const contract = realpathSync(fileURLToPath(new URL("./src/kit/learning/contract.ts", import.meta.url)));
+  const home = portalHome(loadEnv(mode, root, "VITE_PORTAL_URL").VITE_PORTAL_URL);
+  const origin = home ? new URL(home).origin : "";
+  let transformed = false;
+  chunkFor = null;
+  return {
+    // The parent's build:td and dev:td:app set the Typing Feel origin; a plain `pnpm dev`, `pnpm build` or `pnpm check` here
+    // does not (Typing Feel off: Off and Bamboo only). .env files count too.
+    plugins: [feelPreconnect(feelOrigin(loadEnv(mode, root, "VITE_TYPING_FEEL_").VITE_TYPING_FEEL_ORIGIN)), {
+      name: "wordwoven-portal-origin",
+      enforce: "pre",
+      buildStart() { transformed = false; },
+      transform(code, id) {
+        if (canonicalId(id) !== contract) return null;
+        try {
+          const replaced = replacePortalOrigin(code, origin);
+          transformed = true;
+          return { code: replaced, map: null };
+        } catch (error) {
+          this.error(error instanceof Error ? error.message : String(error));
         }
-      : undefined,
-  },
-  build: {
-    target: "es2022",
-    // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
-    manifest: true,
-    rollupOptions: {
-      output: {
-        // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
-        // pause and results cards, the sandbox panel, __td and "Chơi lại Ngày n" (R3 step 1), Học with the portal bridge and
-        // the teaching table (R3) load apart (src/main.ts, LAZY, chunkOf).
-        // At "/" the start set is that chunk and the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
-        manualChunks: (id, { getModuleIds, getModuleInfo }) => (chunkFor ??= chunkOf([...getModuleIds()].filter((at) => getModuleInfo(at)?.isEntry), getModuleInfo))(id),
+      },
+      buildEnd(error) {
+        if (!error && !transformed) this.error("Kit PARENT_ORIGIN was not transformed");
+      },
+    }],
+    base: "/",
+    server: {
+      host: env("DEV_HOST") ?? "127.0.0.1",
+      port: 3006,
+      strictPort: true,
+      allowedHosts: (env("DEV_ALLOWED_HOSTS") ?? "td.typing-game.local")
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean),
+      hmr: hmrHost
+        ? {
+            host: hmrHost,
+            protocol: (env("DEV_HMR_PROTOCOL") as "ws" | "wss" | undefined) ?? "wss",
+            clientPort: Number(env("DEV_HMR_CLIENT_PORT") ?? 443),
+          }
+        : undefined,
+    },
+    build: {
+      target: "es2022",
+      // scripts/bundle-budget.mjs reads the chunks each start page needs from it (BUILD_1B §20).
+      manifest: true,
+      rollupOptions: {
+        output: {
+          // BUILD_1B §20: what the game needs to start is one chunk; sound, the title, the settings and Hồ sơ gõ cards, the
+          // pause and results cards, the sandbox panel, __td and "Chơi lại Ngày n" (R3 step 1), Học with the portal bridge and
+          // the teaching table (R3) load apart (src/main.ts, LAZY, chunkOf).
+          // At "/" the start set is that chunk and the title (scripts/bundle-budget.mjs, ≤ 85 kB gzip).
+          manualChunks: (id, { getModuleIds, getModuleInfo }) => (chunkFor ??= chunkOf([...getModuleIds()].filter((at) => getModuleInfo(at)?.isEntry), getModuleInfo))(id),
+        },
       },
     },
-  },
-}));
+  };
+});

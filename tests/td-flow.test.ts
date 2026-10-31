@@ -64,7 +64,7 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(learnOk({ ...runs[0]!, timedFresh: 1 })).toBe(false);
   });
 
-  it("folds a cell into the kit's summary and prints the §3 table and every gate (missing cells are THIẾU SỐ, never ĐẠT)", { timeout: 20_000 }, () => {
+  it("folds a cell into the kit's summary and prints the §3 table and every gate (missing cells are MISSING DATA, never PASS)", { timeout: 20_000 }, () => {
     const cells = [playCell({ bot: "standard", mode: "balanced", director: true }, 2, deck, 1), playCell({ bot: "no-type", mode: "balanced", director: true }, 2, deck, 1)];
     expect(cells[0]!.summary.runs).toBe(2);
     expect(cells[0]!.k).toBe(1);
@@ -79,6 +79,7 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     stageReport(cells, [{ bot: "standard", profile: measuredProfile(botById("standard"), deck) }], 2, (text) => lines.push(text));
     const text = lines.join("\n");
     expect(text).toContain("| B1 | Shared flow band |");
+    expect(text).toContain("| B8 | Learning stays clear | PASS |");
     expect(text).toContain("| B9 | Matches human play | MISSING DATA |");
     expect(text).toContain("Đêm 1–" + STAGE_NIGHTS);
     expect(text).toMatch(/\| Standard \| 35 \/ \d+\.\d \|/);

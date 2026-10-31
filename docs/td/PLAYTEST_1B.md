@@ -29,7 +29,7 @@
 
 **Sau mỗi ván** (thắng, thua, cả ván "Chơi lại Ngày n"): ở thẻ kết bấm **"Chép số chơi thử"**.
 
-- Trình duyệt lưu một file `loi-goi-choi-thu-s<seed>-n<ngày>-<tick>.json` vào thư mục Tải về (Downloads); cùng nội dung được chép vào bộ nhớ tạm.
+- Trình duyệt lưu một file `wordwoven-playtest-s<seed>-n<ngày>-<tick>.json` vào thư mục Tải về (Downloads); cùng nội dung được chép vào bộ nhớ tạm. File cũ `loi-goi-choi-thu-*.json` vẫn được `scripts/td/b9.ts` đọc khi truyền đường dẫn như trước.
 - Không cần mở hay dán file. Gửi lại các file đó cùng phiếu ở §4.
 - File có: số đo của ván (`numbers`: FlowMeter, hồ sơ gõ game giữ, thống kê, mạng còn) và nhật ký ván (`run`: đầu ván, mọi phím và lệnh). Nhật ký để điều phối viên chạy lại ván trên Node ra đúng mã băm, chứng minh số đo là của chính ván đó. Không có dữ liệu nào ngoài cách gõ trong ván.
 
@@ -55,7 +55,7 @@ Ván 1: thắng / thua · còn ___ mạng · ___ sao
 
 ```bash
 cd games/typing-defense
-node --import tsx scripts/td/b9.ts ~/Downloads/loi-goi-choi-thu-*.json --seeds=40
+node --import tsx scripts/td/b9.ts ~/Downloads/wordwoven-playtest-*.json --seeds=40
 ```
 
 - Mỗi file: chạy lại nhật ký trên Node (cột "Chạy lại trên Node" phải là "khớp" kèm mã băm), rồi một bot gõ đúng E, a, CV game đo được của chủ dự án (thói quen còn lại của bot Chuẩn, chiến thuật Vừa, Học khởi động lạnh) chơi cùng ải, cùng chế độ, cùng thiết lập nhịp trên 40 seed. Mã nguồn: `tests/td/b9.ts`.
