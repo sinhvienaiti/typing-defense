@@ -1,6 +1,6 @@
 /**
- * The title screen (SPLIT_PLAN §1.2, D7; TK 22.1, 22.9): the painted backdrop (/assets/typing-defense/ui/title-dusk.webp,
- * not in Git) under the name and the menu. Nothing on it is drawn in code (owner, 28/10: no code-drawn stand-ins);
+ * The title screen (SPLIT_PLAN §1.2, D7; TK 22.1, 22.9): the accepted painted backdrop and logo
+ * under the menu. Nothing on it is drawn in code (owner, 28/10: no code-drawn stand-ins);
  * without the file the screen is one flat colour and the console says which file failed. Keyboard first: ↑ ↓ pick,
  * Enter or 1–5 choose, Esc goes back to the run left open; while the title is up it takes every key and the world
  * does not step. "Profile" opens the typing profile (BALANCE.md §2) in the menu's place, as "Settings" opens the
@@ -10,11 +10,11 @@
 import type { UiSound } from "../view/audio-min";
 import type { ProfileCard } from "./profile";
 import type { SettingsCard } from "./settings";
+import { artHtml, bindArt } from "./art";
 
 export type TitleChoice = "start" | "continue" | "learn";
 type EntryId = TitleChoice | "settings" | "profile";
 
-const ART = "/assets/typing-defense/ui/title-dusk.webp";
 const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
   ["start", "Start", "Map 1 · Silverfall Meadow"],
   ["continue", "Resume", "Resume your run · Esc"],
@@ -23,7 +23,7 @@ const ENTRIES: readonly (readonly [EntryId, string, string])[] = [
   ["profile", "Profile", "Speed, accuracy, a typing tip"],
 ];
 /** The best stars on "Bắt đầu" (none before a win). */
-export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Best ${best} stars">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
+export const bestHtml = (best: number): string => (best <= 0 ? "" : ` · <span class="tt-stars" aria-label="Best ${best} star${best === 1 ? "" : "s"}">${"★".repeat(best)}${"☆".repeat(3 - best)}</span>`);
 
 export class TitleScreen {
   readonly el: HTMLElement;
@@ -44,8 +44,8 @@ export class TitleScreen {
   ) {
     this.el = Object.assign(document.createElement("div"), { className: "tt-screen", hidden: true });
     this.el.innerHTML =
-      `<div class="tt-art"></div>` +
-      `<header class="tt-head"><h1 class="tt-name">Wordwoven</h1>` +
+      artHtml("title-backdrop", "tt-art") +
+      `<header class="tt-head"><h1 class="tt-name">${artHtml("logo", "tt-logo", "Wordwoven")}<span class="tt-logo-fallback" hidden aria-hidden="true">Wordwoven</span></h1>` +
       `<p class="tt-sub">Defend your village, one word at a time.</p></header>` +
       `<nav class="tt-menu vd-sheet" aria-label="Title">${ENTRIES.map(([id, label, sub], k) => `<div class="tt-entry" role="button" data-entry="${id}"><kbd>${k + 1}</kbd><b>${label}</b><small>${sub}</small></div>`).join("")}</nav>` +
       `<p class="tt-keys">↑ ↓ select · Enter play · 1–5 quick pick</p>`;
@@ -64,17 +64,11 @@ export class TitleScreen {
       const at = this.entries.indexOf((event.target as Element).closest<HTMLElement>(".tt-entry")!);
       if (at >= 0 && at !== this.focus && !this.off.has(ENTRIES[at]![0])) this.move(at);
     });
-    const art = new Image();
-    art.onload = () => {
-      this.el.querySelector<HTMLElement>(".tt-art")!.style.backgroundImage = `url("${ART}")`;
-      this.el.classList.add("has-art");
-    };
-    // No drawn stand-in: a flat background and a warning naming the file.
-    art.onerror = () => {
-      console.warn("title: painted backdrop failed to load", ART);
-      this.el.classList.add("no-art");
-    };
-    art.src = ART;
+    bindArt(this.el.querySelector<HTMLImageElement>(".tt-art")!, "title-backdrop", {
+      loaded: () => { this.el.classList.add("has-art"); this.el.classList.remove("no-art"); },
+      failed: () => { this.el.classList.remove("has-art"); this.el.classList.add("no-art"); },
+    });
+    bindArt(this.el.querySelector<HTMLImageElement>(".tt-logo")!, "logo", { fallback: this.el.querySelector<HTMLElement>(".tt-logo-fallback")! });
   }
 
   get open(): boolean {

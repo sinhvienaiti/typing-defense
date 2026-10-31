@@ -33,7 +33,7 @@
 
 ### 1.2 Phần cho từng mốc còn lại (ước lượng lại sau review 1A.3; 1A.4 ghi số thật)
 
-Mốc đang làm: **1B.V4**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
+Mốc đang làm: **1C.C10**. Test `td-boundary` đọc dòng này và cột "Cộng dồn tối đa" của mốc đó, rồi hỏng khi tổng vượt (ngoài trần cứng của bước đang làm: từ 1B là `BUILD_1B.md` §16: 10.500 tới hết R3, 10.900 từ 1B.V4; từ 1C là `BUILD_1C_MAP1.md` §3: 16.500). Bắt đầu mốc mới thì đổi dòng trên trước khi viết mã. Từ 1A.6 đếm như `BUILD_1A6.md` §0: chỉ TypeScript trong `src/td` (1A đếm thêm `td.html`, `rng.ts`, `td.css`: 178 dòng; mục 3).
 
 | Mốc | Phần mới (ước lượng theo mã thật đã có) | Tối đa | Cộng dồn tối đa |
 |---|---|---|---|
@@ -47,6 +47,21 @@ Mốc đang làm: **1B.V4**. Test `td-boundary` đọc dòng này và cột "C�
 | 1B.R2 Gõ giúp trận (`BUILD_1B.md` §16, §17) | 8.883 → 9.488 thật (mục 7.3) | 1.117 | 10.000 |
 | 1B.R3 Học và dạy (`BUILD_1B.md` §16, §17; `R3_PLAN.md` §8) | 9.670 → 10.255 sau phần A, 10.413 sau phần B (mục 7.7), 10.486 sau luật gỗ của chủ dự án (mục 7.8), 10.492 sau cân bằng R3 (mục 7.9), 10.500 sau đợt test 27/10 (mục 7.10: gói lại chú thích lấy 54 dòng, sửa thêm 62) | 830 | 10.500 |
 | 1B.V4 VFX 2D (V4a của `docs/games/VFX_STANDARD.md` §5.4: ống `FX.fire`/`FX.hit` của phiếu Codex 036, lóe ở tháp và Draconis, cầu lửa, trúng đòn) | 10.499 trước V4; phiếu 036 ≤ +75 | 400 | 10.900 |
+| 1C.C1 giao diện view, view 3D rỗng (`BUILD_1C_MAP1.md` §3, §8) | 10.555 trước 1C (sau phiếu 036; V4a dừng ở bước 1) → 10.767 thật (mục 8.1) | 200 | 10.800 |
+| 1C.C2 sân khấu, camera RTS, bậc (`BUILD_1C_MAP1.md` §3, §8) | 10.766 sau khi gộp `a2-days` (091, 103) → 11.054 thật (mục 8.2) | 650 | 11.450 |
+| 1C.C4 nạp model map 1 (`BUILD_1C_MAP1.md` §3, §8) | phần A (mục 8.3), phần B (mục 8.5): không thêm dòng `src` (bảng chỗ đặt bộ cấp là JSON) | 200 | 11.650 |
+| 1C.C3 đất, đường, suối, cầu, sân Fort (`BUILD_1C_MAP1.md` §3, §8) | 11.054 → 11.356 thật (mục 8.4) | 800 | 12.450 |
+| 1C.C6 nhà và trạng thái (`BUILD_1C_MAP1.md` §3, §8) | 11.356 → 11.612 thật (mục 8.7) | 700 | 13.150 |
+| 1C.C5 rig và clip (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 350 | 13.500 |
+| 1C.C8 Draconis và Mộc Tinh trên sân (làn L2) (`BUILD_1C_MAP1.md` §3, §8) | — | 400 | 13.900 |
+| 1C.C12 đồ bay về HUD, skin HUD (làn L4) (`BUILD_1C_MAP1.md` §3, §8) | — | 250 | 14.150 |
+| 1C.C10 thẻ chữ trên 3D (`BUILD_1C_MAP1.md` §3, §8) | 11.648 → 12.537 thật (mục 8.9: gồm năm pha của Word Shot, phần của C11, và bảng id âm, phần của A13) | 350 | 14.500 |
+| 1C.C7 quái, lính, dân, Helper, cây luật (làn L3) (`BUILD_1C_MAP1.md` §3, §8) | — | 800 | 15.300 |
+| 1C.C9 cảnh (làn L3) (`BUILD_1C_MAP1.md` §3, §8) | — | 450 | 15.750 |
+| 1C.C11 VFX năm pha (làn L4) (`BUILD_1C_MAP1.md` §3, §8) | — | 550 | 16.300 |
+| 1C.A1 A13 việc đầu có hướng dẫn, nối âm thật (`BUILD_1C_MAP1.md` §3, §8) | — | 50 | 16.350 |
+| 1C.C13 hiệu năng, bậc, mặc định Medium (`BUILD_1C_MAP1.md` §3, §8) | — | 50 | 16.400 |
+| 1C.C14 sửa sau kiểm cổng cuối (`BUILD_1C_MAP1.md` §3, §8) | — | 100 | 16.500 |
 
 Ước lượng lại 1A.4 (review 1A.3, mục 5), tính cả `move` và đốm sáng dọc dây trợ lực mà 1A.3 dời sang, cùng 41 dòng của bản sửa review 1A.3. Bản sửa đó dùng hết 38 dòng dự phòng dưới trần, nên phần của 1A.4 giữ 500 mà phải chứa thêm hai việc. Cắt theo BUILD_NOW §10 (cắt UI trước, không cắt luật, test) trước khi viết mã 1A.4:
 
@@ -1858,3 +1873,369 @@ Làn V4a của `docs/games/VFX_STANDARD.md` (repo cha) §5.4, nhánh `td-vfx`. P
 - Ván vàng không đổi (`f2a21037`; 19.660 và 5.695 tick; sau gộp vào `a2-days` vẫn `"same":true` cả hai ván). Ván vàng qua ống: 133 lần bắn, 102 lần trúng, không mất sự kiện.
 - Phần vẽ trên `FxDraw` (lóe ở tháp và Draconis, cầu lửa, trúng đòn) là bước sau; gói "/" nay chừa 1,15 kB, nhưng phần vẽ nằm trong chunk `fx`, không vào gói khởi động.
 - **Làn V4a dừng ở bước 1** (28/10, khi gộp vào `a2-days`): map 1 lên 3D (bước 1C), view 2D chỉ còn là bậc Low và đường lùi; phần vẽ trên `FxDraw` không làm ở 2D, thiết kế năm pha của V4a dùng tiếp ở C11.
+
+
+## 8. 1C "Map 1 lên 3D" (`BUILD_1C_MAP1.md`, nhánh `td-1c`)
+
+Kế hoạch và ngân sách: `docs/td/BUILD_1C_MAP1.md` (C0, chủ dự án duyệt 28/10/2026). Làn L, worktree `games/.wt-td-1c`. Chi tiết từng bước: `docs/changelog/2026-10-28-td-1c-map1.md`.
+
+### 8.1 C1: giao diện view, view 3D rỗng (28/10/2026, Mac mini M4)
+
+- `src/view/view.ts` (lối vào): `MapView` (resize, read, draw, project, unproject, callAt, keepOut, panBy, zoomAt), `Hand`, `pickView` (`?view=2d|3d`, `?q=low|medium|high`; mặc định Low tới C13; chỉ `w1-silverfall` có 3D), `load3d` (`import()` duy nhất tới `src/view/3d/`).
+- `DebugView` nay `implements MapView` (thêm `kind`, `read` gom lớp boss và `FxView`). `main.ts` vẽ qua `view: MapView`; phần riêng của 2D (`FxView`, pool hạt boss) gọi qua `flat`.
+- `src/view/3d/view-3d.ts` (chunk riêng, có three.js): `View3D.open` dựng canvas `#tdCanvas3d` sau canvas 2D, mặt sân phẳng, ánh sáng trời và nắng, camera mặc định TK §23.6 (55° ở 58 m, zoom 22–120 m) có pan và zoom về con trỏ. Không có WebGL 2 thì trả `null`; mất context thì về 2D.
+- Khi trang muốn 3D: canvas 2D ẩn, ván chờ chunk ở tick 0 (như Học), `__td.ready()` chờ nó, `__td.chunks().view3d` báo bản 3D đang vẽ. Chunk lỗi hay mất context: HUD báo một dòng, ván chạy tiếp ở 2D.
+- Kit: thêm module `three` vào `kit.config.json`, chép bằng `node scripts/sync-game-kit.mjs --target games/.wt-td-1c` (11 file, kit không đổi); view 3D dùng `clamp` của `kit/three/util`.
+- `scripts/bundle-budget.mjs` in cỡ chunk 3D (≤ 260 kB gzip) và hỏng khi chunk này lọt vào bộ khởi động. `tests/td-view.test.ts`: `pickView`; `three` chỉ ở `src/view/3d/`; `src/view/3d/` chỉ tới được qua `import()` của `view.ts`; `main.ts` chỉ gọi thành viên của `MapView` trên `view`.
+
+| Đo | Trước (`df63008`) | Sau C1 |
+|---|---|---|
+| Gói "/" (gzip) | 83.784 byte (chừa 1,22 kB) | 84.207 byte (+423; chừa 0,79 kB) |
+| Gói `?title=0` | 82.335 byte | 82.758 byte |
+| Chunk `view-3d` (gồm three) | không có | 117.050 byte gzip (468.069 byte thô), không import chunk nào khác |
+| Dòng `.ts` ngoài kit | 10.555 | 10.767 (`view.ts` 50, `view-3d.ts` 137, `main.ts` +19, `debug-2d.ts` +6) |
+| Test | 355 / 33 file | 360 / 34 file |
+| Ván vàng | `f2a21037` | `"same":true` cả hai (19.660 và 5.695 tick) |
+
+### 8.2 C2: sân khấu và camera RTS (29/10/2026, Mac mini M4)
+
+Trước C2, `a2-days` @ `91ac625` (phiếu 091 từ vựng ghim, 103 thẻ kết và dải nghĩa) gộp vào `td-1c` (`27853b6`, không xung đột): 373 test, "/" 84,16 kB, 10.766 dòng, ván vàng giữ nguyên.
+
+- `src/view/3d/stage.ts` (chép từ `games/dragon-hold@02fe9c7` `src/view/stage.ts`, ghi nguồn): renderer, cảnh với ba lớp (đất, nhân vật, hiệu ứng), trời, nắng tây nam có bóng, ánh lam bù, sương nhạt; hậu kỳ Sách tranh (tone Neutral, bão hòa ×1,15, tách tông, vignette nhẹ, FXAA); bậc Medium (DPR 1, bóng 1024) và High (DPR 1,25, bóng 2048, có lượt bloom 0,25 nhưng tắt tới khi C13 đo); `stats()` đếm draw call và tam giác của khung.
+- `src/view/3d/camera.ts` (chép từ `camera.ts` của Rồng): `CameraRig` nhìn một điểm của sân theo hướng, góc nghiêng và khoảng cách, tất cả có làm mượt; mặc định 55° ở 58 m, điểm nhìn lệch 18 m từ Fort vào giữa sân; zoom 22–120 m về điểm dưới con trỏ; nghiêng 30–85°; pan trong sân cộng 8 m; rung ≤ 6 px trong 120 ms chỉ dời phép chiếu (thẻ chữ không rung); `groundAt` lấy điểm đất dưới một điểm màn hình. Trường nhìn 38° cho đúng cỡ TK §23.2 (Lính 1,85 m ≈ 28 px, Fort 8 m ≈ 125 px ở 1080p). Kit Lời Gọi không có `feedback`, nên rung là bản đơn giản thay cho `Trauma` của Rồng.
+- Điều khiển (TK §23.6): kéo trái hay giữa để pan; **kéo phải để xoay và nghiêng** (`app/input.ts` trước bỏ qua kéo phải); lăn để zoom; mũi tên pan; **Shift + mũi tên** xoay 15° và nghiêng 5°; **F1** góc mặc định, **F2** góc gần và thấp (40° ở 30 m, đề xuất của C2 vì TK chỉ định nghĩa F3), **F3** "Toàn cảnh" 85° ở 100 m. Ở 2D các phím này không làm gì. `MapView` có thêm `turn?`, `look?`, `stats?`; `__td.view()` trả loại view, bậc, draw call, tam giác và tư thế camera.
+- `tests/td-3d-camera.test.ts` (5 test, Node, không WebGL): xuống đất rồi chiếu lại lệch < 0,5 px ở 3 góc nghiêng × 4 hướng (hơn 200 điểm); cỡ TK §23.2 ở góc mặc định; zoom giữ điểm dưới con trỏ trong 0,5 m và kẹp 22–120 m; pan theo hướng và trong sân; F1, F3, nghiêng 30–85°.
+
+| Đo | Sau C1 (gộp 091, 103) | Sau C2 |
+|---|---|---|
+| Gói "/" (gzip) | 84,16 kB | 84,28 kB (chừa 0,72 kB) |
+| Chunk `view-3d` | 117,05 kB | 124,55 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 10.766 | 11.054 (trần bước 11.450) |
+| Test | 373 / 36 file | 378 / 37 file |
+
+- Ván vàng `"same":true` cả hai. `td-1c-view` đạt 10/10 ở 1280 × 720 và 1920 × 1080 (Vite 4150, `heavy.sh --gpu`), lỗi console duy nhất là lỗi của chunk bị chặn.
+- Đo khung sân trống ở High và Medium: làm cùng lượt chụp tờ khung của C3 (một lượt test mỗi làn).
+
+### 8.3 C4 phần A: đưa model map 1 vào manifest, hạ texture, đo media (29/10/2026)
+
+- **Đường ống chạy trong worktree:** các thư mục media của `art-src/` (trừ `art-src/3d/SOURCES.json`, được Git theo dõi) và `art-src/3d/<loại>` là liên kết tới checkout chính, như `public/assets`. `models:prepare` và `models:blender` phải có `--out games/.wt-td-1c/public/assets/typing-defense/models --url-base /assets/typing-defense/models --contracts games/.wt-td-1c/scripts/models/model-contracts.ts`: không có thì công cụ lấy tên thư mục `.wt-td-1c` làm id game (lượt đầu ghi nhầm vào `public/assets/.wt-td-1c/`, đã xóa).
+- **Vào manifest:** `enemies/thuong-luong`, `enemies/nuppeppo`, `enemies/mam-go` (đã rig từ 24/10). `helpers/helper-owlet` chưa vào: hợp đồng model của game chưa có loại `helpers` (thuộc C5, cùng clip Helper).
+- **Barracks dựng lại** từ nguồn mới (24/10 08:52, bản hai tầng có sàn canh): cao 4,19 m, chân 4,58 m (vòng Ø 4,6 m), 11.755 tam giác; trước là bản tạm cao 1,80 m. Thấp hơn dải 4,5–5 m 7 % (không phóng riêng chiều cao), trong ngưỡng 20 % của `td-scale`. Socket `FX_lantern_4` rơi xuống tầng trống (y 0,75 m) trong khi bốn đèn kia ở 2,9 m: C6 sửa.
+- **Hạ texture** trong `scripts/models/model-contracts.ts` (`textureMax`, của game): nhà 1024 / 512 (trước 2048 / 1024), đạo cụ, đạn, đồ rơi, đồ gắn 512 / 256 (trước 1024 / 512); nhân vật giữ nguyên. Đóng gói lại cả 37 mục.
+- **Thử rồi bỏ:** hạ trần tam giác của bậc Medium (nhà 6.000, quái 3.500, lính 4.000, đồ nhỏ 2.000) chỉ bớt 0,18 MB (3,98 → 3,80 MB), vì ở Medium phần nặng là lưới có xương và clip của nhân vật; không đáng rủi ro hình, nên trả lại số cũ.
+- **`scripts/td/media-budget.mjs`** (mới): cộng byte theo bậc của 57 model map 1 cần (manifest) và các thư mục `ground`, `scenery`, `vfx`, so với `BUILD_1C_MAP1.md` §5; in mục còn thiếu; thoát 1 khi vượt (`--strict`: cả khi thiếu).
+
+| Model map 1 (32/57 có trong manifest) | High | Medium |
+|---|---:|---:|
+| Trước (texture cũ) | 11,86 MB | 5,26 MB |
+| Sau phần A | 7,15 MB (trần 7,5) | 3,98 MB (trần 3,6) |
+
+- **Medium vượt trần, và còn thiếu 25 mục** (13 bộ cấp, `cannon-barrel-l3`, giàn tre, xe goòng, lông lửa, hạt Mộc Tinh, ba mốc cảnh, Mộc Tinh, Draconis, `worker-base`, Helper). Dự báo khi đủ: Medium khoảng 7–8 MB chỉ riêng model. Cần quyết lại §5 (xem phần B).
+- **Phần B (để trước C6):** preset cho 13 bộ cấp (mỗi bộ phải khớp với nhà gốc: thay hay chồng lên, socket dời theo ghi chú của `3D_IMPORT_2026-10-28.md`), giàn tre theo 4 cỡ vòng, xe goòng, lông lửa xoay 90°, hạt Mộc Tinh, `vach-thac-bac` sáng +25 %, `cau-go` đúng rect cầu, `choi-canh-doi`; `models:index` và `usedBy`.
+
+### 8.4 C3: mặt đất map 1 (29/10/2026, Mac mini M4)
+
+- **`src/view/3d/ground.ts`:** một lưới cao độ 176 m (sân 96 m, viền 40 m, ô 2 m): phẳng ở mọi chỗ sim đi (`heightAt` = 0); lòng suối −0,55 m trong rect nước; viền dâng dần, Đồi Cầu Vồng ở phía đông, vách Thác Bạc ở đầu suối phía bắc, có khe cho dòng nước (đều ngoài sân).
+- **Shader đất** (`MeshLambertMaterial` + `onBeforeCompile`, giữ ánh sáng, bóng, sương) lát sáu ô của phiếu 095 (8 m một ô) theo mặt nạ nướng từ bản đồ sim (512², 0,34 m/px):
+  - đường theo `groundLanes` có mép mòn (`trail-worn`); vệt bánh xe của `dirt-road` xoay theo hướng đường (bốn góc 45° cố định, liền mép; lấy chủ yếu một góc để vệt không nhòe);
+  - bờ suối (`stream-bank`); sân đá quanh Fort (7 m) và quanh quặng (`stone-yard`);
+  - mép các mặt nạ bị nhiễu bẻ cho không tròn đều; cỏ bớt bão hòa 20 % và có mảng ô liu, mảng nắng (TK §23.1: đất là lớp lặng nhất).
+- **Suối:** dải nước uốn ±0,35 m trong rect, ánh bạc trôi xuôi bằng nhiễu.
+- **Hai Wooden Bridge** (`props/cau-go`): đưa qua `models:blender` ở bước này (preset mới, dài 4,4 m, rộng 2 m, cao 1,6 m), đặt ở tâm hai rect cầu, xoay 90° cho cầu bắc qua suối.
+- **Decal phiếu 097** (hai tờ 4 × 2, hai draw call instanced), 49 chỗ theo luật decor: hoa, cỏ ba lá trên cỏ xa đường và nước; sỏi dọc mép đường; đất mòn ở cổng và trước Fort; đất trống cạnh quặng. Đất dưới tán và lá rụng chờ cây ở C7.
+- **Media:** `scripts/td/prepare-ground.mjs` (ImageMagick) làm ô 1024² (High) và 512² (Medium), tờ decal 1024 × 512 và 512 × 256 vào `public/assets/typing-defense/ground/` (liên kết tới checkout chính). Thiếu file thì giữ màu phẳng. Ground High 1,13 MB (trần 1,5), Medium 0,31 MB (trần 0,8).
+- **Camera:** điểm nhìn mặc định lùi về 12 m từ Fort (trước 18 m), để Fort nằm ở phần ba dưới màn, không dưới HUD.
+- **`tests/td-3d-ground.test.ts`** (5 test): sân phẳng chỗ sim đi, viền và vách cao; nước và lòng suối nằm trong rect, hai bờ cách rect 1,5 m phẳng; mép mặt nạ đường cách `roadHalfM` < 0,25 m dọc mọi làn (lấy mẫu song tuyến như GPU); sân đá phủ vòng Fort và quặng; decal theo luật và giống nhau mỗi lần nạp.
+
+| Đo | Sau C2 | Sau C3 |
+|---|---|---|
+| Gói "/" (gzip) | 84,28 kB | 84,41 kB (chừa 0,59 kB; three nay là chunk dùng chung với GLTFLoader, danh sách tải trước trong lối vào dài thêm) |
+| Bộ chunk 3D | 124,55 kB | 145,28 kB (`view-3d` + `three`; trần 260) |
+| Dòng `.ts` ngoài kit | 11.054 | 11.356 (trần bước 12.450) |
+| Test | 378 / 37 file | 383 / 38 file |
+| Draw call, tam giác (High, góc mặc định) | — | 9, 27.866 (trần 150) |
+| Draw call (Medium, góc mặc định) | — | 9 (trần 100) |
+| Chi phí vẽ một khung (trang, không phải đo GPU) | — | trung bình 0,22–0,36 ms, p95 0,4–0,7 ms |
+
+- Ván vàng giữ nguyên. `td-1c-ground` (mới) đạt ở 1280 × 720 và 1920 × 1080: bản 3D High và Medium, đủ 8 file đất và cầu đã tải, draw call trong trần, không lỗi console. Đo khung ở đây chỉ là số của trang trong lượt chụp; lượt `--perf` thật thuộc C13.
+
+### 8.5 C4 phần B: bộ cấp, đạo cụ, mốc cảnh (29/10/2026)
+
+- **20 mục mới trong preset** (`scripts/models/presets/typing-defense-static.json`), qua `models:blender` và đều đạt:
+  - 13 bộ cấp: Fort L2–L4, Archer Tower, Cannon Tower, Barracks, Gold Mine, Rice Field mỗi nhà L2 và L3;
+  - `props/cannon-barrel-l3` (cùng trục và cỡ với `cannon-barrel`), `props/scaffold-bamboo` (cỡ vòng M; runtime co theo vòng), `props/gold-mine-cart`;
+  - `projectiles/fire-feather` (xoay nằm ngang), `projectiles/seed-drop`;
+  - `landmarks/vach-thac-bac` (rộng 22 m, sáng +25 %, giữ khe thác), `landmarks/choi-canh-doi` (cao 5 m).
+- **Hợp đồng model của game** có thêm hai loại: `kits` và `landmarks` (≤ 8.000 tam giác, texture 512/256).
+- **Chỗ đặt bộ cấp trên nhà gốc:** `src/view/3d/kits.json`, mỗi cấp liệt kê mọi bộ nó hiện, theo hệ của three.js. "Trái" và "phải" trong ghi chú của `3D_IMPORT_2026-10-28` là trái và phải của ảnh: trái là +X của model.
+- **Kiểm chỗ đặt:** `scripts/models/blender/td_kit_compose.py` dựng mỗi nhà ở từng cấp từ đúng bảng đó (19 ảnh, góc 55° và góc trước). Sau một lượt sửa:
+  - Archer Tower L2 thay mái rơm bằng mái ngói, L3 thêm một tầng;
+  - Fort L2 có vòng tường, L3 và L4 chồng lên đỉnh;
+  - Cannon Tower L2 có vòng đá và mái nửa sau, L3 có cột cờ ở góc sau trái và nòng vằn;
+  - Barracks L2 có chòi canh trong sân rào bên phải, L3 có mái ngói đỏ phủ mái rơm;
+  - Gold Mine L2 có tời trên vai đá phải, L3 có guồng áp mặt đá trái;
+  - Rice Field L2 có đống rơm ở góc sau trái, L3 có cối giã ở bờ trái.
+- **Chưa làm** (sửa lưới hay vẽ texture; ghi để sửa sau, không chặn C6):
+  - `keep-kit-l2`: tách hai đảo lưới, khép khe trái vào chòi nỏ;
+  - `keep-kit-l3`: xóa màng xám dưới mái tầng trên;
+  - `archer-kit-l2`: xóa sàn ván đè sàn canh, socket đèn lồng trên xà hiên;
+  - `cannon-barrel-l3`: chép hoa văn xoáy sang mặt trên và mặt sau;
+  - `gold-mine-kit-l3`: tô tối màng giữa các nan guồng.
+- **`models:index`** với preset: `art-src/3d/SOURCES.json` nay có 157 file (trước 71; thêm các file Tripo đợt 2 đã có trên máy), `usedBy` điền cho 50 file mà preset dựng.
+- **Đo media** (`scripts/td/media-budget.mjs`, 53/57 model, còn thiếu Mộc Tinh, Draconis, `worker-base`, Helper):
+
+| | High | Medium |
+|---|---:|---:|
+| Model | 10,08 MB | 5,61 MB |
+| Cộng (cả đất) | 11,22 MB (trần 12) | 5,92 MB (trần 9) |
+| Bộ khởi động | — | 2,09 MB (trần 3,5) |
+| Tới Đêm 1 (thêm JS, CSS, từ vựng) | — | 2,71 MB (trần 6) |
+
+- **High vượt dòng model** (7,5 MB). Khi đủ 4 model còn thiếu (khoảng +2 MB), cảnh (dòng 2,5) và VFX (dòng 0,5), High sẽ khoảng 15–16 MB so với trần 12: cần quyết lại (bản bàn giao).
+- `pnpm check` 383/383, ván vàng giữ nguyên.
+
+### 8.6 Năm chỗ sửa lưới và texture của bộ cấp (29/10/2026)
+
+Làm trên bản sao, không sửa nguồn Tripo: `scripts/models/blender/td_mesh_fix.py` đọc `art-src/3d/kits/<id>.glb`, ghi `<id>.fix1.glb` cạnh nó, kèm ảnh trước và sau cùng số tam giác. Codex không chạy được Blender trong sandbox (phiếu 085), nên việc này do Claude làm.
+
+| Bộ | Kết quả | Tam giác (nguồn) |
+|---|---|---|
+| `keep-kit-l2` | **Đã sửa.** Hai đảo lưới: vòng chính có cổng và chòi nỏ (4.924 mặt), cung tường trái (2.954 mặt). Xoay cung trái 9,5° quanh tâm vòng: khe giữa đầu cung và chòi nỏ (253–261°) khép lại; khe trước phải cho bục giữ nguyên. | 7.878 → 7.878 |
+| `archer-kit-l2` | **Đã sửa.** Bỏ sàn ván đáy (64 mặt nằm ngang ở đáy) để không đè sàn canh của Archer Tower cấp 1; thêm `FX_lantern_0..4` trên xà hiên mặt trước. | 3.652 → 3.588 |
+| `cannon-barrel-l3` | **Không giữ.** Nướng màu nửa có hoa văn quanh trục nòng (bốn bản xoay 90°) làm cả nòng tối đi và miệng đồng thành nâu; nguồn cũ giữ nguyên. | 1.922 |
+| `keep-kit-l3` | **Chưa sửa được bằng script.** Không mặt nào có độ bão hòa thấp (màng "xám" không xám trong texture); tấm phẳng lớn duy nhất nằm ngang, không phải tấm xiên mà ghi chú tả. | 3.510 |
+| `gold-mine-kit-l3` | **Chưa sửa được bằng script.** Không có tấm phẳng riêng ở mặt giữa guồng để tách khỏi nan; màu màng trùng màu gỗ tối. | 3.667 |
+
+- `keep-kit-l2` và `archer-kit-l2` nay dựng từ `.fix1.glb` (preset trỏ `reference` về ảnh 2D gốc để vẫn khớp màu); ảnh dựng lại Fort L2 và Archer Tower L2 đạt.
+- `models:index`: `usedBy` của hai bản sửa điền đúng. Lệnh cảnh báo (thoát 1) vì luật "nguồn đặt tên theo ảnh 2D" chưa biết bản sửa `.fixN.glb`: cần sửa script chung ở repo cha.
+- Ba chỗ còn lại cần mở trong Blender có giao diện, hoặc dựng lại bằng Tripo. Ở camera game ảnh hưởng nhỏ: màng tối ở sườn mái và giữa nan, hoa văn một mặt nòng.
+
+### 8.7 C6: nhà 3D theo dữ liệu sim, mốc cảnh, ánh sáng mới (29/10/2026)
+
+- Kit đã sync phiếu Codex 107 (`9347851`, điều phối viên): `ModelLibrary` nhận `kinds`; game truyền `buildings`, `kits`, `landmarks`, `projectiles`.
+- **`src/view/3d/houses.ts`:**
+  - mỗi nhà của sim dựng từ model `buildings/<id>` cộng bộ cấp của cấp đó theo `kits.json`; xoay 180° cho mặt trước (−Z của model) nhìn về camera mặc định ở phía nam; đặt ở `heightAt`;
+  - đang xây: giàn tre (`props/scaffold-bamboo`, co theo vòng chiếm chỗ); xong thì nhà mọc lên trong 1,2 s (có nảy nhẹ);
+  - lên cấp: bộ cấp mới rơi nảy 0,5 s;
+  - cờ cấp (`props/level-pennant`, cấp − 1 lá) ở `FX_banner`; nòng Cannon Tower ở `FX_turret` (cấp 3 thay bằng nòng vằn); đống vàng của Gold Mine 4 cỡ theo vàng chờ, ở `FX_pile`;
+  - bóng ma lúc đặt nhà: nhà mờ 45 % trên vòng xanh hay đỏ theo `canPlace`, ở `heightAt`;
+  - model chưa nạp xong thì chừa chỗ, dựng lại ở khung sau.
+- **Hai mốc cảnh:** vách Thác Bạc ở đầu suối (ngoài sân phía bắc, mặt thác nhìn vào sân), chòi canh trên Đồi Cầu Vồng (phía đông, nhìn vào sân).
+- **Ánh sáng theo mức "hoành tráng" chủ dự án đặt ngày 28/10** (tài liệu `ART_DIRECTION_2026-10-28.md` chưa có lúc làm):
+  - nắng ấm mạnh hơn (3,4) trên nền trời lạnh, tối hơn (0,9) để có tương phản ấm lạnh;
+  - ánh lam bù 0,35; một đèn viền mềm từ phía sau góc nhìn mặc định;
+  - bóng mềm hơn;
+  - High có ambient occlusion (GTAO); Medium chưa có (C13 đo);
+  - lớp phủ sữa của bước chỉnh màu giảm.
+- **Kịch bản:**
+  - `td-1c-houses` (mới) đạt ở 1280 × 720 và 1920 × 1080: hộp cát, năm nhà đặt sẵn và Fort ở cấp 1, 2, 3 (Fort tới 4), Gold Mine, một nhà đang xây dưới giàn tre, bóng ma; mỗi nhà hiện đúng số bộ cấp của `kits.json`; không lỗi console.
+  - `td-1b-build` có biến `Q` để chạy trên bản 3D: 18/18 ở cả hai cỡ (`Q=high`).
+- **Draw call:** High với cả sáu nhà ở cấp 3, một nhà đang xây và bóng ma là 152, vượt trần 150 (phần nhà trong bảng C0 §6 là 40). Mỗi GLB có nhiều lưới, và lượt bóng nhân đôi. C13 gộp lưới mỗi nhà theo vật liệu (hoặc instanced theo model).
+- **Còn để sau:** ô Rice Field theo trạng thái (phiếu 098), nhà tê vì rễ (C8), hiệu ứng bán nhà (ván bay, C11), đèn lồng Nhiệt và huy hiệu nhịp (C10, C12).
+
+| Đo | Sau C3 | Sau C6 |
+|---|---|---|
+| Gói "/" (gzip) | 84,41 kB | 84,40 kB |
+| Bộ chunk 3D | 145,28 kB | 155,73 kB (thêm GTAO) |
+| Dòng `.ts` ngoài kit | 11.356 | 11.612 (trần bước 13.150) |
+| Draw call, tam giác (High, sáu nhà cấp 3) | 9, 28 nghìn (sân trống) | 148–152, khoảng 640 nghìn |
+| Test | 383 | 383, ván vàng giữ nguyên |
+
+### 8.8 StylePack "Epic": ánh sáng, chỉnh màu, màu đất (29/10/2026)
+
+Theo `docs/games/ART_DIRECTION_2026-10-28.md` (repo cha) §2.3, §2.4, §2.7, §7.1; chưa cần ảnh mới.
+
+- **`stage.ts`:**
+  - nắng ấm `#ffdca8` 3,9, cao 40° từ tây nam (làn L chốt hướng này), bóng sắc;
+  - trời ngọc `#a9d2d6` trên đất teal tối `#33463c` 0,75; viền lạnh 0,4 từ phía đối nắng; GTAO ở High;
+  - sương bạc vàng gần hơn (95–330 m), chờ màu dải sương của phông 114;
+  - chỉnh màu ACES (filmic), bão hòa 0,95, bóng teal, sáng vàng, vignette 0,15;
+  - `relight()`: mỗi vật liệu model giảm 13 % bão hòa ở vàng rơm và cam đồ chơi, tắt kim loại; áp cho nhà, bộ cấp, mốc cảnh, cầu.
+- **`ground.ts`:**
+  - cỏ quay hue sang ngọc teal và giảm bão hòa (YIQ), tối hơn đường một bậc;
+  - đường và mép mòn thành đất be nhạt, không còn cam;
+  - nước ngả bạc;
+  - bóng mây trôi (nhiễu chậm, 0,78–1 lần ánh sáng) trên đất, là một số hạng ánh sáng, không phải ảnh vẽ bằng mã.
+- **Đo trên ảnh** (`scripts/visual/scenarios/td-1c-look.mjs`, góc mặc định, ở 1280 và 1920):
+
+| Đo (§2.3) | Trước (`d354716`) | Sau | Luật |
+|---|---|---|---|
+| Hue trung vị của cỏ | 88° | 124° | 80–150° |
+| Bão hòa trung vị của cỏ | 0,84 | 0,40 | ≤ 0,55 |
+| Luma đường trừ luma cỏ | +0,19 | +0,21 | ≥ +0,15 |
+
+- **Cần sửa ở C10:** luma đường nay 0,71, mà §2.5 đòi nền dưới thẻ chữ ≤ 0,6. C10 thêm nền tối dưới thẻ, hoặc giảm sáng đường ở chỗ có thẻ.
+- **Điểm M (tự chấm, thang §1.3):** trước 3, sau 4. Bảng màu đúng bible, bóng dài, nhà bớt đồ chơi. Nhưng sân vẫn phẳng: không có mốc lớn trong khung, không có ba tầng sâu, không có trời. Mức 8 cần phiếu 114 (trời, phông, rùa trời), 122 (đất v2, vách đá vôi để dựng tháp và mép cao nguyên), 123, 116–118. Một giám khảo độc lập cần chấm lại.
+- Tờ so: `tmp/lane-l/td-1c-look-sheet-1280x720.jpg`, `-1920x1080.jpg` trong worktree. Hàng 1: góc mặc định trước và sau. Hàng 2: F2 trước và sau. Hàng 3: ảnh mẫu của chủ dự án.
+- "/" 84,41 kB, bộ chunk 3D 156,36 kB, 11.648 dòng, 383 test, ván vàng giữ nguyên.
+
+### 8.9 C10: thẻ chữ neo trên 3D và cảm giác gõ (29/10/2026, làn L2, Mac mini M4)
+
+Theo `docs/games/TYPING_BREAK_STUDY.md` §4–§5.3 (repo cha), `ART_DIRECTION_2026-10-28.md` §2.5, §8.2, `VFX_STANDARD.md` §3, §5.6. Mốc giữa (giám khảo trước C10) chưa chạy vì cảnh còn chờ ảnh Codex; điều phối viên cho làm C10 trước.
+
+- **Neo thẻ** (`src/view/3d/words.ts`, `MapView.anchor`): cột thẻ của một lời gọi đứng ở `FX_top` + 0,6 m của nhà (lấy socket cao nhất của thân và bộ cấp, `Houses.point`), qua phép chiếu camera; lời gọi của dân, Thư Đồng, Draconis, quái thì trên đầu người gọi. Bộ xếp làn `lanes.ts` giữ nguyên; `cards.ts` chỉ nhận thêm hàm neo (2D vẫn dùng mái cũ).
+- **Cảm giác trên thẻ (cả 2D và 3D, `cards.ts`, `words/feel.css`):**
+  - chữ vừa gõ được đóng dấu (T1): bản sao rơi từ trên trái, nghiêng −8°, 3× → 2,25× → 1,6× → 1× trong bốn khung (`steps`), lớn hơn và ngả vàng theo bậc Chuỗi (`--tier`); chữ thật hiện từ khung thứ tư;
+  - vòng ấn hai tông quanh chữ (T2): đĩa trắng, vòng trắng dày, vòng tối, cung mảnh xoay, xong ở 150 ms;
+  - khóa: thẻ vọt 1,16× rồi về 1,1× (tau 35 ms), kích cỡ khóa đổi mượt thay cho nhảy (T3); mỗi phím đúng thẻ nhích 3 px;
+  - gõ sai: thẻ rung 12 px và nghiêng 3,5°, tắt dần trong 90 ms; chữ cần gõ giữ nền hồng;
+  - gõ xong: dải nghĩa bóp ngang 2 khung rồi nảy 1,24×; thẻ bị thay thì bóp ngang (T7) thay cho gập dọc.
+- **Cảm giác trên sân (chỉ 3D, `words.ts`, `fx-pool.ts`):**
+  - viền thẻ lóe (Web Animations): khóa trắng ngọc, gõ sai son đỏ giữ 100 ms, gõ xong trắng vàng;
+  - mỗi phím đúng: chữ cái (font của game) rời mép dưới thẻ, ngọc trên bản sao tối, kéo hạt vàng (sợi chỉ "woven"), bay cong vào `FX_core`, chạm thì lóe và vòng; lõi sáng dần theo phần chữ đã gõ (pha A của đòn chữ); khóa thì vòng ngọc dưới chân nhà;
+  - gõ sai: chấm son đỏ ở thẻ và giọt mực rơi xuống đất, vỡ thành vệt;
+  - gõ xong lời gọi kinh tế: các chữ bung quanh đỉnh và hai bên thẻ (dưới thẻ là từ kế tiếp), lao vào nhà; nhà đáp lại bằng lóe vàng, vòng trên đất, tia, hạt bay lên, lớp tối dưới;
+  - Word Shot (và loạt nỏ của Fort khi gõ lời gọi Bắn mạnh), đủ năm pha: A chữ vào lõi; R ở `FX_muzzle` (hay `FX_top`) đúng khung đạn rời: lóe lõi trắng ≤ 30 % bán kính, quầng vàng, vòng, tia theo hướng bắn, nhà nhún 9 % (L18), khói tối trễ 2–3 khung; T đầu đạn ngọc trên đầu tối, vệt, các chữ của từ bay theo; I lóe, vòng trên đất bằng bán kính nổ (tối thiểu 2 m), tia, chữ bung, khói; F than bay lên, vết cháy 2,6 s; không có quái trong tầm thì xì khói ở tháp;
+  - Chuỗi: mỗi bước một sợi hạt vàng ngọc từ nhà được giúp trước tới nhà này trong 0,45 s, số "×N" nảy cạnh thẻ (từ 2); lên bậc (5, 10, 20, 40) hay mốc (10, 25, 50, 100) thì lóe, vòng và tia lớn; chữ bay và tia lớn dần theo bậc;
+  - tấm tối dưới mỗi thẻ (§2.5): nền dưới thẻ đo 0,27–0,36 luma (đường 0,71).
+- **Kho hiệu ứng chung** (`fx-pool.ts`, cho C11 dùng lại): hai InstancedMesh quad (cộng sáng và trộn thường), hình dựng trong shader (quầng có lõi trắng, vòng, tia kéo theo vận tốc, khói ăn mòn bằng nhiễu, chữ từ atlas font, tấm thẻ), vẽ sau lượt chỉnh màu (`stage.overlay`, `toneMapped: false`, không depth, không bóng, không GTAO), nên lõi nóng không bị tone map. Ẩn khi không có hạt (0 draw call). Hạt đủ sáng ngay khung đầu; ngẫu nhiên có seed riêng. Giảm chuyển động: ít hạt hơn (0,6), không nhún nhà.
+- **Âm** (`src/view/sound-map.ts`): một bảng sự kiện → id cho mọi sự kiện hiếm và vòng chiến; `audio-min.ts` phát file thật khi `public/assets/typing-defense/audio/manifest.json` (mới, rỗng, được Git theo dõi) có id đó (phím đúng đổi cao độ theo chữ), không thì tiếng tổng hợp cũ của id; **id mới không có tiếng tổng hợp** (luật 28/10), im tới khi có file. `tests/td-sound-map.test.ts`.
+- **Kịch bản `td-1c-words`** (cổng td-words, td-hud-budget, td-scale, đo đất dưới thẻ, draw call của kho, một khung từ phím; `FRAMES=1` quay screencast 1 s quanh phím đúng, gõ sai, gõ xong, bước Chuỗi, Word Shot, trên nền tối (Rice Field trên cỏ) và nền sáng (thẻ tháp trên đường), cần `CDP_PORT`).
+
+| Đo | Trước (`6a6659d`) | Sau C10 |
+|---|---|---|
+| Gói "/" (gzip) | 84,41 kB | 84,80 kB (chừa 0,20 kB) |
+| Bộ chunk 3D | 156,36 kB | 164,75 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 11.648 | 12.537 (+889; phần C10 là 350, cộng dồn tối đa 14.500, trần cứng 16.500) |
+| Test | 383 / 38 file | 385 / 39 file |
+| Draw call thêm | — | ≤ 2 (0 khi không có hạt), High và Medium |
+| Phím → hiệu ứng | — | khung vẽ đầu tiên sau phím (mọi mẫu, 1280 và 1920 High, 1280 Medium); 1–17 ms từ keydown tới lúc sinh |
+| Trắng xóa vùng sân | — | ≤ 2,3 % (trần 6 %) |
+| Khung đầu / đỉnh của lóe R, I | — | 1,0 |
+
+- `td-1c-words` đạt ở 1280 × 720 và 1920 × 1080 (High), 1280 × 720 (Medium); ván vàng `"same":true` cả hai.
+- **Tờ khung:** `tmp/lane-l2/sheets/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (14 tờ: hàng đầu 4 khung toàn màn, rồi 12 khung cắt quanh thẻ và mục tiêu, −17 tới +800 ms), `compare-{key,word,shot,combo,wrong}.jpg` (tờ của ta cạnh tờ Typing Break), `clip-*-halfspeed.mp4`, số đo `numbers-frames.json`. Khung thô đã xóa.
+- **Còn lại của C10** (cho làn sau): khay mép ≤ 6 cho lời gọi ngoài màn và camera lướt 0,45 s khi bấm; kẹp cột tránh HUD khi zoom (nay chỉ tránh ở zoom 1); mặt nạ vùng yên không cần (thẻ DOM đục nằm trên canvas, hạt không đè chữ). Quái chưa có trên 3D (C7) nên đòn chữ trúng mặt đất trống; đạn bay lên màn hình đi dưới thẻ của chính tháp đó.
+
+### 8.10 Đường map 1, bản đầu (29/10/2026, làn L2; chưa có tờ chấm)
+
+Luật chủ dự án sáng 29/10 (`docs/games/PATH_QUALITY.md`): đường không được là "vệt quệt".
+- `src/view/3d/road.ts`: trường đường nướng từ lane của sim (khoảng cách ngang có dấu, khoảng cách dọc dưới dạng cos/sin chu kỳ 8 m, nửa bề rộng); đoạn hai lane chung chỉ vẽ một lần; ngã ba, khúc cua tìm từ lane. Nửa bề rộng lệch ±14 % theo nhiễu, +20 % ở khúc cua, +30 % ở ngã ba.
+- Shader đất (`ground.ts`): chất liệu chạy dọc đường (`textureGrad`, mật độ texel đều), lõi, vai mòn 0,3–0,8 m, cỏ, mép có nhiễu; mép lõi tối và pháp tuyến nghiêng ở gờ (lõi lún khoảng 5 cm); sân đá lát ở ngã ba. Mặt nạ đường cũ giữ cho test và decal.
+- Đồ bên đường có hạt cố định: đá bờ `props/da-ke` (Tripo có sẵn, đưa qua `models:blender`) cứ 2–5 m, dồn ra phía ngoài khúc cua, một cặp ở mỗi đầu cầu; thềm đá trắng `landmarks/them-da-trang` cạnh ngã ba; ẩn khi có nhà đè lên. Thêm 3 draw call (đá có bóng, thềm không).
+- Ảnh theo vai trò ở `src/view/3d/road.json` (`core`, `verge`, `plaza`, `edgeDecals`): phiếu 122 và tờ c của 123 thay vào đó khi được nhận. Chưa gắn ảnh Codex nào.
+- Test `tests/td-3d-road.test.ts`; kịch bản `td-1c-road` (góc mặc định, F2, cận cảnh khúc cua, ngã ba, đầu cầu).
+- **Còn lại:** tờ chấm theo PATH_QUALITY §5 và số đo luma; viên đá bờ nhìn như khối có viền tối ở camera chơi, cần xem lại hay thay bằng đá của phiếu 123; media mới (`props/da-ke`, `landmarks/them-da-trang`) cần `media:push`.
+
+### 8.11 Sửa C10 sau giám khảo (29/10/2026, làn L2)
+
+Giám khảo độc lập chấm C10 6,5 (phím đúng 6,5; phím sai 7,5; gõ xong 6,0; Word Shot 7,5; Chuỗi 6,5), đòi ≥ 8 và không mục nào dưới 7 (`tmp/lane-l2/judge-c10/verdict.md`). Đã sửa:
+- **Phím đúng:** vòng ấn nằm sau chữ (z-index −1 trong lớp của thẻ), không còn che từ; phím đầu đóng dấu lên mọi thẻ có chữ đầu khớp (cả khi chờ cặp bậc 2).
+- **Thứ bậc thẻ:** chữ của từ `clamp(26px, 30px × --ui, 32px)` (26 px ở 720p), dòng nghĩa 0,72 của nó.
+- **Gõ xong:** khung 0 bùng viền và sáng (T3, 1,14×), rồi bóp ngang 100 ms, trống 60 ms (T7); nghĩa và dấu hạng hiện sau 200 ms; thẻ không nghĩa bóp tại chỗ; chữ bay vào nhà trong ≤ 110 ms và nhà đáp lại ngay khi chữ chạm.
+- **Chuỗi:** "×N" đóng dấu 3× → 1× trong 150 ms theo khung, rồi đứng 26 px, màu theo bậc; lên bậc chỉ có vòng, tia và hạt (không thêm lóe trắng lên tháp); dây nối hai nhà là một nét liền (16 vệt nối đuôi, rộng khoảng 0,4 m, có lớp tối).
+- **Word Shot:** lõi trắng của lóe R giảm (0,22), quầng 0,3; chữ ở vệt đạn có viền mực đậm; chỗ trúng có vết cháy tối và vành ngọc của tia nước.
+- Tờ khung vòng 2: `tmp/lane-l2/sheets2/` (cùng dạng C10). `td-1c-words` đạt ở 1280 và 1920, mọi phím tới hiệu ứng trong khung đầu, trắng xóa ≤ 2,9 %.
+
+### 8.12 Còn lại (cho lượt sau)
+
+- C10: khay mép và kẹp cột tránh HUD đã làm ở §8.13; năm sửa của giám khảo vòng 3 ở §8.15; còn hai giám khảo độc lập vòng 4; icon nhà và mũi tên của khay cần ảnh thật (phiếu Codex); dải tập trung giữa màn kiểu Typing Break là mô-đun kit chung của làn khác (điều phối viên, 29/10), Wordwoven chưa làm dải nhập riêng.
+- Đường: tờ chấm và đá bờ đã làm ở §8.14; còn giám khảo độc lập chấm M (đạt từ 8); `media:push` cho hai model mới; gắn ảnh 122, 123c khi điều phối viên nhận (lõi đường ở camera mặc định cần đá lát thật).
+
+### 8.13 C10 vòng 3 (29/10/2026, làn L3, Mac mini M4)
+
+Giám khảo vòng 2 chấm 7,0 (phím đúng 7,0; phím sai 7,5; gõ xong 6,5; Word Shot 7,5; Chuỗi 7,0; `tmp/lane-l2/judge-c10-r2/verdict.md`). Làn L3 sửa năm chỗ giám khảo nêu và hai việc còn lại của C10:
+- **Phím đúng (sửa 1):** vòng ấn hai tông rời khỏi thẻ, đứng ngay dưới mép dưới thẻ, dưới chữ vừa gõ (`--drop` do `cards.ts` đặt, `feel.css`). Trên thẻ chỉ còn chữ đóng dấu (T1) và màu ngọc. Khung đầu là khung sáng nhất: đĩa trắng to nhất ở khung 0 (từ khung 1 nền trong suốt; trước đây đĩa kéo dài 3 khung và to dần), thêm lóe ngọc trắng 2 khung ở chỗ chữ rời thẻ (3D). Phím cuối của từ không có vòng (thẻ tự nổ).
+- **Gõ xong (sửa 2):** thẻ nổ ngay tại chỗ ở khung của phím cuối: 1,1×, viền trắng ấm 6 px và quầng 22 px (vượt thẻ khoảng 11 %), sáng +38 %, giữ 2 khung (34 ms); rồi bóp ngang 100 ms (nhanh dần) trong khi ánh sáng tắt; trống 60 ms; chỉ khi đó từ kế tiếp của lời gọi mới hiện ở đúng chỗ (`wait` trong `cards.ts`, `SWAP_MS` 194). Chữ cuối được đóng dấu như mọi phím (hết 3 khung trống). Bản sao các chữ của từ bung ra **trước** thẻ (DOM `td-fly` trên mọi thẻ: 1,7× → 1×, ra ngoài và xuống phía nhà, tắt ở 120 ms), còn chữ 3D bay từ dưới mép thẻ vào lõi. Lóe khung của khóa hay của phím sai bị hủy khi từ xong, để không che cú nổ.
+- **Đích đáp lại (sửa 3):** chữ đầu tiên bay 50 ms; khi nó chạm lõi, nhà lóe trắng ấm 50 ms và một vòng ngọc nhỏ (T9); lóe lớn cũ giữ làm nhịp hai.
+- **Chuỗi (sửa 4):** "×N" 34 px ở 720p (44 px ở 1080p), chữ số cao 21–22 px (27–28 px); đứng ngoài dòng từ, cạnh thẻ, giữa chiều cao thẻ, lớn ra về phía xa thẻ; khi có Word Shot thì đứng phía ngược hướng bay trên màn.
+- **Word Shot (sửa 5):** lõi trắng của lóe R nhỏ lại (thân 0,5, `hot` 0,15, quầng 0,24; lóe ở lõi nạp nay màu ngọc thay cho màu HOT gần trắng; tia bắt đầu từ 20 % bán kính ra ngoài, không dồn ở tâm; vòng R bắt đầu từ 65 %, `hot` 0,2). Vòng ngọc trên đất quanh chân tháp ở khung R, nên ở 1280 vẫn thấy cú bắn dù thẻ che đỉnh tháp. Dải nghĩa và nhãn hạng của từ Bắn mạnh chờ tới khi đạn chạm (tối đa 0,9 s, `CardFeel.hold`); ×N đứng phía ngược hướng bắn.
+- **Khay mép (việc còn lại):** lời gọi ra ngoài màn đứng ở mép, theo hướng từ giữa màn tới nhà (`WordFeel.anchor`), ≤ 2 mỗi mép, ≤ 6 tất cả, quá thì ẩn; thẻ có cạnh ngọc dày phía nhà (`data-edge`); nằm ở mép mà vẫn tránh bảng HUD bên đó (xuống dưới bảng trên, lên trên bảng dưới). Bấm thẻ ở khay: camera lướt tới nhà trong 0,45 s, êm hai đầu (`CameraRig.glide`, `View3D.tray`, `main.ts`). Gõ như thường. Chưa có icon nhà và mũi tên bằng ảnh thật (cần phiếu Codex; luật 28/10 cấm hình vẽ bằng mã).
+- **Kẹp cột tránh HUD ở mọi mức zoom (việc còn lại):** cột thẻ đứng dưới thanh HUD trên và trên thanh HUD dưới mà nó gặp; `spreadLanes` tính trần đẩy 240 px từ chỗ mà giới hạn của cột đã đặt nó (trước đây cột bị bảng đẩy quá 240 px thì không tách được khỏi cột bên cạnh, rơi về nhánh "đè lên bảng").
+- **Hiệu năng:** đọc kích thước DOM một lần rồi mới ghi (không còn ép layout cho mỗi chữ); bề rộng ×N đo một lần.
+
+Đo (`td-1c-words`, Mac mini M4, High; tờ ở `tmp/lane-l3/sheets3/`, số ở `numbers-frames.json`):
+
+| Đo | Vòng 2 (L2, `7b9de55`) | Vòng 3 (L3) |
+|---|---|---|
+| Khung đầu / đỉnh của phím đúng (`firstOverPeak`, key-dark và key-light, 1280 và 1920) | 0,74–0,91 | 1,00; 0,96; 1,00; 1,00 |
+| Nhà đáp lại một từ (keydown → lóe T9, đo trong máy, `answerMs`) | +125–208 ms (giám khảo, theo screencast) | 65 ms (1280), 89 ms (1920) |
+| ×N lúc nghỉ ở 720p | khoảng 13 px | cỡ chữ 34 px, chữ số cao 21–22 px (1080p: 44 px, 27–28 px) |
+| Khoảng trống lớn nhất giữa hai khung screencast trong −40…+420 ms | 150 ms (+144–294) | ≤ 34 ms ở mọi tờ (JPEG 55 thay 78) |
+| Lõi trắng / bán kính lóe R (nửa dưới chỗ bắn, khung lóe rộng nhất) | khoảng 0,5 (giám khảo ước) | đo 0,47 (1280), 0,43 (1920), nhưng phép đo tính cả chữ DOM bay qua và tháp đá trắng; mắt ước 0,35–0,4: **vẫn có thể trên 0,30** |
+| Trắng xóa vùng sân | ≤ 2,9 % | ≤ 2,4 % |
+| Draw call hiệu ứng thêm | ≤ 2 | ≤ 2 |
+| Phím → hiệu ứng | khung vẽ đầu | khung vẽ đầu (mọi mẫu) |
+| Khay mép: camera lướt | — | 29 m trong 430 ms (1280), 25 m trong 399 ms (1920, lượt không quay khung) |
+| Thẻ đè bảng HUD ở F2, F3, zoom bánh xe | (chỉ kiểm ở zoom 1) | 0 trong 18 lần nhìn mỗi cỡ |
+| Đất dưới thẻ (§2.5) | 0,27–0,36 | 0,27–0,37 |
+| Gói "/" (gzip) | 80,90 kB (chừa 4,10) | 81,45 kB (chừa 3,55); `?title=0` 82,91 kB (chừa 2,09) |
+| Chunk 3D (gzip, cùng three.js) | 168,27 kB | 169,90 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 12.669 | 12.867 (+198) |
+| Test | 390 / 41 file | 392 / 42 file |
+
+- `td-1c-words` đạt ở 1280 × 720 và 1920 × 1080 (High): td-words, td-hud-budget, td-scale, đất dưới thẻ, ≤ 2 draw call, hiệu ứng ở khung đầu sau phím, `zoomHud`, `trayCap`, `trayGlide`, `trayClear` (mới).
+- Chưa chụp được cảnh nhiều thẻ cùng chữ đầu (cặp bậc 2): qua sáu lượt chạy ở hai cỡ, không lần nào có hai từ cùng chữ đầu sống cùng lúc. Mã đóng dấu lên mọi thẻ khớp có từ vòng 2 (`cards.ts` `read`); kịch bản tự chụp `key-multi` khi gặp cặp.
+- Test mới `tests/td-c10-r3.test.ts` (camera lướt 0,45 s; hai cột bị bảng đẩy quá 240 px vẫn tách và tránh bảng).
+- Tờ: `tmp/lane-l3/sheets3/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (14 tờ như `sheets2`: 4 khung toàn màn và 12 khung cắt từ −17 tới +800 ms), `td-1c-words-combo-rest-<cỡ>.jpg` (×2, ×3, ×5, ×7 cạnh nhau), `td-1c-words-tray[-after]-<cỡ>.jpg` (khay trước và sau khi bấm), `numbers-frames.json`. Khung thô đã xóa bằng `tools/capture-prune/prune.mjs`.
+- Tự chấm (thang của giám khảo, so Typing Break): phím đúng 8, phím sai 7,5, gõ xong 7,5, Word Shot 7,5 (R vẫn có thể trắng quá 30 % trên tháp đá trắng), Chuỗi 8; tổng khoảng 7,7. Chưa chắc đạt 8: cần giám khảo độc lập vòng 3.
+
+### 8.14 Đường map 1: đá bờ và tờ chấm PATH_QUALITY §5 (29/10/2026, làn L3)
+
+- **Đá bờ `props/da-ke` nhìn như khối viền đen:** nguyên nhân chính là GTAO (chỉ có ở High): lớp tấm vữa mỏng của model làm AO vẽ một nét đen dọc mỗi hàng đá (ở Medium nét đó xám). Đã sửa:
+  - đá bờ ra khỏi lớp độ sâu của GTAO (`userData.noAO`, `stage.ts` bọc `overrideVisibility` của `GTAOPass`);
+  - không đổ bóng (bóng của một bờ thấp làm viền tối thêm); độ sâu của mép đường do gờ lún 5 cm trong shader đất (§8.10) gánh;
+  - dài theo đường hơn, thấp hơn (1,5 × 0,9 × 1,15 lần cỡ hạt), lún 60 % chiều cao vào đất, nên chỉ đỉnh các viên đá nhô lên khỏi vai đường;
+  - đặt sát mép lõi (bề rộng nửa + 0,4–0,65 m, trước là + 0,55–0,9 m: cách một mét thì trông như khối rơi trên cỏ);
+  - không mặt nào của đá đen hẳn: màu nền tối thiểu (0,34; 0,31; 0,26) và 0,38 của nó làm ánh tự phát.
+- **Vai đường tối và ấm hơn lõi** (ảnh `trail-worn` đậm hơn, đủ phủ; mép lõi tối 0,3 thay 0,24), để ở camera mặc định đọc ra ba lớp (lõi, vai, cỏ) thay vì một dải.
+- **Số đo** (`td-1c-road` có thêm `probes`: mỗi điểm thứ 24 của làn trên màn, tâm và một mặt cắt 0,2 m một bước từ 1 m trong mép tới 2,6 m ngoài mép; `numbers-road.json`):
+
+| Đo | 1280 × 720 | 1920 × 1080 | Luật |
+|---|---|---|---|
+| Luma lõi − luma cỏ (trung vị; phần mặt cắt đạt ≥ 0,15) | 0.159 (56 %) | 0.155 (61 %) | ≥ 0,15 |
+| Chuyển lõi → vai (80 % → 20 % của chênh lõi–cỏ, trung vị) | 0.4 m | 0.2 m | 0,3–0,8 m |
+| Bề rộng nửa đường (p10–p90 quanh trung vị 2.08 m, 39 điểm) | ±22.1 % | như bên trái | ±10–20 %, rộng ra ở cua và ngã ba |
+| Draw call cả cảnh (camera mặc định) | 73 | 73 | High ≤ 150 |
+
+  - Lõi − cỏ chỉ vừa qua ngưỡng ở trung vị; vài mặt cắt âm vì điểm "cỏ" rơi vào sân Fort, sân đá ngã ba, nhà hay cầu. Bề rộng lệch ±22 % gồm cả phần rộng ra ở cua và ngã ba (luật cho phép). Đo ở 1920 dải chuyển hẹp hơn (0,2 m) vì nay vai tối hơn cỏ, nên mốc 20 % rơi ngay mép lõi; bề rộng vai theo thiết kế vẫn 0,3–0,8 m (`vergeW`).
+- **Tờ:** `tmp/lane-l3/road-sheets/td-1c-road-<cỡ>-<default|near|bend|junction|bridge>.jpg`, mỗi tờ đặt cạnh ảnh tham chiếu của chủ dự án (`art-src/_refs/owner-epic-2026-10-28.webp` ở checkout chính, chỉ đọc). Camera mặc định của game là 55° ở 58 m, nên "mặc định" và "55°" là một tờ; tờ thứ hai là F2 (40°, 30 m).
+- **Tự chấm (thang M):** 5,5. Trả lời "Đường có trông như vệt quệt không?": **ở camera mặc định thì vẫn phần nào có**: lõi là một dải be nhạt đều, chưa thấy đá lát hay vệt bánh xe; vai tối, đá bờ và gờ lún giúp nhưng ở 58 m chúng nhỏ. Ở cận cảnh (khúc cua, ngã ba, đầu cầu) thì không: có vai mòn, gờ, sân đá lát, hàng đá bờ. Mức 8 cần ảnh thật của phiếu 122 (`road-paved`, `trail-worn`) và tờ c của 123 (decal mép đường); chưa gắn, chờ điều phối viên nhận.
+- Trên cỏ có vài nét trắng mảnh lượn song song (thấy ở cận cảnh khúc cua và ngã ba); không phải đường, chưa tìm ra nguồn.
+
+### 8.15 C10 vòng 4 (29/10/2026, làn L4, Mac mini M4)
+
+Giám khảo vòng 3 chấm 7,5 (phím đúng 8,0; phím sai 7,5; gõ xong 7,5; Word Shot 7,5; Chuỗi 7,5; khay mép 7,0; `tmp/lane-l3/judge-c10-r3/verdict.md`). Làn L4 sửa năm chỗ giám khảo nêu, ba việc điều phối viên giao thêm, và một lỗi tìm ra khi chụp.
+- **Word Shot, pha R (sửa 1).** Đo lại theo cách của giám khảo cho thấy chỗ trắng có ba nguồn, sửa từng nguồn:
+  - lõi trắng của quầng: shader làm trắng trong 0,3 của quad, mà thân quầng chỉ hiện tới khoảng 0,6 của quad, nên lõi là một nửa phần mắt thấy (đúng số giám khảo đo 0,46–0,6); nay 0,16 của quad (`fx-pool.ts`, cho mọi quầng);
+  - ánh sáng cộng trên tháp đá trắng: màu gì cộng lên đá trắng cũng ra trắng, và ánh hổ phách cộng ánh ngọc ra trắng kem. Thân lóe R nay được **vẽ** (trộn thường, lớp `ink`): lớp ngọc sẫm rộng gấp 2, thân ngọc đục 0,92, viền hổ phách vẽ (vòng); trên đó chỉ một lõi cộng sáng nhỏ (0,5 thân), quầng ngọc mờ (0,12) và tia ngọc (`hot` 0,1). Bỏ vòng ngọc cộng sáng của R (nó trùng bán kính viền hổ phách nên thành cung trắng); vòng lên bậc của Chuỗi nay vẽ hổ phách và ngọc; lóe kết thúc cầu nạp chỉ còn ngọc;
+  - cầu nạp ở đầu tháp (pha A): ngọc trên ngọc sẫm, `hot` 0,2, quầng hổ phách mờ khi gần đầy; chữ của từ Bắn mạnh lao vào nòng màu ngọc không trắng (`hot` 0), quầng 0,22, không kéo hạt;
+  - thẻ che lóe: khi thẻ của lời gọi che quá một phần ba quầng, tâm lóe hạ xuống trên màn (cùng độ sâu, tối đa 1,2 bán kính, vẫn trên thân tháp) tới khi khoảng 3/4 quầng nằm dưới mép dưới thẻ (`WordFeel.clear`); nòng ở trên vẫn có lớp ngọc sẫm; thẻ đang nổ và bóp, và từ kế tiếp còn ẩn, không còn tấm tối bên dưới (bóng đó che lóe).
+- **Gõ xong (sửa 2):** thẻ đục suốt lúc nổ (trước đây lấy độ mờ 0,7 của thẻ không khóa, vì từ kế tiếp của lời gọi đã khóa); 2 khung đầu: giấy sáng +36 %, viền trắng ấm 4 px quanh thẻ, quầng ấm và lớp sáng ở mép trong (T3); rồi bóp ngang thành một vạch trong 100 ms (1,1 → 0, nhanh dần, cao giữ 1,1), trống 60 ms (T7). Bản sao các chữ bay **lên và ra hai bên** từ dòng từ, không bao giờ xuống dòng nghĩa (cả ở pha R của Word Shot); khung đầu đã ra 55 % đường, mờ từ khung thứ hai. Chữ 3D lao vào nhà không còn kéo hạt vàng (hạt chồng dần làm khung 2–3 sáng hơn khung nổ); lóe T9 ở nhà 0,55; nhịp hai của nhà là thân ngọc trên ngọc sẫm, viền hổ phách vẽ.
+- **Chuỗi (sửa 3):** "×N" cỡ 38 px ở 720p (chữ số cao 23–24 px; 1080p 50 px); 2 khung đầu trắng nóng có quầng màu bậc (khung đóng dấu là khung sáng nhất), rồi theo bậc: ×2–×4 trắng ngà trên quầng tối, ×5–×9 ngọc sẫm trên quầng ngà, ×10–×19 hổ phách, ×20–×39 cam hổ phách, từ ×40 vàng (`TIER_INK`); đi theo thẻ rồi theo dải nghĩa mà thẻ biến thành (x và y). Tờ combo cắt quanh ×N và nhà vừa được giúp (`marks.combo`, `marks.house`), không còn theo lóe R của lần bắn trước.
+- **Khay mép (sửa 4):** mũi chỉ hướng là hiệu ứng trong kho hiệu ứng (không phải CSS, SVG hay emoji): hai chữ V ngọc trên nét mực chảy ra khỏi thẻ theo đúng hướng tới nhà (không chỉ theo mép), trong 44 px khay chừa giữa thẻ và mép màn (`WordFeel.pointers`, `cards.ts`); thẻ vào hay ra khỏi khay trượt 0,3 s (êm cuối) thay cho nhảy (`WordFeel.slide`). Kịch bản chụp bước lia camera mà một thẻ trượt vào khay (`tray-in`), ảnh hai thẻ cùng một mép (`tray-two`), gõ trọn một từ ở khay (`tray-type`), rồi bấm thẻ để camera lướt tới.
+- **Phím sai (sửa 5):** chữ vừa gõ sai hiện màu son trên ô chữ cần gõ, đóng dấu 1,8× → 1× trong 2 khung, rồi bị hất lên phải, xoay, tắt ở 150 ms (`WordFeel.slip`, DOM); giọt mực lớn hơn (quad 52 px CSS ở độ sâu của nhà, phần đục ≥ 50 % rộng khoảng 19 px ở 720p), vết loang 3,2 m; nhà giật nhẹ (0,5 cú nhún Word Shot) với lóe và vòng son.
+- **Số đếm số nhiều:** "Night 1 · 1 foe left" (`hud.ts`), "Best 1 star" (`title.ts`, nhãn đọc màn hình), "1 word · dim" (`build-menu.ts`); test `td-hud` kiểm "1 foe left".
+- **Nhiều thẻ cùng chữ đầu:** trong trò chơi việc này **không xảy ra**: `giveWord` (`calls.ts`) chỉ nhận từ bậc 1, nên mỗi từ đang hiện có một chữ đầu riêng (TK 6.5); cặp bậc 2 chỉ còn trong bộ định tuyến và thẻ. Ba vòng chụp không gặp là vì thế. Để kiểm T1 trên mọi thẻ khớp, `__td.twinFirst()` (`dev-tools.ts`, không đổi sim) đổi một từ chưa gõ thành bạn bậc 2 của một từ khác (cùng chữ đầu, chữ thứ hai khác), đúng trạng thái mà bộ định tuyến và thẻ xử lý; kịch bản gọi nó và chụp `key-multi` (cặp team/thanks, dark/drink, eye/easy).
+- **Lỗi tìm ra khi chụp (sửa ở `cards.ts`):** một thẻ trong pool chưa từng được đặt chỗ (từ kế tiếp của lời gọi đang chờ bóp xong, hay thẻ khay quá trần) mà từ của nó biến mất thì "gập" từ vị trí `undefined`: `place()` ném TypeError và vòng vẽ thẻ dừng. Nay thẻ chưa từng hiện được trả lại ngay. Lời gọi đóng đúng lúc thẻ còn ẩn cũng gây ra lỗi này trong trò chơi thật.
+- **Kịch bản `td-1c-words`:** ghi hộp DOM từng khung (thẻ, chữ bay, ×N, dấu hạng, chữ đóng dấu) khi quay Word Shot và combo, để phép đo lõi R bỏ đúng phần DOM; tìm khay sau khi gọi đêm sớm, thả quái và đưa Draconis về cạnh tháp (lượt chậm tới cuối ngày 2 thì không lời gọi nào sáng); thẻ dải nghĩa không còn bị coi là thẻ khay để bấm.
+
+Đo (`td-1c-words`, Mac mini M4, High; 1280 × 720 lấy từ một lượt, 1920 × 1080 từ một lượt, cùng mã cuối; tờ ở `tmp/lane-l4/sheets4/`, số ở `numbers-frames.json`):
+
+| Đo | Vòng 3 (L3) | Vòng 4 (L4) |
+|---|---|---|
+| Lõi trắng / bán kính lóe R, cách của giám khảo (khung R so khung trước phím; hiệu ứng: xám tăng ≥ 12 hay ≥ 25; lõi: điểm trung tính kênh nhỏ nhất ≥ 215, 232, 245; bỏ mọi hộp DOM), √(diện tích) | giám khảo 0,46–0,67 (1920), 0,32–0,54 (1280); làn 0,43–0,47 | Word Shot 0,18–0,31 (1280), 0,14–0,31 (1920); lượt có Chuỗi lên bậc 0,16–0,33 (1280), 0,18–0,34 (1920). Số trên 0,30 chỉ ở ngưỡng lỏng nhất (215 trên 25) |
+| Như trên, r95 lõi / r95 hiệu ứng | giám khảo 0,40–0,71 | 0,11–0,17 (1280); 0,55–0,93 (1920: 195–861 điểm trắng rải rác, chủ yếu chữ của từ rơi vào nòng, trên 8.854–11.177 điểm hiệu ứng; không thành đĩa) |
+| Khung đầu / đỉnh của riêng lóe R (bỏ hộp DOM) | — | 1,00 (cả hai cỡ, Word Shot và Chuỗi) |
+| Khung đầu / đỉnh của hộp quanh khoảnh khắc (cách của L3), 1280 / 1920 | gõ xong 0,75 / 0,59; Chuỗi 0,97 / 0,88 | phím đúng 0,99 / 0,95, nền sáng 1,0 / 1,0, hai thẻ cùng chữ đầu 1,0 / 1,0; gõ xong 0,91 / 0,91; Word Shot 1,0 / 1,0; Chuỗi 0,78 / 1,0; gõ ở khay 0,89 / 0,93 |
+| Nhà đáp lại một từ (keydown → lóe T9, `answerMs`) | 65 / 89 ms | 63 / 50 ms |
+| ×N lúc nghỉ | cỡ 34 px, chữ số 21–22 px ở 720p | cỡ 38 px, chữ số 23–24 px ở 720p (1080p: 50 px, 31–32 px) |
+| Khung trong cửa sổ −40…+420 ms | khoảng trống lớn nhất ≤ 34 ms | 27–28 khung ở mọi tờ, khoảng trống lớn nhất 17 ms (không rơi khung) |
+| Trắng xóa vùng sân | ≤ 2,4 % | ≤ 2,6 % (trần 6 %) |
+| Draw call hiệu ứng thêm | ≤ 2 | ≤ 2 |
+| Khay mép | camera lướt 29 m / 430 ms | lướt 55,9 m / 427 ms (1280), 52,6 m / 437 ms (1920); hai thẻ cùng một mép có ở cả hai cỡ; gõ "act" từ khay; ≤ 2 mỗi mép, không đè HUD |
+| Nhiều thẻ cùng chữ đầu | chưa chụp được | `key-multi` cả hai cỡ (team/thanks): chữ "t" và vòng ấn trên cả hai thẻ |
+| Gói "/" (gzip) | 81,45 kB (chừa 3,55) | 81,58 kB (chừa 3,42); `?title=0` 83,04 kB (chừa 1,96) |
+| Chunk 3D (gzip, cùng three.js) | 169,90 kB | 171,83 kB (trần 260) |
+| Dòng `.ts` ngoài kit | 12.867 | 13.058 (+165 so với `bc05e67`) |
+| Test | 392 / 42 file | 392 / 42 file (kiểm "1 foe left" thêm vào test có sẵn) |
+
+- `td-1c-words` đạt mọi cổng ở 1280 × 720 và 1920 × 1080 (High), cả `trayGlide`; `pnpm check` xanh; ván vàng `"same":true` cả hai.
+- **Tờ:** `tmp/lane-l4/sheets4/td-1c-words-<khoảnh khắc>-<cỡ>.jpg` (key-dark, key-light, key-multi, wrong-dark, wrong-light, word-dark, shot, combo, tray-in, tray-type: 4 khung toàn màn và 12 khung cắt từ −17 tới +800 ms), `td-1c-words-combo-rest-<cỡ>.jpg` (×2, ×3, ×5, ×7, ×10), `td-1c-words-tray-<cỡ>.jpg` (thẻ trong khay, hai thẻ một mép, sau khi lướt, cắt 2× quanh mũi chỉ), `compare-shot-core-r4.jpg` (khung R và mặt nạ đo), `numbers-frames.json`. Khung thô đã xóa bằng `tools/capture-prune/prune.mjs`.
+- **Tự chấm** (thang giám khảo, so Typing Break): phím đúng 8,0; phím sai 8,0; gõ xong 8,0; Word Shot 8,0; Chuỗi 8,0; khay mép 7,5; tổng khoảng 8,0 (vẫn trong dải 7,5–8,5 cần hai giám khảo).
+- **Còn lại:**
+  - lõi R ở ngưỡng lỏng nhất còn 0,31–0,34; ở 1920 điểm trắng rải rác (chữ của từ rơi vào nòng) làm r95 cao;
+  - hộp gõ xong 0,91 (khung thứ hai sáng hơn khung nổ một chút: T9 ở nhà chạm sau 50 ms); hộp Chuỗi ở 1280 0,78 (thẻ bóp lại để lộ lóe R, chữ bung ra, sợi nối chạy vào nhà trong 0,45 s);
+  - ×N của từ Bắn mạnh đứng một mình tới khi đạn chạm, vì dải nghĩa chờ cú trúng;
+  - mũi chỉ của khay nhỏ và nhạt ở 1×, là hiệu ứng tạm cho tới khi ảnh mũi tên của khay (phiếu Codex) được nhận;
+  - emoji `CALL_ICON` và hạt ●○ bằng CSS vẫn chờ phiếu 133 và 172.

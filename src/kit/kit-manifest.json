@@ -14,7 +14,8 @@
     "balance",
     "audio",
     "ui",
-    "feedback"
+    "feedback",
+    "three"
   ],
   "files": {
     "README.md": "94882f021f43e84a332911e43b07fa0e8ed7a7706cf36b82d3e1506ff9eaff0f",
@@ -68,6 +69,16 @@
     "platform/index.ts": "e814e71ee98f9c080a9948956177ea4cf2e8d07221db78aa4cb2f6ea305a423d",
     "platform/rng.ts": "56a7f59c91c6d92e5fbc4173e523c78018a6f467e4de5ae9a7292ecf5afeb054",
     "platform/safe-storage.ts": "06d6f59c3e6eec2d48697fbece81c23803dbc69f126402206dffb58b372ddc3b",
+    "three/guide-scene.ts": "77a539294bd3e5ff9f917a39c90928f6f1d8b9c89e1904d7a1e4a64b4eb1acaa",
+    "three/hero.ts": "a4551f46882299bddf719b1d3db52a2034133298ad13e2c52920519103a2ad80",
+    "three/index.ts": "0ee144d88984a5d44262d1bd1f3215e79bad1f5f99fc3c66b790818e5080bf53",
+    "three/materials.ts": "50d17ccd0b09da1ebc4a408e8279526a657414539e423e380522e3272ac2bee5",
+    "three/model-contracts.ts": "00c031567337bb0f04e50bf7208c2559310e3cde761cd85a1151d5155df61f70",
+    "three/model-loader.ts": "8928ef95d567590372622bf3a0113d652a06f6b393ee1a82b4b88f2bc63d6014",
+    "three/particles.ts": "a64acbbd76dc1bbdd42d842914c4798dc5eed10c38b3329d34424b3b1be1be57",
+    "three/stage.ts": "1703ed6d6a0e53b21cac0ddb997e8e45442b03f838af17a09a9592e9574097f2",
+    "three/textures.ts": "46448456beaf6f4d1a6f63685253fa8f8242c7adaaed152f5762a61d4714af21",
+    "three/util.ts": "a52b455ac4cb6e48670e558a30b7fb7d6bb0e34ddaaa0c586958f4a6c1b21ad5",
     "tools/cdp-port.mjs": "ac2389605a7d6d4b552a7aa14622b8240afb126c835c85c06df0b00fec783c2b",
     "tools/cdp-run.mjs": "a9c78f4fdb4c25b9f692161aa3e270533cbe88b78ba614d8165e482923fc0719",
     "tools/deploy/check-pack.mjs": "38b86ef0714547a59c675b6df124596a55c25131bab67da742fa41e93edbd540",

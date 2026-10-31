@@ -1,18 +1,18 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-24T01:17:49.733Z",
+  "generatedAt": "2026-10-29T01:27:39.905Z",
   "models": {
     "attachments/cuong-thi-lead-hat": {
       "kind": "attachments",
       "id": "cuong-thi-lead-hat",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/cuong-thi-lead-hat/cuong-thi-lead-hat.high.glb?v=2e8d4e4088",
-          "bytes": 265880
+          "url": "/assets/typing-defense/models/attachments/cuong-thi-lead-hat/cuong-thi-lead-hat.high.glb?v=5d06e3c8b9",
+          "bytes": 128788
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/cuong-thi-lead-hat/cuong-thi-lead-hat.medium.glb?v=a3ad4fc07b",
-          "bytes": 101216
+          "url": "/assets/typing-defense/models/attachments/cuong-thi-lead-hat/cuong-thi-lead-hat.medium.glb?v=7e0ea6c0f6",
+          "bytes": 58612
         }
       },
       "triangles": 1999,
@@ -29,12 +29,12 @@
       "id": "helper-brush",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-brush/helper-brush.high.glb?v=befe55093f",
-          "bytes": 163904
+          "url": "/assets/typing-defense/models/attachments/helper-brush/helper-brush.high.glb?v=99c42c3dd1",
+          "bytes": 86456
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-brush/helper-brush.medium.glb?v=91bcccf106",
-          "bytes": 67392
+          "url": "/assets/typing-defense/models/attachments/helper-brush/helper-brush.medium.glb?v=5d85c1f652",
+          "bytes": 44600
         }
       },
       "triangles": 2000,
@@ -51,12 +51,12 @@
       "id": "helper-cham-glasses",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-cham-glasses/helper-cham-glasses.high.glb?v=4cfbca09c2",
-          "bytes": 123368
+          "url": "/assets/typing-defense/models/attachments/helper-cham-glasses/helper-cham-glasses.high.glb?v=28b9516f98",
+          "bytes": 72800
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-cham-glasses/helper-cham-glasses.medium.glb?v=2d7baa62ff",
-          "bytes": 61444
+          "url": "/assets/typing-defense/models/attachments/helper-cham-glasses/helper-cham-glasses.medium.glb?v=54a72ee2b0",
+          "bytes": 45020
         }
       },
       "triangles": 2000,
@@ -73,12 +73,12 @@
       "id": "helper-cham-scarf",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-cham-scarf/helper-cham-scarf.high.glb?v=650e7b7fe7",
-          "bytes": 188552
+          "url": "/assets/typing-defense/models/attachments/helper-cham-scarf/helper-cham-scarf.high.glb?v=94adf5223f",
+          "bytes": 88408
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-cham-scarf/helper-cham-scarf.medium.glb?v=876f33ef9a",
-          "bytes": 67268
+          "url": "/assets/typing-defense/models/attachments/helper-cham-scarf/helper-cham-scarf.medium.glb?v=e0936f74bc",
+          "bytes": 44324
         }
       },
       "triangles": 2000,
@@ -95,12 +95,12 @@
       "id": "helper-drum",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-drum/helper-drum.high.glb?v=b1c5ed0c99",
-          "bytes": 135072
+          "url": "/assets/typing-defense/models/attachments/helper-drum/helper-drum.high.glb?v=795ab8e8d4",
+          "bytes": 71416
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-drum/helper-drum.medium.glb?v=88ef527927",
-          "bytes": 57184
+          "url": "/assets/typing-defense/models/attachments/helper-drum/helper-drum.medium.glb?v=123de0bde1",
+          "bytes": 40148
         }
       },
       "triangles": 1998,
@@ -117,12 +117,12 @@
       "id": "helper-gach-wingband",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-gach-wingband/helper-gach-wingband.high.glb?v=69d32c89af",
-          "bytes": 162736
+          "url": "/assets/typing-defense/models/attachments/helper-gach-wingband/helper-gach-wingband.high.glb?v=2cadf1f223",
+          "bytes": 89236
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-gach-wingband/helper-gach-wingband.medium.glb?v=486200dfcb",
-          "bytes": 72844
+          "url": "/assets/typing-defense/models/attachments/helper-gach-wingband/helper-gach-wingband.medium.glb?v=33e6eeb720",
+          "bytes": 49112
         }
       },
       "triangles": 2000,
@@ -139,12 +139,12 @@
       "id": "helper-hammer",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-hammer/helper-hammer.high.glb?v=85a7c3986d",
-          "bytes": 194068
+          "url": "/assets/typing-defense/models/attachments/helper-hammer/helper-hammer.high.glb?v=10124beea7",
+          "bytes": 96128
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-hammer/helper-hammer.medium.glb?v=2672191172",
-          "bytes": 74700
+          "url": "/assets/typing-defense/models/attachments/helper-hammer/helper-hammer.medium.glb?v=c09ca31eb4",
+          "bytes": 46876
         }
       },
       "triangles": 2000,
@@ -161,12 +161,12 @@
       "id": "helper-phay-tail",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/helper-phay-tail/helper-phay-tail.high.glb?v=4a91df1948",
-          "bytes": 176588
+          "url": "/assets/typing-defense/models/attachments/helper-phay-tail/helper-phay-tail.high.glb?v=08a90b4f75",
+          "bytes": 93368
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/helper-phay-tail/helper-phay-tail.medium.glb?v=2ae65aa8b9",
-          "bytes": 73704
+          "url": "/assets/typing-defense/models/attachments/helper-phay-tail/helper-phay-tail.medium.glb?v=3e325ab3fa",
+          "bytes": 51264
         }
       },
       "triangles": 2000,
@@ -183,12 +183,12 @@
       "id": "linh-giao-spear",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/attachments/linh-giao-spear/linh-giao-spear.high.glb?v=2aefad1281",
-          "bytes": 188644
+          "url": "/assets/typing-defense/models/attachments/linh-giao-spear/linh-giao-spear.high.glb?v=d8a46d613f",
+          "bytes": 96020
         },
         "medium": {
-          "url": "/assets/typing-defense/models/attachments/linh-giao-spear/linh-giao-spear.medium.glb?v=a5910c1fa1",
-          "bytes": 76988
+          "url": "/assets/typing-defense/models/attachments/linh-giao-spear/linh-giao-spear.medium.glb?v=462e8e7bfa",
+          "bytes": 48484
         }
       },
       "triangles": 2000,
@@ -207,12 +207,12 @@
       "id": "archer",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/archer/archer.high.glb?v=97e01ae6cc",
-          "bytes": 1007624
+          "url": "/assets/typing-defense/models/buildings/archer/archer.high.glb?v=7d6f2b911a",
+          "bytes": 461220
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/archer/archer.medium.glb?v=c67670e582",
-          "bytes": 358452
+          "url": "/assets/typing-defense/models/buildings/archer/archer.medium.glb?v=158f9683b8",
+          "bytes": 209032
         }
       },
       "triangles": 10000,
@@ -243,15 +243,15 @@
       "id": "barracks",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/barracks/barracks.high.glb?v=b352ed09c9",
-          "bytes": 1019004
+          "url": "/assets/typing-defense/models/buildings/barracks/barracks.high.glb?v=b48d5eb44e",
+          "bytes": 527660
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/barracks/barracks.medium.glb?v=6f0711a6a2",
-          "bytes": 359872
+          "url": "/assets/typing-defense/models/buildings/barracks/barracks.medium.glb?v=d1091eb7d9",
+          "bytes": 272312
         }
       },
-      "triangles": 9999,
+      "triangles": 11755,
       "sockets": [
         "FX_assist",
         "FX_banner",
@@ -269,9 +269,9 @@
       ],
       "clips": [],
       "size": [
-        4.6806,
-        1.8033,
-        3.6895
+        4.615,
+        4.1891,
+        3.8734
       ]
     },
     "buildings/cannon": {
@@ -279,12 +279,12 @@
       "id": "cannon",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/cannon/cannon.high.glb?v=bb8dd0811f",
-          "bytes": 729520
+          "url": "/assets/typing-defense/models/buildings/cannon/cannon.high.glb?v=1467f61de9",
+          "bytes": 346356
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/cannon/cannon.medium.glb?v=203320dd56",
-          "bytes": 267804
+          "url": "/assets/typing-defense/models/buildings/cannon/cannon.medium.glb?v=0e0da1edd6",
+          "bytes": 173788
         }
       },
       "triangles": 10000,
@@ -315,12 +315,12 @@
       "id": "farm",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/farm/farm.high.glb?v=872a6607b9",
-          "bytes": 753436
+          "url": "/assets/typing-defense/models/buildings/farm/farm.high.glb?v=05dac5e859",
+          "bytes": 380152
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/farm/farm.medium.glb?v=a062756e6f",
-          "bytes": 301344
+          "url": "/assets/typing-defense/models/buildings/farm/farm.medium.glb?v=a37f3f45da",
+          "bytes": 198872
         }
       },
       "triangles": 9999,
@@ -350,12 +350,12 @@
       "id": "gold-mine",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/gold-mine/gold-mine.high.glb?v=3dd485c45a",
-          "bytes": 868168
+          "url": "/assets/typing-defense/models/buildings/gold-mine/gold-mine.high.glb?v=71b5f892c4",
+          "bytes": 399468
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/gold-mine/gold-mine.medium.glb?v=0dd229b115",
-          "bytes": 312164
+          "url": "/assets/typing-defense/models/buildings/gold-mine/gold-mine.medium.glb?v=18e6661d12",
+          "bytes": 199560
         }
       },
       "triangles": 9999,
@@ -388,12 +388,12 @@
       "id": "keep",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/keep/keep.high.glb?v=72aba1ee94",
-          "bytes": 977168
+          "url": "/assets/typing-defense/models/buildings/keep/keep.high.glb?v=de75c197a7",
+          "bytes": 486204
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/keep/keep.medium.glb?v=987df05a33",
-          "bytes": 384484
+          "url": "/assets/typing-defense/models/buildings/keep/keep.medium.glb?v=357389872f",
+          "bytes": 253496
         }
       },
       "triangles": 15000,
@@ -424,12 +424,12 @@
       "id": "seal-dais",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/buildings/seal-dais/seal-dais.high.glb?v=fc5180f66b",
-          "bytes": 739224
+          "url": "/assets/typing-defense/models/buildings/seal-dais/seal-dais.high.glb?v=be0cf06000",
+          "bytes": 359548
         },
         "medium": {
-          "url": "/assets/typing-defense/models/buildings/seal-dais/seal-dais.medium.glb?v=db52438a9a",
-          "bytes": 275484
+          "url": "/assets/typing-defense/models/buildings/seal-dais/seal-dais.medium.glb?v=0893177b47",
+          "bytes": 179464
         }
       },
       "triangles": 10000,
@@ -488,6 +488,75 @@
         0.7751
       ]
     },
+    "enemies/mam-go": {
+      "kind": "enemies",
+      "id": "mam-go",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/enemies/mam-go/mam-go.high.glb?v=08db488651",
+          "bytes": 437828
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/enemies/mam-go/mam-go.medium.glb?v=72b7b53f26",
+          "bytes": 273340
+        }
+      },
+      "triangles": 5840,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_HAND_R",
+        "FX_HEAD",
+        "FX_CORE",
+        "FX_FEET"
+      ],
+      "clips": [
+        "Enemy_Idle",
+        "Enemy_Move",
+        "Enemy_Attack",
+        "Enemy_Hit",
+        "Enemy_Death"
+      ],
+      "size": [
+        1.3892,
+        1.6,
+        0.5444
+      ]
+    },
+    "enemies/nuppeppo": {
+      "kind": "enemies",
+      "id": "nuppeppo",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/enemies/nuppeppo/nuppeppo.high.glb?v=b52db891a2",
+          "bytes": 229788
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/enemies/nuppeppo/nuppeppo.medium.glb?v=79c9eafb19",
+          "bytes": 157844
+        }
+      },
+      "triangles": 5910,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_HAND_R",
+        "FX_HEAD",
+        "FX_CORE",
+        "FX_FEET"
+      ],
+      "clips": [
+        "Enemy_Idle",
+        "Enemy_Move",
+        "Enemy_Attack",
+        "Enemy_Hit",
+        "Enemy_Death",
+        "Enemy_Death.split"
+      ],
+      "size": [
+        2.0809,
+        2,
+        1.4423
+      ]
+    },
     "enemies/tanuki": {
       "kind": "enemies",
       "id": "tanuki",
@@ -521,6 +590,42 @@
         1.6255,
         1.8,
         1.4325
+      ]
+    },
+    "enemies/thuong-luong": {
+      "kind": "enemies",
+      "id": "thuong-luong",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/enemies/thuong-luong/thuong-luong.high.glb?v=c18ef39791",
+          "bytes": 525820
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/enemies/thuong-luong/thuong-luong.medium.glb?v=461679a293",
+          "bytes": 333364
+        }
+      },
+      "triangles": 5652,
+      "sockets": [
+        "FX_HAND_L",
+        "FX_HAND_R",
+        "FX_CORE",
+        "FX_FEET",
+        "FX_TOOL",
+        "FX_HEAD"
+      ],
+      "clips": [
+        "Enemy_Idle",
+        "Enemy_Move",
+        "Enemy_Attack",
+        "Enemy_Hit",
+        "Enemy_Skill",
+        "Enemy_Death"
+      ],
+      "size": [
+        1.5326,
+        2.4,
+        5.258
       ]
     },
     "enemies/troll": {
@@ -602,17 +707,392 @@
         1.2921
       ]
     },
+    "kits/archer-kit-l2": {
+      "kind": "kits",
+      "id": "archer-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.high.glb?v=565828f586",
+          "bytes": 128180
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/archer-kit-l2/archer-kit-l2.medium.glb?v=d2197b4428",
+          "bytes": 72064
+        }
+      },
+      "triangles": 3588,
+      "sockets": [
+        "FX_lantern_0",
+        "FX_lantern_1",
+        "FX_lantern_2",
+        "FX_lantern_3",
+        "FX_lantern_4",
+        "FX_perch",
+        "FX_top",
+        "FX_word"
+      ],
+      "clips": [],
+      "size": [
+        3.2,
+        3.2432,
+        2.622
+      ]
+    },
+    "kits/archer-kit-l3": {
+      "kind": "kits",
+      "id": "archer-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/archer-kit-l3/archer-kit-l3.high.glb?v=ed2b451b9b",
+          "bytes": 131448
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/archer-kit-l3/archer-kit-l3.medium.glb?v=4f8c04d062",
+          "bytes": 72420
+        }
+      },
+      "triangles": 3582,
+      "sockets": [
+        "FX_crew",
+        "FX_muzzle",
+        "FX_perch",
+        "FX_top",
+        "FX_word"
+      ],
+      "clips": [],
+      "size": [
+        2.8,
+        3.1503,
+        2.6431
+      ]
+    },
+    "kits/barracks-kit-l2": {
+      "kind": "kits",
+      "id": "barracks-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/barracks-kit-l2/barracks-kit-l2.high.glb?v=eb30aa38dd",
+          "bytes": 150492
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/barracks-kit-l2/barracks-kit-l2.medium.glb?v=5bb5c2febf",
+          "bytes": 78156
+        }
+      },
+      "triangles": 3592,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        1.9,
+        2.3631,
+        1.9462
+      ]
+    },
+    "kits/barracks-kit-l3": {
+      "kind": "kits",
+      "id": "barracks-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/barracks-kit-l3/barracks-kit-l3.high.glb?v=6dba5db35e",
+          "bytes": 130592
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/barracks-kit-l3/barracks-kit-l3.medium.glb?v=a90d713bc1",
+          "bytes": 69912
+        }
+      },
+      "triangles": 3697,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        3.6,
+        1.4802,
+        2.5095
+      ]
+    },
+    "kits/cannon-kit-l2": {
+      "kind": "kits",
+      "id": "cannon-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/cannon-kit-l2/cannon-kit-l2.high.glb?v=f83e4e3402",
+          "bytes": 123744
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/cannon-kit-l2/cannon-kit-l2.medium.glb?v=3c3be4b3b3",
+          "bytes": 69092
+        }
+      },
+      "triangles": 3701,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        4.4,
+        2.1138,
+        3.7638
+      ]
+    },
+    "kits/cannon-kit-l3": {
+      "kind": "kits",
+      "id": "cannon-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/cannon-kit-l3/cannon-kit-l3.high.glb?v=1a1be3823a",
+          "bytes": 141316
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/cannon-kit-l3/cannon-kit-l3.medium.glb?v=5ba4bdd500",
+          "bytes": 75724
+        }
+      },
+      "triangles": 3779,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        1.9086,
+        3.2,
+        1.0098
+      ]
+    },
+    "kits/farm-kit-l2": {
+      "kind": "kits",
+      "id": "farm-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/farm-kit-l2/farm-kit-l2.high.glb?v=4448f697fe",
+          "bytes": 136616
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/farm-kit-l2/farm-kit-l2.medium.glb?v=005265e579",
+          "bytes": 73612
+        }
+      },
+      "triangles": 3934,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.2,
+        1.4146,
+        1.3512
+      ]
+    },
+    "kits/farm-kit-l3": {
+      "kind": "kits",
+      "id": "farm-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/farm-kit-l3/farm-kit-l3.high.glb?v=b883b1b36c",
+          "bytes": 122980
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/farm-kit-l3/farm-kit-l3.medium.glb?v=e926e701ee",
+          "bytes": 66984
+        }
+      },
+      "triangles": 3778,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.4,
+        1.3661,
+        1.168
+      ]
+    },
+    "kits/gold-mine-kit-l2": {
+      "kind": "kits",
+      "id": "gold-mine-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/gold-mine-kit-l2/gold-mine-kit-l2.high.glb?v=a1d3f26e9d",
+          "bytes": 149076
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/gold-mine-kit-l2/gold-mine-kit-l2.medium.glb?v=eecc09c9bb",
+          "bytes": 78936
+        }
+      },
+      "triangles": 3668,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        1.8,
+        1.0171,
+        1.1619
+      ]
+    },
+    "kits/gold-mine-kit-l3": {
+      "kind": "kits",
+      "id": "gold-mine-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/gold-mine-kit-l3/gold-mine-kit-l3.high.glb?v=632e9c1c50",
+          "bytes": 154996
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/gold-mine-kit-l3/gold-mine-kit-l3.medium.glb?v=05618723b6",
+          "bytes": 84616
+        }
+      },
+      "triangles": 3667,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        4.1878,
+        2.6,
+        2.0306
+      ]
+    },
+    "kits/keep-kit-l2": {
+      "kind": "kits",
+      "id": "keep-kit-l2",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.high.glb?v=7f7dae5d48",
+          "bytes": 205584
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l2/keep-kit-l2.medium.glb?v=0f62bf9d0a",
+          "bytes": 122480
+        }
+      },
+      "triangles": 7800,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        12.0117,
+        5.7805,
+        10.7122
+      ]
+    },
+    "kits/keep-kit-l3": {
+      "kind": "kits",
+      "id": "keep-kit-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l3/keep-kit-l3.high.glb?v=da2c724307",
+          "bytes": 144232
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l3/keep-kit-l3.medium.glb?v=cbffef8918",
+          "bytes": 79076
+        }
+      },
+      "triangles": 3510,
+      "sockets": [
+        "FX_perch",
+        "FX_top",
+        "FX_word"
+      ],
+      "clips": [],
+      "size": [
+        3.8,
+        4.1421,
+        2.9895
+      ]
+    },
+    "kits/keep-kit-l4": {
+      "kind": "kits",
+      "id": "keep-kit-l4",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l4/keep-kit-l4.high.glb?v=4b7ea1aca2",
+          "bytes": 139680
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/kits/keep-kit-l4/keep-kit-l4.medium.glb?v=cb25cda7a0",
+          "bytes": 76688
+        }
+      },
+      "triangles": 3608,
+      "sockets": [
+        "FX_perch",
+        "FX_top",
+        "FX_word"
+      ],
+      "clips": [],
+      "size": [
+        3.6,
+        2.6574,
+        2.6534
+      ]
+    },
+    "landmarks/choi-canh-doi": {
+      "kind": "landmarks",
+      "id": "choi-canh-doi",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/landmarks/choi-canh-doi/choi-canh-doi.high.glb?v=14195eaadd",
+          "bytes": 223208
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/landmarks/choi-canh-doi/choi-canh-doi.medium.glb?v=e6aafc599f",
+          "bytes": 135300
+        }
+      },
+      "triangles": 7699,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        4.1031,
+        5,
+        4.0076
+      ]
+    },
+    "landmarks/them-da-trang": {
+      "kind": "landmarks",
+      "id": "them-da-trang",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.high.glb?v=bf277ee1bc",
+          "bytes": 131720
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/landmarks/them-da-trang/them-da-trang.medium.glb?v=8ee17ad558",
+          "bytes": 73524
+        }
+      },
+      "triangles": 4000,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        3.4001,
+        0.9049,
+        3.3822
+      ]
+    },
+    "landmarks/vach-thac-bac": {
+      "kind": "landmarks",
+      "id": "vach-thac-bac",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/landmarks/vach-thac-bac/vach-thac-bac.high.glb?v=be88a07916",
+          "bytes": 154132
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/landmarks/vach-thac-bac/vach-thac-bac.medium.glb?v=cd61e43595",
+          "bytes": 99756
+        }
+      },
+      "triangles": 7738,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        22,
+        16.7941,
+        20.9446
+      ]
+    },
     "loot/bag-basket": {
       "kind": "loot",
       "id": "bag-basket",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/loot/bag-basket/bag-basket.high.glb?v=a2977241fa",
-          "bytes": 290968
+          "url": "/assets/typing-defense/models/loot/bag-basket/bag-basket.high.glb?v=73f6cbe3cc",
+          "bytes": 126252
         },
         "medium": {
-          "url": "/assets/typing-defense/models/loot/bag-basket/bag-basket.medium.glb?v=961b316cf1",
-          "bytes": 94892
+          "url": "/assets/typing-defense/models/loot/bag-basket/bag-basket.medium.glb?v=f2eabf662c",
+          "bytes": 53568
         }
       },
       "triangles": 2000,
@@ -629,12 +1109,12 @@
       "id": "bag-cloth",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/loot/bag-cloth/bag-cloth.high.glb?v=8326c179f6",
-          "bytes": 209936
+          "url": "/assets/typing-defense/models/loot/bag-cloth/bag-cloth.high.glb?v=be671b429d",
+          "bytes": 100720
         },
         "medium": {
-          "url": "/assets/typing-defense/models/loot/bag-cloth/bag-cloth.medium.glb?v=a28e5f20c8",
-          "bytes": 78920
+          "url": "/assets/typing-defense/models/loot/bag-cloth/bag-cloth.medium.glb?v=0dd58a9875",
+          "bytes": 51292
         }
       },
       "triangles": 1998,
@@ -651,12 +1131,12 @@
       "id": "chest-boss",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/loot/chest-boss/chest-boss.high.glb?v=635630c587",
-          "bytes": 296436
+          "url": "/assets/typing-defense/models/loot/chest-boss/chest-boss.high.glb?v=bde2e7636c",
+          "bytes": 146608
         },
         "medium": {
-          "url": "/assets/typing-defense/models/loot/chest-boss/chest-boss.medium.glb?v=c6d80a97be",
-          "bytes": 113116
+          "url": "/assets/typing-defense/models/loot/chest-boss/chest-boss.medium.glb?v=293c8f5298",
+          "bytes": 65112
         }
       },
       "triangles": 2000,
@@ -675,12 +1155,12 @@
       "id": "arrow",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/projectiles/arrow/arrow.high.glb?v=c6e8ec0de3",
-          "bytes": 168216
+          "url": "/assets/typing-defense/models/projectiles/arrow/arrow.high.glb?v=fea4a3f16a",
+          "bytes": 86308
         },
         "medium": {
-          "url": "/assets/typing-defense/models/projectiles/arrow/arrow.medium.glb?v=0c5f4c744f",
-          "bytes": 68408
+          "url": "/assets/typing-defense/models/projectiles/arrow/arrow.medium.glb?v=23616e506f",
+          "bytes": 45240
         }
       },
       "triangles": 2000,
@@ -692,17 +1172,39 @@
         1.2
       ]
     },
+    "projectiles/fire-feather": {
+      "kind": "projectiles",
+      "id": "fire-feather",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/projectiles/fire-feather/fire-feather.high.glb?v=308c7a6c00",
+          "bytes": 80480
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/projectiles/fire-feather/fire-feather.medium.glb?v=bba7af05d2",
+          "bytes": 44100
+        }
+      },
+      "triangles": 1912,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        0.189,
+        0.2737,
+        1
+      ]
+    },
     "projectiles/keep-bolt": {
       "kind": "projectiles",
       "id": "keep-bolt",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/projectiles/keep-bolt/keep-bolt.high.glb?v=16c9f50029",
-          "bytes": 183468
+          "url": "/assets/typing-defense/models/projectiles/keep-bolt/keep-bolt.high.glb?v=8d563dba2f",
+          "bytes": 95212
         },
         "medium": {
-          "url": "/assets/typing-defense/models/projectiles/keep-bolt/keep-bolt.medium.glb?v=ca9f0048c3",
-          "bytes": 73652
+          "url": "/assets/typing-defense/models/projectiles/keep-bolt/keep-bolt.medium.glb?v=49e1480aa0",
+          "bytes": 48152
         }
       },
       "triangles": 2000,
@@ -719,12 +1221,12 @@
       "id": "root-burst",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/projectiles/root-burst/root-burst.high.glb?v=ff464f6dc4",
-          "bytes": 174444
+          "url": "/assets/typing-defense/models/projectiles/root-burst/root-burst.high.glb?v=30eb7ac34b",
+          "bytes": 99012
         },
         "medium": {
-          "url": "/assets/typing-defense/models/projectiles/root-burst/root-burst.medium.glb?v=8b15ffd3f9",
-          "bytes": 81132
+          "url": "/assets/typing-defense/models/projectiles/root-burst/root-burst.medium.glb?v=1dcd527bc4",
+          "bytes": 62872
         }
       },
       "triangles": 3953,
@@ -736,17 +1238,39 @@
         2.4404
       ]
     },
+    "projectiles/seed-drop": {
+      "kind": "projectiles",
+      "id": "seed-drop",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/projectiles/seed-drop/seed-drop.high.glb?v=cf45486c2e",
+          "bytes": 49012
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/projectiles/seed-drop/seed-drop.medium.glb?v=cae11e2260",
+          "bytes": 33248
+        }
+      },
+      "triangles": 1920,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        0.5143,
+        0.6,
+        0.5001
+      ]
+    },
     "projectiles/shell": {
       "kind": "projectiles",
       "id": "shell",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/projectiles/shell/shell.high.glb?v=6223d6263a",
-          "bytes": 218536
+          "url": "/assets/typing-defense/models/projectiles/shell/shell.high.glb?v=b3a341c463",
+          "bytes": 107068
         },
         "medium": {
-          "url": "/assets/typing-defense/models/projectiles/shell/shell.medium.glb?v=b2cffd5304",
-          "bytes": 82264
+          "url": "/assets/typing-defense/models/projectiles/shell/shell.medium.glb?v=6ba4e1426f",
+          "bytes": 51144
         }
       },
       "triangles": 2000,
@@ -763,12 +1287,12 @@
       "id": "cannon-barrel",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/cannon-barrel/cannon-barrel.high.glb?v=859121cb45",
-          "bytes": 206496
+          "url": "/assets/typing-defense/models/props/cannon-barrel/cannon-barrel.high.glb?v=a413aa8a56",
+          "bytes": 108044
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/cannon-barrel/cannon-barrel.medium.glb?v=bf728657ee",
-          "bytes": 84104
+          "url": "/assets/typing-defense/models/props/cannon-barrel/cannon-barrel.medium.glb?v=98ab87bd66",
+          "bytes": 52632
         }
       },
       "triangles": 2000,
@@ -782,17 +1306,107 @@
         3
       ]
     },
+    "props/cannon-barrel-l3": {
+      "kind": "props",
+      "id": "cannon-barrel-l3",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/cannon-barrel-l3/cannon-barrel-l3.high.glb?v=5c114f378b",
+          "bytes": 106584
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/cannon-barrel-l3/cannon-barrel-l3.medium.glb?v=dd78d1c78d",
+          "bytes": 52116
+        }
+      },
+      "triangles": 1922,
+      "sockets": [
+        "FX_muzzle"
+      ],
+      "clips": [],
+      "size": [
+        1.7294,
+        1.7206,
+        3
+      ]
+    },
+    "props/cau-go": {
+      "kind": "props",
+      "id": "cau-go",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/cau-go/cau-go.high.glb?v=073ac4a8d1",
+          "bytes": 161744
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/cau-go/cau-go.medium.glb?v=bd60fcfcee",
+          "bytes": 94412
+        }
+      },
+      "triangles": 4026,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.0182,
+        1.5795,
+        4.4423
+      ]
+    },
+    "props/da-ke": {
+      "kind": "props",
+      "id": "da-ke",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/da-ke/da-ke.high.glb?v=de4d929cee",
+          "bytes": 76708
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/da-ke/da-ke.medium.glb?v=0a23c3bbcb",
+          "bytes": 45292
+        }
+      },
+      "triangles": 2086,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        2.5527,
+        0.8662,
+        1.0305
+      ]
+    },
+    "props/gold-mine-cart": {
+      "kind": "props",
+      "id": "gold-mine-cart",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/gold-mine-cart/gold-mine-cart.high.glb?v=5775f98386",
+          "bytes": 126404
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/gold-mine-cart/gold-mine-cart.medium.glb?v=aaee773136",
+          "bytes": 63368
+        }
+      },
+      "triangles": 2000,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        1.2843,
+        1.0569,
+        1.1939
+      ]
+    },
     "props/gold-pile-1": {
       "kind": "props",
       "id": "gold-pile-1",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/gold-pile-1/gold-pile-1.high.glb?v=83715cbb4e",
-          "bytes": 153524
+          "url": "/assets/typing-defense/models/props/gold-pile-1/gold-pile-1.high.glb?v=07eedbe7ba",
+          "bytes": 85268
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/gold-pile-1/gold-pile-1.medium.glb?v=d332a6e9c7",
-          "bytes": 70036
+          "url": "/assets/typing-defense/models/props/gold-pile-1/gold-pile-1.medium.glb?v=9943fd80e3",
+          "bytes": 48952
         }
       },
       "triangles": 2000,
@@ -809,12 +1423,12 @@
       "id": "gold-pile-2",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/gold-pile-2/gold-pile-2.high.glb?v=20c2499fc9",
-          "bytes": 203572
+          "url": "/assets/typing-defense/models/props/gold-pile-2/gold-pile-2.high.glb?v=fad368b332",
+          "bytes": 104732
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/gold-pile-2/gold-pile-2.medium.glb?v=5d2b32594d",
-          "bytes": 83268
+          "url": "/assets/typing-defense/models/props/gold-pile-2/gold-pile-2.medium.glb?v=589731fbfb",
+          "bytes": 55188
         }
       },
       "triangles": 1999,
@@ -831,12 +1445,12 @@
       "id": "gold-pile-3",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/gold-pile-3/gold-pile-3.high.glb?v=7d59455e15",
-          "bytes": 214916
+          "url": "/assets/typing-defense/models/props/gold-pile-3/gold-pile-3.high.glb?v=d344ec7ddd",
+          "bytes": 113620
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/gold-pile-3/gold-pile-3.medium.glb?v=a447655ede",
-          "bytes": 90592
+          "url": "/assets/typing-defense/models/props/gold-pile-3/gold-pile-3.medium.glb?v=a48c59f8a0",
+          "bytes": 58504
         }
       },
       "triangles": 2000,
@@ -853,12 +1467,12 @@
       "id": "gold-pile-4",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/gold-pile-4/gold-pile-4.high.glb?v=5f6bce1212",
-          "bytes": 232644
+          "url": "/assets/typing-defense/models/props/gold-pile-4/gold-pile-4.high.glb?v=c6caefda2c",
+          "bytes": 117832
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/gold-pile-4/gold-pile-4.medium.glb?v=6c02848dd0",
-          "bytes": 92332
+          "url": "/assets/typing-defense/models/props/gold-pile-4/gold-pile-4.medium.glb?v=65e45179d2",
+          "bytes": 58100
         }
       },
       "triangles": 1999,
@@ -875,12 +1489,12 @@
       "id": "level-pennant",
       "tiers": {
         "high": {
-          "url": "/assets/typing-defense/models/props/level-pennant/level-pennant.high.glb?v=ccb3344e2e",
-          "bytes": 165920
+          "url": "/assets/typing-defense/models/props/level-pennant/level-pennant.high.glb?v=1362838ed8",
+          "bytes": 92992
         },
         "medium": {
-          "url": "/assets/typing-defense/models/props/level-pennant/level-pennant.medium.glb?v=c28feca803",
-          "bytes": 75280
+          "url": "/assets/typing-defense/models/props/level-pennant/level-pennant.medium.glb?v=48bd765bc0",
+          "bytes": 52752
         }
       },
       "triangles": 2000,
@@ -890,6 +1504,28 @@
         0.673,
         2.1984,
         0.3799
+      ]
+    },
+    "props/scaffold-bamboo": {
+      "kind": "props",
+      "id": "scaffold-bamboo",
+      "tiers": {
+        "high": {
+          "url": "/assets/typing-defense/models/props/scaffold-bamboo/scaffold-bamboo.high.glb?v=1a9e92f6f0",
+          "bytes": 171652
+        },
+        "medium": {
+          "url": "/assets/typing-defense/models/props/scaffold-bamboo/scaffold-bamboo.medium.glb?v=194b925e8d",
+          "bytes": 90556
+        }
+      },
+      "triangles": 3630,
+      "sockets": [],
+      "clips": [],
+      "size": [
+        4.8,
+        2.6036,
+        4.2615
       ]
     },
     "units/linh-giao": {

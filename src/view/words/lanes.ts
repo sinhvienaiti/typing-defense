@@ -56,6 +56,9 @@ export function spreadLanes(lanes: readonly LaneBox[], left: number, right: numb
   const order = lanes.map((_, index) => index).sort((a, b) => lanes[a]!.x - lanes[b]!.x || a - b);
   out.length = lanes.length;
   out.fill(0);
+  // `push` caps what parting adds, counted from where a lane's own bounds put it (an edge tray past a panel still parts).
+  const high = lanes.map((lane) => Math.max(push, (lane.lo ?? -Infinity) + lane.half - lane.x + push));
+  const low = lanes.map((lane) => Math.min(-push, (lane.hi ?? Infinity) - lane.half - lane.x - push));
   for (let pass = 0; pass < 40; pass += 1) {
     let moved = false;
     for (let i = 0; i < order.length; i += 1) {
@@ -66,8 +69,8 @@ export function spreadLanes(lanes: readonly LaneBox[], left: number, right: numb
         const gap = b.x + out[order[j]!]! - b.half - (a.x + out[order[i]!]! + a.half);
         if (gap >= COLUMN.clear - 0.01) continue;
         const half = (COLUMN.clear - gap) / 2;
-        out[order[i]!] = Math.max(-push, out[order[i]!]! - half);
-        out[order[j]!] = Math.min(push, out[order[j]!]! + half);
+        out[order[i]!] = Math.max(low[order[i]!]!, out[order[i]!]! - half);
+        out[order[j]!] = Math.min(high[order[j]!]!, out[order[j]!]! + half);
         moved = true;
       }
     }

@@ -1,0 +1,100 @@
+#!/usr/bin/env node
+/**
+ * Map 1's media per tier against docs/td/BUILD_1C_MAP1.md §5 (1C step C4): the models map 1 loads (their High or
+ * Medium file in public/assets/typing-defense/models/manifest.json), the ground tiles and decals (C3), the scenery
+ * atlas and backdrops (C9) and the VFX sheets (C11), each read from public/assets/typing-defense/<part>/ by its
+ * ".high." or ".medium." name. The owner's decisions of 28/10 (BUILD_1C_MAP1 §5): High in all ≤ 16 MB, Medium ≤ 9 MB, the starter set
+ * the page waits for ≤ 3.5 MB, and the bytes up to Night 1 (the starter set, what Day 1 adds, JS, CSS and vocabulary)
+ * ≤ 6 MB. Prints a table and the models map 1 needs that the manifest does not list yet; exits 1 when a line is passed
+ * (with --strict also when a model is missing).
+ *   node scripts/td/media-budget.mjs [--strict] [--json]
+ */
+import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { gzipSync } from "node:zlib";
+
+const ROOT = join(import.meta.dirname, "..", "..");
+const ASSETS = join(ROOT, "public/assets/typing-defense");
+/** BUILD_1C_MAP1 §5, MB (10^6 bytes): the owner's decisions of 28/10, High in all ≤ 16 MB and Medium ≤ 9 MB; the parts are only watched. */
+export const BUDGET = {
+  models: { high: null, medium: null },
+  ground: { high: null, medium: null },
+  scenery: { high: null, medium: null },
+  vfx: { high: null, medium: null },
+  total: { high: 16, medium: 9 },
+};
+/** Medium only: the starter set and the bytes up to Night 1 (owner 28/10). */
+export const FIRST = { starter: 3.5, night1: 6 };
+const helperGear = ["helper-cham-glasses", "helper-cham-scarf", "helper-phay-tail", "helper-gach-wingband", "helper-brush", "helper-drum", "helper-hammer"].map((id) => "attachments/" + id);
+/** What the page waits for at Medium: the ground, the scenery and these models (Day 1's houses, the hero and helpers, the first foe). */
+export const STARTER = ["buildings/keep", "buildings/archer", "buildings/farm", "props/scaffold-bamboo", "props/level-pennant", "props/cau-go", "landmarks/vach-thac-bac", "landmarks/choi-canh-doi", "heroes/draconis", "helpers/helper-owlet", ...helperGear, "units/worker-base", "enemies/cuong-thi", "projectiles/arrow", "projectiles/keep-bolt"];
+/** Loaded during Day 1, so in by Night 1: the level 2 kits Day 1 can buy, the fire feather, and the VFX sheets. */
+export const NIGHT_1 = ["kits/keep-kit-l2", "kits/archer-kit-l2", "kits/farm-kit-l2", "projectiles/fire-feather"];
+/** The models map 1's story and sandbox draw (BUILD_1C_MAP1 §5; the Troll and the bags are not in map 1's rules). */
+export const MAP1_MODELS = [
+  ...["keep", "archer", "cannon", "barracks", "gold-mine", "farm"].map((id) => "buildings/" + id),
+  ...["keep-kit-l2", "keep-kit-l3", "keep-kit-l4", "archer-kit-l2", "archer-kit-l3", "cannon-kit-l2", "cannon-kit-l3", "barracks-kit-l2", "barracks-kit-l3", "gold-mine-kit-l2", "gold-mine-kit-l3", "farm-kit-l2", "farm-kit-l3"].map((id) => "kits/" + id),
+  ...["cannon-barrel", "cannon-barrel-l3", "gold-pile-1", "gold-pile-2", "gold-pile-3", "gold-pile-4", "level-pennant", "gold-mine-cart", "scaffold-bamboo", "cau-go"].map((id) => "props/" + id),
+  "landmarks/vach-thac-bac", "landmarks/choi-canh-doi",
+  ...["arrow", "keep-bolt", "shell", "root-burst", "fire-feather", "seed-drop"].map((id) => "projectiles/" + id),
+  "loot/chest-boss",
+  ...["helper-cham-glasses", "helper-cham-scarf", "helper-phay-tail", "helper-gach-wingband", "helper-brush", "helper-drum", "helper-hammer", "cuong-thi-lead-hat", "linh-giao-spear"].map((id) => "attachments/" + id),
+  ...["cuong-thi", "thuong-luong", "mam-go", "tanuki", "nuppeppo", "moc-tinh"].map((id) => "enemies/" + id),
+  "units/linh-giao", "units/worker-base", "heroes/draconis", "helpers/helper-owlet",
+];
+
+const mb = (bytes) => bytes / 1e6;
+function files(dir) {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name);
+    return statSync(path).isDirectory() ? files(path) : [path];
+  });
+}
+/** Bytes of a part's files for a tier: "<name>.high.<ext>" or "<name>.medium.<ext>"; a file with neither counts for both. */
+function partBytes(part, tier) {
+  return files(join(ASSETS, part)).filter((path) => !/manifest\.json$/.test(path)).reduce((sum, path) => {
+    const other = tier === "high" ? ".medium." : ".high.";
+    return path.includes(other) ? sum : sum + statSync(path).size;
+  }, 0);
+}
+
+/** JS and CSS a first play fetches (gzip of dist/assets, as served), and the vocabulary; 0 for JS and CSS before a build. */
+function codeBytes() {
+  const dist = join(ROOT, "dist/assets");
+  const code = files(dist).filter((path) => /\.(js|css)$/.test(path)).reduce((sum, path) => sum + gzipSync(readFileSync(path)).length, 0);
+  return code + files(join(ROOT, "public/vocabulary")).reduce((sum, path) => sum + gzipSync(readFileSync(path)).length, 0);
+}
+
+export function measure() {
+  const manifest = JSON.parse(readFileSync(join(ASSETS, "models/manifest.json"), "utf8")).models;
+  const missing = MAP1_MODELS.filter((key) => manifest[key] === undefined);
+  const rows = {};
+  for (const tier of ["high", "medium"]) {
+    const models = MAP1_MODELS.reduce((sum, key) => sum + (manifest[key]?.tiers?.[tier]?.bytes ?? 0), 0);
+    const parts = { models, ground: partBytes("ground", tier), scenery: partBytes("scenery", tier), vfx: partBytes("vfx", tier) };
+    rows[tier] = { ...parts, total: Object.values(parts).reduce((a, b) => a + b, 0) };
+  }
+  const medium = (keys) => keys.reduce((sum, key) => sum + (manifest[key]?.tiers?.medium?.bytes ?? 0), 0);
+  const starter = medium(STARTER) + rows.medium.ground + rows.medium.scenery;
+  const night1 = starter + medium(NIGHT_1) + rows.medium.vfx + codeBytes();
+  const over = [];
+  if (mb(rows.high.total) > BUDGET.total.high) over.push("total high");
+  if (mb(rows.medium.total) > BUDGET.total.medium) over.push("total medium");
+  if (mb(starter) > FIRST.starter) over.push("starter set");
+  if (mb(night1) > FIRST.night1) over.push("up to Night 1");
+  return { rows, starter, night1, missing, listed: MAP1_MODELS.length - missing.length, over };
+}
+
+if (process.argv[1] === import.meta.filename) {
+  const result = measure();
+  if (process.argv.includes("--json")) console.log(JSON.stringify(result, null, 1));
+  else {
+    console.log("| Phần | High (MB) | trần | Medium (MB) | trần |\n|---|---:|---:|---:|---:|");
+    for (const part of Object.keys(BUDGET)) console.log(`| ${part} | ${mb(result.rows.high[part]).toFixed(2)} | ${BUDGET[part].high ?? "—"} | ${mb(result.rows.medium[part]).toFixed(2)} | ${BUDGET[part].medium ?? "—"} |`);
+    console.log(`| starter set (Medium) | | | ${mb(result.starter).toFixed(2)} | ${FIRST.starter} |\n| up to Night 1 (Medium, with JS, CSS, vocabulary) | | | ${mb(result.night1).toFixed(2)} | ${FIRST.night1} |`);
+    console.log(`\nmodels: ${result.listed}/${MAP1_MODELS.length} of map 1's listed; missing: ${result.missing.join(", ") || "none"}`);
+    console.log(result.over.length === 0 ? "media budget: within BUILD_1C_MAP1 §5" : "media budget: over in " + result.over.join(", "));
+  }
+  process.exitCode = result.over.length > 0 || (process.argv.includes("--strict") && result.missing.length > 0) ? 1 : 0;
+}

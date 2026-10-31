@@ -21,6 +21,10 @@ nginx, at `https://td.typing-game.local`. It is a submodule of the
 - `docs/td/BUILD_1B.md` (1B, written after the split, so its paths are current):
   map 1 as a 5-night stage, the Mộc Tinh boss peak, rounds R1/R2/R3, line
   ceiling 10,500, balance targets and gates.
+- `docs/td/BUILD_1C_MAP1.md` (C0, approved by the owner 28/10/2026): step 1C for map 1 only (3D on Medium and High, the
+  2D view as the Low tier and the fallback), the 1C line ceiling 16,500, the "/" and 3D chunk budgets, media and frame
+  budgets per tier, the module split under `src/view/3d/` and the order C1 → C2 → C4 → C3 → C6 → C10 → C13 → C14.
+  Built on branch `td-1c` (worktree `games/.wt-td-1c`), merged into `a2-days` step by step after review.
 - `docs/td/R3_PLAN.md`: the plan of 1B R3 "Học và dạy" (work items by file, order with the
   bundle budget first, data shapes, the spec points chosen as proposed, tests, scenarios, the
   balance plan, line budget and cut order) and the pre-R3 baseline on the Apple M4.
@@ -209,7 +213,12 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   keeps a set the host cannot serve ("Saved sound · unavailable") and writes `keyboard` only once it owns one
   (`src/app/prefs.ts`); Bamboo stands in, unsaved, for a set that cannot sound; the run's first step waits for the
   saved set's first batch 1.5 s at most (`src/app/keyboard-gate.ts`). Tests use the sample host `tests/feel-fixture.ts`.
-- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` included).
+- 1C (`docs/td/BUILD_1C_MAP1.md`, branch `td-1c`): the page draws through `MapView` (`src/view/view.ts`: `pickView` by
+  `?view=2d|3d` and `?q=low|medium|high`, Low and 2D by default until C13; `load3d`). `DebugView` is the Low tier and the
+  fallback; map 1's 3D view is `src/view/3d/` (C1: `view-3d.ts`, still empty), a chunk of its own with three.js that
+  only `load3d` reaches (`tests/td-view.test.ts`; `scripts/bundle-budget.mjs` checks its 260 kB budget). Scenario
+  `scripts/visual/scenarios/td-1c-view.mjs`: 2D plays, 3D opens, a blocked chunk and a lost context fall back.
+- `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` and, from 1C, `three` included).
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`
   (the sandbox bot, 3 nights) and `tests/golden/td-1b-boss.json` (the sandbox
   preset, Mộc Tinh called on day 1, until it retreats).

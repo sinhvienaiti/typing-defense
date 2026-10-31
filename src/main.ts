@@ -21,9 +21,11 @@
  * run holds as behind the pause card, and each letter's verdict plays the chosen keyboard set. That set comes from Typing
  * Feel (parent docs/games/TYPING_FEEL_SERVICE.md §5.1): its catalogue (app/keyboard.ts, a chunk) is asked for with the
  * page and nothing waits on it; the run's first step waits for the saved set's first sounds 1.5 s at most
- * (app/keyboard-gate.ts).
+ * (app/keyboard-gate.ts). 1C (docs/td/BUILD_1C_MAP1.md): the world is drawn through a MapView (view/view.ts), the 2D
+ * view or, when the tier asks for it, map 1's 3D view, a chunk with three.js that falls back to 2D.
  */
 import "./ui/td.css";
+import { bindArt } from "./ui/art";
 import { runFrameLoop } from "./kit/platform";
 import { Chunk } from "./app/chunks";
 import type { Learner } from "./app/learn";
@@ -51,6 +53,7 @@ import type { TitleChoice, TitleScreen } from "./ui/title";
 import type { TypingAudio, UiSound } from "./view/audio-min";
 import type { FxPipe } from "./view/fx-pipe";
 import { DebugView } from "./view/debug-2d";
+import { load3d, pickView, type MapView } from "./view/view";
 import { WordCards } from "./view/words/cards";
 
 function byId<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -59,12 +62,20 @@ function byId<T extends HTMLElement = HTMLElement>(id: string): T {
   return element as T;
 }
 
+bindArt(byId<HTMLImageElement>("tdLoadingLogo"), "logo", { fallback: byId("tdLoadingFallback") });
+
 const params = new URLSearchParams(window.location.search);
 // The story stage of map 1 (BUILD_1B §4.1); the sandbox with ?sandbox=1.
 const sandbox = params.get("sandbox") === "1";
 const seed = Number(params.get("seed") ?? "1") >>> 0 || 1;
 const canvas = byId<HTMLCanvasElement>("tdCanvas");
-const view = new DebugView(canvas);
+const flat = new DebugView(canvas);
+/** The view the world is drawn through: 2D, or map 1's 3D view once its chunk is in and WebGL opens; 2D again if that fails. */
+let view: MapView = flat;
+const look = pickView(params, SLICE_1A.id);
+/** The 3D view's chunk, asked for at once when the tier wants it; the 2D canvas stays hidden meanwhile and the run waits at tick 0. */
+const view3d = new Chunk("view3d", load3d);
+if (look.kind === "3d") void ((canvas.style.visibility = "hidden"), view3d.get());
 let painted = false;
 const settings = loadSettings();
 /** Typing Feel: the save's own keyboard sound (before the default fills it in) and the catalogue, asked for with the page (app/keyboard.ts). */
@@ -181,7 +192,7 @@ const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).
   audio: () => audio, quit: () => showTitle(world.phase !== "defeat"), countdown: () => titleUp || selection.halted ? 0 : 500, notice: tellLost,
   saved: keyboardSaved, feed: keyboardFeed, standIn: (id) => void (keyboardStandIn = id), playable: (by) => keyboardGate.open(by),
 }));
-const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z));
+const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z), (w, c, core) => view.anchor?.(w, c, core) ?? null);
 cards.child = profile.audience === "child";
 /** The study lists the run plays (flags(), "Chơi lại Ngày n"): a replayed day's, else planned once app/learn.ts is in. */
 let runLearn = retry?.learn ?? NO_LEARN;
@@ -216,6 +227,8 @@ function act(action: string): void {
   if (quick?.blocking) return;
   const [name, dx, dy] = action.split(":");
   if (name === "pan") view.panBy(Number(dx) * 60, Number(dy) * 60);
+  else if (name === "turn") view.turn?.(Number(dx) * 50, Number(dy) * 23);
+  else if (name === "cam" && (dx === "home" || dx === "near" || dx === "overview")) view.look?.(dx);
   else if (name === "mute") { settings.muted = !settings.muted; settingsChanged(); saveSettings(settings); }
   else if (name === "pause" && mapOnly) mapOnly = false; // the HUD's Ⅱ brings the results back too
   else selection.act(action);
@@ -256,17 +269,18 @@ const dev = new Chunk("dev", () => import("./app/dev-tools"));
 function prefetch(): void {
   void quickChunk.get().then((m) => (quick = m));
   wantSound(false);
-  void fxChunk.get().then((m) => m && ((view.fx = new m.FxView(view.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
+  void fxChunk.get().then((m) => m && ((flat.fx = new m.FxView(flat.boss.fx)), (fx = new m.FxPipe(world.events.ring))));
   wantSheet();
   wantTips();
   void retryChunk.get();
   if (sandbox) void panel.get();
   void dev.get().then((m) => m?.installDevTools({
     world, session, deck, source, sandbox, selection, recent, costs,
-    // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel), and the keyboard gate open.
-    ready: () => painted && keyboardGate.isOpen && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
-    chunks: () => ({ sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
-    header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
+    // Painted, and the chunks this page wants are in or given up (sound, the cards and their buttons, the title when it is up, the sandbox panel,
+    // the 3D view when the tier asks for it), and the keyboard gate open.
+    ready: () => painted && keyboardGate.isOpen && (look.kind === "2d" || view3d.settled) && quickChunk.settled && sound.settled && fxChunk.settled && sheets.settled && retryChunk.settled && learnChunk.settled && tips.settled && (!titleUp || title !== null) && (!sandbox || panel.settled),
+    chunks: () => ({ view3d: view.kind === "3d", sound: audio !== null, fx: fx !== null, sheets: sheet !== null, panel: panel.value !== null, title: title !== null, retry: retryChunk.value !== null, learn: learner !== null, tips: banner.tips !== null }),
+    view: () => view.stats?.() ?? { kind: view.kind }, header: () => runHeader, mode: () => startMode, replayed: () => replayed, learn: () => runLearn,
     learning: () => ({ store: learner?.store ?? null, sent: learner?.sent.slice() ?? [], queued: learnChunk.value?.learningBridge().queued().length ?? 0 }), balance: () => retryChunk.get().then((m) => m?.balanceOf(world, profile) ?? null),
     keyboard: () => ({ gate: { startedAt: keyboardGate.startedAt, openedAt: keyboardGate.openedAt, by: keyboardGate.by }, firstStepAt, standIn: keyboardStandIn, panel: quick?.keyboard() ?? null }),
   }));
@@ -293,16 +307,20 @@ installKeys(window, {
   onVietnamese: () => (imeUntil = performance.now() + 8000),
   allowUntrusted: params.get("untrusted") === "1",
 });
-installPointer(canvas, view, {
+/** The pointer acts on the view that is up (the 3D view has a canvas of its own). */
+const camera = { panBy: (dx: number, dy: number) => view.panBy(dx, dy), turn: (dx: number, dy: number) => view.turn?.(dx, dy), zoomAt: (x: number, y: number, k: number) => view.zoomAt(x, y, k), unproject: (x: number, y: number) => view.unproject(x, y) };
+const hand: Parameters<typeof installPointer>[2] = {
   pointer: (p) => selection.pointer(p),
   // A call's bubble (a word card, or a dim one on the map) sends the agent there (BUILD_1A6 §8).
   click: (p, right, at) => {
     if (titleUp || quick?.blocking) return;
+    if (!right && view.tray?.(at.x, at.y)) return;
     const call = right || selection.building ? -1 : Math.max(cards.callAt(at.x, at.y), view.callAt(at.x, at.y));
     if (call >= 0) selection.toCall(call);
     else selection.click(p, right);
   },
-});
+};
+installPointer(canvas, camera, hand);
 
 /** The story won: its stars kept in td.campaign, once (BUILD_1B §4.3, R3; a replayed day's win too). */
 let won: ReturnType<typeof keepStars> | null = null;
@@ -363,6 +381,15 @@ const recent: RareEvent[] = [];
 resize();
 showHud();
 prefetch();
+/** Back to the 2D view (no WebGL, the chunk given up, a lost context), told in the HUD; the run goes on. */
+const to2d = (text: string): void => void ((view = flat), (canvas.style.visibility = ""), tellLost(text), resize());
+if (look.kind === "3d") void view3d.get().then((m) => {
+  const deep = m?.View3D.open(canvas, look.tier === "high" ? "high" : "medium", world, () => (deep?.dispose(), to2d("3D view stopped: playing on in 2D")), cards) ?? null;
+  if (deep === null) return to2d("3D view could not open: playing in 2D · F5 to try again");
+  installPointer(deep.canvas, camera, hand);
+  view = deep;
+  resize();
+});
 
 /** The last 600 frames' costs in ms (BUILD_NOW §7 gate 5): the steps with the HUD and sound, then the 2D view with the cards. */
 const costs = { update: [] as number[], draw: [] as number[] };
@@ -377,8 +404,8 @@ runFrameLoop({
   update(now) {
     timed(costs.update, () => {
       selection.update();
-      // The first step waits for Học's study lists and the keyboard gate (the saved set's first sounds, 1.5 s at most).
-      session.paused = selection.halted || titleUp || quick?.blocking === true || (world.tick === 0 && (!learnChunk.settled || !keyboardGate.isOpen));
+      // The first step waits for Học's study lists, the keyboard gate (the saved set's first sounds, 1.5 s at most) and the 3D view when asked for.
+      session.paused = selection.halted || titleUp || quick?.blocking === true || (world.tick === 0 && (!learnChunk.settled || !keyboardGate.isOpen || (look.kind === "3d" && !view3d.settled)));
       session.orders = selection.tactical && !titleUp && !quick?.blocking; // orders wait behind an overlay too
       session.frame(now);
       if (firstStepAt < 0 && world.tick > 0) firstStepAt = performance.now();
@@ -390,8 +417,7 @@ runFrameLoop({
       if (sample !== null) saveSkill((profile = updateSkill(profile, sample).profile));
       cards.read(fresh, world, now);
       if ((world.boss.stage > 0) !== bossTop > 0) resize();
-      view.boss.read(fresh, world, now);
-      view.fx?.read(fresh, world, now);
+      view.read(fresh, world, now);
       fx?.read(world.events.ring);
       banner.read(fresh, world, now);
       audio?.read(fresh, world, now);

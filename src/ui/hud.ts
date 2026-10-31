@@ -49,7 +49,7 @@ export function statusHtml(w: World, sandbox: boolean, paused: boolean, muted: b
   const left = Math.max(0, Math.ceil((w.phaseEnd - w.tick) / TICK_HZ));
   const clock = Math.floor(left / 60) + ":" + String(left % 60).padStart(2, "0");
   const enemies = w.enemies.count + w.spawnQueue.length;
-  const phase = w.phase === "day" ? `Day ${w.day} · ${clock}` : w.phase === "night" ? `Night ${w.day} · ${enemies} foes left` : w.phase === "dawn" ? `Dawn ${w.day}` : w.phase === "victory" ? "Village saved" : "Defeat";
+  const phase = w.phase === "day" ? `Day ${w.day} · ${clock}` : w.phase === "night" ? `Night ${w.day} · ${enemies} ${enemies === 1 ? "foe" : "foes"} left` : w.phase === "dawn" ? `Dawn ${w.day}` : w.phase === "victory" ? "Village saved" : "Defeat";
   const lives = hit > 0 ? `${w.lives}<i class="td-hit">−${hit}</i>` : String(w.lives);
   return (
     `<div class="td-row"><span class="td-title"><b>Wordwoven</b><small>${sandbox ? "Sandbox · 1B demo" : "Map 1 · Silverfall Meadow"}</small></span>` +

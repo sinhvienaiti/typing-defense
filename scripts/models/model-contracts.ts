@@ -16,7 +16,7 @@
 // occupation ring, on the ground. Sockets are Empties named exactly as below
 // (building sockets are lower-case after FX_, as in TK 23.9).
 
-export type ModelKind = "buildings" | "props" | "projectiles" | "loot" | "attachments" | "heroes" | "enemies" | "units";
+export type ModelKind = "buildings" | "props" | "projectiles" | "loot" | "attachments" | "heroes" | "enemies" | "units" | "kits" | "landmarks";
 export type ModelTier = "high" | "medium";
 
 export type ModelContract = {
@@ -47,7 +47,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Building_Idle", "Building_Fire", "Building_Work", "Building_Hit", "Building_Ruin"],
     triangles: { min: 2_000, max: 15_000 },
-    textureMax: { high: 2048, medium: 1024 },
+    textureMax: { high: 1024, medium: 512 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   // Separate parts placed on a building: cannon barrel, mine cart, gold piles, level pennant.
   props: {
@@ -57,7 +57,28 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Prop_Idle", "Prop_Fire", "Prop_Work"],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
+  },
+  // 1C C4: a building's level kit (L2–L4), placed on its base house at the transform src/view/3d/kits.json gives; it may
+  // carry the sockets the level moves (FX_top, FX_perch, FX_word, FX_crew, FX_muzzle, FX_lantern_*).
+  kits: {
+    kind: "kits",
+    requiredSockets: [],
+    optionalSockets: ["FX_top", "FX_perch", "FX_word", "FX_crew", "FX_muzzle", "FX_banner", "FX_lantern_0", "FX_lantern_1", "FX_lantern_2", "FX_lantern_3", "FX_lantern_4"],
+    requiredClips: [],
+    optionalClips: [],
+    triangles: { min: 500, max: 8_000 },
+    textureMax: { high: 512, medium: 256 }, // small on a house, or far outside the field (BUILD_1C_MAP1 §5)
+  },
+  // 1C C4: a map's landmark (TK 23.10: ≤ 6 a map; the falls' cliff, the hill's watch hut), drawn once, outside play.
+  landmarks: {
+    kind: "landmarks",
+    requiredSockets: [],
+    optionalSockets: ["FX_core", "FX_top"],
+    requiredClips: [],
+    optionalClips: [],
+    triangles: { min: 500, max: 8_000 },
+    textureMax: { high: 512, medium: 256 }, // small on a house, or far outside the field (BUILD_1C_MAP1 §5)
   },
   projectiles: {
     kind: "projectiles",
@@ -66,7 +87,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: [],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   loot: {
     kind: "loot",
@@ -75,7 +96,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: ["Loot_Open"],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
   // Walking heroes (TK 23.9): skinned, front -Z, feet on the ground at the
   // origin, in-place clips (no root motion), one-shots start and end on Idle.
@@ -119,7 +140,7 @@ export const MODEL_CONTRACTS: Readonly<Record<ModelKind, ModelContract>> = {
     requiredClips: [],
     optionalClips: [],
     triangles: { min: 50, max: 4_000 },
-    textureMax: { high: 1024, medium: 512 },
+    textureMax: { high: 512, medium: 256 }, // 1C C4: BUILD_1C_MAP1 §5 media budget
   },
 };
 

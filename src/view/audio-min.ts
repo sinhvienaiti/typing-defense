@@ -15,16 +15,18 @@
  * Rễ Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
  * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
  * drum's thump (Ngắt), a bronze stroke and knock (Neo), a stone dome cracking (Phá Khiên).
+ * C10: every event reaches its sound through one id (sound-map.ts); a real file listed in the audio manifest plays in its
+ * place (FileBank), and the ids added since have no code-made sound.
  */
 import { TICK_HZ } from "../content/rules";
-import { FX, type RareEvent } from "../sim/events";
-import { PROJECTILE } from "../sim/stores/projectiles";
+import type { RareEvent } from "../sim/events";
 import { chainTier } from "../sim/systems/chain";
 import type { World } from "../sim/world";
 import { KEY } from "../typing/router";
 import { bambooKeys, type Settings } from "../app/prefs";
 import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, trong, type Out } from "./folk";
 import { FolkMusic } from "./music";
+import { busOf, eventSounds, ringSound } from "./sound-map";
 
 const ALERTS_PER_S = 3;
 /** Each bus's gain at volume 100 (the settings square the slider: half the slider is a quarter of the power). */
@@ -44,11 +46,11 @@ export class TypingAudio {
   private verb!: ConvolverNode;
   private readonly out = {} as Record<Bus, Out>;
   private music: FolkMusic | null = null;
-  private alerts: number[] = [];
   private cursor = 0;
   private phase = "";
   /** Real-time stamps (ms) of the last sounds a cap counts. */
-  private readonly last = { arrow: [] as number[], puff: [] as number[], coin: [] as number[], leak: -1e9, caller: 0, left: -1 };
+  private readonly last = { caps: {} as Record<string, number[]>, leak: -1e9, caller: 0, left: -1 };
+  private files: FileBank | null = null;
 
   /** `standIn`: the chosen keyboard set the Bamboo keys stand in for this session (app/quick.ts), or null. */
   constructor(private settings: Settings, private readonly standIn: () => string | null = () => null) {}
@@ -95,6 +97,7 @@ export class TypingAudio {
     this.out.ui = { ctx, to: this.uiBus };
     this.out.keys = { ctx, to: this.keyBus };
     this.music = new FolkMusic(ctx, this.duck);
+    this.files = new FileBank(ctx);
     this.apply(this.settings);
   }
 
@@ -135,8 +138,9 @@ export class TypingAudio {
   frame(w: World | null, now: number): void {
     if (this.ctx === null || this.music === null) return;
     const left = w !== null && w.phase === "day" ? Math.ceil((w.phaseEnd - w.tick) / TICK_HZ) : -1;
-    if (left !== this.last.left && left > 0 && left <= 10) go(this.out.ui, this.ctx.currentTime, left <= 3 ? 1180 : 880, 0.07, 0.04);
+    const changed = left !== this.last.left;
     this.last.left = left;
+    if (changed && left > 0 && left <= 10) this.play("day-countdown", this.ctx.currentTime, now, null, w);
     this.music.set(w !== null && w.phase === "night", w === null ? 0 : w.boss.stage === 2 || w.boss.stage === 3 ? 1 : w.boss.stage === 4 ? 2 : 0);
     this.music.update();
     const speaking = typeof speechSynthesis !== "undefined" && speechSynthesis.speaking;
@@ -150,18 +154,7 @@ export class TypingAudio {
   }
 
   ui(sound: UiSound): void {
-    if (this.ctx === null) return;
-    const o = this.out.ui;
-    const t = this.ctx.currentTime;
-    if (sound === "move") go(o, t, 980, 0.05, 0.03);
-    else if (sound === "pick") {
-      go(o, t, 620, 0.09, 0.05);
-      chuong(o, t + 0.04, 1318.5, 0.035, 0.7);
-    } else if (sound === "off") go(o, t, 170, 0.05, 0.05);
-    else {
-      giay(o, t, 0.02, 0.22, 900, 2600);
-      chuong(o, t + 0.12, 2093 * (0.9 + Math.random() * 0.2), 0.012, 0.6);
-    }
+    if (this.ctx !== null) this.play("ui-" + sound, this.ctx.currentTime, performance.now(), null, null);
   }
 
   /** A capped sound: true (and counted) while fewer than `max` played in the last second. */
@@ -185,85 +178,120 @@ export class TypingAudio {
     else [0, 0.13].forEach((at, k) => sao(o, t + at, note(k === 0 ? 12 : 14), 0.1, 0.05));
   }
 
-  /** Mộc Tinh's sounds (BUILD_1B §13.2); a warning's sound is never capped. */
-  private boss(event: RareEvent, t: number): void {
-    const world = this.out.world;
-    if (event.t === "bossWarn") [0, 0.42].forEach((at) => go(world, t + at, 110, 0.35, 0.22));
-    else if (event.t === "bossLull") {
-      rumble(world, t, 12, 0.3);
-      [0, 3, 6, 9, 10.5, 11.2, 11.7].forEach((at) => trong(world, t + at, 0.35, 70));
-    } else if (event.t === "bossEmerge" || event.t === "bossPhase") {
-      rumble(world, t, 0.35, 0.5);
-      roar(world, t + 0.2, 0.35);
-      if (event.t === "bossPhase") [chuong(world, t + 0.1, 1318.5, 0.08, 1.6), chuong(world, t + 0.3, 98, 0.18, 2.4)];
-    } else if (event.t === "bossStrike" && !event.hit && event.move === "roots") giay(world, t, 0.12, (event.end - event.tick) / 60, 500, 180);
-    else if (event.t === "bossStrike" && event.hit && event.move === "roots") [go(world, t, 160, 0.4, 0.09), giay(world, t + 0.03, 0.08, 0.3, 900, 300)];
-    else if (event.t === "bossStrike" && event.hit && (event.move === "slam" || event.move === "keep")) [giay(world, t, 0.14, 0.18, 2600, 500), trong(world, t + 0.12, 0.45, 60)];
-    else if (event.t === "bossStrike" && event.move === "drain") event.hit ? [go(world, t, 90, 0.45, 0.2), chuong(world, t + 0.05, 146.8, 0.08, 2.2)] : [rumble(world, t, (event.end - event.tick) / TICK_HZ, 0.25), giay(world, t, 0.1, (event.end - event.tick) / TICK_HZ, 180, 520)]; // R3: Rễ hút sinh khí draws in, then a knock and a low bell
-    else if (event.t === "bossRetreat") {
-      [0, 0.25, 0.5, 0.75].forEach((at, k) => tranh(world, t + at, note(7 - 2 * k), 0.12));
-      giay(world, t + 0.3, 0.06, 1.2, 1800, 700);
-      for (let k = 0; k < 8; k += 1) chuong(world, t + 1.2 + k * 0.08, note(5 + k) * 4, 0.02, 0.3);
-    }
+  /**
+   * C10: one id's sound (src/view/sound-map.ts): its real file when the manifest lists one, else the code-made sound it
+   * had (SYNTH); an id with neither is silent. Keys never come here (key()). Boss warnings are never capped.
+   */
+  private play(id: string, t: number, now: number, event: RareEvent | null, w: World | null): void {
+    const cap = id.startsWith("call-") ? "call" : id; // the call alerts share theirs
+    if (CAPS[cap] !== undefined && !this.room((this.last.caps[cap] ??= []), now, CAPS[cap]!)) return;
+    if (this.files?.play(id, this.out[busOf(id)], t)) return;
+    const kind = CALL_IDS.indexOf(id);
+    if (kind >= 0) return this.alert(kind, t);
+    SYNTH[id]?.(this.out[busOf(id)], t, { e: (event ?? {}) as Partial<Record<string, number | string>>, chain: w?.typing.chain ?? 0, left: this.last.left });
   }
 
-  /** This frame's rare events and the combat ring since the last call. */
+  /** This frame's rare events and the combat ring since the last call, each through its sound ids (sound-map.ts). */
   read(events: readonly RareEvent[], w: World, now: number): void {
     const ring = w.events.ring;
     const from = Math.max(this.cursor, ring.written - ring.size);
     this.cursor = ring.written;
     if (this.ctx === null || this.settings.muted) return;
     const t = this.ctx.currentTime;
-    const typing = this.out.typing;
-    const world = this.out.world;
     for (const event of events) {
-      if (event.t === "call" && event.state === "bright") {
-        if (this.room(this.alerts, now, ALERTS_PER_S)) this.alert(event.kind, t);
-      } else if (event.t === "wordKey") {
+      if (event.t === "wordKey") {
+        // Keys sound once: a Typing Feel set plays in app/quick.ts; the Bamboo keys here, only when chosen or standing in.
         const s = w.words.slotOf(event.word);
         if (event.result !== KEY.group) this.key(false, event.result === KEY.wrong || event.result === KEY.stray, s >= 0 ? w.words.typed[s]! : 8);
-      } else if (event.t === "wordHit") {
-        const step = event.grade === "sloppy" ? 4 : 5 + Math.min(5, chainTier(w.typing.chain) + 1);
-        tranh(typing, t, note(step), event.grade === "sloppy" ? 0.07 : event.grade === "ok" ? 0.11 : 0.14, event.grade === "flash");
-        if (event.grade === "perfect" || event.grade === "flash") chuong(typing, t + 0.02, 2093, 0.03, 0.6);
-      } else if (event.t === "chain" && event.callout) [0, 0.12, 0.24].forEach((at, k) => sao(typing, t + at, note(10 + k), 0.13, 0.05));
-      else if (event.t === "phase" && event.phase !== this.phase) {
-        this.phase = event.phase;
-        if (event.phase === "night") {
-          [0, 0.32, 0.5].forEach((at) => trong(world, t + at, 0.4, 110));
-          chuong(world, t + 0.05, 98, 0.16, 3);
-        } else if (event.phase === "dawn") [0, 0.2, 0.4].forEach((at, k) => sao(world, t + at, note(7 + 2 * k), 0.25, 0.05));
-      } else if (event.t === "direct" && event.ok) {
-        // A direct word lands (BUILD_1B §9.2): the drum breaks with a skin's thump; Neo pins the pack with a low bronze stroke
-        // and a knock; the Troll's dome cracks, stone grinding over a low wooden blow (R3).
-        if (event.verb === 0) trong(world, t, 0.35, 180);
-        else if (event.verb === 1) [chuong(world, t, 147, 0.14, 1.6), go(world, t + 0.04, 260, 0.22, 0.08)];
-        else [go(world, t, 95, 0.45, 0.14), giay(world, t + 0.02, 0.14, 0.45, 1400, 260), rumble(world, t + 0.05, 0.5, 0.25)];
-      } else if (event.t === "panic") [0, 0.1].forEach((at) => go(world, t + at, 1250, 0.05, 0.05)); // a helper runs: two quick high knocks (test pass 27/10)
-      else if (event.t.startsWith("boss")) this.boss(event, t);
-      else if (event.t === "defeat") {
-        chuong(world, t, 82.4, 0.2, 3.5);
-        [0, 0.35, 0.7].forEach((at, k) => sao(world, t + 0.2 + at, note(7 - 2 * k), 0.4, 0.05));
+        continue;
       }
+      if (event.t === "phase") {
+        if (event.phase === this.phase) continue;
+        this.phase = event.phase;
+      }
+      for (const id of eventSounds(event)) this.play(id, t, now, event, w);
     }
-    let blasts = 0;
-    let puffs = 0;
+    // At most 2 blasts and 3 ink puffs a frame; a leak's gong 0.8 s apart.
+    const frame: Record<string, number> = { blast: 2, "ink-puff": 3 };
     for (let index = from; index < ring.written; index += 1) {
       const slot = index % ring.size;
-      const kind = ring.kind[slot]!;
-      if (kind === FX.fire && ring.value[slot] === PROJECTILE.wordShot) {
-        giay(world, t, 0.07, 0.15, 4200, 1100);
-        go(world, t, 1400, 0.03, 0.02);
-      } else if (kind === FX.fire && ring.value[slot] === PROJECTILE.arrow && this.room(this.last.arrow, now, 4)) giay(world, t, 0.018, 0.06, 2600, 1500);
-      else if (kind === FX.burst && blasts++ < 2) {
-        trong(world, t, 0.24, 70);
-        giay(world, t, 0.05, 0.25, 1300, 300);
-      } else if (kind === FX.death && puffs++ < 3 && this.room(this.last.puff, now, 8)) giay(world, t, 0.03, 0.12, 1900, 600);
-      else if (kind === FX.coin && this.room(this.last.coin, now, 3)) chuong(world, t + 0.03, 3136, 0.012, 0.3);
-      else if (kind === FX.leak && now - this.last.leak > 800) {
-        this.last.leak = now;
-        chuong(world, t, 220, 0.1, 1.2);
-      }
+      const id = ringSound(ring.kind[slot]!, ring.value[slot]!);
+      if (id === null || (frame[id] !== undefined && frame[id]-- <= 0)) continue;
+      if (id === "leak" && now - this.last.leak <= 800) continue;
+      if (id === "leak") this.last.leak = now;
+      this.play(id, t, now, null, w);
     }
+  }
+}
+
+const CALL_IDS = ["call-power", "call-build", "call-harvest", "call-chop", "call-mine", "call-quiz"];
+type Cue = { e: Partial<Record<string, number | string>>; chain: number; left: number };
+const span = (q: Cue): number => ((q.e["end"] as number) - (q.e["tick"] as number)) / TICK_HZ;
+/** The code-made sound of each id that had one before C10 (sound-map.ts SOUND_IDS.made); the new ids have none. */
+const SYNTH: Readonly<Record<string, (o: Out, t: number, q: Cue) => void>> = {
+  "word-hit": (o, t, q) => tranh(o, t, note(q.e["grade"] === "sloppy" ? 4 : 5 + Math.min(5, chainTier(q.chain) + 1)), q.e["grade"] === "sloppy" ? 0.07 : q.e["grade"] === "ok" ? 0.11 : 0.14, q.e["grade"] === "flash"),
+  "word-hit-bell": (o, t) => chuong(o, t + 0.02, 2093, 0.03, 0.6),
+  "chain-callout": (o, t) => [0, 0.12, 0.24].forEach((at, k) => sao(o, t + at, note(10 + k), 0.13, 0.05)),
+  "night-fall": (o, t) => [[0, 0.32, 0.5].forEach((at) => trong(o, t + at, 0.4, 110)), chuong(o, t + 0.05, 98, 0.16, 3)],
+  dawn: (o, t) => [0, 0.2, 0.4].forEach((at, k) => sao(o, t + at, note(7 + 2 * k), 0.25, 0.05)),
+  // A direct word lands (BUILD_1B §9.2): a drum's thump (Ngắt); a low bronze stroke and a knock (Neo); stone grinding over a low blow (Phá Khiên, R3).
+  "direct-break": (o, t) => trong(o, t, 0.35, 180),
+  "direct-pin": (o, t) => [chuong(o, t, 147, 0.14, 1.6), go(o, t + 0.04, 260, 0.22, 0.08)],
+  "direct-shield": (o, t) => [go(o, t, 95, 0.45, 0.14), giay(o, t + 0.02, 0.14, 0.45, 1400, 260), rumble(o, t + 0.05, 0.5, 0.25)],
+  "helper-panic": (o, t) => [0, 0.1].forEach((at) => go(o, t + at, 1250, 0.05, 0.05)), // two quick high knocks (test pass 27/10)
+  defeat: (o, t) => [chuong(o, t, 82.4, 0.2, 3.5), [0, 0.35, 0.7].forEach((at, k) => sao(o, t + 0.2 + at, note(7 - 2 * k), 0.4, 0.05))],
+  "wordshot-fire": (o, t) => [giay(o, t, 0.07, 0.15, 4200, 1100), go(o, t, 1400, 0.03, 0.02)],
+  "arrow-fire": (o, t) => giay(o, t, 0.018, 0.06, 2600, 1500),
+  blast: (o, t) => [trong(o, t, 0.24, 70), giay(o, t, 0.05, 0.25, 1300, 300)],
+  "ink-puff": (o, t) => giay(o, t, 0.03, 0.12, 1900, 600),
+  coin: (o, t) => chuong(o, t + 0.03, 3136, 0.012, 0.3),
+  leak: (o, t) => chuong(o, t, 220, 0.1, 1.2),
+  // Mộc Tinh (BUILD_1B §13.2).
+  "boss-warn": (o, t) => [0, 0.42].forEach((at) => go(o, t + at, 110, 0.35, 0.22)),
+  "boss-lull": (o, t) => [rumble(o, t, 12, 0.3), [0, 3, 6, 9, 10.5, 11.2, 11.7].forEach((at) => trong(o, t + at, 0.35, 70))],
+  "boss-emerge": (o, t) => [rumble(o, t, 0.35, 0.5), roar(o, t + 0.2, 0.35)],
+  "boss-phase": (o, t) => [rumble(o, t, 0.35, 0.5), roar(o, t + 0.2, 0.35), chuong(o, t + 0.1, 1318.5, 0.08, 1.6), chuong(o, t + 0.3, 98, 0.18, 2.4)],
+  "boss-roots": (o, t, q) => giay(o, t, 0.12, span(q), 500, 180),
+  "boss-roots-hit": (o, t) => [go(o, t, 160, 0.4, 0.09), giay(o, t + 0.03, 0.08, 0.3, 900, 300)],
+  "boss-slam": (o, t) => [giay(o, t, 0.14, 0.18, 2600, 500), trong(o, t + 0.12, 0.45, 60)],
+  "boss-drain": (o, t, q) => [rumble(o, t, span(q), 0.25), giay(o, t, 0.1, span(q), 180, 520)], // R3: Rễ hút sinh khí draws in, then a knock and a low bell
+  "boss-drain-hit": (o, t) => [go(o, t, 90, 0.45, 0.2), chuong(o, t + 0.05, 146.8, 0.08, 2.2)],
+  "boss-retreat": (o, t) => [[0, 0.25, 0.5, 0.75].forEach((at, k) => tranh(o, t + at, note(7 - 2 * k), 0.12)), giay(o, t + 0.3, 0.06, 1.2, 1800, 700), Array.from({ length: 8 }, (_, k) => chuong(o, t + 1.2 + k * 0.08, note(5 + k) * 4, 0.02, 0.3))],
+  "day-countdown": (o, t, q) => go(o, t, q.left <= 3 ? 1180 : 880, 0.07, 0.04),
+  "ui-move": (o, t) => go(o, t, 980, 0.05, 0.03),
+  "ui-pick": (o, t) => [go(o, t, 620, 0.09, 0.05), chuong(o, t + 0.04, 1318.5, 0.035, 0.7)],
+  "ui-off": (o, t) => go(o, t, 170, 0.05, 0.05),
+  "ui-lamp": (o, t) => [giay(o, t, 0.02, 0.22, 900, 2600), chuong(o, t + 0.12, 2093 * (0.9 + Math.random() * 0.2), 0.012, 0.6)],
+};
+
+/** Sounds a second at most (the rest are dropped): the call alerts, arrows, ink puffs, coins. */
+const CAPS: Readonly<Record<string, number>> = {
+  call: ALERTS_PER_S, "arrow-fire": 4, "ink-puff": 8, coin: 3,
+};
+
+/** Real files (AUDIO_PIPELINE §11, manifest v2 or v1), decoded once sound starts; none are listed yet. */
+class FileBank {
+  private readonly buffers = new Map<string, AudioBuffer[]>();
+
+  constructor(ctx: AudioContext) {
+    const base = "/assets/typing-defense/audio/";
+    void fetch(base + "manifest.json").then((r) => (r.ok ? r.json() : null)).then(async (m: { sounds?: Record<string, string[] | { files?: string[] }> } | null) => {
+      for (const [id, entry] of Object.entries(m?.sounds ?? {})) {
+        const files = Array.isArray(entry) ? entry : (entry.files ?? []);
+        const list = await Promise.all(files.map((file) => fetch(base + file).then((r) => r.arrayBuffer()).then((data) => ctx.decodeAudioData(data)).catch(() => null)));
+        const ok = list.filter((b): b is AudioBuffer => b !== null);
+        if (ok.length > 0) this.buffers.set(id, ok);
+      }
+    }).catch(() => undefined);
+  }
+
+  /** Plays one of id's files on `out`; false when it has none. */
+  play(id: string, out: Out, t: number): boolean {
+    const list = this.buffers.get(id);
+    if (list === undefined) return false;
+    const source = new AudioBufferSourceNode(out.ctx, { buffer: list[Math.floor(Math.random() * list.length)]! });
+    source.connect(out.to);
+    source.start(t);
+    return true;
   }
 }

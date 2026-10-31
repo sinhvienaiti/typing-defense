@@ -13,7 +13,7 @@
 - **Không tôn giáo** (TK 22.1): không chuông chùa, không mõ chùa, không tụng, không tiếng đình đám. Cồng là cồng hội làng; phách tre thay cho mõ.
 - **Bus** (TK 24.2): `music` (nhường khi phát âm từ: −9 dB trong 0,12 s, lên lại trong 0,5 s), `typing` (có nén nhẹ riêng), `world`, `ui`; vang chung 0,8 s; `master` qua bộ giới hạn −3 dB. Cài đặt có ba thanh: Âm lượng chung, Nhạc, Tiếng trận và gõ (lưu ở `td.settings`).
 - **Định dạng file thật** (TK 24.9): gốc WAV 48 kHz 24-bit; trong game OGG Vorbis, mono cho tiếng ngắn, stereo cho nhạc và âm nền. Tiếng ngắn đỉnh −1 dBTP; nhạc −18 LUFS; âm nền −26 LUFS.
-- **Tiếng phím** (`key-right`, `key-wrong`) giữ tổng hợp bằng mã, không làm bằng AI (TK 24.6): phải bắt đầu dưới 20 ms và dài dưới 60 ms.
+- **Tiếng phím** không có id trong `sound-map.ts` (gộp 1C ngày 31/10/2026): mỗi phím kêu đúng một lần, từ bộ Typing Feel đã chọn (`app/quick.ts`, `docs/games/TYPING_FEEL_SERVICE.md` của repo cha) hoặc phím Bamboo tổng hợp bằng mã (`key()` trong `view/audio-min.ts`); Off thì im. Phải bắt đầu dưới 20 ms và dài dưới 60 ms (TK 24.6).
 - Prompt viết bằng tiếng Anh vì công cụ tạo âm hiểu tiếng Anh tốt hơn. Mỗi prompt tiếng lẻ (không phải nhạc, âm nền hay giọng người) ghép thêm đuôi chung: *"Single isolated sound effect, close and dry, starts instantly, clean natural end, 48 kHz."* Đuôi chỉ ghi điều muốn có, không có chữ phủ định ("no music", "no reverb"): công cụ tạo âm dễ làm ra đúng thứ bị nhắc tên (quyết định Q6, 24/10/2026).
 - **Âm hành động** (`wordshot-fire`, `arrow-fire`, `blast`, `ink-puff`; quyết định Q6 của chủ dự án ngày 24/10/2026, ghi ở `tools/audio-lab/DECISIONS.md` của repo cha) không ghép đuôi chung trên, vì đuôi chung ghi "dry", còn đuôi vang ngoài làng là một phần của âm hành động. Prompt của các id này tự ghi đủ phần chuẩn bị (nếu hành động có), đầu tiếng, thân và đuôi ngắn, không có chữ phủ định. Cỡ âm theo nguồn: cung tre nhỏ thì tiếng nhỏ. Không dùng hướng "bụp", "puff", "pop", tiếng trầm ngắn đứng riêng.
 
@@ -27,8 +27,8 @@
 | `call-chop` | Lời gọi Chặt sáng lên | Chắc, trầm | Gõ gỗ trầm và vụn tre | One low knock of a wooden axe handle on a bamboo trunk, with a few tiny splinters, 0.25 s. |
 | `call-mine` | Lời gọi Đào sáng lên | Nhỏ, sạch | Hai tiếng "keng" li ti | Two tiny clinks of an iron hoe tip on stone, high and dry, 0.06 s apart, 0.3 s total. |
 | `call-quiz` | Lời gọi Hỏi bài sáng lên | Tò mò | Sáo trúc hai nốt đi lên | A two-note rising call on a Vietnamese bamboo flute (sáo trúc), breathy, playful, like a question, 0.35 s. |
-| `key-right` | Mỗi phím đúng | Gọn, giòn | Tiếng tre "tách", cao lên một bán cung mỗi chữ (tối đa 12) | Giữ tổng hợp bằng mã. Tham khảo nếu cần mẫu: a dry tap of a thin bamboo slat, 30 ms. |
-| `key-wrong` | Phím sai, phím lạc | Không phạt, chỉ báo | "Tóc" đục, nhỏ hơn 12 dB | Giữ tổng hợp bằng mã. Tham khảo: a dull muted knock on a damp wooden block, 40 ms. |
+| (phím đúng, Bamboo) | Mỗi phím đúng, khi chọn Bamboo | Gọn, giòn | Tiếng tre "tách", cao lên một bán cung mỗi chữ (tối đa 12) | Không làm file: bộ phím đến từ Typing Feel; Bamboo giữ tổng hợp bằng mã. |
+| (phím sai, Bamboo) | Phím sai, phím lạc, khi chọn Bamboo | Không phạt, chỉ báo | "Tóc" đục, nhỏ hơn 12 dB | Như trên. |
 | `word-hit` | Gõ xong một từ | Thưởng, có nhạc tính | Một nốt đàn tranh theo bậc Chuỗi (C5 D5 F5 G5 A5 C6); Chớp có vuốt lên; Ẩu thấp một bậc | Single plucked note on a Vietnamese đàn tranh zither, bright attack, short warm ring 0.8 s; record one file per pitch C5, D5, F5, G5, A5, C6 and a version with an upward slide into the note. |
 | `word-hit-bell` | Thêm khi Hoàn hảo hoặc Chớp | Lấp lánh | Chuông đồng cao C7 | One tiny high bronze bell "ting", 0.5 s, pure and light. |
 | `chain-callout` | Mốc Chuỗi | Mừng | Câu sáo ba nốt đi lên | Three quick rising notes on a sáo trúc bamboo flute (A5, C6, D6), cheerful, 0.45 s. |
@@ -78,5 +78,5 @@ Một nhịp 84 BPM, một thang ngũ cung, hai lớp bắt đầu cùng lúc, c
 
 1. Đặt file gốc ở `art-src/audio/<id>-v<n>.wav`, bản trong game ở `public/assets/typing-defense/audio/<id>.ogg`.
 2. Manifest âm (chưa có) ghi mỗi id: bus, file, độ lệch cao độ, trần, ưu tiên (TK 24.2). Thiếu file thì giữ tiếng tổng hợp hiện tại.
-3. `key-right`, `key-wrong` không thay.
+3. Tiếng phím không qua manifest này (Typing Feel hoặc Bamboo).
 4. Mỗi file ghi công cụ, gói, ngày, prompt (TK 24.9).

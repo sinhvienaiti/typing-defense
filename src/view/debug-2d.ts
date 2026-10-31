@@ -13,7 +13,7 @@
  * picture's own clock).
  */
 import { AGENT, BUILD, FARM, TICK_HZ, TREE, ULT } from "../content/rules";
-import { FX } from "../sim/events";
+import { FX, type RareEvent } from "../sim/events";
 import { MODE, PATH_MAX } from "../sim/stores/agents";
 import { PLOT } from "../sim/stores/buildings";
 import { CALL_STATE } from "../sim/stores/calls";
@@ -26,6 +26,7 @@ import type { World } from "../sim/world";
 import { wordText } from "../typing/decks";
 import { BossView, type Pen } from "./boss-2d";
 import type { FxView } from "./fx-pipe";
+import type { Hand, MapView } from "./view";
 import { CALL_COLOR, callLabel, pips, ROOF_M } from "./words/cards";
 import type { Rect } from "./words/lanes";
 
@@ -60,11 +61,11 @@ const DRAGON = new Path2D("M0 -1.15L0.35 -0.15L1.3 0.7L0.27 0.4L0 0.85L-0.27 0.4
 const FLAG = new Path2D("M0 0V-1.6L1.1 -1.25L0 -0.9Z");
 
 type Mark = { kind: number; x: number; z: number; value: number; tick: number };
-/** The player's hand (app/selection.ts): the selected agent, the building and the dim call in focus by id, the build menu's kind and ghost. */
-export type Hand = { agent: number; focus: number; call: number; kind: number; ghost(): { x: number; z: number; reason: string } | null };
 type Bubble = { id: number; x: number; y: number; w: number; h: number };
 
-export class DebugView {
+/** The Low tier and the fallback of the map view (1C, view.ts). */
+export class DebugView implements MapView {
+  readonly kind = "2d";
   private ctx: CanvasRenderingContext2D;
   private readonly screen: CanvasRenderingContext2D;
   /** The painted ground for the current camera, and the camera it was painted for. */
@@ -137,6 +138,11 @@ export class DebugView {
   /** The call (id) whose dim bubble is under the CSS point, −1 none. */
   callAt(px: number, py: number): number {
     return this.bubbles.find((b) => px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h)?.id ?? -1;
+  }
+
+  read(events: readonly RareEvent[], w: World, now: number): void {
+    this.boss.read(events, w, now);
+    this.fx?.read(events, w, now);
   }
 
   draw(w: World, hand: Hand): void {

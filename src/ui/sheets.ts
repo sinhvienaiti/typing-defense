@@ -13,6 +13,7 @@ import { locked } from "../sim/systems/waves";
 import type { World } from "../sim/world";
 import { gloss, wordText } from "../typing/decks";
 import type { SettingsCard } from "./settings";
+import { artHtml, bindArt, type ArtName } from "./art";
 
 export type SheetAction = "resume" | "settings" | "title" | "again" | "retry" | "copy" | "map";
 type Button = readonly [action: SheetAction, label: string, key: string];
@@ -82,7 +83,7 @@ export class Sheet {
       ["again", retry ? "Restart" : "Retry", retry ? "" : "Enter"], ["copy", "Copy playtest data", ""], ["map", "View map", "Esc"], ["title", "Title screen", ""],
     ];
     this.focus = 0;
-    this.el.className = "td-sheet vd-sheet is-" + kind + (won ? " is-won" : "");
+    this.el.className = "td-sheet vd-sheet is-" + kind + (won ? " is-won" : kind === "results" ? " is-lost" : "");
     const stats = w.stats;
     const row = (label: string, value: number | string): string => `<dt>${label}</dt><dd>${value}</dd>`;
     const { review, reviewN, deck } = w.typing;
@@ -91,11 +92,16 @@ export class Sheet {
     this.el.innerHTML =
       (kind === "pause"
         ? `<h2>Paused</h2><p>Your village waits. Card words stay in place.</p>`
-        : (won ? `<h2>Village saved</h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh remembers his name and leaves.${run.retried > 0 ? " (retry Day " + run.retried + ")" : ""}</p>`
-          : `<h2>Fort fallen</h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
+        : artHtml("crest", "td-result-crest") + (won ? `<h2 class="td-result-heading">${artHtml("banner", "td-result-banner")}<span>Village saved</span></h2><div class="td-stars">${[1, 2, 3].map((k) => `<i class="${k <= stars ? "on" : ""}">★</i>`).join("")}</div>${run.story ? recordLine(run.best ?? 0, run.record === true) : ""}<p>Mộc Tinh remembers his name and leaves.${run.retried > 0 ? " (retry Day " + run.retried + ")" : ""}</p>`
+          : `<h2 class="td-result-heading">${artHtml("banner", "td-result-banner")}<span>Fort fallen</span></h2><p class="td-hint-line">${lossHint(w, run.blows)}</p>`) +
           `<dl>` + (won ? row("Chest", "+" + stats[STAT.goldChest]! / 1000 + " Gold") : "") + row("Lives", w.lives) + row("Nights held", won ? Math.max(w.day, stats[STAT.wavesCleared]!) : stats[STAT.wavesCleared]!) + row("Foes slain", stats[STAT.kills]!) + row("Words", stats[STAT.callWords]!) + row("Perfect calls", stats[STAT.callsPerfect]!) + (w.mode === "learn" || w.knowledge > 0 ? row("Knowledge", w.knowledge) : "") + `</dl>` +
-          (words === "" ? "" : `<div class="td-review"><small>To review</small><ul>${words}</ul></div>`)) +
+          artHtml("divider", "td-result-divider") + (words === "" ? "" : `<div class="td-review"><small>To review</small><ul>${words}</ul></div>`)) +
       this.buttons.map(([action, label, key]) => `<button type="button" tabindex="-1" data-sheet="${action}">${label}${key === "" ? "" : `<kbd>${key}</kbd>`}</button>`).join("");
+    // The heading's words turn cream on a loaded banner only; on paper (loading, failed) they stay ink (recheck 232 F2).
+    this.el.querySelectorAll<HTMLImageElement>("img[data-ui-art]").forEach((img) => {
+      const on = (yes: boolean) => () => img.parentElement?.classList.toggle("has-banner", yes);
+      bindArt(img, img.dataset.uiArt as ArtName, img.dataset.uiArt === "banner" ? { loaded: on(true), failed: on(false) } : {});
+    });
     this.el.appendChild(this.settings.el);
     this.paint();
   }
