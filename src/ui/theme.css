@@ -15,6 +15,8 @@
 @import "@fontsource/baloo-2/latin-800.css";
 
 :root {
+  --vd-quick-bg: #102b25; --vd-quick-control: #173f34; --vd-quick-text: #f3ead2; --vd-quick-muted: #f3ead2;
+  --vd-quick-accent: #f0c46d; --vd-quick-backdrop: rgba(5, 15, 12, 0.6);
   /* Văn Điền palette */
   --vd-seedling: #8cc152; --vd-seedling-deep: #5f9a3a; --vd-paddy: #e2b54a; --vd-paddy-deep: #b8862a;
   --vd-bamboo: #8a5a2b; --vd-bamboo-dark: #5b3a1c; --vd-bamboo-leaf: #3f6b2e; --vd-water: #9cc9d3;

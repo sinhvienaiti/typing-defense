@@ -202,6 +202,13 @@ The docs predate the split. Read their paths as: `src/td/` → `src/`,
   (E, pace k, the director on by "Nhịp tự điều" in `td.settings`); `src/sim/systems/pace.ts` runs the flow
   meters and the pace directors inside the sim (hashed, `pace` events); "Hồ sơ gõ" is `src/ui/profile.ts`.
   A replay needs the header: `flags()` and the replay files carry `expected` and `pace`.
+- Keyboard sounds (parent `docs/games/TYPING_FEEL_SERVICE.md` §5.1–5.3): no set is copied into the game. The Typing Feel
+  catalogue and sets load at run time from `VITE_TYPING_FEEL_ORIGIN` (`src/app/keyboard.ts`, a chunk `main.ts` asks for
+  with the page; the parent's `build:td` and `dev:td:app` set it, this repo's own scripts do not: Off and Bamboo only).
+  The Sound panel (`src/app/quick.ts`) is built at once with the pending list and takes the settled list later; the save
+  keeps a set the host cannot serve ("Saved sound · unavailable") and writes `keyboard` only once it owns one
+  (`src/app/prefs.ts`); Bamboo stands in, unsaved, for a set that cannot sound; the run's first step waits for the
+  saved set's first batch 1.5 s at most (`src/app/keyboard-gate.ts`). Tests use the sample host `tests/feel-fixture.ts`.
 - `src/kit/`: shared kit copied from the parent repo's `shared/game-kit` (modules in `kit.config.json`, `balance` included).
 - `tests/`: Vitest; `tests/td/` helpers, bots, golden; `tests/golden/td-1a.json`
   (the sandbox bot, 3 nights) and `tests/golden/td-1b-boss.json` (the sandbox

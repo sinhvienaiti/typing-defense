@@ -9,6 +9,7 @@
 @import "@fontsource/be-vietnam-pro/800.css";
 @import "./theme.css";
 @import "./title.css";
+@import "./quick.css";
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #6f9a3e; color: var(--vd-ink); font: 500 14px/1.4 var(--vd-font); }

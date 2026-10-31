@@ -33,7 +33,7 @@ function sources(dir: string, pattern = /\.(ts|tsx|js|mjs|css)$/): Source[] {
   });
 }
 
-const PACKAGES = /^(three|three\/examples\/jsm\/.+|@fontsource\/.+)$/;
+const PACKAGES = /^(three|three\/examples\/jsm\/.+|@fontsource\/.+|a11y-dialog)$/;
 const PURE_ROOTS = ["src/sim/", "src/typing/", "src/content/"];
 /** Kit files the rules load: the seeded streams, and the balance module's flow meter and pace director (BALANCE.md §8: pure, deterministic TS). */
 const PURE_KIT = ["src/kit/platform/rng", ...["bands", "director", "flow", "math", "profile"].map((file) => "src/kit/balance/" + file)];
@@ -157,7 +157,7 @@ describe("Lời Gọi boundary (TK 25.3, SPLIT_PLAN §3)", () => {
     expect(readFileSync(join(ROOT, "vite.config.ts"), "utf8")).toMatch(/\bport: 3006\b/);
   });
 
-  it("src loads only src/**, three, three/examples/jsm/* and @fontsource/*", () => {
+  it("src loads only src/**, three, three/examples/jsm/*, @fontsource/* and a11y-dialog (MIT, the kit's quick-settings panels)", () => {
     const crossing = browser.flatMap((source) =>
       importsOf(source)
         .filter(({ spec }) => {

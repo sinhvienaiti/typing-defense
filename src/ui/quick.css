@@ -1,0 +1,20 @@
+/* The quick controls own the top of the right HUD column. */
+.has-quick-settings .td-tip, .has-quick-settings .td-sandbox { top: max(64px, calc(80px * var(--hud, 1))); }
+.td-quick.kit-qs {
+  --kit-qs-bg: var(--vd-quick-bg); --kit-qs-control: var(--vd-quick-control); --kit-qs-text: var(--vd-quick-text);
+  --kit-qs-muted: var(--vd-quick-muted); --kit-qs-accent: var(--vd-quick-accent); --kit-qs-accent-text: var(--vd-ink);
+  --kit-qs-focus: var(--vd-lantern); --kit-qs-line: var(--vd-bamboo); --kit-qs-backdrop: var(--vd-quick-backdrop);
+  font-family: var(--vd-font);
+}
+.td-quick.kit-qs .kit-qs__panel {
+  border: 38px solid transparent; border-image: var(--kit-qs-skin-panel) 210 fill / 38px / 0 round;
+  border-radius: 0; background-image: none; padding: 4px 8px 12px;
+}
+.td-quick.kit-qs .kit-qs__btn, .td-quick.kit-qs .kit-qs__chip {
+  border: 12px solid transparent; border-image: var(--kit-qs-skin-button) 170 260 fill / 12px / 0 round;
+  background-image: none; padding: 0 7px; min-height: 38px;
+}
+.td-quick .kit-qs__btn:hover, .td-quick .kit-qs__opt input:checked + .kit-qs__chip,
+.td-quick .kit-qs__btn[aria-pressed="true"], .td-quick .kit-qs__btn[aria-checked="true"] { outline: 2px solid var(--vd-lantern); color: var(--vd-quick-text); }
+.td-quick .kit-qs__row { grid-template-columns: 24px minmax(90px, auto) minmax(0, 1fr); }
+.td-quick .kit-qs__row--slot { grid-template-columns: 1fr; }

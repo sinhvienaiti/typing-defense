@@ -1,13 +1,16 @@
 /**
  * Lời Gọi's sound made in code (docs/td/BUILD_NOW.md §5.5, TK 24; SPLIT_PLAN §1.2), no files: bamboo, wood, bronze
  * bells and paper (folk.ts), the list and the prompts for the real files in docs/audio/THEME_SOUND_LIST.md. Buses (TK
- * 24.2): music (ducked under a spoken word), typing (its own light compressor), world, ui, a shared reverb, master and
- * a limiter; the settings set master, music and effects. A call that lights up rings its kind's alert (power a trống
- * cơm pair, build two bamboo taps, harvest a high bell, chop a low wood knock, mine a small clink, quiz a sáo call; at
- * most 3 a second); a right key is a bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB
- * lower; a finished word a đàn tranh note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots
- * whoosh, blasts thud, the ink folk puff like paper, a leak rings a gong; night and dawn have their own calls. The
- * title adds far villagers calling across the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's
+ * 24.2): music (ducked under a spoken word), typing (its own light compressor), world, ui (the Interface volume, ticket
+ * 193), keys (the original Bamboo keys at Master × Keyboard volume, silent with any other keyboard sound: a Typing Feel
+ * set plays in app/quick.ts, unless Bamboo stands in for one that cannot sound), a shared reverb, master and a limiter;
+ * the settings set master, music, effects and interface.
+ * A call that lights up rings its kind's alert (power a trống cơm pair, build two bamboo taps, harvest a high bell, chop
+ * a low wood knock, mine a small clink, quiz a sáo call; at most 3 a second); with Bamboo chosen, a right key is a
+ * bamboo tick a semitone higher per letter, a wrong or stray one a dull "tóc" 12 dB lower; a finished word a đàn tranh
+ * note on the ngũ cung by chain tier (Perfect and Flash add a bell). Word Shots whoosh, blasts thud, the ink folk puff
+ * like paper, a leak rings a gong; night and dawn have their own calls. The title adds far villagers calling across
+ * the fields. Mộc Tinh (BUILD_1B §13.2): day 5's two low wood beats; the lull's
  * swelling rumble and a low drum every 3 s, faster at the end; the ground breaking and a roar as it rises and staggers;
  * Rễ Trồi's creak through its warning, a wooden "cộp" as it lands; Quật cành's whoosh and thud; the stagger's bell and
  * gong; the retreat's falling chord and leaves; the chest's coins up the scale. A direct word breaking its mechanic: a
@@ -19,14 +22,14 @@ import { PROJECTILE } from "../sim/stores/projectiles";
 import { chainTier } from "../sim/systems/chain";
 import type { World } from "../sim/world";
 import { KEY } from "../typing/router";
-import type { Settings } from "../app/prefs";
+import { bambooKeys, type Settings } from "../app/prefs";
 import { chuong, giay, go, goi, note, reverbTail, roar, rumble, sao, tranh, trong, type Out } from "./folk";
 import { FolkMusic } from "./music";
 
 const ALERTS_PER_S = 3;
 /** Each bus's gain at volume 100 (the settings square the slider: half the slider is a quarter of the power). */
 const BASE = { music: 1, sfx: 1.4 } as const;
-type Bus = "typing" | "world" | "ui";
+type Bus = "typing" | "world" | "ui" | "keys";
 /** The title's sounds: a menu step, a choice, a closed entry, a lantern lighting. */
 export type UiSound = "move" | "pick" | "off" | "lamp";
 
@@ -36,24 +39,26 @@ export class TypingAudio {
   private musicBus!: GainNode;
   private duck!: GainNode;
   private sfx!: GainNode;
+  private uiBus!: GainNode;
+  private keyBus!: GainNode;
   private verb!: ConvolverNode;
   private readonly out = {} as Record<Bus, Out>;
   private music: FolkMusic | null = null;
-  private quiet = false;
   private alerts: number[] = [];
   private cursor = 0;
   private phase = "";
   /** Real-time stamps (ms) of the last sounds a cap counts. */
   private readonly last = { arrow: [] as number[], puff: [] as number[], coin: [] as number[], leak: -1e9, caller: 0, left: -1 };
 
-  constructor(private settings: Settings) {}
+  /** `standIn`: the chosen keyboard set the Bamboo keys stand in for this session (app/quick.ts), or null. */
+  constructor(private settings: Settings, private readonly standIn: () => string | null = () => null) {}
 
   get muted(): boolean {
-    return this.quiet;
+    return this.settings.muted;
   }
 
   set muted(on: boolean) {
-    this.quiet = on;
+    this.settings.muted = on;
     this.apply(this.settings);
   }
 
@@ -83,20 +88,43 @@ export class TypingAudio {
     this.out.typing = { ctx, to: typing };
     this.out.world = { ctx, to: new GainNode(ctx, { gain: 0.9 }) };
     this.out.world.to.connect(this.sfx);
-    this.out.ui = { ctx, to: this.sfx };
+    this.uiBus = new GainNode(ctx);
+    this.uiBus.connect(this.master);
+    this.keyBus = new GainNode(ctx);
+    this.keyBus.connect(limiter);
+    this.out.ui = { ctx, to: this.uiBus };
+    this.out.keys = { ctx, to: this.keyBus };
     this.music = new FolkMusic(ctx, this.duck);
     this.apply(this.settings);
   }
 
-  /** Volumes from the settings (0–100), squared; mute holds the master at 0. */
+  /** Volumes from the settings (0–100), squared; mute holds the master at 0. The Bamboo keys: linear, Master × Keyboard. */
   apply(settings: Settings): void {
     this.settings = settings;
     if (this.ctx === null) return;
     const t = this.ctx.currentTime;
     const v = (value: number, base = 1): number => base * (value / 100) ** 2;
-    this.master.gain.setTargetAtTime(this.quiet ? 0 : v(settings.master), t, 0.03);
+    this.master.gain.setTargetAtTime(settings.muted ? 0 : v(settings.master), t, 0.03);
     this.musicBus.gain.setTargetAtTime(v(settings.music, BASE.music), t, 0.03);
     this.sfx.gain.setTargetAtTime(v(settings.sfx, BASE.sfx), t, 0.03);
+    this.uiBus.gain.setTargetAtTime(v(settings.ui, BASE.sfx), t, 0.03);
+    this.keyBus.gain.setTargetAtTime(settings.muted || !bambooKeys(settings, this.standIn()) ? 0 : settings.master * settings.keyboardVolume / 10000, t, 0.03);
+  }
+
+  /** The original bamboo keys, independently of the combat and completion sounds; also while they stand in for a set that cannot sound. */
+  key(space = false, wrong = false, step = 0): void {
+    if (this.ctx === null || !bambooKeys(this.settings, this.standIn()) || this.settings.muted || this.settings.master === 0 || this.settings.keyboardVolume === 0) return;
+    go(this.out.keys, this.ctx.currentTime, wrong ? 150 : space ? 620 : 880 * 2 ** (Math.min(12, step) / 12), wrong ? 0.04 : 0.08, wrong ? 0.045 : space ? 0.05 : 0.028);
+  }
+
+  /** Slider samples use the same channel as play. */
+  preview(group: string): void {
+    this.resume();
+    if (group === "master") go({ ctx: this.ctx!, to: this.master }, this.ctx!.currentTime, 620, 0.09, 0.05);
+    else if (group === "ui") this.ui("pick");
+    else if (group === "keyboard") this.key();
+    else if (group === "music") tranh({ ctx: this.ctx!, to: this.duck }, this.ctx!.currentTime, note(5), 0.1);
+    else go(this.out.world, this.ctx!.currentTime, 620, 0.09, 0.05);
   }
 
   /**
@@ -184,7 +212,7 @@ export class TypingAudio {
     const ring = w.events.ring;
     const from = Math.max(this.cursor, ring.written - ring.size);
     this.cursor = ring.written;
-    if (this.ctx === null || this.quiet) return;
+    if (this.ctx === null || this.settings.muted) return;
     const t = this.ctx.currentTime;
     const typing = this.out.typing;
     const world = this.out.world;
@@ -193,8 +221,7 @@ export class TypingAudio {
         if (this.room(this.alerts, now, ALERTS_PER_S)) this.alert(event.kind, t);
       } else if (event.t === "wordKey") {
         const s = w.words.slotOf(event.word);
-        if (event.result === KEY.wrong || event.result === KEY.stray) go(typing, t, 150, 0.04, 0.045);
-        else if (event.result !== KEY.group) go(typing, t, 880 * 2 ** (Math.min(12, s >= 0 ? w.words.typed[s]! : 8) / 12), 0.08, 0.028);
+        if (event.result !== KEY.group) this.key(false, event.result === KEY.wrong || event.result === KEY.stray, s >= 0 ? w.words.typed[s]! : 8);
       } else if (event.t === "wordHit") {
         const step = event.grade === "sloppy" ? 4 : 5 + Math.min(5, chainTier(w.typing.chain) + 1);
         tranh(typing, t, note(step), event.grade === "sloppy" ? 0.07 : event.grade === "ok" ? 0.11 : 0.14, event.grade === "flash");

@@ -70,7 +70,7 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     expect(cells[0]!.k).toBe(1);
     const table = metricsTable(cells);
     expect(table).toHaveLength(2 + cells.length);
-    expect(table[2]).toMatch(/^\| Cân bằng \| standard \| 1\.000 \|/);
+    expect(table[2]).toMatch(/^\| Balanced \| standard \| 1\.000 \|/);
     const gates = stageGates(cells);
     expect(gates.map((gate) => gate.id)).toEqual([...GATE_IDS]);
     expect(gates.find((gate) => gate.id === "B9")!.status).toBe("skip");
@@ -78,10 +78,10 @@ describe("the stage matrix and its report (BALANCE.md §3, §7)", () => {
     const lines: string[] = [];
     stageReport(cells, [{ bot: "standard", profile: measuredProfile(botById("standard"), deck) }], 2, (text) => lines.push(text));
     const text = lines.join("\n");
-    expect(text).toContain("| B1 | Cùng vùng cuốn |");
-    expect(text).toContain("| B9 | Khớp người thật | THIẾU SỐ |");
+    expect(text).toContain("| B1 | Shared flow band |");
+    expect(text).toContain("| B9 | Matches human play | MISSING DATA |");
     expect(text).toContain("Đêm 1–" + STAGE_NIGHTS);
-    expect(text).toMatch(/\| Chuẩn \| 35 \/ \d+\.\d \|/);
+    expect(text).toMatch(/\| Standard \| 35 \/ \d+\.\d \|/);
   });
 
   it("grades B1 and B7's director-off row on the 1B tight band when asked (the pooled sets, BUILD_1B §18.3)", () => {
