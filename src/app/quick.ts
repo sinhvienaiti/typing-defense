@@ -28,6 +28,40 @@ export const QUICK_SKIN: QuickSkin = {
   sliderTrack: QUICK_ART + "slider-track.png",
   sliderThumb: QUICK_ART + "slider-thumb.128.png",
 };
+/**
+ * Art the kit's skin has no field for, passed to quick.css as variables on the layer: the 160 button-active plate (a
+ * chosen chip, a pressed Mute, a switch that is on) and the 180 muted speaker for the Master row while muted.
+ */
+export const QUICK_ART_VARS: Readonly<Record<string, string>> = {
+  "--td-qs-button-active": QUICK_ART + "button-active.v2.alpha.png",
+  "--td-qs-icon-muted": QUICK_ART + "hud-sound-muted.128.png",
+};
+/** The Mute button's label while muted; its own label ("Mute") comes back when unmuted. */
+export const UNMUTE_LABEL = "Unmute";
+/**
+ * The kit draws no muted state on the Master row (only the corner speaker changes). While Mute is pressed the row takes
+ * `td-quick__row--muted` (quick.css dims the groove and strikes the number) and the button reads "Unmute"; muted or at 0
+ * the row takes `td-quick__row--silent` (the muted speaker art). It follows what the kit draws (the button's
+ * aria-pressed, the number's text), so a change in the panel, a refresh() and a reopened panel all repaint it.
+ */
+export function watchMute(root: HTMLElement): void {
+  const row = root.querySelector<HTMLElement>('.kit-qs__row[data-row="master"]');
+  const button = row?.querySelector<HTMLButtonElement>('.kit-qs__btn[data-toggle="muted"]');
+  const number = row?.querySelector<HTMLElement>(".kit-qs__num");
+  if (!row || !button || !number) return;
+  const label = button.textContent ?? "";
+  const paint = (): void => {
+    const muted = button.getAttribute("aria-pressed") === "true";
+    row.classList.toggle("td-quick__row--muted", muted);
+    row.classList.toggle("td-quick__row--silent", muted || number.textContent === "0");
+    const text = muted ? UNMUTE_LABEL : label;
+    if (button.textContent !== text) button.textContent = text;
+  };
+  const observer = new MutationObserver(paint);
+  observer.observe(button, { attributes: true, attributeFilter: ["aria-pressed"] });
+  observer.observe(number, { childList: true, characterData: true, subtree: true });
+  paint();
+}
 export const settingsRows = (): QuickRow[] => [
   { kind: "heading", id: "gameHeading", label: "Game · new runs" },
   { kind: "toggle", id: "pace", label: "Pace adapts to your typing", default: true },
@@ -110,6 +144,8 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
     onPause: () => { hooks.audio()?.resume(); sounds.resume(); }, onQuit: hooks.quit, countdownMs: hooks.countdown,
   });
   panel.root.classList.add("td-quick");
+  for (const [name, url] of Object.entries(QUICK_ART_VARS)) panel.root.style.setProperty(name, `url(${JSON.stringify(url)})`);
+  watchMute(panel.root);
   document.body.classList.add("has-quick-settings");
   levels();
   // The catalogue settles the saved choice when it comes (a host that failed keeps it), then the set loads.
