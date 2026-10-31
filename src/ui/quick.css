@@ -7,32 +7,52 @@
   font-family: var(--vd-font);
 }
 /* Layer settings for the kit (QUICK_SETTINGS_VARS). Focus is a lantern-amber glow hugging the art; active plates
-   letter in gold; the panel title is in the title face (Baloo 2). The knob box is 32 px (the art fills 70 %: about
-   22 px visible at 720p), so the fill stops at its centre; the 225 groove is cut 0 64 with 10 px caps. Mute sits in a
-   column as wide as "Unmute" after the number on every slider row, so all grooves are one length. Until the 244 fill
-   art: the empty groove is the jade groove greyed and dimmed (it must not read full at 0), the fill the same groove
-   lit with a lantern glow. */
+   letter in gold; the panel title, buttons, chips, keyboard rows, labels and headings are in the title face (Baloo 2
+   600, the one weight the game loads); numbers and small notes keep Be Vietnam Pro. The knob box is 32 px (the art
+   fills 70 %: about 22 px visible at 720p), so the fill stops at its centre. The 244 groove pair sits 8 px in from the
+   1024 px canvas's ends, so it is cut 0 72 (8 + 64) with 11.25 px caps (72 x 10 / 64) and drawn as painted. Mute sits
+   in a column as wide as "Unmute" after the number on every slider row, so all grooves are one length. */
 .td-quick.kit-qs {
   --kit-qs-glow: var(--vd-lantern); --kit-qs-active-text: var(--vd-quick-accent); --kit-qs-title-font: var(--vd-title);
-  --kit-qs-knob: calc(32px * var(--kit-qs-s)); --kit-qs-groove-slice: 0 64; --kit-qs-groove-cap: calc(10px * var(--kit-qs-s));
+  --kit-qs-button-font: var(--vd-title); --kit-qs-label-font: var(--vd-title); --kit-qs-note-font: var(--vd-font);
+  --kit-qs-knob: calc(32px * var(--kit-qs-s)); --kit-qs-groove-slice: 0 72; --kit-qs-groove-cap: calc(11.25px * var(--kit-qs-s));
   --kit-qs-aside-w: calc(38px + 60px * var(--kit-qs-s));
-  --kit-qs-empty-filter: grayscale(0.85) brightness(0.45);
-  --kit-qs-fill-filter: brightness(1.2) saturate(1.3) drop-shadow(0 0 calc(3px * var(--kit-qs-s)) rgba(255, 184, 77, 0.7));
   --kit-qs-list-pad: calc(8px * var(--kit-qs-s));
 }
+.td-quick .kit-qs__label, .td-quick .kit-qs__heading, .td-quick .kit-qs__btn, .td-quick .kit-qs__chip,
+.td-quick .kit-qs__row--keyboards .kit-keyboards button.kit-keyboards__option,
+.td-quick .kit-qs__row--keyboards .kit-keyboards .kit-keyboards__family { font-weight: 600; }
+.td-quick .kit-qs__label { font-size: calc(16px * var(--kit-qs-s)); line-height: 1.15; }
+.td-quick .kit-qs__btn, .td-quick .kit-qs__chip,
+.td-quick .kit-qs__row--keyboards .kit-keyboards button.kit-keyboards__option { font-size: calc(16px * var(--kit-qs-s)); }
 .td-quick .kit-qs__title { font-size: calc(26px * var(--kit-qs-s)); font-weight: 800; line-height: 1.1; color: var(--vd-quick-accent); text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75); }
 /* Frame (160 panel-large.v2, 1183 x 1152): a 9-slice of its slice data (210 px corners and edges, edges "round"), 38 px
    wide at 720p and 57 at 1080p (its display data: 56). The centre is no longer the frame's own `fill`: with "round" the
    middle slice was tiled at the frame's scale (138 px tiles), a grid of seams behind the rows. The border box now stops
    at the inner gold edge (100 px of the art, 18 px drawn), the frame image covers the band beyond it, and the centre is
    one stretched copy of the art's middle (763 x 732 px: the art drawn 1183/763 and 1152/732 times the area inside the
-   frame), clipped inside the gold edge. Paddings keep the content where it was (42/46/50 px at 720p). */
+   frame), clipped inside the gold edge. Paddings keep the content where it was (42/46/50 px at 720p).
+   The edge slices also hold 20 px of inner jade (art 100..210), which "round" repeated as darker stepped strips along
+   the top and right (judges 31/10). Cutting at the band would push the sun medallions and red scroll corners into the
+   repeating edges, so the cut stays and ::before lays the same stretched centre over those strips: the jade inside the
+   gold edge is one picture, the braided band still repeats, and the four corners keep their ornaments. ::before sits
+   under the content (isolation on the panel, z-index -1). */
 .td-quick.kit-qs .kit-qs__panel {
+  --td-qs-jade: var(--kit-qs-skin-panel) center / calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5505)
+    calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5738) no-repeat padding-box transparent;
+  isolation: isolate;
   border: calc(18px * var(--kit-qs-s)) solid transparent; border-radius: 0;
   border-image: var(--kit-qs-skin-panel) 210 / calc(38px * var(--kit-qs-s)) / 0 round;
-  background: var(--kit-qs-skin-panel) center / calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5505)
-    calc(max(100% - 40px * var(--kit-qs-s), 1px) * 1.5738) no-repeat padding-box transparent;
+  background: var(--td-qs-jade);
   padding: calc(24px * var(--kit-qs-s)) calc(28px * var(--kit-qs-s)) calc(32px * var(--kit-qs-s));
+}
+.td-quick.kit-qs .kit-qs__panel::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--td-qs-jade);
+  -webkit-mask: linear-gradient(#000 0 0) center / calc(100% - 40px * var(--kit-qs-s)) 100% no-repeat,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 40px * var(--kit-qs-s)) no-repeat;
+  mask: linear-gradient(#000 0 0) center / calc(100% - 40px * var(--kit-qs-s)) 100% no-repeat,
+    linear-gradient(#000 0 0) center / 100% calc(100% - 40px * var(--kit-qs-s)) no-repeat;
 }
 .td-quick.kit-qs .kit-qs__btn, .td-quick.kit-qs .kit-qs__chip {
   border: 12px solid transparent; border-image: var(--kit-qs-skin-button) 170 260 fill / 12px / 0 round;
@@ -45,7 +65,11 @@
 .td-quick.kit-qs .kit-qs__btn[aria-pressed="true"], .td-quick.kit-qs .kit-qs__btn[aria-checked="true"] {
   border-image-source: var(--kit-qs-skin-button-active, var(--kit-qs-skin-button)); background: none; color: var(--vd-quick-accent);
 }
-.td-quick.kit-qs .kit-qs__btn:hover, .td-quick.kit-qs .kit-qs__opt:hover input:not(:disabled) + .kit-qs__chip { filter: brightness(1.18); }
+/* Hover lights the plate with a lantern glow (judges 31/10: a cream-to-white text shift alone did not read). */
+.td-quick.kit-qs .kit-qs__btn, .td-quick.kit-qs .kit-qs__chip { transition: filter 120ms ease-out; }
+.td-quick.kit-qs .kit-qs__btn:hover, .td-quick.kit-qs .kit-qs__opt:hover input:not(:disabled) + .kit-qs__chip {
+  filter: brightness(1.25) drop-shadow(0 0 calc(5px * var(--kit-qs-s)) rgba(255, 184, 77, 0.85));
+}
 /* "Unmute" is longer than "Mute": the toggle keeps Unmute's width for both labels, so the Master row does not shift when
    muted. The button's 12 px art border and 7 px padding do not scale (38 px); the label does (58 px at scale 1, measured). */
 .td-quick.kit-qs .kit-qs__btn[data-toggle] { min-width: calc(38px + 60px * var(--kit-qs-s)); }
@@ -59,15 +83,32 @@
 .td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:not(.kit-qs__row--slot) {
   grid-template-columns: var(--kit-qs-icon-size) 9em minmax(0, 1fr);
 }
-/* The Sound panel is 640 px wide (scaled; the kit's 560 elsewhere): with Mute in its own column, the extra 80 px all go
-   to the grooves (139 to 219 px at 720p), every row alike. */
-.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__panel { width: min(calc(640px * var(--kit-qs-s)), calc(100% - 32px)); }
+/* Both panels are 640 px wide (scaled; the kit's 560). On Sound, with Mute in its own column, the extra 80 px all go
+   to the grooves (139 to 219 px at 720p), every row alike. Every slider row is as tall as the Master row with its Mute
+   plate (the plate's unscaled 24 px border plus one 16 px line at 1.35, scaled, plus the row's 3 px padding above and
+   below, border-box), so the rows step evenly: 51.6 px at 720p, 65.4 px at 1080p. */
+.td-quick .kit-qs__dialog .kit-qs__panel { width: min(calc(640px * var(--kit-qs-s)), calc(100% - 32px)); }
+/* Story mode (judges 31/10: five chips wrapped 3 + 2 under a label centred between the lines): Settings is 640 px wide
+   like Sound, the label sits on its own line and the five plates run on one line under it, from the label's edge.
+   Chips keep 5 px inside their 12 px art border (buttons 7 px), so the five fit in 514 px at 720p (494 px used; 656 of 771 at 1080p). */
+.td-quick .kit-qs__dialog[data-panel="settings"] .kit-qs__row[data-row="mode"] {
+  grid-template-columns: var(--kit-qs-icon-size) minmax(0, 1fr); row-gap: calc(6px * var(--kit-qs-s));
+}
+.td-quick .kit-qs__row[data-row="mode"] .kit-qs__icon-cell { grid-area: 1 / 1; }
+.td-quick .kit-qs__row[data-row="mode"] .kit-qs__label { grid-area: 1 / 2; }
+.td-quick .kit-qs__row[data-row="mode"] .kit-qs__control { grid-area: 2 / 2; }
+.td-quick .kit-qs__row[data-row="mode"] .kit-qs__opts { flex-wrap: nowrap; }
+.td-quick.kit-qs .kit-qs__chip { padding: 0 5px; }
+.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:has(.kit-qs__slider) {
+  min-height: calc(max(38px, 24px + 16px * 1.35 * var(--kit-qs-s)) + 6px * var(--kit-qs-s));
+}
 /* Keyboard sound rows are 160 plates (app/quick.ts QUICK_SKIN.listRow, cut as the buttons), the chosen row the
    button-active plate with gold lettering; the kit drops the listbox's rounded box and flat fills. The list grows with
    the panel (the kit draws it 34 px a row at every size, so at 1080p a 22 px label filled its plate): rows, family
    headings and the listen icons scale by --kit-qs-s, and app/quick.ts scales the plate's edges the same way
    (LIST_ROW_VARS). Touch keeps at least the kit's 44 px rows. */
-.td-quick .kit-qs__row--keyboards .kit-keyboards { max-height: calc(306px * var(--kit-qs-s)); }
+/* Eight rows (272 px at 720p, was nine): the taller slider rows take 24 px, and the panel fits 720p without scrolling. */
+.td-quick .kit-qs__row--keyboards .kit-keyboards { max-height: calc(272px * var(--kit-qs-s)); }
 .td-quick .kit-qs__row--keyboards .kit-keyboards button,
 .td-quick .kit-qs__row--keyboards .kit-keyboards__spacer {
   flex-basis: calc(34px * var(--kit-qs-s)); height: calc(34px * var(--kit-qs-s)); min-height: calc(34px * var(--kit-qs-s));
@@ -112,10 +153,10 @@
 .td-quick.kit-qs--skin-slider .kit-qs__range:active::-moz-range-thumb {
   transform: scale(1.08); filter: brightness(1.25) drop-shadow(0 0 calc(6px * var(--kit-qs-s)) rgba(255, 170, 60, 0.95));
 }
-/* Keyboard focus warms both groove layers (the kit reads the two filters on the slider's own layers). */
+/* Keyboard focus warms both groove layers with a lantern glow (the kit reads the two filters on the slider's layers). */
 .td-quick .kit-qs__slider:has(.kit-qs__range:focus-visible) {
-  --kit-qs-empty-filter: grayscale(0.85) brightness(0.45) drop-shadow(0 0 calc(3px * var(--kit-qs-s)) rgba(255, 184, 77, 0.6));
-  --kit-qs-fill-filter: brightness(1.3) saturate(1.3) drop-shadow(0 0 calc(4px * var(--kit-qs-s)) rgba(255, 184, 77, 0.9));
+  --kit-qs-empty-filter: drop-shadow(0 0 calc(3px * var(--kit-qs-s)) rgba(255, 184, 77, 0.6));
+  --kit-qs-fill-filter: brightness(1.1) drop-shadow(0 0 calc(4px * var(--kit-qs-s)) rgba(255, 184, 77, 0.9));
 }
 @media (prefers-reduced-motion: reduce) {
   .td-quick.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb { transition: none; }

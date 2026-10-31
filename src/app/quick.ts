@@ -8,7 +8,7 @@
  * chosen set's own files.
  */
 import { pendingKeyboardChoices, TypingSounds, type KeyboardSoundChoice, type TypingSoundEvent } from "../kit/feedback/typing-fx/audio";
-import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickIcons, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
+import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickContext, type QuickIcons, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
 import { bambooKeys, MODE_CHOICES, ownKeyboard, ownsKeyboard, saveSettings, type Settings } from "./prefs";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, manifestJson, ORIGINAL_KEYS, sampleBytes, startKeyboard, type KeyboardFeed } from "./keyboard";
 import { modeName } from "../ui/settings";
@@ -24,10 +24,11 @@ export const QUICK_ART = "/assets/typing-defense/ui/quick-settings/";
 export const PLATE_SLICE = [170, 260] as const;
 const ROW_EDGE = [12, 18] as const;
 /**
- * Frame, button (115/160) and slider art (225). At 1080p the groove is drawn about 15 CSS px tall and the knob box
- * 42 px: the 1024 x 64 groove and the 128 px knob.
- * - The fill layer runs on the 225 groove until the 244 fill art is accepted: `sliderEmpty` is the groove (quick.css
- *   dims and greys it, so the jade never reads full at 0) and the fill falls back to the same groove, lit.
+ * Frame, button (115/160) and slider art (225 knob, 244 groove pair). At 1080p the groove is drawn about 15 CSS px tall
+ * and the knob box 42 px: the 1024 x 64 groove and the 128 px knob.
+ * - The fill layer: the 244 pair (accepted 31/10), a dark empty groove right of the knob and the lit jade fill left of
+ *   it, drawn as painted. The two match each other (IoU 0.9996); both sit 8 px in from the old 225 groove's ends, so
+ *   quick.css cuts them 0 72. The 225 track stays as `sliderTrack` (the kit's fallback only).
  * - Keyboard sound rows are 160 button plates, the chosen row the 160 button-active plate (`buttonActive`, also the
  *   pressed and chosen buttons). The 245 list-row art drops in here.
  */
@@ -37,7 +38,8 @@ export const QUICK_SKIN: QuickSkin = {
   buttonActive: QUICK_ART + "button-active.v2.alpha.png",
   sliderTrack: QUICK_ART + "slider-track.png",
   sliderThumb: QUICK_ART + "slider-thumb.128.png",
-  sliderEmpty: QUICK_ART + "slider-track.png",
+  sliderEmpty: QUICK_ART + "slider-empty.png",
+  sliderFill: QUICK_ART + "slider-fill.png",
   listRow: { slice: PLATE_SLICE, edge: ROW_EDGE },
 };
 /** The 180 icons the game has (no Voice row); Keyboard volume reuses the keyboard icon until its own (ticket 244) is accepted. */
@@ -113,6 +115,8 @@ export const letterSound = (result: number): TypingSoundEvent => (result === KEY
  */
 export type QuickHooks = {
   audio(): TypingAudio | null; quit(): void; countdown(): number; notice(text: string): void;
+  /** "title" while the title is up (no Resume, no Quit to title); unset: always play. */
+  context?(): QuickContext;
   readonly saved: string | null; readonly feed?: KeyboardFeed | Promise<KeyboardFeed | null>; standIn?(id: string | null): void; playable?(by: "batch" | "ended"): void;
 };
 /**
@@ -166,6 +170,7 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
     },
     onPreview: (group) => { if (group === "keyboard" && !bamboo()) sounds.play("key"); else hooks.audio()?.preview(group); },
     onPause: () => { hooks.audio()?.resume(); sounds.resume(); }, onQuit: hooks.quit, countdownMs: hooks.countdown,
+    context: () => hooks.context?.() ?? "play",
   });
   panel.root.classList.add("td-quick");
   for (const [name, url] of Object.entries(QUICK_ART_VARS)) panel.root.style.setProperty(name, `url(${JSON.stringify(url)})`);

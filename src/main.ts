@@ -191,6 +191,7 @@ window.addEventListener("pagehide", () => {
 const selection = new Selection(world, (command) => session.send(command));
 const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).mountQuick(settings, {
   audio: () => audio, quit: () => showTitle(world.phase !== "defeat"), countdown: () => titleUp || selection.halted ? 0 : 500, notice: tellLost,
+  context: () => (titleUp ? "title" : "play"),
   saved: keyboardSaved, feed: keyboardFeed, standIn: (id) => void (keyboardStandIn = id), playable: (by) => keyboardGate.open(by),
 }));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z), (w, c, core) => view.anchor?.(w, c, core) ?? null);
