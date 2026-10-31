@@ -34,7 +34,7 @@ export function keyStamps(cards: readonly StampCard[], root: HTMLElement, tier: 
     const step = stampStep(now - key.at, tier, done);
     key.el.style.opacity = String(step.opacity);
     if (!step.opacity) continue;
-    const soft = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const soft = matchMedia("(prefers-reduced-motion: reduce)").matches || (typeof document !== "undefined" && document.documentElement.classList.contains("td-still"));
     const r = key.source.getBoundingClientRect();
     const x = (r.left + r.right) / 2, y = (r.top + r.bottom) / 2;
     // The stamp's font is the letter's (feel.css); the card's own scale on screen (lock, typing, burst) is the letter's rect over its

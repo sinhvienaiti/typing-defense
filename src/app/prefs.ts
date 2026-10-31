@@ -6,12 +6,14 @@
  * Tickets 192/193 add mute, the interface volume, the keyboard sound (a Typing Feel set's id, "bamboo" or "off") and its
  * volume, changed in the Settings and Sound panels (app/quick.ts). The keyboard sound is written only once the save owns
  * one (parent docs/games/TYPING_FEEL_SERVICE.md §4.5): until then the page follows the Typing Feel catalogue's default.
+ * The Settings panel adds reduced motion (`motion`, on top of the system's setting) and the learning switches: the
+ * Vietnamese meaning (`meaning`) and the IPA (`ipa`), both on by default (parent IN_GAME_SETTINGS.md §3).
  */
 import { safeLocalStorage } from "../kit/platform/safe-storage";
 import { STARS } from "../content/rules";
 import type { Mode } from "../content/types";
 
-export type Settings = { master: number; music: number; sfx: number; pace: boolean; mode: Mode | null; muted: boolean; ui: number; keyboard: string; keyboardVolume: number };
+export type Settings = { master: number; music: number; sfx: number; pace: boolean; mode: Mode | null; muted: boolean; ui: number; keyboard: string; keyboardVolume: number; motion: boolean; meaning: boolean; ipa: boolean };
 export type Volume = "master" | "music" | "sfx";
 type Storage = Pick<typeof safeLocalStorage, "readJson" | "writeJson">;
 
@@ -19,7 +21,7 @@ const KEY = "td.settings";
 /** Owner's ticket-189 choice, 2026-10-30: the hard default until the Typing Feel catalogue's `default` settles it (app/keyboard.ts). */
 export const DEFAULT_KEYBOARD_SOUND = "bright-clack";
 export const BUILT_IN_KEYS = "bamboo";
-const DEFAULTS: Settings = { master: 80, music: 60, sfx: 80, pace: true, mode: null, muted: false, ui: 80, keyboard: DEFAULT_KEYBOARD_SOUND, keyboardVolume: 100 };
+const DEFAULTS: Settings = { master: 80, music: 60, sfx: 80, pace: true, mode: null, muted: false, ui: 80, keyboard: DEFAULT_KEYBOARD_SOUND, keyboardVolume: 100, motion: false, meaning: true, ipa: true };
 export const SETTING_ROWS: readonly (readonly [Volume, string])[] = [["master", "Master volume"], ["music", "Music"], ["sfx", "Effects"]];
 /** The modes the settings card steps through, null ("theo hồ sơ") first. */
 export const MODE_CHOICES: readonly (Mode | null)[] = [null, "relax", "balanced", "challenge", "learn"];
@@ -39,6 +41,10 @@ export function loadSettings(storage: Storage = safeLocalStorage): Settings {
   }
   settings.ui = typeof stored?.ui === "number" ? settings.ui : settings.sfx;
   settings.muted = stored?.muted === true;
+  for (const key of ["motion", "meaning", "ipa"] as const) {
+    const value = stored?.[key];
+    if (typeof value === "boolean") settings[key] = value;
+  }
   if (typeof stored?.keyboard === "string" && /^[a-z0-9][a-z0-9-]{0,31}$/.test(stored.keyboard)) settings.keyboard = stored.keyboard;
   if (typeof stored?.keyboard === "string") keyboardOwned.add(settings);
   return settings;

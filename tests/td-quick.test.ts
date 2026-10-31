@@ -232,12 +232,47 @@ describe("applyQuick and the saved values (tickets 192/193)", () => {
     expect(applyQuick(s, "mode", "profile")).toBe(true);
     expect(s.mode).toBeNull();
     for (const [id, value] of [["master", Number.NaN], ["music", "loud"], ["mode", "hard"], ["keyboard", "Bad Id!"], ["keyboard", 3], ["pace", "yes"], ["muted", 1], ["voice", 50], ["quality", "low"]] as const) expect(applyQuick(s, id, value), `${id}=${String(value)}`).toBe(false);
-    expect(quickValues(s)).toEqual({ master: 0, muted: true, music: 30, effects: 55, ui: 25, keyboard: "warm-amber", keyboardVolume: 100, pace: false, mode: "profile" });
+    expect(quickValues(s)).toEqual({ master: 0, muted: true, music: 30, effects: 55, ui: 25, keyboard: "warm-amber", keyboardVolume: 100, mode: "profile", pace: "off", motion: "off", meaning: "on", ipa: "on", reducedMotion: false });
+    // The switches are On/Off chips (judges 31/10): each sets its own Settings field.
+    for (const [id, field] of [["pace", "pace"], ["motion", "motion"], ["meaning", "meaning"], ["ipa", "ipa"]] as const) {
+      expect(applyQuick(s, id, "on"), id).toBe(true);
+      expect(s[field], id).toBe(true);
+      expect(applyQuick(s, id, "off"), id).toBe(true);
+      expect(s[field], id).toBe(false);
+      expect(applyQuick(s, id, "maybe"), id).toBe(false);
+    }
+    expect(applyQuick(s, "toString", "on")).toBe(false);
+    s.motion = true;
+    expect(quickValues(s)).toMatchObject({ motion: "on", reducedMotion: true, meaning: "off", ipa: "off" });
   });
 
-  it("offers only real rows: no Voice slider, no typing-effect or graphics rows the game does not draw", () => {
+  it("offers only real rows: no Voice slider, no Quality before C13, no typing-effect rows; every switch is an On/Off pair", () => {
     expect(soundRows([]).map((row) => row.id)).toEqual(["master", "music", "effects", "keyboard", "keyboardVolume", "ui"]);
-    expect(settingsRows().map((row) => row.id)).toEqual(["gameHeading", "pace", "mode", "resume", "quit"]);
+    expect(settingsRows().map((row) => row.id)).toEqual(["graphicsHeading", "motion", "learningHeading", "meaning", "ipa", "gameHeading", "pace", "mode", "resume", "quit"]);
+    for (const id of ["motion", "meaning", "ipa", "pace"]) {
+      const row = settingsRows().find((r) => r.id === id)!;
+      expect(row.kind, id).toBe("choice");
+      expect(row.kind === "choice" && row.options.map((o) => o.label), id).toEqual(["On", "Off"]);
+    }
+    expect(settingsRows().filter((row) => "icon" in row).map((row) => (row as { icon: string }).icon)).toEqual(["gfx-motion", "learn-meaning", "learn-ipa"]);
+  });
+
+  it("the Settings switches save at once, read back, and act: reduced motion stills the page and the kit's 3-2-1", async () => {
+    const quick = await mount();
+    press("F1", "F1");
+    const chip = (id: string, value: string) => document.querySelector<HTMLInputElement>(`.kit-qs__dialog[data-panel="settings"] [data-row="${id}"] input[value="${value}"]`)!;
+    expect(chip("pace", "on").checked).toBe(true);
+    expect(chip("meaning", "on").checked).toBe(true);
+    expect(chip("motion", "off").checked).toBe(true);
+    expect(document.documentElement.classList.contains("td-still")).toBe(false);
+    for (const [id, value] of [["motion", "on"], ["meaning", "off"], ["ipa", "off"], ["pace", "off"]] as const) chip(id, value).click();
+    expect(stored()).toMatchObject({ motion: true, meaning: false, ipa: false, pace: false });
+    expect(loadSettings()).toMatchObject({ motion: true, meaning: false, ipa: false, pace: false });
+    expect(document.documentElement.classList.contains("td-still")).toBe(true);
+    expect(quick.root.classList.contains("kit-qs--still")).toBe(true);
+    chip("motion", "off").click();
+    expect(document.documentElement.classList.contains("td-still")).toBe(false);
+    expect(quick.root.classList.contains("kit-qs--still")).toBe(false);
   });
 
   it("the panels save each change at once and read it back on the next page", async () => {
@@ -861,39 +896,38 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
     expect(sheet().rules.get('.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:has(.kit-qs__slider)')).toContain("min-height: calc(max(38px, 24px + 16px * 1.35 * var(--kit-qs-s)) + 6px * var(--kit-qs-s));");
   });
 
-  it("muted, the Master row dims and strikes its number, shows the muted speaker and the button reads Unmute", async () => {
+  it("muted, the Master row dims and strikes its number, shows the muted speaker and the button reads Unmute (the kit's row)", async () => {
     await mount();
-    const root = document.querySelector<HTMLElement>(".td-quick")!;
-    expect(root.style.getPropertyValue("--td-qs-icon-muted")).toContain("/assets/typing-defense/ui/quick-settings/hud-sound-muted.128.png");
     press("F2", "F2");
     const master = document.querySelector<HTMLElement>('.kit-qs__dialog[data-panel="sound"] [data-row="master"]')!;
     const mute = master.querySelector<HTMLButtonElement>('[data-toggle="muted"]')!;
+    const icon = () => master.querySelector(".kit-qs__icon")?.getAttribute("src") ?? "";
     expect(mute.textContent).toBe("Mute");
+    expect(icon()).toContain("vol-master.128.png");
     mute.click();
     await settle();
     expect(mute.getAttribute("aria-pressed")).toBe("true");
     expect(mute.textContent).toBe("Unmute");
-    expect(master.classList.contains("td-quick__row--muted")).toBe(true);
-    expect(master.classList.contains("td-quick__row--silent")).toBe(true);
+    expect(master.classList.contains("kit-qs__row--muted")).toBe(true);
+    expect(master.classList.contains("kit-qs__row--silent")).toBe(true);
+    expect(icon()).toContain("hud-sound-muted.128.png");
     expect(stored()?.muted).toBe(true);
     mute.click();
     await settle();
     expect(mute.textContent).toBe("Mute");
-    expect(master.classList.contains("td-quick__row--muted")).toBe(false);
-    expect(master.classList.contains("td-quick__row--silent")).toBe(false);
+    expect(master.classList.contains("kit-qs__row--muted")).toBe(false);
+    expect(icon()).toContain("vol-master.128.png");
     const range = master.querySelector<HTMLInputElement>('input[type="range"]')!;
     range.value = "0";
     range.dispatchEvent(new Event("input", { bubbles: true }));
     await settle();
-    expect(master.classList.contains("td-quick__row--silent")).toBe(true);
-    expect(master.classList.contains("td-quick__row--muted")).toBe(false);
+    expect(master.classList.contains("kit-qs__row--silent")).toBe(true);
+    expect(master.classList.contains("kit-qs__row--muted")).toBe(false);
+    expect(icon()).toContain("hud-sound-muted.128.png");
+    // The game's own watcher and its rules are gone; Mute's column stays as wide as "Unmute".
     const { rules } = sheet();
-    // The whole slider dims (both groove layers and the knob), not only the range (which would leave the fill lit).
-    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__slider")).toContain("filter: grayscale(0.7) brightness(0.6);");
-    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__range")).toBeUndefined();
-    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__num")).toContain("text-decoration: line-through;");
-    expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon-cell")).toContain("background: var(--td-qs-icon-muted) center / contain no-repeat;");
-    expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon")).toContain("opacity: 0;");
+    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__slider")).toBeUndefined();
+    expect(readFileSync(join(__dirname, "..", "src/app/quick.ts"), "utf8")).not.toContain("MutationObserver");
     expect(rules.get(".td-quick.kit-qs .kit-qs__btn[data-toggle]")).toContain("min-width: calc(38px + 60px * var(--kit-qs-s));");
   });
 
@@ -909,8 +943,15 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
     const ranges = [...sound.querySelectorAll('input[type="range"]')].map((input) => input.closest(".kit-qs__row")!);
     expect(ranges.length).toBeGreaterThanOrEqual(5);
     for (const line of [...ranges, sound.querySelector('[data-row="keyboard"]')!]) expect(matched.has(line), (line as HTMLElement).dataset.row).toBe(true);
-    // The Settings rows keep their own columns ("Pace adapts to your typing" on one line).
+    // Keyboard sound (judges 31/10: an empty block under its label): the label on its own line, the list under it from
+    // the label's edge across the label and control columns.
+    const { rules } = sheet();
+    expect(rules.get('.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row.kit-qs__row--keyboards')).toContain("grid-template-columns: var(--kit-qs-icon-size) minmax(0, 1fr);");
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-qs__label")).toContain("grid-area: 1 / 2;");
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-qs__control")).toContain("grid-area: 2 / 2;");
+    // Settings rows share one label column of their own ("Pace adapts to your typing" on one line).
     expect([...document.querySelectorAll('.kit-qs__dialog[data-panel="settings"] .kit-qs__row')].some((line) => matched.has(line))).toBe(false);
+    expect(rules.get('.td-quick .kit-qs__dialog[data-panel="settings"] .kit-qs__row:not(.kit-qs__row--slot)')).toContain("grid-template-columns: var(--kit-qs-icon-size) 13.5em minmax(0, 1fr);");
   });
 
   it("Resume, the primary button, reads in gold lettering on the dark button art, not the kit's ink", async () => {
@@ -941,12 +982,14 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
     expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-active-text: var(--vd-quick-accent);");
     expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-list-pad: calc(8px * var(--kit-qs-s));");
     // Rows, headings and listen icons scale; touch keeps 44 px.
-    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards")).toContain("max-height: calc(272px * var(--kit-qs-s));");
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards")).toContain("max-height: calc(238px * var(--kit-qs-s));");
     const rowsRule = rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards button") ?? "";
     expect(rowsRule).toContain("height: calc(34px * var(--kit-qs-s));");
     expect(rowsRule).toContain("height: max(44px, calc(34px * var(--kit-qs-s)));");
     expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__family")).toContain("height: calc(28px * var(--kit-qs-s));");
-    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__listen img")).toContain("width: calc(24px * var(--kit-qs-s));");
+    // The kit scales the Listen icon, lights it while its sample sounds and shows a thin scrollbar (parent fc7f4a11).
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__listen img")).toBeUndefined();
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-scroll-thumb:");
   });
 
   it("every Sound row has its own icon (the 244 r2 keyboard and interface, Keyboard volume's new one), the corner gear is the 244 r2, and the title is in Baloo 2", async () => {
@@ -980,8 +1023,14 @@ describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill
     const { rules } = sheet();
     expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-title-font: var(--vd-title);");
     expect(rules.get(".td-quick .kit-qs__title")).toContain("color: var(--vd-quick-accent);");
-    // The Settings rows have no accepted icon yet: the cell keeps the scaled width.
+    // Row icons 32 px at 720p (judges 31/10: 24 px blurred them); the Settings rows' icons wait for art: the cell keeps the width.
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-icon-size: calc(32px * var(--kit-qs-s));");
     expect(rules.get(".td-quick .kit-qs__row")).toContain("grid-template-columns: var(--kit-qs-icon-size) minmax(90px, auto) minmax(0, 1fr);");
+    // The resume 3-2-1 in the title face and gold, on the crest over a scrim (judges 31/10).
+    expect(rules.get(".td-quick .kit-qs__digit")).toContain("background: var(--td-qs-medallion) center / contain no-repeat;");
+    expect(rules.get(".td-quick .kit-qs__digit")).toContain("var(--vd-title)");
+    expect(rules.get(".td-quick .kit-qs__count")).toContain("radial-gradient(");
+    expect(document.querySelector<HTMLElement>(".td-quick")!.style.getPropertyValue("--td-qs-medallion")).toContain("/assets/typing-defense/ui/crest.256.webp");
   });
 });
 

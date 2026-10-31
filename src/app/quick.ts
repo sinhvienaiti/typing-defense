@@ -71,49 +71,49 @@ export const LIST_ROW_VARS: Readonly<Record<string, string>> = {
   "--kit-qs-list-inset": `${scaled(2)} 0px`,
   "--kit-qs-list-text-x": scaled(ROW_EDGE[1] + 4),
 };
-/** Art the kit's skin has no field for, passed to quick.css as variables on the layer: the 180 muted speaker for the Master row. */
-export const QUICK_ART_VARS: Readonly<Record<string, string>> = {
-  "--td-qs-icon-muted": QUICK_ART + "hud-sound-muted.128.png",
-};
-/** The Mute button's label while muted; its own label ("Mute") comes back when unmuted. */
-export const UNMUTE_LABEL = "Unmute";
 /**
- * The kit draws no muted state on the Master row (only the corner speaker changes). While Mute is pressed the row takes
- * `td-quick__row--muted` (quick.css dims the groove and strikes the number) and the button reads "Unmute"; muted or at 0
- * the row takes `td-quick__row--silent` (the muted speaker art). It follows what the kit draws (the button's
- * aria-pressed, the number's text), so a change in the panel, a refresh() and a reopened panel all repaint it.
+ * The resume 3-2-1's medallion (judges 31/10: the digit was plain text, barely seen on the field): the game's crest, the
+ * results card's (ui/art.ts), behind the gold number; quick.css draws it through --td-qs-medallion.
  */
-export function watchMute(root: HTMLElement): void {
-  const row = root.querySelector<HTMLElement>('.kit-qs__row[data-row="master"]');
-  const button = row?.querySelector<HTMLButtonElement>('.kit-qs__btn[data-toggle="muted"]');
-  const number = row?.querySelector<HTMLElement>(".kit-qs__num");
-  if (!row || !button || !number) return;
-  const label = button.textContent ?? "";
-  const paint = (): void => {
-    const muted = button.getAttribute("aria-pressed") === "true";
-    row.classList.toggle("td-quick__row--muted", muted);
-    row.classList.toggle("td-quick__row--silent", muted || number.textContent === "0");
-    const text = muted ? UNMUTE_LABEL : label;
-    if (button.textContent !== text) button.textContent = text;
-  };
-  const observer = new MutationObserver(paint);
-  observer.observe(button, { attributes: true, attributeFilter: ["aria-pressed"] });
-  observer.observe(number, { childList: true, characterData: true, subtree: true });
-  paint();
-}
+export const QUICK_COUNT_ART = "/assets/typing-defense/ui/crest.256.webp";
+/**
+ * The muted Master row is the kit's since parent fc7f4a11 (toggle.pressedLabel "Unmute", mutedIcon hud-sound-muted,
+ * kit-qs__row--muted): it replaced this game's own watcher and its CSS.
+ */
+/** An on/off setting as two chips, so its state reads at a glance (judges 31/10: one "On" plate was ambiguous). */
+const ON_OFF = [{ value: "on", label: "On" }, { value: "off", label: "Off" }] as const;
+const onOff = (id: string, label: string, on: boolean, icon?: string): QuickRow => ({ kind: "choice", id, label, ...(icon ? { icon } : {}), options: ON_OFF, default: on ? "on" : "off" });
+/** The switches the Settings panel shows as chips, by row id: the Settings field each one sets. */
+export const SWITCHES = { motion: "motion", meaning: "meaning", ipa: "ipa", pace: "pace" } as const;
+/**
+ * Settings (IN_GAME_SETTINGS §3): Graphics has reduced motion only (the Quality row comes with the 3D view at C13,
+ * BUILD_1C_MAP1 §2: no unfinished 3D in players' hands); Learning the meaning and the IPA (cards and the word strip);
+ * no typing-effect rows (Wordwoven draws its own C10 key stamps, not the kit's letter styles). Row icons by the kit's
+ * names wait for their art (an empty cell keeps the column).
+ */
 export const settingsRows = (): QuickRow[] => [
+  { kind: "heading", id: "graphicsHeading", label: "Graphics" },
+  onOff("motion", "Reduced motion", false, "gfx-motion"),
+  { kind: "heading", id: "learningHeading", label: "Learning" },
+  onOff("meaning", "Show Vietnamese meaning", true, "learn-meaning"),
+  onOff("ipa", "Show pronunciation", true, "learn-ipa"),
   { kind: "heading", id: "gameHeading", label: "Game · new runs" },
-  { kind: "toggle", id: "pace", label: "Pace adapts to your typing", default: true },
+  onOff("pace", "Pace adapts to your typing", true),
   { kind: "choice", id: "mode", label: "Story mode", options: MODE_CHOICES.map((mode) => ({ value: mode ?? "profile", label: modeName(mode) })), default: "profile" },
   { kind: "button", id: "resume", label: "Resume", action: "resume", primary: true },
   { kind: "button", id: "quit", label: "Quit to title", action: "quit" },
 ];
 export const soundRows = (choices: readonly KeyboardSoundChoice[]): QuickRow[] => defaultSoundRows({ keyboardProfiles: choices }).filter((row) => row.id !== "voice");
-export const quickValues = (s: Settings): Record<string, QuickValue> => ({ master: s.master, muted: s.muted, music: s.music, effects: s.sfx, ui: s.ui, keyboard: s.keyboard, keyboardVolume: s.keyboardVolume, pace: s.pace, mode: s.mode ?? "profile" });
+/** `reducedMotion` is the kit's own switch (it stills the 3-2-1); the row that sets it is `motion`. */
+export const quickValues = (s: Settings): Record<string, QuickValue> => ({
+  master: s.master, muted: s.muted, music: s.music, effects: s.sfx, ui: s.ui, keyboard: s.keyboard, keyboardVolume: s.keyboardVolume, mode: s.mode ?? "profile",
+  ...Object.fromEntries(Object.entries(SWITCHES).map(([id, key]) => [id, s[key] ? "on" : "off"])), reducedMotion: s.motion,
+});
 export function applyQuick(s: Settings, id: string, value: QuickValue): boolean {
   if (id === "keyboard" && typeof value === "string" && /^[a-z0-9][a-z0-9-]{0,31}$/.test(value)) s.keyboard = value;
   else if (id === "mode" && (value === "profile" || MODE_CHOICES.includes(value as Settings["mode"]))) s.mode = value === "profile" ? null : value as Settings["mode"];
-  else if ((id === "pace" || id === "muted") && typeof value === "boolean") s[id] = value;
+  else if (Object.hasOwn(SWITCHES, id) && (value === "on" || value === "off" || typeof value === "boolean")) s[SWITCHES[id as keyof typeof SWITCHES]] = value === "on" || value === true;
+  else if (id === "muted" && typeof value === "boolean") s.muted = value;
   else if (["master", "music", "effects", "ui", "keyboardVolume"].includes(id) && typeof value === "number" && Number.isFinite(value)) s[id === "effects" ? "sfx" : id as "master" | "music" | "ui" | "keyboardVolume"] = Math.round(Math.max(0, Math.min(100, value)));
   else return false;
   return true;
@@ -150,10 +150,12 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
   const startup = new AbortController();
   const probe = { base: null as string | null, state: "loading", revision: "", defaultId: "", sets: 0, families: 0 };
   const bamboo = (): boolean => bambooKeys(s, standIn);
+  /** The sound levels, and reduced motion on the page (`td-still`: td.css, feel.css and the 2D boss layer read it). */
   const levels = (): void => {
     sounds.muted = s.muted || s.master === 0 || s.keyboard === "off";
     sounds.setVolume(sounds.muted ? 0 : s.master * s.keyboardVolume / 10000);
     hooks.audio()?.apply(s);
+    document.documentElement.classList.toggle("td-still", s.motion);
   };
   const setStandIn = (id: string | null, notice = false): void => {
     standIn = id;
@@ -180,15 +182,16 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
       }
       levels();
       saveSettings(s);
+      // The kit's own reducedMotion (its 3-2-1) follows the motion row.
+      if (id === "motion") panel.refresh();
     },
     onPreview: (group) => { if (group === "keyboard" && !bamboo()) sounds.play("key"); else hooks.audio()?.preview(group); },
     onPause: () => { hooks.audio()?.resume(); sounds.resume(); }, onQuit: hooks.quit, countdownMs: hooks.countdown,
     context: () => hooks.context?.() ?? "play",
   });
   panel.root.classList.add("td-quick");
-  for (const [name, url] of Object.entries(QUICK_ART_VARS)) panel.root.style.setProperty(name, `url(${JSON.stringify(url)})`);
+  panel.root.style.setProperty("--td-qs-medallion", `url(${JSON.stringify(QUICK_COUNT_ART)})`);
   for (const [name, value] of Object.entries(LIST_ROW_VARS)) panel.root.style.setProperty(name, value);
-  watchMute(panel.root);
   document.body.classList.add("has-quick-settings");
   levels();
   // The catalogue settles the saved choice when it comes (a host that failed keeps it), then the set loads.

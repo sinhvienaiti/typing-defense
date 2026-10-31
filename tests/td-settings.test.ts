@@ -16,7 +16,9 @@ const memory = (data: Record<string, unknown> = {}) => {
 describe("the story's mode (§14)", () => {
   it("reads a mode the game has, else none (by the profile); the volumes and the pace as before", () => {
     expect(loadSettings(memory()).mode).toBeNull();
-    expect(loadSettings(memory({ "td.settings": { master: 50, mode: "challenge" } }))).toEqual({ master: 50, music: 60, sfx: 80, pace: true, mode: "challenge", muted: false, ui: 80, keyboard: "bright-clack", keyboardVolume: 100 });
+    expect(loadSettings(memory({ "td.settings": { master: 50, mode: "challenge" } }))).toEqual({ master: 50, music: 60, sfx: 80, pace: true, mode: "challenge", muted: false, ui: 80, keyboard: "bright-clack", keyboardVolume: 100, motion: false, meaning: true, ipa: true });
+    // Settings' switches (reduced motion, the meaning, the IPA): a saved boolean, else the default.
+    expect(loadSettings(memory({ "td.settings": { motion: true, meaning: false, ipa: "no" } }))).toMatchObject({ motion: true, meaning: false, ipa: true });
     for (const bad of ["hard", 3, null, "theo hồ sơ"]) expect(loadSettings(memory({ "td.settings": { mode: bad } })).mode).toBeNull();
   });
 

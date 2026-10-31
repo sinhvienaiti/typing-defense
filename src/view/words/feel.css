@@ -26,6 +26,7 @@
 @media (prefers-reduced-motion: reduce) {
   .td-words .td-card .k::after { animation-duration: 100ms; }
 }
+.td-still .td-words .td-card .k::after { animation-duration: 100ms; }
 /* The chain count beside the card a word was typed on (src/view/3d/words.ts sets its tier's fill and halo): a number, no words. */
 /* Its digits ≈ 24 px tall at rest at 720p (judge C10 r3), beside the card or its meaning strip, never over its word line. */
 .td-combo { position: absolute; top: 0; left: 0; opacity: 0; pointer-events: none; will-change: transform, opacity; white-space: nowrap; font: 800 clamp(38px, calc(42px * var(--ui, 1)), 50px)/1 var(--vd-title); -webkit-text-stroke: 2.5px var(--vd-ink); }

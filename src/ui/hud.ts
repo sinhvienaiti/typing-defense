@@ -73,16 +73,17 @@ const earlyHtml = (w: World, left: number, clock: string, paused: boolean): stri
 /**
  * The compact word strip (TK 23.4): the locked word, its typed part in jade, or a note; the chain and its tier. A
  * quiz's word stays hidden past what is typed (its first letter shown) under its meaning; the learn mode adds the
- * meaning and the IPA (BUILD_1A6 §7). In the tactical pause it says so where the eyes are: keys wait (review R2).
+ * meaning and the IPA (BUILD_1A6 §7), each unless `show` (the settings) turns it off. In the tactical pause it says so where the eyes are: keys wait (review R2).
  */
-export function stripHtml(w: World, note: string, tactical = false): string {
+export function stripHtml(w: World, note: string, tactical = false, show: { readonly meaning: boolean; readonly ipa: boolean } = { meaning: true, ipa: true }): string {
   const { router, deck, chain } = w.typing;
   const word = router.lock >= 0 ? wordText(deck, w.words.word[router.lock]!) : "";
   const typed = router.lock >= 0 ? w.words.typed[router.lock]! : 0;
   const quiz = router.lock >= 0 && w.calls.kind[w.words.call[router.lock]!] === CALL_KIND.quiz;
   const shown = quiz ? word.slice(0, Math.max(1, typed)) + "_".repeat(word.length - Math.max(1, typed)) : word;
   const item = router.lock >= 0 ? w.words.word[router.lock]! : -1;
-  const mean = item < 0 || !(quiz || w.mode === "learn") ? "" : gloss(deck, item) + (quiz || deck.ipa[item] === "" ? "" : " " + deck.ipa[item]);
+  // Settings' learning switches hide the meaning and the IPA; a quiz keeps its meaning (the prompt).
+  const mean = item < 0 || !(quiz || w.mode === "learn") ? "" : quiz ? gloss(deck, item) : ((show.meaning ? gloss(deck, item) : "") + (show.ipa && deck.ipa[item] !== "" ? " " + deck.ipa[item] : "")).trim();
   const locked = `<b class="td-word"><span>${shown.slice(0, typed)}</span>${shown.slice(typed)}</b>`;
   let main = `<em>Type a card's first letter to lock on</em>`;
   if (tactical) main = (router.lock >= 0 ? locked : "") + `<em class="td-warn td-halt">Paused · Space</em>`; // the card keeps the meaning

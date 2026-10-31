@@ -52,7 +52,11 @@ export class BossView {
   private readonly shake = new Map<number, number>();
   private burnAt = -1e9;
   private drainAt = -1e9; // R3: the last drain (ms)
-  private readonly still = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  private readonly calm = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /** Reduced motion: the system's, or Settings' (`td-still` on the page, app/quick.ts). */
+  private get still(): boolean {
+    return this.calm || (typeof document !== "undefined" && document.documentElement.classList.contains("td-still"));
+  }
 
   /** The next floater of the numbers' ring (0) or the wilts' (1), set. */
   private float(k: 0 | 1, x: number, z: number, text: string, color: string, size: number, now: number): void {

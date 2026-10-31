@@ -75,7 +75,11 @@ export class WordFeel implements CardFeel {
   readonly pool = new FxPool(480);
   private w: World | null = null;
   private seed = 20261029;
-  private readonly soft = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  private readonly calm = typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /** Reduced motion: the system's, or Settings' (`td-still` on the page, app/quick.ts). */
+  private get soft(): boolean {
+    return this.calm || (typeof document !== "undefined" && document.documentElement.classList.contains("td-still"));
+  }
   private readonly charges = new Map<number, Charge>();
   private readonly spots = new Map<number, Spot>();
   private readonly shots = new Map<number, Shot>();

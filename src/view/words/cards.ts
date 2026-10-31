@@ -125,6 +125,8 @@ export class WordCards {
   /** Học (R3): a child's profile, and the times a deck word was seen (app/learn.ts; null until it is in). */
   child = false;
   seen: ((item: number) => number) | null = null;
+  /** Settings' "Show Vietnamese meaning": off, no meaning under a card or after it is typed (a quiz keeps its prompt). */
+  meanings: { readonly meaning: boolean } = { meaning: true };
   /** C10: the 3D view's typing feel while it draws. */
   feel: CardFeel | null = null;
   /** C10's key stamps (stamps.ts), a chunk main.ts asks for with the page: none are drawn until it is in. */
@@ -182,9 +184,10 @@ export class WordCards {
     const kind = w.calls.kind[c]!;
     const word = w.words.word[s]!;
     const back = w.words.kind[s] === KIND.review;
+    const shows = this.meanings.meaning || kind === CALL_KIND.quiz;
     Object.assign(card, {
-      id, b: c, call: w.calls.id(c), word: wordText(w.typing.deck, word), mean: gloss(w.typing.deck, word), quiz: kind === CALL_KIND.quiz,
-      learn: back || meaningShown(w.mode, this.child, this.seen === null ? null : this.seen(word)), dots: "", typed: -1, late: false, lockedAt: -1, leave: "", pinkUntil: 0,
+      id, b: c, call: w.calls.id(c), word: wordText(w.typing.deck, word), mean: shows ? gloss(w.typing.deck, word) : "", quiz: kind === CALL_KIND.quiz,
+      learn: shows && (back || meaningShown(w.mode, this.child, this.seen === null ? null : this.seen(word))), dots: "", typed: -1, late: false, lockedAt: -1, leave: "", pinkUntil: 0,
     });
     card.el.style.setProperty("--fam", CALL_COLOR[kind]!);
     burst(card.el, SWAP_MS);

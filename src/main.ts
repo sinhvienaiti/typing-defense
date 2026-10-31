@@ -196,6 +196,7 @@ const quickChunk = new Chunk("quick", async () => (await import("./app/quick")).
 }));
 const cards = new WordCards(byId("tdWords"), (x, z) => view.project(x, z), (w, c, core) => view.anchor?.(w, c, core) ?? null);
 cards.child = profile.audience === "child";
+cards.meanings = settings;
 /** C10's key stamps (view/words/stamps.ts), asked for with the page; nothing waits on them but __td.ready(). A failed one is asked again on a key. */
 const stamps = new Chunk("stamps", () => import("./view/words/stamps"));
 const wantStamps = (): void => void stamps.get().then((m) => (cards.stamper = m?.keyStamps ?? null));
@@ -361,7 +362,7 @@ function showHud(): void {
     statusHtml(world, sandbox, selection.halted, audio?.muted === true, notices.filter((notice) => notice !== ""), banner.hit(now)),
     sandbox && selection.panel && panel.value !== null ? panel.value(world) : "",
     teamHtml(world, selection.agent),
-    stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical),
+    stripHtml(world, refused?.t === "rejected" ? (REASON[refused.reason] ?? refused.reason) : "", selection.tactical, settings),
     dockHtml(world, selection, tips.value?.doesLine),
     actionsHtml(world, selection.tactical),
     banner.html(world, now),

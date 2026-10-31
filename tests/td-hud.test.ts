@@ -115,6 +115,20 @@ describe("learning in the HUD (BUILD_1A6 §7)", () => {
       expect(stripHtml(other, "")).toContain('<b class="td-word"><span>c</span>old</b>' + mean + "<span");
     }
   });
+
+  it("Settings' learning switches hide the meaning and the IPA each; a quiz keeps its meaning (the prompt)", () => {
+    const learn = world({ deck, mode: "learn" });
+    callWord(learn, 1);
+    type(learn, "c", 60, true);
+    const strip = (meaning: boolean, ipa: boolean) => stripHtml(learn, "", false, { meaning, ipa });
+    expect(strip(true, false)).toContain('<small class="td-mean">lạnh; rét</small>');
+    expect(strip(false, true)).toContain('<small class="td-mean">/koʊld/</small>');
+    expect(strip(false, false)).not.toContain("td-mean");
+    const quiz = world({ deck });
+    callWord(quiz, 0, 1, CALL_KIND.quiz);
+    type(quiz, "g", 60, true);
+    expect(stripHtml(quiz, "", false, { meaning: false, ipa: false })).toContain('<small class="td-mean">tốt; hay</small>');
+  });
 });
 
 describe("cards and buttons (BUILD_1A6 §8–§9)", () => {

@@ -75,3 +75,53 @@ Tệp: `src/app/quick.ts`, `src/ui/quick.css`, `tests/td-quick.test.ts`, `public
 - Close vẫn là nút chữ, dòng danh sách âm phím vẫn trên tấm nút 160: chờ ảnh 245 được nhận.
 - Hàng Pace và Story mode chưa có icon.
 - Con trỏ submodule ở repo cha chưa cập nhật.
+
+## Lượt sửa theo giám khảo sau khi gắn ảnh (tối 31/10)
+
+Chín mục của giám khảo cho hai bảng. Kit đổi ở repo cha `ba2b4d65` (của lượt này: Tab đi vòng trong bảng) và
+`fc7f4a11` (của lượt Last Line: hàng Master khi tắt tiếng, phản hồi nút Listen, thanh cuộn mảnh); game đồng bộ kit
+tại `fc7f4a11` (83 file, `verify-kit` OK).
+
+| Mục của giám khảo | Đã làm |
+|---|---|
+| Tab rời bảng Settings ở màn tựa (hai mục, kit) | Kit tự lo phím Tab khi bảng mở (`ui/quick-settings/focus.ts`): điểm dừng là các nút đang hiện và bật, thanh trượt, dòng danh sách, và mỗi nhóm radio chỉ lấy chip đang chọn; Tab ở điểm cuối về Close, Shift+Tab ở Close về điểm cuối. Đo trên host chơi: 1 Shift+Tab từ khung bảng + 10 Tab + 10 Shift+Tab, Settings ở màn tựa, Sound, Settings trong trận, cả hai cỡ: mọi lần focus đều ở trong bảng. 10 test kit mới |
+| Shift+Tab từ khung bảng không làm gì (kit) | Cùng bản sửa trên: từ khung bảng Shift+Tab tới điểm cuối (chip đang chọn của Story mode ở màn tựa, Quit to title trong trận), Tab tới Close |
+| Icon hàng 24 px, dưới quy tắc 28–32 px (kit) | Kit có sẵn biến nên không phải đổi kit: `quick.css` đặt `--kit-qs-icon-size` = 32 px × tỉ lệ (32 px ở 720p, 48 px ở 1080p), cột icon rộng theo. Mặc định của kit vẫn 24 px |
+| Settings thiếu Graphics, Learning; Pace là một tấm "On" khó đọc | Thêm nhóm **Graphics**: Reduced motion; nhóm **Learning**: Show Vietnamese meaning, Show pronunciation. Mỗi công tắc (cả Pace) là cặp chip On/Off như Story mode. Lưu trong `td.settings` (`motion`, `meaning`, `ipa`). Reduced motion gắn lớp `td-still` lên trang (cùng việc với thiết lập hệ thống: `td.css`, `feel.css`, lớp boss 2D, dấu phím, thẻ chữ 3D) và tắt hoạt ảnh 3-2-1 của kit. Tắt nghĩa thì thẻ chữ và dải chữ không hiện nghĩa (thẻ đố giữ nghĩa vì đó là đề), tắt phiên âm thì dải chữ ở chế độ Học bỏ IPA. Đo trên host chơi: tắt nghĩa ở màn tựa rồi vào trận, 0/20 thẻ có nghĩa |
+| Thiếu hàng Quality nối với bậc `?q` | **Chưa làm, có lý do:** `docs/td/BUILD_1C_MAP1.md` §2 (chủ dự án duyệt) giữ bản 3D dở khỏi tay người chơi tới hết C13, và chính C13 thêm hàng "Chất lượng hình". Hàng này để tới C13 |
+| Thiếu hàng hiệu ứng gõ (kiểu chữ, cường độ, cỡ, xem thử) | **Chưa làm, có lý do:** Wordwoven vẽ dấu phím C10 của riêng game, chưa dùng chữ hiệu ứng của kit (FocusStrip); thêm hàng lúc này là công tắc không làm gì |
+| Đếm ngược 3-2-1 là chữ hệ thống, mờ trên sân (kit) | Không cần đổi kit: số vàng font Baloo 2 có viền mực, đặt trên huy hiệu của game (`crest.256.webp`, ảnh đã dùng ở thẻ kết quả, qua `--td-qs-medallion`), dưới là lớp tối mờ dần; số hiện từ 60 % độ đậm thay vì từ 0. Huy hiệu vẽ tối đa ở cỡ gốc 256 px (220 px ở 720p) |
+| Hàng Keyboard sound để trống một khối dưới nhãn (kit) | Không cần đổi kit: nhãn đứng một dòng riêng, danh sách chạy dưới nhãn từ mép nhãn tới mép bảng (506 px ở 720p, 759 px ở 1080p), icon trải hai dòng. Danh sách còn 7 dòng (238 px ở 720p) để bảng Sound vẫn không cuộn ở 720p (cao 666 px) |
+| Nút Listen không có phản hồi, thanh cuộn xám của hệ điều hành (kit) | Lượt Last Line đã sửa trong kit (`fc7f4a11`): icon theo tỉ lệ bảng, rê chuột sáng có quầng, bấm thì thu nhỏ, sáng suốt lúc mẫu đang phát; danh sách có thanh cuộn mảnh. Wordwoven đặt màu thanh cuộn vàng của khung (`--kit-qs-scroll-thumb`) và bỏ luật cỡ icon Listen của riêng game |
+
+Dọn theo kit mới: hàng Master khi tắt tiếng nay do kit vẽ (`Unmute`, icon loa tắt, làm mờ rãnh, gạch số), nên bỏ
+`watchMute`, `UNMUTE_LABEL`, `QUICK_ART_VARS` và các luật `td-quick__row--muted/silent` của game.
+
+Tệp: `src/app/prefs.ts`, `src/app/quick.ts`, `src/main.ts`, `src/ui/hud.ts`, `src/ui/quick.css`, `src/ui/td.css`,
+`src/view/boss-2d.ts`, `src/view/3d/words.ts`, `src/view/words/cards.ts`, `src/view/words/feel.css`,
+`src/view/words/stamps.ts`, `src/kit/` (đồng bộ), `tests/td-quick.test.ts`, `tests/td-hud.test.ts`,
+`tests/td-settings.test.ts`, changelog.
+
+### Kiểm
+
+- `pnpm check` xanh: `verify-kit` 83 file, 55 file test, **655 test** (thêm 2: công tắc Settings lưu và có tác dụng;
+  công tắc nghĩa và IPA trên dải chữ), `tsc`, build. Ngân sách gói ở host chơi (`pnpm build:td` ở repo cha): "/"
+  84,14 kB gzip (dư 0,86 kB), "/?title=0" **84,96 kB (dư 0,04 kB)**: phần thêm vào lối vào là đọc ba công tắc, nghĩa
+  trên thẻ, dải chữ và lớp boss.
+- Host chơi https://td.typing-game.local/, Chrome không giao diện, 1280 × 720 và 1920 × 1080, màn tựa và trong trận:
+  0 ảnh hỏng, 0 yêu cầu lỗi (358), 0 ngoại lệ, 0 cảnh báo; bốn bảng không cuộn; sáu icon hàng Sound tải xong, 32 px /
+  48 px; năm rãnh bằng nhau và cùng x (211 px ở 720p, 335,5 px ở 1080p); phần đầy đo bằng điểm ảnh ở 0/50/100:
+  16/106/195 so với 16/105,5/195 (720p), 24/168/312 so với 24/167,8/311,5 (1080p); chip On/Off của bốn công tắc cùng
+  x; Tab như trên; mũi tên trên Music 60 → 61; Esc đóng ở màn tựa và trong trận; bảng mở thì tick đứng, đóng thì đếm
+  ngược (số "2" Baloo 2 vàng, độ đậm 1, trên huy hiệu) rồi chạy tiếp; chọn Deep Amber, gõ một chữ: đúng một tiếng.
+- Tờ ghép `wordwoven-1280x720.jpg`, `wordwoven-1920x1080.jpg` (thư mục kiểm của lượt, ngoài repo); số đo ở
+  `tmp/panels-fix/run-*.json`. Ảnh thô đã xoá bằng `tools/capture-prune/prune.mjs`.
+
+### Còn mở
+
+- Icon cho Reduced motion, hai hàng Learning, Pace và Story mode: chưa có ảnh được nhận (ô giữ chỗ trống, tên icon
+  của kit đã gắn sẵn: `gfx-motion`, `learn-meaning`, `learn-ipa`).
+- Hàng Quality: tới C13. Hàng hiệu ứng gõ: khi game dùng chữ hiệu ứng của kit.
+- Ngân sách "/?title=0" chỉ còn 40 byte.
+- Close vẫn là nút chữ, dòng danh sách vẫn trên tấm nút 160 (ảnh 245 chưa được nhận); `media.md5` và con trỏ submodule
+  ở repo cha như trên.

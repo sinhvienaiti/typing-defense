@@ -20,6 +20,10 @@
   --kit-qs-fill-slice: 0 72; --kit-qs-fill-cap: calc(11.25px * var(--kit-qs-s));
   --kit-qs-aside-w: calc(38px + 60px * var(--kit-qs-s));
   --kit-qs-list-pad: calc(8px * var(--kit-qs-s));
+  /* Row icons 32 px at 720p, 48 at 1080p (judges 31/10: at 24 px the painted icons blurred; the rows rule is 28-32). */
+  --kit-qs-icon-size: calc(32px * var(--kit-qs-s));
+  /* The keyboard list's thin scrollbar (the kit's, no grey OS bar) in the frame's gold. */
+  --kit-qs-scroll-thumb: rgba(240, 196, 109, 0.7);
 }
 .td-quick .kit-qs__label, .td-quick .kit-qs__heading, .td-quick .kit-qs__btn, .td-quick .kit-qs__chip,
 .td-quick .kit-qs__row--keyboards .kit-keyboards button.kit-keyboards__option,
@@ -85,6 +89,11 @@
 .td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row:not(.kit-qs__row--slot) {
   grid-template-columns: var(--kit-qs-icon-size) 9em minmax(0, 1fr);
 }
+/* Settings rows share one label column wide enough for "Pace adapts to your typing", so every On/Off pair starts at
+   one x (Story mode keeps its label line over its five chips). */
+.td-quick .kit-qs__dialog[data-panel="settings"] .kit-qs__row:not(.kit-qs__row--slot) {
+  grid-template-columns: var(--kit-qs-icon-size) 13.5em minmax(0, 1fr);
+}
 /* Both panels are 640 px wide (scaled; the kit's 560). On Sound, with Mute in its own column, the extra 80 px all go
    to the grooves (139 to 219 px at 720p), every row alike. Every slider row is as tall as the Master row with its Mute
    plate (the plate's unscaled 24 px border plus one 16 px line at 1.35, scaled, plus the row's 3 px padding above and
@@ -109,8 +118,19 @@
    the panel (the kit draws it 34 px a row at every size, so at 1080p a 22 px label filled its plate): rows, family
    headings and the listen icons scale by --kit-qs-s, and app/quick.ts scales the plate's edges the same way
    (LIST_ROW_VARS). Touch keeps at least the kit's 44 px rows. */
-/* Eight rows (272 px at 720p, was nine): the taller slider rows take 24 px, and the panel fits 720p without scrolling. */
-.td-quick .kit-qs__row--keyboards .kit-keyboards { max-height: calc(272px * var(--kit-qs-s)); }
+/* Keyboard sound (judges 31/10: the label left an empty block about 190 x 260 px under it): the label sits on its own
+   line and the list runs under it from the label's edge to the panel's, as Story mode's chips do; the icon spans both
+   lines, so the label line costs only its own height (about 20 px at 720p) and the list shows seven rows (238 px at
+   720p), so the panel still fits 720p without scrolling. */
+.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__row.kit-qs__row--keyboards {
+  grid-template-columns: var(--kit-qs-icon-size) minmax(0, 1fr); row-gap: calc(2px * var(--kit-qs-s));
+}
+.td-quick .kit-qs__row--keyboards .kit-qs__icon-cell { grid-area: 1 / 1 / 3 / 2; align-self: start; }
+.td-quick .kit-qs__row--keyboards .kit-qs__label { grid-area: 1 / 2; align-self: center; }
+.td-quick .kit-qs__row--keyboards .kit-qs__control { grid-area: 2 / 2; }
+/* Seven rows (238 px at 720p; eight before the label had its own line, nine before the taller slider rows): the panel
+   fits 720p without scrolling. */
+.td-quick .kit-qs__row--keyboards .kit-keyboards { max-height: calc(238px * var(--kit-qs-s)); }
 .td-quick .kit-qs__row--keyboards .kit-keyboards button,
 .td-quick .kit-qs__row--keyboards .kit-keyboards__spacer {
   flex-basis: calc(34px * var(--kit-qs-s)); height: calc(34px * var(--kit-qs-s)); min-height: calc(34px * var(--kit-qs-s));
@@ -120,7 +140,6 @@
   padding: calc(4px * var(--kit-qs-s)) calc(10px * var(--kit-qs-s));
 }
 .td-quick .kit-qs__row--keyboards .kit-keyboards__listen { min-width: calc(44px * var(--kit-qs-s)); }
-.td-quick .kit-qs__row--keyboards .kit-keyboards__listen img { width: calc(24px * var(--kit-qs-s)); height: calc(24px * var(--kit-qs-s)); }
 @media (any-pointer: coarse) {
   .td-quick .kit-qs__row--keyboards .kit-keyboards button,
   .td-quick .kit-qs__row--keyboards .kit-keyboards__spacer {
@@ -166,12 +185,22 @@
 }
 .td-quick.kit-qs--still.kit-qs--skin-slider .kit-qs__range::-webkit-slider-thumb { transition: none; }
 .td-quick.kit-qs--still.kit-qs--skin-slider .kit-qs__range::-moz-range-thumb { transition: none; }
-/* Muted (app/quick.ts watchMute): while Mute is pressed the whole Master slider (both groove layers and the knob) dims
-   and loses colour and the number is struck through; the button reads "Unmute" on the button-active plate. The row's
-   speaker shows the 180 muted-speaker art (--td-qs-icon-muted) while muted or at 0, as the corner button does; the
-   kit's image only hides. */
-.td-quick .td-quick__row--muted .kit-qs__slider { filter: grayscale(0.7) brightness(0.6); }
-.td-quick .td-quick__row--muted .kit-qs__num { opacity: 0.55; text-decoration: line-through; text-decoration-thickness: calc(2px * var(--kit-qs-s)); }
-.td-quick .td-quick__row--silent .kit-qs__icon-cell { background: var(--td-qs-icon-muted) center / contain no-repeat; }
-.td-quick .td-quick__row--silent .kit-qs__icon { opacity: 0; }
+/* Muted: the kit's (kit-qs__row--muted dims the slider by --kit-qs-muted-filter and strikes the number; the row's icon
+   turns to the 180 muted speaker while muted or at 0). */
 .td-quick .kit-qs__row--slot { grid-template-columns: 1fr; }
+/* The resume 3-2-1 (judges 31/10: a translucent cream digit in the system font, barely seen on the field): the gold
+   number in the title face with an ink outline, on the game's crest (the results card's, --td-qs-medallion from
+   app/quick.ts) over a short dark scrim, so it reads on grass, water and night alike. It pops in from 60 % rather than
+   from nothing. */
+.td-quick .kit-qs__count { background: radial-gradient(circle, rgba(6, 14, 11, 0.62) 0, rgba(6, 14, 11, 0.42) calc(120px * var(--kit-qs-s)), rgba(6, 14, 11, 0) calc(220px * var(--kit-qs-s))); }
+.td-quick .kit-qs__digit {
+  /* The crest is drawn at most at its own 256 px (220 at 720p), the number at 0.47 of it. */
+  --td-qs-count: min(calc(220px * var(--kit-qs-s)), 256px);
+  display: grid; place-items: center; width: var(--td-qs-count); height: var(--td-qs-count);
+  background: var(--td-qs-medallion) center / contain no-repeat;
+  font: 800 calc(var(--td-qs-count) * 0.47) / 1 var(--vd-title); color: var(--vd-quick-accent);
+  -webkit-text-stroke: calc(3px * var(--kit-qs-s)) var(--vd-ink); paint-order: stroke fill;
+  text-shadow: 0 calc(3px * var(--kit-qs-s)) 0 var(--vd-ink), 0 0 calc(18px * var(--kit-qs-s)) rgba(6, 14, 11, 0.9);
+  animation-name: td-count-pop;
+}
+@keyframes td-count-pop { from { opacity: 0.6; transform: scale(1.25); } 30% { opacity: 1; } to { opacity: 1; transform: scale(1); } }

@@ -82,6 +82,8 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-call.is-last { animation: td-last 0.5s ease-in-out infinite alternate; }
 @keyframes td-last { to { transform: scale(1.035); filter: brightness(1.3); } }
 @media (prefers-reduced-motion: reduce) { .td-call.is-last { animation: none; outline: 3px solid var(--vd-amber-bright); } }
+/* Settings' "Reduced motion" (app/quick.ts puts td-still on the page) does what the system setting does, here and below. */
+.td-still .td-call.is-last { animation: none; outline: 3px solid var(--vd-amber-bright); }
 .td-hud .td-warn { color: var(--vd-amber); font-weight: 700; }
 .td-phase b { font-family: var(--vd-title); font-size: 1.12em; }
 .td-load { padding: 2px 9px; border-radius: 999px; background: var(--vd-jade); color: #fff; font-weight: 800; white-space: nowrap; }
@@ -127,6 +129,7 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-bar.is-hit { animation: td-jolt 0.16s linear; }
 @keyframes td-jolt { 25% { transform: translateX(-2px); } 75% { transform: translateX(2px); } }
 @media (prefers-reduced-motion: reduce) { .td-bar.is-hit { animation: none; } }
+.td-still .td-bar.is-hit { animation: none; }
 .td-bar .td-hp { background: linear-gradient(#8a5a2b, #6b4a2a); }
 .td-bar s { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--vd-ink); }
 .td-bar .td-retreat { background: var(--vd-seal); }
@@ -156,6 +159,7 @@ body.is-paused #tdCanvas, body.is-paused #tdCanvas3d { filter: saturate(0.55) se
 .td-card .k { display: inline-block; animation: td-key 0.18s ease-out; }
 @keyframes td-key { from { transform: translateY(-4px) scale(1.5); color: #19c9a8; text-shadow: 0 0 6px rgba(127, 245, 224, 0.9); } }
 @media (prefers-reduced-motion: reduce) { .td-card .k { animation: none; } }
+.td-still .td-card .k { animation: none; }
 .td-card .p { background: #ffb3b3; box-shadow: 0 2px 0 var(--vd-seal); }
 .td-card::before { content: attr(data-icon); margin-right: 5px; font-size: 0.8em; }
 .td-card-pips { margin-left: 6px; color: var(--fam); font-size: 0.6em; letter-spacing: 1px; vertical-align: 0.2em; -webkit-text-stroke: 0.6px var(--vd-ink); }
