@@ -8,7 +8,7 @@
  * chosen set's own files.
  */
 import { pendingKeyboardChoices, TypingSounds, type KeyboardSoundChoice, type TypingSoundEvent } from "../kit/feedback/typing-fx/audio";
-import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
+import { QuickSettings, defaultSoundRows, QUICK_ICON_NAMES, type QuickIcons, type QuickRow, type QuickSkin, type QuickValue } from "../kit/ui/quick-settings";
 import { bambooKeys, MODE_CHOICES, ownKeyboard, ownsKeyboard, saveSettings, type Settings } from "./prefs";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, manifestJson, ORIGINAL_KEYS, sampleBytes, startKeyboard, type KeyboardFeed } from "./keyboard";
 import { modeName } from "../ui/settings";
@@ -17,23 +17,47 @@ import { KEY } from "../typing/router";
 import type { TypingAudio } from "../view/audio-min";
 export const QUICK_ART = "/assets/typing-defense/ui/quick-settings/";
 /**
- * Frame, button (115/160) and slider art (225). At 1080p the groove is drawn up to about 414 × 15 CSS px and the knob
- * box 42 px: the 1024 × 64 groove and the 128 px knob. quick.css draws the groove in three slices (the cloud-scroll caps
- * keep their proportion, the plain middle stretches), sizes the knob and clears the kit's flat colours under both
- * (`.td-quick.kit-qs--skin-slider`), so only the art shows.
+ * The 160 button art (2079 x 502) as a nine-slice: cut 170 px top and bottom, 260 px at the sides (the medallion and
+ * cloud-scroll corners), as quick.css cuts the buttons. Keyboard sound rows draw it at 12 / 170 of its size (12 px
+ * edges, 18 px sides at 720p).
+ */
+export const PLATE_SLICE = [170, 260] as const;
+const ROW_EDGE = [12, 18] as const;
+/**
+ * Frame, button (115/160) and slider art (225). At 1080p the groove is drawn about 15 CSS px tall and the knob box
+ * 42 px: the 1024 x 64 groove and the 128 px knob.
+ * - The fill layer runs on the 225 groove until the 244 fill art is accepted: `sliderEmpty` is the groove (quick.css
+ *   dims and greys it, so the jade never reads full at 0) and the fill falls back to the same groove, lit.
+ * - Keyboard sound rows are 160 button plates, the chosen row the 160 button-active plate (`buttonActive`, also the
+ *   pressed and chosen buttons). The 245 list-row art drops in here.
  */
 export const QUICK_SKIN: QuickSkin = {
   panel: QUICK_ART + "panel-large.v2.alpha.png",
   button: QUICK_ART + "button.v2.alpha.png",
+  buttonActive: QUICK_ART + "button-active.v2.alpha.png",
   sliderTrack: QUICK_ART + "slider-track.png",
   sliderThumb: QUICK_ART + "slider-thumb.128.png",
+  sliderEmpty: QUICK_ART + "slider-track.png",
+  listRow: { slice: PLATE_SLICE, edge: ROW_EDGE },
+};
+/** The 180 icons the game has (no Voice row); Keyboard volume reuses the keyboard icon until its own (ticket 244) is accepted. */
+export const QUICK_ICONS: QuickIcons = {
+  ...Object.fromEntries(QUICK_ICON_NAMES.filter((name) => name !== "vol-voice").map((name) => [name, QUICK_ART + name + ".128.png"])),
+  "vol-keyboard-volume": QUICK_ART + "vol-keyboard.128.png",
 };
 /**
- * Art the kit's skin has no field for, passed to quick.css as variables on the layer: the 160 button-active plate (a
- * chosen chip, a pressed Mute, a switch that is on) and the 180 muted speaker for the Master row while muted.
+ * The keyboard rows' plate at the panel's scale (quick.css scales the 34 px rows by --kit-qs-s; the kit's own values
+ * are these at scale 1): the edges and the label clear of the corners.
  */
+const scaled = (n: number): string => `calc(${n}px * var(--kit-qs-s))`;
+export const LIST_ROW_VARS: Readonly<Record<string, string>> = {
+  "--kit-qs-list-edge": ROW_EDGE.map(scaled).join(" "),
+  "--kit-qs-list-active-edge": ROW_EDGE.map(scaled).join(" "),
+  "--kit-qs-list-inset": `${scaled(2)} 0px`,
+  "--kit-qs-list-text-x": scaled(ROW_EDGE[1] + 4),
+};
+/** Art the kit's skin has no field for, passed to quick.css as variables on the layer: the 180 muted speaker for the Master row. */
 export const QUICK_ART_VARS: Readonly<Record<string, string>> = {
-  "--td-qs-button-active": QUICK_ART + "button-active.v2.alpha.png",
   "--td-qs-icon-muted": QUICK_ART + "hud-sound-muted.128.png",
 };
 /** The Mute button's label while muted; its own label ("Mute") comes back when unmuted. */
@@ -127,7 +151,7 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
     // A picked set's manifest (3 s, HTTP cache: its URL is versioned), its samples and every preview (8 s a file).
     keyboardFetch: { fetchJson: manifestJson, fetchBytes: sampleBytes },
     onKeyboardFail: (choice) => { if (choice.value === s.keyboard) setStandIn(choice.value, true); },
-    icons: Object.fromEntries(QUICK_ICON_NAMES.filter((name) => name !== "vol-voice").map((name) => [name, QUICK_ART + name + ".128.png"])),
+    icons: QUICK_ICONS,
     skin: QUICK_SKIN,
     onChange: (id, value) => {
       if (!applyQuick(s, id, value)) return;
@@ -145,6 +169,7 @@ export function mountQuick(s: Settings, hooks: QuickHooks): GameQuick {
   });
   panel.root.classList.add("td-quick");
   for (const [name, url] of Object.entries(QUICK_ART_VARS)) panel.root.style.setProperty(name, `url(${JSON.stringify(url)})`);
+  for (const [name, value] of Object.entries(LIST_ROW_VARS)) panel.root.style.setProperty(name, value);
   watchMute(panel.root);
   document.body.classList.add("has-quick-settings");
   levels();

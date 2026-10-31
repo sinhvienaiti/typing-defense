@@ -5,7 +5,8 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vite
 import { installKeys } from "../src/app/input";
 import { KEYBOARD_SET_UNAVAILABLE, KEYBOARD_UNAVAILABLE, requestKeyboardCatalogue } from "../src/app/keyboard";
 import { bambooKeys, BUILT_IN_KEYS, DEFAULT_KEYBOARD_SOUND, loadSettings, savedKeyboard, type Settings } from "../src/app/prefs";
-import { applyQuick, mountQuick, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
+import { applyQuick, LIST_ROW_VARS, mountQuick, PLATE_SLICE, QUICK_ICONS, quickValues, settingsRows, soundRows, type GameQuick } from "../src/app/quick";
+import { QUICK_ICON_NAMES } from "../src/kit/ui/quick-settings";
 import { Session } from "../src/app/session";
 import { KEYBOARD_DECODE_BATCH_SIZE, KEYBOARD_FIRST_BATCH_SPACES, TYPING_SOUND_MAP } from "../src/kit/feedback/typing-fx/audio";
 import { safeLocalStorage } from "../src/kit/platform/safe-storage";
@@ -685,7 +686,7 @@ describe("Typing Feel sets on the sample host: the owner's picks Raindrop Tile a
   });
 });
 
-describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
+describe("the panels' art (115/160 frame and button, 225 sliders, the kit's fill layer and list plates)", () => {
   /** Rule bodies of src/ui/quick.css by selector (comments dropped, whitespace folded) and every rule head. */
   const sheet = (): { rules: Map<string, string>; heads: string[] } => {
     const rules = new Map<string, string>();
@@ -700,31 +701,57 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
     return { rules, heads };
   };
 
-  it("sliders wear the 225 jade groove in three slices and the limestone knob, with no kit colour under either", async () => {
+  it("sliders draw the 225 jade groove as a greyed empty part and a lit fill clipped at the limestone knob, every groove one length", async () => {
     await mount();
     const root = document.querySelector<HTMLElement>(".td-quick")!;
     expect(root.classList.contains("kit-qs--skin-slider")).toBe(true);
-    expect(root.style.getPropertyValue("--kit-qs-skin-track")).toContain("/assets/typing-defense/ui/quick-settings/slider-track.png");
+    // The fill layer is on before the 244 fill art: the empty part is the 225 groove, the fill falls back to it.
+    expect(root.classList.contains("kit-qs--slider-fill")).toBe(true);
+    expect(root.classList.contains("kit-qs--fill-art")).toBe(false);
+    for (const name of ["--kit-qs-skin-track", "--kit-qs-skin-empty", "--kit-qs-skin-fill"]) {
+      expect(root.style.getPropertyValue(name), name).toContain("/assets/typing-defense/ui/quick-settings/slider-track.png");
+    }
     expect(root.style.getPropertyValue("--kit-qs-skin-thumb")).toContain("/assets/typing-defense/ui/quick-settings/slider-thumb.128.png");
     expect(root.style.getPropertyValue("--kit-qs-skin-panel")).toContain("panel-large.v2.alpha.png");
     press("F2", "F2");
-    expect(document.querySelector('[data-row="master"] input[type="range"]')!.classList.contains("kit-qs__range")).toBe(true);
-    // A DOM stub has no cascade: read the sheet. The 64 px cloud-scroll caps keep their proportion (10 x 10 at scale 1)
-    // and only the jade middle stretches; the round knob and the capped groove would show the kit's flat colours.
+    const sound = document.querySelector('.kit-qs__dialog[data-panel="sound"]')!;
+    const row = (id: string) => sound.querySelector<HTMLElement>(`[data-row="${id}"]`)!;
+    // Every slider row: the range over the groove and fill layers, and Mute's column after the number (empty but for
+    // Master), so all grooves have one length.
+    for (const id of ["master", "music", "effects", "keyboardVolume", "ui"]) {
+      const slider = row(id).querySelector(".kit-qs__slider")!;
+      expect(slider.querySelector(".kit-qs__groove"), id).not.toBeNull();
+      expect(slider.querySelector(".kit-qs__fill"), id).not.toBeNull();
+      expect(slider.querySelector("input.kit-qs__range"), id).not.toBeNull();
+      expect(row(id).querySelector(".kit-qs__aside"), id).not.toBeNull();
+    }
+    expect(row("master").querySelector('.kit-qs__aside [data-toggle="muted"]')).not.toBeNull();
+    // The fill follows the value (the kit clips it at the knob's centre through --kit-qs-v).
+    const music = row("music").querySelector<HTMLElement>(".kit-qs__slider")!;
+    const input = music.querySelector<HTMLInputElement>("input")!;
+    for (const [value, v] of [[0, "0.0000"], [50, "0.5000"], [100, "1.0000"]] as const) {
+      input.value = String(value);
+      input.dispatchEvent(new Event("input", { bubbles: true }));
+      expect(music.style.getPropertyValue("--kit-qs-v"), String(value)).toBe(v);
+    }
+    // A DOM stub has no cascade: read the sheet. Knob 32 px, the 64 px cloud-scroll caps 10 px, Mute's column as wide as
+    // "Unmute"; the empty jade greyed and dimmed (never full at 0), the fill lit with a lantern glow.
     const { rules, heads } = sheet();
+    const layer = rules.get(".td-quick.kit-qs") ?? "";
+    for (const line of [
+      "--kit-qs-knob: calc(32px * var(--kit-qs-s));",
+      "--kit-qs-groove-slice: 0 64;",
+      "--kit-qs-groove-cap: calc(10px * var(--kit-qs-s));",
+      "--kit-qs-aside-w: calc(38px + 60px * var(--kit-qs-s));",
+      "--kit-qs-empty-filter: grayscale(0.85) brightness(0.45);",
+      "--kit-qs-fill-filter: brightness(1.2) saturate(1.3) drop-shadow(",
+    ]) expect(layer, line).toContain(line);
     const at = (pseudo: string) => rules.get(`.td-quick.kit-qs--skin-slider .kit-qs__range${pseudo}`) ?? "";
-    for (const track of ["::-webkit-slider-runnable-track", "::-moz-range-track"]) {
-      expect(at(track), track).toContain("background: none;");
-      expect(at(track), track).toContain("border-image: var(--kit-qs-skin-track) 0 64 fill / 0 calc(10px * var(--kit-qs-s)) stretch;");
-    }
-    // The knob box is 32 px (about 22 px of knob at 720p), centred on the 10 px groove; the range box holds it.
-    for (const thumb of ["::-webkit-slider-thumb", "::-moz-range-thumb"]) {
-      expect(at(thumb), thumb).toContain("background-color: transparent;");
-      expect(at(thumb), thumb).toContain("width: calc(32px * var(--kit-qs-s));");
-      expect(at(thumb), thumb).toContain("height: calc(32px * var(--kit-qs-s));");
-    }
-    expect(at("::-webkit-slider-thumb")).toContain("margin-top: calc(-11px * var(--kit-qs-s));");
+    // The knob art only: the kit's --kit-qs-text square under it is cleared.
+    for (const thumb of ["::-webkit-slider-thumb", "::-moz-range-thumb"]) expect(at(thumb), thumb).toContain("background-color: transparent;");
     expect(at("")).toContain("height: calc(32px * var(--kit-qs-s));");
+    // The old track rules are gone (the kit's fill layer draws the groove now).
+    expect(at("::-webkit-slider-runnable-track")).toBe("");
     // One unknown pseudo-element drops a whole rule: WebKit and Gecko never share one.
     expect(heads.filter((head) => head.includes("::-webkit-") && head.includes("::-moz-"))).toEqual([]);
   });
@@ -734,14 +761,17 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
     const at = (state: string) => rules.get(`.td-quick.kit-qs--skin-slider .kit-qs__range${state}`) ?? "";
     expect(at("")).toContain("cursor: pointer;");
     expect(at(":active")).toContain("cursor: grabbing;");
-    // The kit's flat 2 px box around the whole range gives way to a lantern ring of light on the knob and a warm groove.
+    // The kit's flat 2 px box around the whole range gives way to the lantern glow on the knob and a warm groove.
     expect(at(":focus-visible")).toContain("outline: none;");
-    for (const [thumb, track] of [["::-webkit-slider-thumb", "::-webkit-slider-runnable-track"], ["::-moz-range-thumb", "::-moz-range-track"]] as const) {
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-glow: var(--vd-lantern);");
+    for (const thumb of ["::-webkit-slider-thumb", "::-moz-range-thumb"]) {
       expect(at(`:hover${thumb}`), thumb).toMatch(/filter: brightness\(1\.15\) drop-shadow\(/);
       expect(at(`:active${thumb}`), thumb).toContain("transform: scale(1.08);");
-      expect(at(`:focus-visible${thumb}`), thumb).toContain("drop-shadow(0 0 1px #ffb84d) drop-shadow(0 0 1px #ffb84d)");
-      expect(at(`:focus-visible${track}`), track).toContain("filter: drop-shadow(");
+      expect(at(`:focus-visible${thumb}`), thumb).toContain("filter: brightness(1.12) var(--kit-qs-glow-filter);");
     }
+    const warm = rules.get(".td-quick .kit-qs__slider:has(.kit-qs__range:focus-visible)") ?? "";
+    expect(warm).toMatch(/--kit-qs-empty-filter: grayscale\(0\.85\) brightness\(0\.45\) drop-shadow\(/);
+    expect(warm).toMatch(/--kit-qs-fill-filter: brightness\(1\.3\) saturate\(1\.3\) drop-shadow\(/);
   });
 
   it("the frame is a 9-slice whose centre is one stretched copy of the art's middle, never tiles", () => {
@@ -756,11 +786,13 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
   it("a chosen chip, a pressed Mute and a switched-on switch wear the 160 button-active plate, not an orange outline", async () => {
     await mount();
     const root = document.querySelector<HTMLElement>(".td-quick")!;
-    expect(root.style.getPropertyValue("--td-qs-button-active")).toContain("/assets/typing-defense/ui/quick-settings/button-active.v2.alpha.png");
+    // The button-active plate now comes through the kit's skin field.
+    expect(root.classList.contains("kit-qs--skin-button-active")).toBe(true);
+    expect(root.style.getPropertyValue("--kit-qs-skin-button-active")).toContain("/assets/typing-defense/ui/quick-settings/button-active.v2.alpha.png");
     const { rules } = sheet();
     for (const state of [".kit-qs__opt input:checked + .kit-qs__chip", '.kit-qs__btn[aria-pressed="true"]', '.kit-qs__btn[aria-checked="true"]']) {
       const body = rules.get(`.td-quick.kit-qs ${state}`) ?? "";
-      expect(body, state).toContain("border-image-source: var(--td-qs-button-active, var(--kit-qs-skin-button));");
+      expect(body, state).toContain("border-image-source: var(--kit-qs-skin-button-active, var(--kit-qs-skin-button));");
       expect(body, state).toContain("color: var(--vd-quick-accent);");
     }
     expect([...rules.values()].some((body) => body.includes("outline: 2px solid var(--vd-lantern)"))).toBe(false);
@@ -794,7 +826,9 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
     expect(master.classList.contains("td-quick__row--silent")).toBe(true);
     expect(master.classList.contains("td-quick__row--muted")).toBe(false);
     const { rules } = sheet();
-    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__range")).toContain("filter: grayscale(0.7) brightness(0.6);");
+    // The whole slider dims (both groove layers and the knob), not only the range (which would leave the fill lit).
+    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__slider")).toContain("filter: grayscale(0.7) brightness(0.6);");
+    expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__range")).toBeUndefined();
     expect(rules.get(".td-quick .td-quick__row--muted .kit-qs__num")).toContain("text-decoration: line-through;");
     expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon-cell")).toContain("background: var(--td-qs-icon-muted) center / contain no-repeat;");
     expect(rules.get(".td-quick .td-quick__row--silent .kit-qs__icon")).toContain("opacity: 0;");
@@ -805,7 +839,9 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
     await mount();
     press("F2", "F2");
     const aligned = ".td-quick .kit-qs__dialog[data-panel=\"sound\"] .kit-qs__row:not(.kit-qs__row--slot)";
-    expect(sheet().rules.get(aligned)).toContain("grid-template-columns: calc(24px * var(--kit-qs-s)) 9em minmax(0, 1fr);");
+    expect(sheet().rules.get(aligned)).toContain("grid-template-columns: var(--kit-qs-icon-size) 9em minmax(0, 1fr);");
+    // The Sound panel is 640 px wide, so the grooves take the room Mute's column costs.
+    expect(sheet().rules.get('.td-quick .kit-qs__dialog[data-panel="sound"] .kit-qs__panel')).toContain("width: min(calc(640px * var(--kit-qs-s)), calc(100% - 32px));");
     const matched = new Set(document.querySelectorAll(aligned));
     const sound = document.querySelector('.kit-qs__dialog[data-panel="sound"]')!;
     const ranges = [...sound.querySelectorAll('input[type="range"]')].map((input) => input.closest(".kit-qs__row")!);
@@ -821,6 +857,51 @@ describe("the panels' art (115/160 frame and button, 225 sliders)", () => {
     const resume = document.querySelector<HTMLButtonElement>('.kit-qs__dialog[data-panel="settings"] [data-action="resume"]')!;
     expect(resume.classList.contains("kit-qs__btn--primary")).toBe(true);
     expect(sheet().rules.get(".td-quick .kit-qs__btn--primary")).toContain("color: var(--vd-quick-accent);");
+  });
+
+  it("keyboard sound rows are 160 plates cut as the buttons, the chosen row the button-active plate in gold; the list scales with the panel", async () => {
+    await mount();
+    const root = document.querySelector<HTMLElement>(".td-quick")!;
+    expect(root.classList.contains("kit-qs--skin-list")).toBe(true);
+    // Real active art exists, so the kit does not tint the row plate.
+    expect(root.classList.contains("kit-qs--list-tint")).toBe(false);
+    expect(root.style.getPropertyValue("--kit-qs-list-row")).toContain("/assets/typing-defense/ui/quick-settings/button.v2.alpha.png");
+    expect(root.style.getPropertyValue("--kit-qs-list-row-active")).toContain("/assets/typing-defense/ui/quick-settings/button-active.v2.alpha.png");
+    // The buttons' own cut (quick.css: 170 260), the edges at 12 / 170 of the art.
+    expect(PLATE_SLICE).toEqual([170, 260]);
+    expect(sheet().rules.get(".td-quick.kit-qs .kit-qs__btn")).toContain("border-image: var(--kit-qs-skin-button) 170 260 fill");
+    expect(root.style.getPropertyValue("--kit-qs-list-slice")).toBe("170 260");
+    for (const [name, value] of Object.entries(LIST_ROW_VARS)) expect(root.style.getPropertyValue(name), name).toBe(value);
+    expect(LIST_ROW_VARS["--kit-qs-list-edge"]).toBe("calc(12px * var(--kit-qs-s)) calc(18px * var(--kit-qs-s))");
+    press("F2", "F2");
+    expect(document.querySelector('[role="option"][aria-selected="true"]')).not.toBeNull();
+    const { rules } = sheet();
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-active-text: var(--vd-quick-accent);");
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-list-pad: calc(8px * var(--kit-qs-s));");
+    // Rows, headings and listen icons scale; touch keeps 44 px.
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards")).toContain("max-height: calc(306px * var(--kit-qs-s));");
+    const rowsRule = rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards button") ?? "";
+    expect(rowsRule).toContain("height: calc(34px * var(--kit-qs-s));");
+    expect(rowsRule).toContain("height: max(44px, calc(34px * var(--kit-qs-s)));");
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__family")).toContain("height: calc(28px * var(--kit-qs-s));");
+    expect(rules.get(".td-quick .kit-qs__row--keyboards .kit-keyboards__listen img")).toContain("width: calc(24px * var(--kit-qs-s));");
+  });
+
+  it("every Sound row has its 180 icon (Keyboard volume the keyboard's), only files the game has, and the title is in Baloo 2", async () => {
+    await mount();
+    press("F2", "F2");
+    const sound = document.querySelector('.kit-qs__dialog[data-panel="sound"]')!;
+    const icon = (id: string) => sound.querySelector(`[data-row="${id}"] .kit-qs__icon`)?.getAttribute("src") ?? null;
+    const expected: Record<string, string> = { master: "vol-master", music: "vol-music", effects: "vol-effects", keyboard: "vol-keyboard", keyboardVolume: "vol-keyboard", ui: "vol-interface" };
+    for (const [id, name] of Object.entries(expected)) expect(icon(id), id).toContain(`/assets/typing-defense/ui/quick-settings/${name}.128.png`);
+    // No Voice row, so no vol-voice file; every URL is one of the 180 icons the game has.
+    expect(QUICK_ICONS["vol-voice"]).toBeUndefined();
+    for (const url of Object.values(QUICK_ICONS)) expect(QUICK_ICON_NAMES.some((name) => name !== "vol-voice" && url!.endsWith(`/${name}.128.png`)), url).toBe(true);
+    const { rules } = sheet();
+    expect(rules.get(".td-quick.kit-qs")).toContain("--kit-qs-title-font: var(--vd-title);");
+    expect(rules.get(".td-quick .kit-qs__title")).toContain("color: var(--vd-quick-accent);");
+    // The Settings rows have no accepted icon yet: the cell keeps the scaled width.
+    expect(rules.get(".td-quick .kit-qs__row")).toContain("grid-template-columns: var(--kit-qs-icon-size) minmax(90px, auto) minmax(0, 1fr);");
   });
 });
 
